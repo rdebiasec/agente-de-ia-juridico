@@ -267,4 +267,4 @@ async def test_manual_page_and_app_link():
     assert "Reiniciar puntaje, marcas y chat" in manual
     assert "La IA propone; usted revisa y aprueba" in manual
     assert 'href="/"' in manual
-    assert "Volver a la herramienta" in manual
+    assert "Volver a Herramienta" in manual
