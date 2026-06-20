@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Asistente jurídico del despacho — pruebas Fase 0 con DBX Solutions."
+    />
+    <link rel="icon" href="/static/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/chat.css" />
+    <title>Asistente Jurídico | DBX Solutions</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <a class="logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
+          <img src="/static/dbx-logo.svg" alt="DBX Solutions" />
+        </a>
+        <span class="phase-badge">Fase 0 · Pruebas</span>
+      </header>
+
+      <section class="hero">
+        <span class="eyebrow">Asistente jurídico</span>
+        <h1>Consulte al asistente del despacho</h1>
+        <p>
+          Entorno de prueba para la abogada. Las respuestas son borradores informativos y
+          requieren revisión y aprobación profesional.
+        </p>
+      </section>
+
+      <main class="chat-shell" aria-label="Chat con el asistente jurídico">
+        <div class="chat-toolbar">
+          <div class="status-label">
+            <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+            <span id="status-text">Conectando…</span>
+          </div>
+          <span class="toolbar-note">Human-supervised · Su equipo en control</span>
+        </div>
+
+        <div class="messages" id="messages" role="log" aria-live="polite"></div>
+
+        <div class="suggestions" id="suggestions" aria-label="Preguntas sugeridas"></div>
+
+        <form class="composer" id="chat-form">
+          <label class="sr-only" for="message-input">Escriba su consulta</label>
+          <textarea
+            id="message-input"
+            rows="2"
+            placeholder="Escriba su consulta jurídica…"
+            maxlength="8000"
+            required
+          ></textarea>
+          <button class="btn-send" id="send-btn" type="submit">Enviar</button>
+        </form>
+      </main>
+
+      <p class="disclaimer">
+        <strong>Aviso legal:</strong> este asistente apoya al abogado; no lo reemplaza. Toda
+        respuesta es un borrador informativo sujeto a revisión y aprobación del abogado del
+        despacho.
+      </p>
+
+      <footer>
+        Desarrollado con el theme de
+        <a href="https://www.dbx-solutions.com" target="_blank" rel="noopener">DBX Solutions</a>
+      </footer>
+    </div>
+
+    <script src="/static/chat.js" defer></script>
+  </body>
+</html>

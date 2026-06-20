@@ -10,6 +10,7 @@ COPY pyproject.toml ./
 COPY src ./src
 COPY agente ./agente
 COPY scripts ./scripts
+COPY static ./static
 
 RUN pip install --no-cache-dir .
 

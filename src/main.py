@@ -7,6 +7,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src.agents.runner import run_agent
@@ -37,6 +39,18 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
 app.include_router(whatsapp_router)
+
+_static_dir = get_settings().project_root / "static"
+if _static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+
+@app.get("/")
+async def chat_page():
+    index = _static_dir / "index.html"
+    if index.is_file():
+        return FileResponse(index)
+    return {"message": "Agente Jurídico API — use POST /chat"}
 
 
 class ChatRequest(BaseModel):
