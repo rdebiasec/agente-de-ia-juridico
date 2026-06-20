@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     # Render inyecta PORT automáticamente; local default 8000
     port: int = 8000  # env: PORT
 
+    site_username: str = "despacho"
+    site_password: str = ""
+    session_secret: str = "dev-change-me-in-production"
+    session_idle_minutes: int = 30
+    session_cookie_secure: bool = False
+
     @property
     def project_root(self) -> Path:
         return Path(__file__).resolve().parents[1]

@@ -18,12 +18,32 @@
     <title>Asistente Jurídico | DBX Solutions</title>
   </head>
   <body>
-    <div class="page">
+    <a class="skip-link" href="#messages">Ir al chat</a>
+    <a class="skip-link" href="#validation-blocks">Ir a pruebas</a>
+    <a class="skip-link" href="#session-report-body">Ir al reporte</a>
+
+    <div id="onboarding-modal" class="onboarding-modal" hidden>
+      <div class="onboarding-card" role="dialog" aria-labelledby="onboarding-title">
+        <h2 id="onboarding-title">Validación Fase 0 — 60 segundos</h2>
+        <ol class="onboarding-steps">
+          <li><strong>Panel de Chat:</strong> envíe preguntas sugeridas o escriba las suyas.</li>
+          <li><strong>Panel de Pruebas:</strong> marque Aprobada/Rechazada con nota opcional.</li>
+          <li><strong>Panel de Reportería:</strong> genere análisis y exporte el informe.</li>
+        </ol>
+        <button type="button" class="btn-onboarding-close" id="onboarding-close">Entendido</button>
+      </div>
+    </div>
+
+    <div id="app-root" class="page">
       <header class="site-header">
         <a class="logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
-          <img src="/static/dbx-logo.svg" alt="DBX Solutions" />
+          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="180" height="36" />
         </a>
-        <span class="phase-badge">Fase 0 · Pruebas</span>
+        <div class="site-header-actions">
+          <span class="session-user-badge" id="session-user-badge" hidden></span>
+          <a class="btn-help" href="/help">Manual de Uso</a>
+          <button type="button" class="btn-logout" id="auth-logout-btn">Cerrar sesión</button>
+        </div>
       </header>
 
       <section class="hero">
@@ -37,18 +57,17 @@
 
       <div class="main-layout">
         <div class="chat-column">
-          <main class="chat-shell" aria-label="Chat con el asistente jurídico">
-            <div class="chat-toolbar">
+          <h2 class="panel-title">Panel de Chat</h2>
+          <div class="chat-content" aria-label="Chat con el asistente jurídico">
+            <header class="chat-header">
               <div class="status-label">
                 <span class="status-dot" id="status-dot" aria-hidden="true"></span>
                 <span id="status-text">Conectando…</span>
               </div>
               <span class="toolbar-note">Human-supervised · Su equipo en control</span>
-            </div>
+            </header>
 
             <div class="messages" id="messages" role="log" aria-live="polite"></div>
-
-            <div class="suggestions" id="suggestions" aria-label="Preguntas sugeridas"></div>
 
             <form class="composer" id="chat-form">
               <label class="sr-only" for="message-input">Escriba su consulta</label>
@@ -61,16 +80,17 @@
               ></textarea>
               <button class="btn-send" id="send-btn" type="submit">Enviar</button>
             </form>
-          </main>
 
-          <p class="disclaimer">
-            <strong>Aviso legal:</strong> este asistente apoya al abogado; no lo reemplaza. Toda
-            respuesta es un borrador informativo sujeto a revisión y aprobación del abogado del
-            despacho.
-          </p>
+            <p class="disclaimer">
+              <strong>Aviso legal:</strong> este asistente apoya al abogado; no lo reemplaza. Toda
+              respuesta es un borrador informativo sujeto a revisión y aprobación del abogado del
+              despacho.
+            </p>
+          </div>
         </div>
 
         <aside class="validation-panel" id="validation-panel" aria-labelledby="validation-title">
+          <h2 class="panel-title">Panel de Pruebas</h2>
           <button
             class="validation-toggle"
             id="validation-toggle"
@@ -87,10 +107,20 @@
               <h2 id="validation-title">Guía de validación — Fase 0</h2>
               <div class="validation-score-row">
                 <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
-                <button type="button" class="btn-reset-score" id="reset-validation-btn">
-                  Reiniciar Puntaje
-                </button>
+                <div class="validation-reset-actions">
+                  <button type="button" class="btn-reset-score" id="reset-score-btn">
+                    Reiniciar puntaje, marcas y chat
+                  </button>
+                  <button type="button" class="btn-reset-session" id="reset-session-btn">
+                    Reiniciar sesión completa
+                  </button>
+                </div>
               </div>
+              <p class="validation-stepper" id="validation-stepper" aria-live="polite">Paso 1 de 6</p>
+              <label class="validation-filter-pending">
+                <input type="checkbox" id="filter-pending-only" />
+                Mostrar solo pendientes
+              </label>
               <p class="probes-source-badge" id="probes-source-badge">
                 Cargando preguntas de validación…
               </p>
@@ -116,15 +146,59 @@
             <div id="validation-blocks"></div>
           </div>
         </aside>
+
+        <aside class="report-panel" id="report-panel" aria-labelledby="report-title">
+          <h2 class="panel-title">Panel de Reportería</h2>
+          <button
+            class="report-toggle"
+            id="report-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="report-content"
+          >
+            <span>Reporte de sesión</span>
+            <span class="toggle-icon" aria-hidden="true"></span>
+          </button>
+
+          <div class="report-content" id="report-content">
+            <header class="report-header">
+              <h2 id="report-title">Reporte de sesión</h2>
+              <div class="session-report-actions">
+                <button type="button" class="btn-report-action" id="btn-generate-report">
+                  Generar / Actualizar análisis
+                </button>
+                <button type="button" class="btn-report-action btn-report-action--secondary" id="btn-export-pdf">
+                  Imprimir / Guardar PDF
+                </button>
+                <button type="button" class="btn-report-action btn-report-action--secondary" id="btn-export-doc">
+                  Descargar informe (.doc)
+                </button>
+              </div>
+            </header>
+
+            <section class="session-report-wrap" id="session-report-wrap">
+              <div class="session-report-body" id="session-report-body"></div>
+              <details class="session-report-transcript-wrap">
+                <summary>Ver conversación completa</summary>
+                <div class="session-report-transcript" id="session-report-transcript"></div>
+              </details>
+            </section>
+          </div>
+        </aside>
       </div>
 
       <footer>
-        Desarrollado con el theme de
-        <a href="https://www.dbx-solutions.com" target="_blank" rel="noopener">DBX Solutions</a>
+        <span>Desarrollado con el theme de</span>
+        <a class="footer-logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
+          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="140" height="28" />
+        </a>
       </footer>
     </div>
 
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
     <script src="/static/validation-tests.js"></script>
+    <script src="/static/report.js"></script>
     <script src="/static/chat.js" defer></script>
   </body>
 </html>

@@ -1,33 +1,185 @@
 const STORAGE_KEY = "agente-juridico-user-id";
-const VALIDATION_STORAGE_KEY = "agente-juridico-validation-v2";
+const SESSION_STORAGE_KEY = "agente-juridico-session-v4";
+const LEGACY_V3_KEY = "agente-juridico-session-v3";
+const LEGACY_STORAGE_KEY = "agente-juridico-validation-v2";
+const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
+const ENABLE_SERVER_RUBRIC = true;
 
-const suggestions = [
-  "¿Qué áreas del derecho maneja el despacho?",
-  "Quiero divorciarme por mutuo acuerdo",
-  "¿Cuál es el perfil del asistente jurídico?",
-  "Redacta un contrato de prestación de servicios",
-];
+const WELCOME_MESSAGE =
+  "Bienvenida. Soy el asistente jurídico del despacho (Fase 0). Puedo orientarla sobre el perfil del despacho y las áreas del derecho en nuestra base de conocimiento.\n\n¿En qué puedo ayudarla hoy?";
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
 const inputEl = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
-const suggestionsEl = document.getElementById("suggestions");
 const statusDot = document.getElementById("status-dot");
 const statusText = document.getElementById("status-text");
 const validationBlocksEl = document.getElementById("validation-blocks");
 const validationProgressEl = document.getElementById("validation-progress");
 const validationScoreEl = document.getElementById("validation-score");
 const validationScoreBarEl = document.getElementById("validation-score-bar");
-const resetValidationBtn = document.getElementById("reset-validation-btn");
+const resetScoreBtn = document.getElementById("reset-score-btn");
+const resetSessionBtn = document.getElementById("reset-session-btn");
+const validationStepperEl = document.getElementById("validation-stepper");
+const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
 const chatColumnEl = document.querySelector(".chat-column");
 
-const validationState = loadValidationState();
-let validationMarks = validationState.marks || {};
-let dynamicProbes = validationState.probes || {};
-let probesSource = validationState.probesSource || "default";
+const sessionState = loadSessionState();
+let sessionId = sessionState.sessionId;
+let startedAt = sessionState.startedAt;
+let lastActivityAt = sessionState.lastActivityAt;
+let validationMarks = sessionState.marks || {};
+let dynamicProbes = sessionState.probes || {};
+let probesSource = sessionState.probesSource || "default";
+let checklistChecked = normalizeChecklistChecked(sessionState.checklistChecked);
+let chatLog = Array.isArray(sessionState.chatLog) ? sessionState.chatLog : [];
+let events = Array.isArray(sessionState.events) ? sessionState.events : [];
+let markNotes = sessionState.markNotes || {};
+let lastReport = sessionState.lastReport || null;
 let activeBlockId = null;
+let pendingChatMeta = null;
+let sendViaOverride = null;
+let filterPendingOnly = false;
+/** Bumped on reset so in-flight /chat responses cannot repopulate the UI. */
+let chatEpoch = 0;
+
+function normalizeChecklistChecked(raw) {
+  if (!raw || typeof raw !== "object") return {};
+  return Object.fromEntries(
+    Object.entries(raw).map(([key, value]) => [Number(key), Boolean(value)])
+  );
+}
+
+function createSessionId() {
+  return `sess-${crypto.randomUUID().slice(0, 12)}`;
+}
+
+function migrateFromV3() {
+  try {
+    const raw = localStorage.getItem(LEGACY_V3_KEY);
+    if (!raw) return null;
+    const v3 = JSON.parse(raw);
+    localStorage.removeItem(LEGACY_V3_KEY);
+    const migrated = {
+      ...v3,
+      markNotes: v3.markNotes || {},
+      schemaVersion: 4,
+    };
+    if (migrated.lastReport?.metrics) {
+      migrated.lastReport = SessionReport?.normalizeBackendReport?.(migrated.lastReport, migrated) || null;
+    }
+    return migrated;
+  } catch {
+    return null;
+  }
+}
+
+function migrateFromLegacy() {
+  try {
+    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!raw) return null;
+    const v2 = JSON.parse(raw);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    return {
+      sessionId: createSessionId(),
+      startedAt: v2.updated_at || new Date().toISOString(),
+      lastActivityAt: v2.updated_at || new Date().toISOString(),
+      marks: v2.marks || {},
+      probes: v2.probes || {},
+      probesSource: v2.probesSource || "default",
+      checklistChecked: v2.checklistChecked || {},
+      chatLog: [],
+      events: [{ type: "session_start", ts: new Date().toISOString(), reason: "migration_v2" }],
+      markNotes: {},
+      lastReport: null,
+      schemaVersion: 4,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function loadSessionState() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { markNotes: {}, schemaVersion: 4, ...parsed };
+    }
+  } catch {
+    /* ignore */
+  }
+  const fromV3 = migrateFromV3();
+  if (fromV3) {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(fromV3));
+    return fromV3;
+  }
+  const migrated = migrateFromLegacy();
+  if (migrated) {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(migrated));
+    return migrated;
+  }
+  const now = new Date().toISOString();
+  return {
+    sessionId: createSessionId(),
+    startedAt: now,
+    lastActivityAt: now,
+    marks: {},
+    probes: {},
+    probesSource: "default",
+    checklistChecked: {},
+    chatLog: [],
+    events: [{ type: "session_start", ts: now }],
+    markNotes: {},
+    lastReport: null,
+    schemaVersion: 4,
+  };
+}
+
+function getSessionSnapshot() {
+  return {
+    sessionId,
+    startedAt,
+    lastActivityAt,
+    marks: { ...validationMarks },
+    markNotes: { ...markNotes },
+    probes: { ...dynamicProbes },
+    probesSource,
+    checklistChecked: { ...checklistChecked },
+    chatLog: chatLog.slice(),
+    events: events.slice(),
+    lastReport,
+  };
+}
+
+function touchActivity() {
+  lastActivityAt = new Date().toISOString();
+}
+
+function saveSessionState() {
+  touchActivity();
+  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(getSessionSnapshot()));
+  SessionReport?.refresh?.();
+}
+
+function recordEvent(event) {
+  events.push({ ...event, ts: event.ts || new Date().toISOString() });
+  if (events.length > 200) events = events.slice(-200);
+  saveSessionState();
+}
+
+function appendChatLogEntry(entry) {
+  const record = {
+    id: `msg-${crypto.randomUUID().slice(0, 10)}`,
+    ts: new Date().toISOString(),
+    ...entry,
+  };
+  chatLog.push(record);
+  if (chatLog.length > 500) chatLog = chatLog.slice(-500);
+  saveSessionState();
+  return record;
+}
 
 function getUserId() {
   let id = localStorage.getItem(STORAGE_KEY);
@@ -36,26 +188,6 @@ function getUserId() {
     localStorage.setItem(STORAGE_KEY, id);
   }
   return id;
-}
-
-function loadValidationState() {
-  try {
-    return JSON.parse(localStorage.getItem(VALIDATION_STORAGE_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-
-function saveValidationState() {
-  localStorage.setItem(
-    VALIDATION_STORAGE_KEY,
-    JSON.stringify({
-      marks: validationMarks,
-      probes: dynamicProbes,
-      probesSource,
-      updated_at: new Date().toISOString(),
-    })
-  );
 }
 
 function updateProbesSourceBadge() {
@@ -90,27 +222,102 @@ function initDefaultProbes() {
   });
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatText(text) {
-  return text
+  const safe = escapeHtml(text);
+  return safe
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/\n/g, "<br>");
+}
+
+function getBlockTitle(blockId) {
+  if (!blockId) return "";
+  const test = VALIDATION_TESTS.find((t) => t.id === blockId);
+  return test?.title || blockId;
+}
+
+function buildMessageMeta(role, options = {}) {
+  const { blockId, via, latencyMs } = options;
+  const parts = [];
+  if (role === "user") parts.push("Usted");
+  else if (role === "assistant") parts.push("Asistente jurídico");
+
+  if (blockId) {
+    const title = getBlockTitle(blockId);
+    parts.push(`<button type="button" class="message-block-badge" data-block-id="${escapeHtml(blockId)}">${escapeHtml(title)}</button>`);
+  }
+  if (via === "probe") parts.push('<span class="message-via-badge">probe</span>');
+  if (role === "assistant" && typeof latencyMs === "number") {
+    parts.push(`<span class="message-latency">${latencyMs} ms</span>`);
+  }
+  return parts.join(" · ");
 }
 
 function scrollToBottom() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function addMessage(role, text, meta = "") {
+function addMessageToUI(role, text, meta = "", options = {}) {
   const el = document.createElement("div");
   el.className = `message ${role}`;
+  if (options.msgId) el.dataset.msgId = options.msgId;
+  if (options.blockId) el.dataset.blockId = options.blockId;
+
+  const metaHtml = meta || buildMessageMeta(role, options);
   el.innerHTML = `
-    ${meta ? `<span class="message-meta">${meta}</span>` : ""}
+    ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
+    ${role === "assistant" ? '<span class="message-phase-badge">Fase 0 · Borrador</span>' : ""}
   `;
+
+  el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
+    const bid = e.currentTarget.dataset.blockId;
+    if (bid) {
+      setActiveBlock(bid);
+      const blockEl = document.querySelector(`.validation-block[data-test-id="${bid}"]`);
+      if (blockEl) scrollBlockIntoValidationPanel(blockEl);
+    }
+  });
+
   messagesEl.appendChild(el);
   scrollToBottom();
   return el;
+}
+
+function showWelcomeMessage() {
+  addMessageToUI("assistant", WELCOME_MESSAGE, "Asistente jurídico");
+}
+
+function clearChatUI() {
+  const container = document.getElementById("messages");
+  if (!container) return;
+  container.innerHTML = "";
+  hideTyping();
+}
+
+function restoreChatFromLog() {
+  clearChatUI();
+  if (!chatLog.length) {
+    showWelcomeMessage();
+    return;
+  }
+  chatLog.forEach((entry) => {
+    addMessageToUI(entry.role, entry.text, "", {
+      msgId: entry.id,
+      blockId: entry.blockId,
+      via: entry.via,
+      latencyMs: entry.latencyMs,
+    });
+  });
 }
 
 function showTyping() {
@@ -130,6 +337,50 @@ function scrollToChat() {
   if (window.matchMedia("(max-width: 1024px)").matches && chatColumnEl) {
     chatColumnEl.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+function scrollToLinkedMessage(blockId) {
+  const first = messagesEl.querySelector(`.message[data-block-id="${blockId}"]`);
+  if (!first) {
+    scrollToChat();
+    Toast?.show?.("No hay mensajes vinculados a esta sección en el chat.", "info");
+    return;
+  }
+  scrollToChat();
+  first.scrollIntoView({ behavior: "smooth", block: "center" });
+  first.classList.add("message--highlight");
+  setTimeout(() => first.classList.remove("message--highlight"), 2000);
+}
+
+function countLinkedMessages(blockId) {
+  return chatLog.filter((m) => m.blockId === blockId).length;
+}
+
+function refreshLinkedMessagesUI(blockId) {
+  const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
+  if (!blockEl) return;
+  let linked = blockEl.querySelector(".linked-messages");
+  const count = countLinkedMessages(blockId);
+  if (!linked) {
+    linked = document.createElement("div");
+    linked.className = "linked-messages";
+    blockEl.querySelector(".mark-actions")?.before(linked);
+  }
+  if (count === 0) {
+    linked.innerHTML = `<span class="linked-messages-empty">Sin mensajes vinculados en el chat.</span>`;
+    return;
+  }
+  linked.innerHTML = `
+    <span class="linked-messages-count">${count} mensaje(s) vinculado(s)</span>
+    <button type="button" class="btn-linked-messages" data-block-id="${blockId}">Ver en chat</button>
+  `;
+  linked.querySelector(".btn-linked-messages")?.addEventListener("click", () => {
+    scrollToLinkedMessage(blockId);
+  });
+}
+
+function refreshAllLinkedMessagesUI() {
+  VALIDATION_TESTS.forEach((t) => refreshLinkedMessagesUI(t.id));
 }
 
 function setActiveBlock(blockId) {
@@ -176,6 +427,24 @@ function updateBlockVisualState(blockId) {
       scoreTag.className = "block-score-tag";
     }
   }
+
+  let noteEl = blockEl.querySelector(".mark-note-display");
+  const noteText = markNotes[blockId];
+  if (noteText) {
+    if (!noteEl) {
+      noteEl = document.createElement("p");
+      noteEl.className = "mark-note-display";
+      blockEl.querySelector(".mark-actions")?.before(noteEl);
+    }
+    noteEl.innerHTML = `<strong>Nota:</strong> ${escapeHtml(noteText)} <button type="button" class="mark-note-edit" data-block-id="${blockId}">Editar nota</button>`;
+    noteEl.querySelector(".mark-note-edit")?.addEventListener("click", () => {
+      requestValidationMark(blockId, validationMarks[blockId] || "pass");
+    });
+  } else if (noteEl) {
+    noteEl.remove();
+  }
+
+  refreshLinkedMessagesUI(blockId);
 }
 
 function updateValidationProgress() {
@@ -193,13 +462,127 @@ function updateValidationProgress() {
   if (validationProgressEl) {
     validationProgressEl.textContent = `${marked} de ${VALIDATION_TESTS.length} secciones marcadas`;
   }
+  if (validationStepperEl) {
+    const nextPending = VALIDATION_TESTS.find((t) => !validationMarks[t.id]);
+    const stepIndex = nextPending
+      ? VALIDATION_TESTS.findIndex((t) => t.id === nextPending.id) + 1
+      : VALIDATION_TESTS.length;
+    const stepTitle = nextPending ? nextPending.title : "Checklist final";
+    validationStepperEl.textContent = `Paso ${stepIndex} de ${VALIDATION_TESTS.length} · ${stepTitle}`;
+  }
+  applyPendingFilter();
+  SessionReport?.refresh?.();
 }
 
-function setValidationMark(blockId, mark) {
+function applyPendingFilter() {
+  if (!validationBlocksEl) return;
+  filterPendingOnly = Boolean(filterPendingEl?.checked);
+  validationBlocksEl.querySelectorAll(".validation-block[data-test-id]").forEach((el) => {
+    const id = el.dataset.testId;
+    const mark = validationMarks[id];
+    const isPending = !mark;
+    el.classList.toggle("is-filtered-hidden", filterPendingOnly && !isPending);
+  });
+}
+
+function scrollBlockIntoValidationPanel(targetEl) {
+  if (!validationBlocksEl || !targetEl) return;
+
+  const containerTop = validationBlocksEl.getBoundingClientRect().top;
+  const targetTop = targetEl.getBoundingClientRect().top;
+  const nextScrollTop = validationBlocksEl.scrollTop + (targetTop - containerTop) - 8;
+
+  validationBlocksEl.scrollTo({
+    top: Math.max(0, nextScrollTop),
+    behavior: "smooth",
+  });
+}
+
+function scrollToNextValidationBlock(currentBlockId) {
+  if (!validationBlocksEl) return;
+
+  const currentIndex = VALIDATION_TESTS.findIndex((t) => t.id === currentBlockId);
+  if (currentIndex === -1) return;
+
+  let targetEl = null;
+  if (currentIndex < VALIDATION_TESTS.length - 1) {
+    const nextTest = VALIDATION_TESTS[currentIndex + 1];
+    targetEl = validationBlocksEl.querySelector(
+      `.validation-block[data-test-id="${nextTest.id}"]`
+    );
+    setActiveBlock(nextTest.id);
+  } else {
+    targetEl = validationBlocksEl.querySelector(".validation-checklist");
+    setActiveBlock(null);
+  }
+
+  if (!targetEl) return;
+
+  requestAnimationFrame(() => {
+    scrollBlockIntoValidationPanel(targetEl);
+  });
+}
+
+function setValidationMark(blockId, mark, note = undefined) {
+  const previousMark = validationMarks[blockId];
   validationMarks[blockId] = mark;
-  saveValidationState();
+  if (note !== undefined) {
+    if (note.trim()) markNotes[blockId] = note.trim();
+    else delete markNotes[blockId];
+  }
+  const test = VALIDATION_TESTS.find((t) => t.id === blockId);
+  recordEvent({
+    type: "mark",
+    blockId,
+    blockTitle: test?.title,
+    mark,
+    note: markNotes[blockId] || "",
+    score: computeScore(),
+  });
   updateBlockVisualState(blockId);
+  refreshLinkedMessagesUI(blockId);
   updateValidationProgress();
+  if (mark === "pass" && previousMark !== "pass") {
+    scrollToNextValidationBlock(blockId);
+  }
+}
+
+function openMarkNoteDialog(blockId, mark) {
+  const test = VALIDATION_TESTS.find((t) => t.id === blockId);
+  const existing = markNotes[blockId] || "";
+  const panel = document.createElement("div");
+  panel.className = "mark-note-panel";
+  panel.innerHTML = `
+    <p class="mark-note-title">${mark === "pass" ? "Aprobada" : "Rechazada"} — ${escapeHtml(test?.title || blockId)}</p>
+    <label class="mark-note-label">Nota opcional (criterio del revisor)</label>
+    <textarea class="mark-note-input" rows="3" maxlength="500" placeholder="¿Por qué marca esta sección?"></textarea>
+    <div class="mark-note-actions">
+      <button type="button" class="mark-note-confirm">Confirmar</button>
+      <button type="button" class="mark-note-skip">Omitir nota</button>
+    </div>
+  `;
+  const textarea = panel.querySelector(".mark-note-input");
+  if (textarea && existing) textarea.value = existing;
+
+  const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
+  blockEl?.querySelector(".mark-note-panel")?.remove();
+  blockEl?.querySelector(".mark-actions")?.after(panel);
+
+  const close = () => panel.remove();
+
+  panel.querySelector(".mark-note-confirm")?.addEventListener("click", () => {
+    const note = panel.querySelector(".mark-note-input")?.value || "";
+    setValidationMark(blockId, mark, note);
+    close();
+  });
+  panel.querySelector(".mark-note-skip")?.addEventListener("click", () => {
+    setValidationMark(blockId, mark, "");
+    close();
+  });
+}
+
+function requestValidationMark(blockId, mark) {
+  openMarkNoteDialog(blockId, mark);
 }
 
 function buildProbeList(test) {
@@ -221,6 +604,7 @@ function buildProbeList(test) {
     btn.addEventListener("click", () => {
       setActiveBlock(test.id);
       scrollToChat();
+      sendViaOverride = "probe";
       sendMessage(probe.message || probe.label);
     });
     probeList.appendChild(btn);
@@ -376,29 +760,77 @@ function renderTestBlock(test, index) {
     btn.dataset.mark = mark;
     btn.dataset.blockId = test.id;
     btn.textContent = mark === "pass" ? "Aprobada" : "Rechazada";
-    btn.addEventListener("click", () => setValidationMark(test.id, mark));
+    btn.addEventListener("click", () => requestValidationMark(test.id, mark));
     markActions.appendChild(btn);
   });
   section.appendChild(markActions);
 
+  refreshLinkedMessagesUI(test.id);
+
   return section;
+}
+
+function toggleChecklistItem(index) {
+  checklistChecked[index] = !checklistChecked[index];
+  recordEvent({
+    type: "checklist",
+    index,
+    checked: Boolean(checklistChecked[index]),
+  });
+  updateChecklistItemVisual(index);
+  SessionReport?.refresh?.();
+}
+
+function updateChecklistItemVisual(index) {
+  const btn = document.querySelector(`.checklist-toggle[data-index="${index}"]`);
+  if (!btn) return;
+  const checked = Boolean(checklistChecked[index]);
+  btn.classList.toggle("is-checked", checked);
+  btn.setAttribute("aria-checked", String(checked));
 }
 
 function renderChecklistBlock() {
   const section = document.createElement("section");
   section.className = "validation-block validation-checklist";
-  section.innerHTML = `
-    <h3>Checklist final para la abogada</h3>
-    <ul class="checklist">
-      ${VALIDATION_CHECKLIST.map(
-        (item) => `<li><span class="check-box" aria-hidden="true"></span> ${item}</li>`
-      ).join("")}
-    </ul>
-    <p class="validation-note">
-      Puntaje máximo: ${VALIDATION_TOTAL_WEIGHT}/100. Si todas las secciones están aprobadas,
-      Fase 0 puede considerarse validada. Si alguna falla, documente el caso y repórtelo al equipo técnico.
-    </p>
-  `;
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Checklist final para la abogada";
+  section.appendChild(heading);
+
+  const list = document.createElement("ul");
+  list.className = "checklist";
+
+  VALIDATION_CHECKLIST.forEach((item, index) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "checklist-toggle";
+    btn.dataset.index = String(index);
+    btn.setAttribute("role", "checkbox");
+    btn.setAttribute("aria-checked", String(Boolean(checklistChecked[index])));
+    if (checklistChecked[index]) btn.classList.add("is-checked");
+
+    const box = document.createElement("span");
+    box.className = "check-box";
+    box.setAttribute("aria-hidden", "true");
+
+    const label = document.createElement("span");
+    label.className = "checklist-text";
+    label.textContent = item;
+
+    btn.append(box, label);
+    btn.addEventListener("click", () => toggleChecklistItem(index));
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  section.appendChild(list);
+
+  const note = document.createElement("p");
+  note.className = "validation-note";
+  note.textContent = `Puntaje máximo: ${VALIDATION_TOTAL_WEIGHT}/100. Si todas las secciones están aprobadas, Fase 0 puede considerarse validada. Si alguna falla, documente el caso y repórtelo al equipo técnico.`;
+  section.appendChild(note);
+
   return section;
 }
 
@@ -437,7 +869,7 @@ async function generateNewProbes(options = {}) {
   updateProbesSourceBadge();
 
   try {
-    const res = await fetch("/validation/generate-probes", {
+    const res = await authFetch("/validation/generate-probes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -450,7 +882,7 @@ async function generateNewProbes(options = {}) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       if (!silent) {
-        alert(err.detail || "No se pudieron generar preguntas. Intente en unos segundos.");
+        Toast?.show?.(err.detail || "No se pudieron generar preguntas. Intente en unos segundos.", "error");
       }
       probesSource = Object.keys(dynamicProbes).length ? "fallback" : "default";
       updateProbesSourceBadge();
@@ -462,7 +894,12 @@ async function generateNewProbes(options = {}) {
       dynamicProbes[id] = probes.slice(0, 2);
     });
     probesSource = data.source === "llm" ? "llm" : "fallback";
-    saveValidationState();
+    recordEvent({
+      type: "generate_probes",
+      blockId: blockId || null,
+      blocks,
+      source: probesSource,
+    });
 
     if (blockId) {
       refreshProbeListForBlock(blockId);
@@ -473,7 +910,7 @@ async function generateNewProbes(options = {}) {
     return true;
   } catch {
     if (!silent) {
-      alert("Error de conexión al generar preguntas.");
+      Toast?.show?.("Error de conexión al generar preguntas.", "error");
     }
     probesSource = "default";
     updateProbesSourceBadge();
@@ -486,14 +923,63 @@ async function generateNewProbes(options = {}) {
   }
 }
 
-function resetValidation() {
-  if (!confirm("¿Reiniciar marcas y puntaje? Las preguntas actuales se conservan.")) {
+function resetChatConversation() {
+  chatEpoch += 1;
+  pendingChatMeta = null;
+  sendViaOverride = null;
+  chatLog = [];
+  clearChatUI();
+  showWelcomeMessage();
+  if (sendBtn) sendBtn.disabled = false;
+}
+
+function startNewSession() {
+  const now = new Date().toISOString();
+  sessionId = createSessionId();
+  startedAt = now;
+  lastActivityAt = now;
+  validationMarks = {};
+  markNotes = {};
+  checklistChecked = {};
+  events = [{ type: "session_start", ts: now }];
+  lastReport = null;
+  resetChatConversation();
+  saveSessionState();
+  VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
+  VALIDATION_CHECKLIST.forEach((_, index) => updateChecklistItemVisual(index));
+  updateValidationProgress();
+}
+
+function resetScoreOnly() {
+  if (
+    !confirm(
+      "¿Reiniciar puntaje, marcas, checklist, notas y conversación? Se conservan las preguntas generadas."
+    )
+  ) {
     return;
   }
   validationMarks = {};
-  saveValidationState();
+  markNotes = {};
+  checklistChecked = {};
+  lastReport = null;
+  resetChatConversation();
+  recordEvent({ type: "reset_score" });
   VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
+  VALIDATION_CHECKLIST.forEach((_, index) => updateChecklistItemVisual(index));
+  refreshAllLinkedMessagesUI();
   updateValidationProgress();
+  saveSessionState();
+}
+
+function resetFullSession() {
+  if (
+    !confirm(
+      "¿Reiniciar sesión completa? Se borrarán conversación, marcas, checklist, notas y reporte. Las preguntas generadas se conservan."
+    )
+  ) {
+    return;
+  }
+  startNewSession();
 }
 
 function updateConnectionStatus(connected) {
@@ -529,13 +1015,44 @@ async function sendMessage(text) {
   const trimmed = text.trim();
   if (!trimmed) return;
 
-  addMessage("user", trimmed, "Usted");
+  const epochAtSend = chatEpoch;
+  const via = sendViaOverride || (activeBlockId ? "probe" : "manual");
+  const blockId = activeBlockId || null;
+  sendViaOverride = null;
+
+  addMessageToUI("user", trimmed, "", { blockId, via });
+  const userEntry = appendChatLogEntry({
+    role: "user",
+    text: trimmed,
+    via,
+    blockId,
+  });
+
+  const abortIfStale = () => {
+    if (epochAtSend === chatEpoch) return false;
+    if (chatLog.some((entry) => entry.id === userEntry.id)) {
+      chatLog = chatLog.filter((entry) => entry.id !== userEntry.id);
+      saveSessionState();
+    }
+    hideTyping();
+    if (sendBtn) sendBtn.disabled = false;
+    pendingChatMeta = null;
+    return true;
+  };
+
+  const userEl = messagesEl.lastElementChild;
+  if (userEl && userEntry.id) userEl.dataset.msgId = userEntry.id;
+  pendingChatMeta = { userEntryId: userEntry.id, startedAt: Date.now(), epoch: epochAtSend };
+
   inputEl.value = "";
   sendBtn.disabled = true;
   showTyping();
 
+  let assistantText =
+    "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.";
+
   try {
-    const res = await fetch("/chat", {
+    const res = await authFetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -545,41 +1062,42 @@ async function sendMessage(text) {
       }),
     });
 
+    if (abortIfStale()) return;
+
     hideTyping();
 
-    if (!res.ok) {
-      addMessage(
-        "assistant",
-        "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.",
-        "Asistente"
-      );
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      assistantText = data.text;
     }
-
-    const data = await res.json();
-    addMessage("assistant", data.text, "Asistente jurídico");
   } catch {
+    if (abortIfStale()) return;
     hideTyping();
-    addMessage(
-      "assistant",
-      "Error de conexión. Verifique su red o espere si el servicio estaba inactivo.",
-      "Asistente"
-    );
-  } finally {
-    sendBtn.disabled = false;
-    inputEl.focus();
+    assistantText =
+      "Error de conexión. Verifique su red o espere si el servicio estaba inactivo.";
   }
-}
 
-function renderSuggestions() {
-  suggestions.forEach((text) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "chip";
-    btn.textContent = text;
-    btn.addEventListener("click", () => sendMessage(text));
-    suggestionsEl.appendChild(btn);
+  if (abortIfStale()) return;
+
+  const latencyMs = pendingChatMeta ? Date.now() - pendingChatMeta.startedAt : null;
+  const assistantEntry = appendChatLogEntry({
+    role: "assistant",
+    text: assistantText,
+    blockId,
+    latencyMs,
+    replyTo: pendingChatMeta?.userEntryId,
   });
+  addMessageToUI("assistant", assistantText, "", {
+    msgId: assistantEntry.id,
+    blockId,
+    latencyMs,
+  });
+  const assistantEl = messagesEl.lastElementChild;
+  if (assistantEl && assistantEntry.id) assistantEl.dataset.msgId = assistantEntry.id;
+  pendingChatMeta = null;
+
+  sendBtn.disabled = false;
+  inputEl.focus();
 }
 
 formEl.addEventListener("submit", (event) => {
@@ -594,23 +1112,57 @@ inputEl.addEventListener("keydown", (event) => {
   }
 });
 
-addMessage(
-  "assistant",
-  "Bienvenida. Soy el asistente jurídico del despacho (Fase 0). Puedo orientarla sobre el perfil del despacho y las áreas del derecho en nuestra base de conocimiento.\n\n¿En qué puedo ayudarla hoy?",
-  "Asistente jurídico"
-);
-
-function initValidationPanel() {
-  const panel = document.getElementById("validation-panel");
-  const toggle = document.getElementById("validation-toggle");
+function initCollapsiblePanel(panelId, toggleId) {
+  const panel = document.getElementById(panelId);
+  const toggle = document.getElementById(toggleId);
   if (!panel || !toggle) return;
 
   toggle.addEventListener("click", () => {
     const isOpen = panel.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", String(isOpen));
   });
+}
 
-  resetValidationBtn?.addEventListener("click", resetValidation);
+function initValidationPanel() {
+  initCollapsiblePanel("validation-panel", "validation-toggle");
+  initCollapsiblePanel("report-panel", "report-toggle");
+  resetScoreBtn?.addEventListener("click", resetScoreOnly);
+  resetSessionBtn?.addEventListener("click", resetFullSession);
+  filterPendingEl?.addEventListener("change", applyPendingFilter);
+}
+
+async function syncRubricFromServer() {
+  if (!ENABLE_SERVER_RUBRIC) return;
+  try {
+    const res = await authFetch("/validation/rubric");
+    if (!res.ok) return;
+    const data = await res.json();
+    const weightMap = {};
+    if (data.connection) weightMap[data.connection.id] = data.connection.weight;
+    (data.blocks || []).forEach((b) => {
+      weightMap[b.id] = b.weight;
+    });
+    VALIDATION_TESTS.forEach((test) => {
+      if (weightMap[test.id] != null) test.weight = weightMap[test.id];
+    });
+    if (data.total_weight) {
+      window.VALIDATION_TOTAL_WEIGHT = data.total_weight;
+    }
+    updateValidationProgress();
+  } catch {
+    /* fallback to bundled rubric */
+  }
+}
+
+function initOnboarding() {
+  const modal = document.getElementById("onboarding-modal");
+  const closeBtn = document.getElementById("onboarding-close");
+  if (!modal || localStorage.getItem(ONBOARDING_KEY)) return;
+  modal.hidden = false;
+  closeBtn?.addEventListener("click", () => {
+    modal.hidden = true;
+    localStorage.setItem(ONBOARDING_KEY, "1");
+  });
 }
 
 async function bootstrapValidationProbes() {
@@ -628,8 +1180,39 @@ async function bootstrapValidationProbes() {
 
 initDefaultProbes();
 renderValidationPanel();
-renderSuggestions();
+restoreChatFromLog();
 checkHealth();
 initValidationPanel();
+syncRubricFromServer();
 bootstrapValidationProbes();
-inputEl.focus();
+
+SessionReport.init({
+  getSession: getSessionSnapshot,
+  saveSession: (snapshot) => {
+    // Report generation may finish after a reset; only persist analysis, not stale chat.
+    lastReport = snapshot.lastReport || null;
+    saveSessionState();
+    refreshAllLinkedMessagesUI();
+  },
+  getUserId,
+});
+
+let appBooted = false;
+
+function bootAgentApp() {
+  if (appBooted) return;
+  appBooted = true;
+  initOnboarding();
+  inputEl.focus();
+  window.addEventListener("load", () => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  });
+}
+
+window.bootAgentApp = bootAgentApp;
+
+if (window.__agentAuthed) {
+  bootAgentApp();
+}

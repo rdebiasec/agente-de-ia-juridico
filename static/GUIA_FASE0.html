@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="es" class="manual-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Manual de uso — Asistente jurídico Fase 0 para validación del despacho."
+    />
+    <link rel="icon" href="/static/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/chat.css" />
+    <title>Manual de uso — Fase 0 | DBX Solutions</title>
+  </head>
+  <body class="manual-body">
+    <div class="manual-page">
+      <header class="manual-header">
+        <a class="logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
+          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="180" height="36" />
+        </a>
+        <div class="manual-header-actions">
+          <a class="btn-help manual-back-tool" href="/">Volver a la herramienta</a>
+        </div>
+      </header>
+
+      <section class="manual-hero">
+        <span class="eyebrow">Asistente jurídico</span>
+        <h1>Manual de uso — Validación Fase 0</h1>
+        <p>
+          Guía para la abogada del despacho. Aprenda a usar los tres paneles, marcar las pruebas,
+          generar el reporte y reiniciar la sesión. La IA propone; usted revisa y aprueba.
+        </p>
+        <div class="manual-callout manual-callout--tip">
+          <strong>En palabras simples:</strong> haga preguntas, marque cada prueba como Aprobada o
+          Rechazada, y al final genere el reporte para dejar evidencia de la revisión.
+        </div>
+      </section>
+
+      <nav class="manual-toc" aria-label="Contenido del manual">
+        <h2>Contenido</h2>
+        <ol>
+          <li><a href="#acceso">Acceso e inicio de sesión</a></li>
+          <li><a href="#barra-superior">Barra superior</a></li>
+          <li><a href="#vista-general">Vista general de la pantalla</a></li>
+          <li><a href="#chat">Panel de Chat</a></li>
+          <li><a href="#pruebas">Panel de Pruebas</a></li>
+          <li><a href="#reporteria">Panel de Reportería</a></li>
+          <li><a href="#reinicios">Reinicios</a></li>
+          <li><a href="#alcance">Alcance y reglas de Fase 0</a></li>
+          <li><a href="#flujo">Flujo recomendado</a></li>
+        </ol>
+      </nav>
+
+      <!-- A. Acceso e sesión -->
+      <section class="manual-section" id="acceso">
+        <h2>1. Acceso e inicio de sesión</h2>
+        <p>
+          Para entrar, abra la URL del asistente que le proporcionó el equipo técnico. Si el acceso
+          está protegido, verá la pantalla <strong>Asistente Jurídico — Fase 0</strong> con los
+          campos <strong>Usuario</strong> y <strong>Contraseña</strong>.
+        </p>
+        <p>
+          Tras iniciar sesión correctamente, la aplicación la redirige a la página principal con
+          los tres paneles de trabajo.
+        </p>
+        <div class="manual-callout manual-callout--tip">
+          El indicador de sesión muestra su usuario y el tiempo de inactividad permitido (por
+          ejemplo, <em>despacho · sesión 30 min</em>). Si no hay actividad durante ese periodo, la
+          sesión se cierra sola y volverá a la pantalla de inicio de sesión con un aviso.
+        </div>
+        <p>
+          Para salir manualmente en cualquier momento, use el botón <strong>Cerrar sesión</strong>
+          en la barra superior.
+        </p>
+        <h3>Resumen rápido</h3>
+        <ol class="manual-steps">
+          <li class="manual-step">
+            <span class="manual-step-num">1</span>
+            <span class="manual-step-body">Entre con usuario y contraseña.</span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">2</span>
+            <span class="manual-step-body">Trabaje en los paneles de Chat, Pruebas y Reportería.</span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">3</span>
+            <span class="manual-step-body">Cierre sesión al terminar.</span>
+          </li>
+        </ol>
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual — barra superior</span>
+          <span class="session-user-badge">despacho · sesión 30 min</span>
+          <button type="button" class="btn-logout" disabled>Cerrar sesión</button>
+        </div>
+        <p class="manual-validation-ids">Validado: A1 · A2 · A3 · A4</p>
+      </section>
+
+      <!-- B. Barra superior -->
+      <section class="manual-section" id="barra-superior">
+        <h2>2. Barra superior</h2>
+        <p>En la parte superior de la pantalla encontrará estos elementos:</p>
+        <ul>
+          <li>
+            <strong>Badge de sesión</strong> — muestra su usuario y el tiempo de sesión (ej.
+            <em>despacho · sesión 30 min</em>).
+          </li>
+          <li>
+            <strong>Manual de Uso</strong> — abre la página <code>/help</code> con todas las
+            instrucciones para usar la herramienta.
+          </li>
+          <li><strong>Cerrar sesión</strong> — cierra su sesión y vuelve al login.</li>
+        </ul>
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual</span>
+          <span class="session-user-badge">despacho · sesión 30 min</span>
+          <button type="button" class="btn-help" disabled>Manual de Uso</button>
+          <button type="button" class="btn-logout" disabled>Cerrar sesión</button>
+        </div>
+        <p class="manual-validation-ids">Validado: B1 · B4</p>
+      </section>
+      <section class="manual-section" id="vista-general">
+        <h2>3. Vista general de la pantalla</h2>
+        <p>La pantalla principal se organiza en tres paneles:</p>
+        <ul>
+          <li><strong>Panel de Chat</strong> (izquierda) — conversación con el asistente.</li>
+          <li><strong>Panel de Pruebas</strong> (centro) — guía de validación y marcación.</li>
+          <li><strong>Panel de Reportería</strong> (derecha) — reporte y exportación.</li>
+        </ul>
+        <p>
+          En pantallas pequeñas (tablets o móviles), los paneles de Pruebas y Reportería se abren
+          con sus botones desplegables: <em>Guía de validación — Fase 0</em> y
+          <em>Reporte de sesión</em>.
+        </p>
+        <div class="manual-callout manual-callout--tip">
+          La primera vez que entre, puede aparecer el modal <strong>Validación Fase 0 — 60
+          segundos</strong> con un resumen rápido. Pulse <strong>Entendido</strong> para cerrarlo.
+        </div>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Cómo leer la pantalla:</strong> izquierda = conversar, centro = calificar pruebas,
+          derecha = generar informe.
+        </div>
+        <p class="manual-validation-ids">Validado: C1 · C2 · C3</p>
+      </section>
+
+      <!-- D. Panel de Chat -->
+      <section class="manual-section" id="chat">
+        <h2>4. Panel de Chat</h2>
+        <h3>Estado de conexión</h3>
+        <p>
+          En la barra del chat, el indicador debe mostrar <strong>Conectado · Fase 0 activa</strong>
+          con un punto verde cuando el servicio funciona correctamente.
+        </p>
+        <h3>Enviar consultas</h3>
+        <p>
+          Escriba su consulta en el cuadro de texto (máximo 8.000 caracteres) y pulse
+          <strong>Enviar</strong> o presione <kbd>Enter</kbd> (sin mantener Shift).
+        </p>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Consejo práctico:</strong> use preguntas concretas y cortas. Ejemplo:
+          <em>“¿Qué áreas del derecho maneja el despacho?”</em>
+        </div>
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual</span>
+          <button type="button" class="btn-send" disabled>Enviar</button>
+        </div>
+        <h3>Mensaje de bienvenida</h3>
+        <p>
+          Al abrir una sesión sin conversación previa, aparece un mensaje de bienvenida del
+          asistente indicando que está en Fase 0 y que puede orientarla sobre el perfil del despacho
+          y las áreas del derecho.
+        </p>
+        <h3>Indicador de escritura</h3>
+        <p>
+          Mientras el asistente prepara la respuesta, verá una animación de tres puntos en una
+          burbuja gris (indicador «typing»).
+        </p>
+        <div class="manual-callout manual-callout--warning">
+          <strong>Aviso legal:</strong> las respuestas del asistente son borradores informativos
+          sujetos a revisión y aprobación del abogado del despacho. El aviso al pie del panel de
+          chat lo recuerda en todo momento.
+        </div>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Qué significa “borrador”:</strong> la respuesta sirve como apoyo inicial, pero
+          usted decide la versión final.
+        </div>
+        <p class="manual-validation-ids">Validado: D1 · D2 · D3 · D4 · D5</p>
+      </section>
+
+      <!-- E. Panel de Pruebas -->
+      <section class="manual-section" id="pruebas">
+        <h2>5. Panel de Pruebas</h2>
+        <p>
+          Este panel contiene <strong>6 secciones de prueba</strong>, un bloque de
+          <strong>alcance</strong> y un <strong>Checklist final</strong>. El puntaje máximo es
+          <strong>100 puntos</strong>.
+        </p>
+
+        <h3>Cómo validar cada sección</h3>
+        <ol class="manual-steps">
+          <li class="manual-step">
+            <span class="manual-step-num">1</span>
+            <span class="manual-step-body">
+              Lea las instrucciones de la sección (<em>Qué hacer</em>, <em>Qué esperar</em>,
+              criterios de Aprobada/Rechazada).
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">2</span>
+            <span class="manual-step-body">
+              Use las <strong>2 preguntas sugeridas</strong> y pulse
+              <strong>Enviar al chat</strong>, o escriba su propia pregunta en el Panel de Chat.
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">3</span>
+            <span class="manual-step-body">
+              Opcional: pulse <strong>Generar Nuevas Preguntas</strong> para obtener variantes con
+              IA (requiere que el servicio de IA esté configurado).
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">4</span>
+            <span class="manual-step-body">
+              Revise la respuesta del asistente. Si envió desde una sección, verá
+              <em>X mensaje(s) vinculado(s)</em> y el botón <strong>Ver en chat</strong>.
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">5</span>
+            <span class="manual-step-body">
+              Marque <strong>Aprobada</strong> o <strong>Rechazada</strong>. Puede añadir una
+              <strong>nota opcional</strong> (máximo 500 caracteres) o pulsar
+              <strong>Omitir nota</strong>.
+            </span>
+          </li>
+        </ol>
+
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual — acciones de prueba</span>
+          <button type="button" class="mark-btn mark-btn--pass" disabled>Aprobada</button>
+          <button type="button" class="mark-btn mark-btn--fail" disabled>Rechazada</button>
+          <button type="button" class="btn-reset-score" disabled>Reiniciar puntaje, marcas y chat</button>
+        </div>
+
+        <h3>Puntaje y progreso</h3>
+        <ul>
+          <li>
+            El <strong>Puntaje</strong> y la barra de progreso suben solo cuando marca una sección
+            como <strong>Aprobada</strong> (cada sección tiene un peso distinto).
+          </li>
+          <li>
+            El indicador <strong>Paso X de 6</strong> le guía hacia la siguiente sección pendiente.
+          </li>
+          <li>
+            Active <strong>Mostrar solo pendientes</strong> para ocultar las secciones ya marcadas.
+          </li>
+        </ul>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Regla simple del puntaje:</strong> solo suma puntos cuando una sección queda en
+          <strong>Aprobada</strong>.
+        </div>
+
+        <h3>Sección especial: Conexión</h3>
+        <p>
+          La primera sección (<em>Conexión y estado del servicio</em>) no tiene preguntas
+          sugeridas. Solo verifique que el chat muestre conexión correcta y marque Aprobada o
+          Rechazada según corresponda.
+        </p>
+
+        <h3>Checklist final</h3>
+        <p>
+          Al final del panel hay <strong>7 ítems</strong> que usted marca manualmente como
+          recordatorio de criterios globales. No suman puntaje automático, pero son parte de su
+          revisión como abogada.
+        </p>
+        <div class="manual-callout manual-callout--tip">
+          Piense el checklist como “control de calidad final” antes de generar el informe.
+        </div>
+        <p class="manual-validation-ids">Validado: E1 · E2 · E3 · E4 · E5 · E6 · E7 · E8 · E9 · E10</p>
+      </section>
+
+      <!-- F. Panel de Reportería -->
+      <section class="manual-section" id="reporteria">
+        <h2>6. Panel de Reportería</h2>
+        <p>Cuando haya marcado las secciones, use el panel derecho para documentar la sesión:</p>
+        <ul>
+          <li>
+            <strong>Generar / Actualizar análisis</strong> — produce el reporte de sesión con
+            métricas, marcas y análisis.
+          </li>
+          <li>
+            <strong>Imprimir / Guardar PDF</strong> — abre la vista de impresión del navegador para
+            guardar un PDF.
+          </li>
+          <li>
+            <strong>Descargar informe (.doc)</strong> — descarga un archivo Word con el informe.
+          </li>
+          <li>
+            <strong>Ver conversación completa</strong> — desplegable al final del reporte con el
+            transcript de toda la sesión.
+          </li>
+        </ul>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Orden recomendado:</strong> primero “Generar / Actualizar análisis”, luego exporte
+          en PDF o Word.
+        </div>
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual</span>
+          <button type="button" class="btn-report-action" disabled>Generar / Actualizar análisis</button>
+          <button type="button" class="btn-report-action btn-report-action--secondary" disabled>
+            Imprimir / Guardar PDF
+          </button>
+          <button type="button" class="btn-report-action btn-report-action--secondary" disabled>
+            Descargar informe (.doc)
+          </button>
+        </div>
+        <p class="manual-validation-ids">Validado: F1 · F2 · F3 · F4</p>
+      </section>
+
+      <!-- G. Reinicios -->
+      <section class="manual-section" id="reinicios">
+        <h2>7. Reinicios</h2>
+        <p>En la parte superior del Panel de Pruebas hay dos botones de reinicio:</p>
+        <ul>
+          <li>
+            <strong>Reiniciar puntaje, marcas y chat</strong> — borra marcas, checklist, notas,
+            reporte <em>y toda la conversación</em>. Conserva las preguntas generadas con IA.
+          </li>
+          <li>
+            <strong>Reiniciar sesión completa</strong> — además de lo anterior, crea una sesión
+            nueva (nuevo identificador interno). También conserva las preguntas generadas.
+          </li>
+        </ul>
+        <div class="manual-ui-ref">
+          <span class="manual-ui-ref-label">Referencia visual</span>
+          <button type="button" class="btn-reset-score" disabled>Reiniciar puntaje, marcas y chat</button>
+          <button type="button" class="btn-reset-session" disabled>Reiniciar sesión completa</button>
+        </div>
+        <div class="manual-callout manual-callout--warning">
+          Ambos botones piden confirmación antes de ejecutar. Tras reiniciar, recargar la página no
+          debe restaurar la conversación borrada.
+        </div>
+        <div class="manual-callout manual-callout--warning">
+          Si tiene dudas, use primero <strong>Reiniciar puntaje, marcas y chat</strong>. Use
+          <strong>Reiniciar sesión completa</strong> cuando quiera comenzar una sesión nueva desde cero.
+        </div>
+        <p class="manual-validation-ids">Validado: G1 · G2 · G3</p>
+      </section>
+
+      <!-- H. Alcance -->
+      <section class="manual-section" id="alcance">
+        <h2>8. Alcance y reglas de Fase 0</h2>
+        <ul>
+          <li>
+            <strong>Sí debe:</strong> orientar sobre el perfil del despacho y las áreas del
+            derecho en la base de conocimiento.
+          </li>
+          <li>
+            <strong>No debe:</strong> redactar contratos, tutelas, memoriales, demandas ni
+            analizar casos concretos (eso corresponde a Fase 1 en adelante).
+          </li>
+          <li>
+            <strong>No debe inventar</strong> sentencias, radicados ni normas. Debe decir
+            claramente cuando no tiene la información.
+          </li>
+          <li>
+            Toda respuesta debe incluir un aviso de <strong>revisión humana</strong> por parte del
+            abogado.
+          </li>
+        </ul>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Regla inmutable:</strong> la IA propone; usted revisa y aprueba. Ninguna
+          respuesta del asistente sustituye su criterio profesional.
+        </div>
+        <h3>Traducción práctica</h3>
+        <ul>
+          <li><strong>Permitido:</strong> orientación general sobre perfil y áreas.</li>
+          <li><strong>No permitido:</strong> redactar documentos o inventar información jurídica.</li>
+          <li><strong>Siempre:</strong> validar usted el resultado antes de usarlo externamente.</li>
+        </ul>
+        <p class="manual-validation-ids">Validado: H1 · H2 · H3 · H4 · H5</p>
+      </section>
+
+      <!-- I. Flujo recomendado -->
+      <section class="manual-section" id="flujo">
+        <h2>9. Flujo recomendado</h2>
+        <ol class="manual-steps">
+          <li class="manual-step">
+            <span class="manual-step-num">1</span>
+            <span class="manual-step-body">
+              Entre a la aplicación y verifique la conexión (sección Conexión y estado del
+              servicio).
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">2</span>
+            <span class="manual-step-body">
+              Recorra las 6 secciones: envíe preguntas, lea las respuestas y marque Aprobada o
+              Rechazada con nota si lo considera necesario.
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">3</span>
+            <span class="manual-step-body">Complete el checklist final (7 ítems).</span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">4</span>
+            <span class="manual-step-body">
+              Genere el reporte de sesión y expórtelo en PDF o Word según necesite.
+            </span>
+          </li>
+          <li class="manual-step">
+            <span class="manual-step-num">5</span>
+            <span class="manual-step-body">
+              Si alguna sección falla, documente el motivo en la nota de la sección y repórtelo al
+              equipo técnico.
+            </span>
+          </li>
+        </ol>
+        <div class="manual-callout manual-callout--tip">
+          <strong>Si tiene poco tiempo:</strong> complete mínimo las 6 secciones, revise el checklist
+          y genere el reporte antes de cerrar.
+        </div>
+        <p class="manual-validation-ids">Validado: I1 · I2 · I3 · I4 · I5</p>
+      </section>
+
+      <a class="manual-back" href="/">← Volver a la herramienta</a>
+    </div>
+  </body>
+</html>
