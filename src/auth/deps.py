@@ -28,8 +28,14 @@ def apply_session_cookie(response: Response, token: str, settings: Settings) -> 
     )
 
 
-def clear_session_cookie(response: Response) -> None:
-    response.delete_cookie(key=COOKIE_NAME, path="/")
+def clear_session_cookie(response: Response, settings: Settings) -> None:
+    response.delete_cookie(
+        key=COOKIE_NAME,
+        path="/",
+        secure=cookie_secure(settings),
+        httponly=True,
+        samesite="lax",
+    )
 
 
 async def optional_web_session(

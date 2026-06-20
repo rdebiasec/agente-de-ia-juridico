@@ -66,6 +66,9 @@ async def test_login_logout_and_protected_routes(monkeypatch):
 
         logout = await client.post("/auth/logout", cookies={"agente_session": cookie})
         assert logout.status_code == 200
+        set_cookie = logout.headers.get("set-cookie", "")
+        assert "agente_session=" in set_cookie
+        assert "Max-Age=0" in set_cookie or "expires=" in set_cookie.lower()
 
         again = await client.post("/chat", json={"message": "hola", "user_id": "t"})
         assert again.status_code == 401

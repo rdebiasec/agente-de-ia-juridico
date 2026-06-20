@@ -67,6 +67,9 @@ git push origin main
 4. Render detecta `render.yaml` en la raíz
 5. En **Environment**, añade secretos:
    - `OPENAI_API_KEY` (obligatorio para GPT)
+   - `SITE_USERNAME`, `SITE_PASSWORD`, `SESSION_SECRET` (login web Fase 0)
+   - `SESSION_IDLE_MINUTES=30`
+   - `SESSION_COOKIE_SECURE=true` (solo producción HTTPS)
    - `SLACK_BOT_TOKEN` + `SLACK_SIGNING_SECRET` (Slack)
    - `TWILIO_*` (WhatsApp, cuando lo actives)
 6. Deploy → URL: `https://agente-de-ia-juridico.onrender.com` (o similar)
@@ -79,6 +82,9 @@ curl -X POST https://TU-APP.onrender.com/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"¿Qué áreas del derecho maneja el despacho?"}'
 ```
+
+En producción, `GET /health` debe mostrar `"web_auth_enabled": true` para que
+el flujo de login/logout sea idéntico al local.
 
 ### WhatsApp (Twilio)
 

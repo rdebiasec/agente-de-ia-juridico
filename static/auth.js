@@ -6,6 +6,8 @@ const AgentAuth = (() => {
   let idleMs = IDLE_MS_DEFAULT;
   let idleTimer = null;
   let onLogoutCallback = null;
+  let isLoggingOut = false;
+  let activityHandler = null;
 
   function redirectToLogin(reason = "") {
     clearIdleTimer();
@@ -46,7 +48,8 @@ const AgentAuth = (() => {
   function bindActivityListeners() {
     const events = ["mousedown", "keydown", "scroll", "touchstart"];
     let lastPing = 0;
-    const onActivity = () => {
+    activityHandler = () => {
+      if (isLoggingOut) return;
       resetIdleTimer();
       const now = Date.now();
       if (now - lastPing > 60_000) {
@@ -54,7 +57,14 @@ const AgentAuth = (() => {
         authFetch("/auth/heartbeat", { method: "POST" }).catch(() => {});
       }
     };
-    events.forEach((ev) => window.addEventListener(ev, onActivity, { passive: true }));
+    events.forEach((ev) => window.addEventListener(ev, activityHandler, { passive: true }));
+  }
+
+  function unbindActivityListeners() {
+    if (!activityHandler) return;
+    const events = ["mousedown", "keydown", "scroll", "touchstart"];
+    events.forEach((ev) => window.removeEventListener(ev, activityHandler));
+    activityHandler = null;
   }
 
   async function checkStatus() {
@@ -64,6 +74,9 @@ const AgentAuth = (() => {
   }
 
   async function logout(sessionExpired = false) {
+    isLoggingOut = true;
+    unbindActivityListeners();
+    clearIdleTimer();
     await fetch("/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
     if (onLogoutCallback) onLogoutCallback();
     redirectToLogin(sessionExpired ? "expired" : "");

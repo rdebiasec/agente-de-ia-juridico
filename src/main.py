@@ -167,8 +167,11 @@ async def auth_login(
 
 
 @app.post("/auth/logout")
-async def auth_logout(response: Response):
-    clear_session_cookie(response)
+async def auth_logout(
+    response: Response,
+    settings: Settings = Depends(get_settings),
+):
+    clear_session_cookie(response, settings)
     return {"ok": True}
 
 
