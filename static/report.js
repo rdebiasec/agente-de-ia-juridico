@@ -8,9 +8,6 @@ const SessionReport = (() => {
     pending: "Pendiente",
   };
 
-  const LEGAL_DISCLAIMER =
-    "Borrador analítico — requiere revisión humana. No constituye dictamen legal.";
-
   const ENABLE_RULES_AUTO = true;
   let rulesDebounceTimer = null;
   let cachedRulesInsights = null;
@@ -280,8 +277,6 @@ const SessionReport = (() => {
 
     return `
       <div class="report-panel-inner" id="report-print-area">
-        <p class="report-legal-disclaimer">${escapeHtml(LEGAL_DISCLAIMER)}</p>
-        <p class="report-session-id">Sesión <code>${escapeHtml(session.sessionId || "—")}</code></p>
         ${renderStaleBanner(normalized, session)}
         <p class="report-executive">${escapeHtml(buildExecutiveSummary(metrics))}</p>
         ${renderMetricsCards(metrics)}
@@ -298,7 +293,6 @@ const SessionReport = (() => {
         ${renderInsightsList(rules, "Cargando conclusiones…")}
         <h4>Análisis IA ${generatedAt ? `<span class="report-generated-at">(${escapeHtml(generatedAt)})</span>` : ""}</h4>
         <div id="report-llm-block">${renderLlmBlock(llm, llmStatus, llmMessage, hasGenerated)}</div>
-        <p class="report-legal-disclaimer report-legal-disclaimer--footer">${escapeHtml(LEGAL_DISCLAIMER)}</p>
       </div>`;
   }
 

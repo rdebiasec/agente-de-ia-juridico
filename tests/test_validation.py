@@ -151,7 +151,6 @@ async def test_session_export_translated_marks():
     body = r.content.decode("utf-8")
     assert "Aprobada" in body
     assert "Cumple criterios" in body
-    assert "Borrador analítico" in body
 
 
 @pytest.mark.asyncio
@@ -165,6 +164,17 @@ async def test_chat_page_reset_clears_chat_guard():
     assert "resetChatConversation" in body
     assert "chatEpoch" in body
     assert "chatLog: chatLog.slice()" in body
+
+
+@pytest.mark.asyncio
+async def test_report_panel_hides_disclaimer_and_session_id():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/static/report.js")
+    assert r.status_code == 200
+    body = r.text
+    assert "Borrador analítico — requiere revisión humana. No constituye dictamen legal." not in body
+    assert 'Sesión <code>${escapeHtml(session.sessionId || "—")}</code>' not in body
 
 
 @pytest.mark.asyncio
