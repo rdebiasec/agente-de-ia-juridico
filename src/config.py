@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     @property
     def project_root(self) -> Path:
-        return Path(__file__).resolve().parents[2]
+        return Path(__file__).resolve().parents[1]
 
     @property
     def agente_dir(self) -> Path:
