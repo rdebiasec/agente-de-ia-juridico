@@ -1,0 +1,1 @@
+"""Agente jurídico — paquete principal."""

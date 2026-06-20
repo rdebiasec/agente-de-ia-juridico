@@ -1,0 +1,34 @@
+fase_activa: 0
+runtime: openai-agents-sdk
+canales:
+  slack:
+    enabled: true
+    mode: socket
+  whatsapp:
+    enabled: true
+    provider: twilio
+    webhook_path: /whatsapp/webhook
+    human_review: true
+
+agentes:
+  - name: orquestador_fase0
+    jira: KAN-5
+    enabled: true
+  - name: perfil_abogado_colombia
+    jira: KAN-9
+    req: [REQ-001, REQ-002, REQ-003]
+    enabled: true
+  - name: conocimiento_areas_derecho
+    jira: KAN-10
+    req: [REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011]
+    enabled: true
+
+fases_stub:
+  - FASE_1.md
+  - FASE_2.md
+  - FASE_3.md
+
+mcp:
+  - name: agente-docs
+    type: filesystem
+    path: ./agente
