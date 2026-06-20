@@ -179,6 +179,19 @@ async def test_report_panel_hides_disclaimer_and_session_id():
 
 
 @pytest.mark.asyncio
+async def test_linked_messages_count_only_user_validation_messages():
+    """Mensajes vinculados: contar solo envíos de validación, no respuestas del asistente."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        chat_js = await client.get("/static/chat.js")
+        report_js = await client.get("/static/report.js")
+    assert chat_js.status_code == 200
+    assert report_js.status_code == 200
+    assert 'm.blockId === blockId && m.role === "user"' in chat_js.text
+    assert 'm.blockId === test.id && m.role === "user"' in report_js.text
+
+
+@pytest.mark.asyncio
 async def test_chat_page_has_report_and_reset_buttons():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:

@@ -90,7 +90,8 @@ const SessionReport = (() => {
 
     const sections = VALIDATION_TESTS.map((test) => {
       const mark = marks[test.id] || "pending";
-      const linked = chatLog.filter((m) => m.blockId === test.id);
+      // Solo contar mensajes enviados para validación por la abogada.
+      const linked = chatLog.filter((m) => m.blockId === test.id && m.role === "user");
       return {
         id: test.id,
         title: test.title,

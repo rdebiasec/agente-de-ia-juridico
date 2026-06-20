@@ -352,7 +352,8 @@ function scrollToLinkedMessage(blockId) {
 }
 
 function countLinkedMessages(blockId) {
-  return chatLog.filter((m) => m.blockId === blockId).length;
+  // Solo cuenta preguntas enviadas para validar, no respuestas del asistente.
+  return chatLog.filter((m) => m.blockId === blockId && m.role === "user").length;
 }
 
 function refreshLinkedMessagesUI(blockId) {
