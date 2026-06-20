@@ -38,6 +38,17 @@ curl http://localhost:8000/health
 
 ## Subir cambios a GitHub
 
+### Primera vez (crear repo)
+
+```bash
+gh auth login          # solo una vez — sigue las instrucciones en pantalla
+./scripts/setup-github.sh
+```
+
+Eso crea **`agente-de-ia-juridico`** en tu cuenta GitHub (privado) y hace push.
+
+### Día a día
+
 ```bash
 git add .
 git commit -m "Describe tu cambio"
