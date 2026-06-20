@@ -54,4 +54,4 @@ async def test_chat_page_has_score_ui():
         r = await client.get("/")
     assert r.status_code == 200
     assert "validation-score" in r.text
-    assert "generate-probes-btn" in r.text
+    assert "Generar nuevas" in r.text

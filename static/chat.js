@@ -19,7 +19,6 @@ const validationBlocksEl = document.getElementById("validation-blocks");
 const validationProgressEl = document.getElementById("validation-progress");
 const validationScoreEl = document.getElementById("validation-score");
 const validationScoreBarEl = document.getElementById("validation-score-bar");
-const generateProbesBtn = document.getElementById("generate-probes-btn");
 const resetValidationBtn = document.getElementById("reset-validation-btn");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
 const chatColumnEl = document.querySelector(".chat-column");
@@ -76,17 +75,17 @@ function updateProbesSourceBadge() {
 }
 
 function getProbesForTest(test) {
-  if (dynamicProbes[test.id]?.length) {
-    return dynamicProbes[test.id];
-  }
-  return test.defaultProbes || [];
+  const probes = dynamicProbes[test.id]?.length
+    ? dynamicProbes[test.id]
+    : test.defaultProbes || [];
+  return probes.slice(0, 2);
 }
 
 function initDefaultProbes() {
   VALIDATION_TESTS.forEach((test) => {
     if (!test.defaultProbes?.length) return;
     if (!dynamicProbes[test.id]?.length) {
-      dynamicProbes[test.id] = [...test.defaultProbes];
+      dynamicProbes[test.id] = test.defaultProbes.slice(0, 2);
     }
   });
 }
@@ -208,31 +207,59 @@ function buildProbeList(test) {
   probeList.className = "probe-list";
   probeList.dataset.probeBlock = test.id;
 
-  getProbesForTest(test).forEach((probe) => {
+  const probes = getProbesForTest(test);
+  probes.forEach((probe, index) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "probe-btn";
     btn.innerHTML = `
-      <span class="probe-label">Enviar al chat</span>
-      <span class="probe-text"></span>
+      <span class="probe-message"></span>
+      <span class="probe-send">Enviar al chat</span>
     `;
-    btn.querySelector(".probe-text").textContent = probe.label;
+    btn.querySelector(".probe-message").textContent = probe.message || probe.label;
+    btn.setAttribute("aria-label", `Pregunta ${index + 1}: ${probe.message || probe.label}`);
     btn.addEventListener("click", () => {
       setActiveBlock(test.id);
       scrollToChat();
-      sendMessage(probe.message);
+      sendMessage(probe.message || probe.label);
     });
     probeList.appendChild(btn);
   });
 
-  if (!probeList.childElementCount) {
+  if (!probes.length) {
     const empty = document.createElement("p");
     empty.className = "probe-empty";
-    empty.textContent = "Sin preguntas — use «Generar nuevas preguntas».";
+    empty.textContent = "Sin preguntas — pulse «Generar nuevas».";
     probeList.appendChild(empty);
   }
 
   return probeList;
+}
+
+function buildProbesSection(test) {
+  const wrap = document.createElement("div");
+  wrap.className = "probes-section";
+  wrap.dataset.probeBlock = test.id;
+
+  const header = document.createElement("div");
+  header.className = "probes-section-header";
+
+  const title = document.createElement("span");
+  title.className = "probes-section-title";
+  title.textContent = "Preguntas sugeridas (2)";
+
+  const genBtn = document.createElement("button");
+  genBtn.type = "button";
+  genBtn.className = "btn-generate-inline";
+  genBtn.dataset.blockId = test.id;
+  genBtn.textContent = "Generar nuevas";
+  genBtn.addEventListener("click", () => generateNewProbes({ blockId: test.id }));
+
+  header.appendChild(title);
+  header.appendChild(genBtn);
+  wrap.appendChild(header);
+  wrap.appendChild(buildProbeList(test));
+  return wrap;
 }
 
 function refreshProbeListForBlock(blockId) {
@@ -240,17 +267,15 @@ function refreshProbeListForBlock(blockId) {
   const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
   if (!test || !blockEl) return;
 
-  const oldList = blockEl.querySelector(".probe-list");
-  if (oldList) {
-    oldList.replaceWith(buildProbeList(test));
+  const oldSection = blockEl.querySelector(".probes-section");
+  if (oldSection) {
+    oldSection.replaceWith(buildProbesSection(test));
   }
 }
 
 function refreshAllProbeLists() {
-  VALIDATION_TESTS.forEach((test) => {
-    if (test.defaultProbes?.length || dynamicProbes[test.id]?.length) {
-      refreshProbeListForBlock(test.id);
-    }
+  VALIDATION_TESTS.filter((t) => !t.connectionOnly).forEach((test) => {
+    refreshProbeListForBlock(test.id);
   });
 }
 
@@ -307,8 +332,15 @@ function renderTestBlock(test, index) {
 
   addRow("Qué hacer", test.instructions);
 
-  if (test.defaultProbes?.length || dynamicProbes[test.id]?.length) {
-    addRow("Preguntas sugeridas", buildProbeList(test));
+  if (!test.connectionOnly) {
+    const probesDt = document.createElement("dt");
+    probesDt.className = "probes-dt-sr";
+    probesDt.textContent = "Preguntas sugeridas";
+    const probesDd = document.createElement("dd");
+    probesDd.className = "probes-dd";
+    probesDd.appendChild(buildProbesSection(test));
+    dl.appendChild(probesDt);
+    dl.appendChild(probesDd);
   }
 
   if (test.connectionOnly) {
@@ -387,16 +419,20 @@ function renderValidationPanel() {
 }
 
 async function generateNewProbes(options = {}) {
-  const { silent = false } = options;
-  if (!generateProbesBtn && !silent) return;
+  const { silent = false, blockId = null } = options;
+  const generatableIds = VALIDATION_TESTS.filter((t) => !t.connectionOnly).map((t) => t.id);
+  const blocks = blockId ? [blockId] : generatableIds;
 
-  if (generateProbesBtn) {
-    generateProbesBtn.disabled = true;
-  }
-  const prevText = generateProbesBtn?.textContent || "Generar nuevas preguntas";
-  if (generateProbesBtn) {
-    generateProbesBtn.textContent = "Generando…";
-  }
+  const inlineButtons = blockId
+    ? document.querySelectorAll(`.btn-generate-inline[data-block-id="${blockId}"]`)
+    : document.querySelectorAll(".btn-generate-inline");
+
+  inlineButtons.forEach((btn) => {
+    btn.disabled = true;
+    btn.dataset.prevText = btn.textContent;
+    btn.textContent = "Generando…";
+  });
+
   probesSource = "loading";
   updateProbesSourceBadge();
 
@@ -406,6 +442,7 @@ async function generateNewProbes(options = {}) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: getUserId(),
+        blocks,
         probes_per_block: 2,
       }),
     });
@@ -415,16 +452,23 @@ async function generateNewProbes(options = {}) {
       if (!silent) {
         alert(err.detail || "No se pudieron generar preguntas. Intente en unos segundos.");
       }
-      probesSource = dynamicProbes && Object.keys(dynamicProbes).length ? "fallback" : "default";
+      probesSource = Object.keys(dynamicProbes).length ? "fallback" : "default";
       updateProbesSourceBadge();
       return false;
     }
 
     const data = await res.json();
-    dynamicProbes = { ...dynamicProbes, ...data.blocks };
+    Object.entries(data.blocks).forEach(([id, probes]) => {
+      dynamicProbes[id] = probes.slice(0, 2);
+    });
     probesSource = data.source === "llm" ? "llm" : "fallback";
     saveValidationState();
-    refreshAllProbeLists();
+
+    if (blockId) {
+      refreshProbeListForBlock(blockId);
+    } else {
+      refreshAllProbeLists();
+    }
     updateProbesSourceBadge();
     return true;
   } catch {
@@ -435,10 +479,10 @@ async function generateNewProbes(options = {}) {
     updateProbesSourceBadge();
     return false;
   } finally {
-    if (generateProbesBtn) {
-      generateProbesBtn.disabled = false;
-      generateProbesBtn.textContent = prevText;
-    }
+    inlineButtons.forEach((btn) => {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.prevText || "Generar nuevas";
+    });
   }
 }
 
@@ -566,7 +610,6 @@ function initValidationPanel() {
     toggle.setAttribute("aria-expanded", String(isOpen));
   });
 
-  generateProbesBtn?.addEventListener("click", () => generateNewProbes());
   resetValidationBtn?.addEventListener("click", resetValidation);
 }
 

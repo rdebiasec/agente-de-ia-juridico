@@ -120,7 +120,7 @@ async def generate_probes(
                     cleaned.append({"label": label, "message": message})
             if not cleaned:
                 cleaned = fallback.get(bid, [])[:probes_per_block]
-            result_blocks[bid] = cleaned
+            result_blocks[bid] = cleaned[:probes_per_block]
 
         return {"session_id": session_id, "source": "llm", "blocks": result_blocks}
 
