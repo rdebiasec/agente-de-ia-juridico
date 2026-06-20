@@ -175,6 +175,7 @@ async def test_report_panel_hides_disclaimer_and_session_id():
     body = r.text
     assert "Borrador analítico — requiere revisión humana. No constituye dictamen legal." not in body
     assert 'Sesión <code>${escapeHtml(session.sessionId || "—")}</code>' not in body
+    assert "Sesión iniciada — aún no hay secciones evaluadas." not in body
 
 
 @pytest.mark.asyncio
@@ -184,7 +185,7 @@ async def test_chat_page_has_report_and_reset_buttons():
         r = await client.get("/")
     assert r.status_code == 200
     assert "reset-score-btn" in r.text
-    assert "reset-session-btn" in r.text
+    assert "reset-session-btn" not in r.text
     assert "btn-export-doc" not in r.text
     assert "Descargar informe (.doc)" not in r.text
     assert "Imprimir / Guardar PDF" in r.text

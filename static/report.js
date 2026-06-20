@@ -136,7 +136,7 @@ const SessionReport = (() => {
 
   function buildExecutiveSummary(metrics) {
     if (metrics.sectionsPending === VALIDATION_TESTS.length) {
-      return "Sesión iniciada — aún no hay secciones evaluadas.";
+      return "";
     }
     if (metrics.score === 100) {
       return "Veredicto: puntaje máximo (100/100). Fase 0 puede considerarse validada según la rúbrica.";
@@ -278,7 +278,7 @@ const SessionReport = (() => {
     return `
       <div class="report-panel-inner" id="report-print-area">
         ${renderStaleBanner(normalized, session)}
-        <p class="report-executive">${escapeHtml(buildExecutiveSummary(metrics))}</p>
+        ${buildExecutiveSummary(metrics) ? `<p class="report-executive">${escapeHtml(buildExecutiveSummary(metrics))}</p>` : ""}
         ${renderMetricsCards(metrics)}
         <p class="report-substats">
           Probe: ${metrics.probeQuestions} · Manual: ${metrics.manualQuestions} ·

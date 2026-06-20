@@ -40,7 +40,7 @@ body {
 }
 
 .page {
-  width: min(1680px, 98vw);
+  width: min(2040px, 99.5vw);
   margin: 0 auto;
   height: 100dvh;
   max-height: 100dvh;
@@ -52,7 +52,7 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(289px, 520px) minmax(280px, 1fr) minmax(411px, 512px);
+  grid-template-columns: minmax(340px, 640px) minmax(340px, 1fr) minmax(520px, 760px);
   gap: 1.25rem;
   align-items: stretch;
   flex: 1;
@@ -90,7 +90,7 @@ body {
 
 .chat-column {
   min-width: 0;
-  max-width: 520px;
+  max-width: 640px;
   font-size: 16px;
   color: var(--text);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),

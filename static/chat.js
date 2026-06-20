@@ -19,7 +19,6 @@ const validationProgressEl = document.getElementById("validation-progress");
 const validationScoreEl = document.getElementById("validation-score");
 const validationScoreBarEl = document.getElementById("validation-score-bar");
 const resetScoreBtn = document.getElementById("reset-score-btn");
-const resetSessionBtn = document.getElementById("reset-session-btn");
 const validationStepperEl = document.getElementById("validation-stepper");
 const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
@@ -933,23 +932,6 @@ function resetChatConversation() {
   if (sendBtn) sendBtn.disabled = false;
 }
 
-function startNewSession() {
-  const now = new Date().toISOString();
-  sessionId = createSessionId();
-  startedAt = now;
-  lastActivityAt = now;
-  validationMarks = {};
-  markNotes = {};
-  checklistChecked = {};
-  events = [{ type: "session_start", ts: now }];
-  lastReport = null;
-  resetChatConversation();
-  saveSessionState();
-  VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
-  VALIDATION_CHECKLIST.forEach((_, index) => updateChecklistItemVisual(index));
-  updateValidationProgress();
-}
-
 function resetScoreOnly() {
   if (
     !confirm(
@@ -969,17 +951,6 @@ function resetScoreOnly() {
   refreshAllLinkedMessagesUI();
   updateValidationProgress();
   saveSessionState();
-}
-
-function resetFullSession() {
-  if (
-    !confirm(
-      "¿Reiniciar sesión completa? Se borrarán conversación, marcas, checklist, notas y reporte. Las preguntas generadas se conservan."
-    )
-  ) {
-    return;
-  }
-  startNewSession();
 }
 
 function updateConnectionStatus(connected) {
@@ -1127,7 +1098,6 @@ function initValidationPanel() {
   initCollapsiblePanel("validation-panel", "validation-toggle");
   initCollapsiblePanel("report-panel", "report-toggle");
   resetScoreBtn?.addEventListener("click", resetScoreOnly);
-  resetSessionBtn?.addEventListener("click", resetFullSession);
   filterPendingEl?.addEventListener("change", applyPendingFilter);
 }
 
