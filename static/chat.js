@@ -152,6 +152,18 @@ addMessage(
   "Asistente jurídico"
 );
 
+function initValidationPanel() {
+  const panel = document.getElementById("validation-panel");
+  const toggle = document.getElementById("validation-toggle");
+  if (!panel || !toggle) return;
+
+  toggle.addEventListener("click", () => {
+    const isOpen = panel.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+}
+
 renderSuggestions();
 checkHealth();
+initValidationPanel();
 inputEl.focus();
