@@ -1,5 +1,5 @@
 const STORAGE_KEY = "agente-juridico-user-id";
-const VALIDATION_STORAGE_KEY = "agente-juridico-validation";
+const VALIDATION_STORAGE_KEY = "agente-juridico-validation-v2";
 
 const suggestions = [
   "¿Qué áreas del derecho maneja el despacho?",
@@ -17,9 +17,17 @@ const statusDot = document.getElementById("status-dot");
 const statusText = document.getElementById("status-text");
 const validationBlocksEl = document.getElementById("validation-blocks");
 const validationProgressEl = document.getElementById("validation-progress");
+const validationScoreEl = document.getElementById("validation-score");
+const validationScoreBarEl = document.getElementById("validation-score-bar");
+const generateProbesBtn = document.getElementById("generate-probes-btn");
+const resetValidationBtn = document.getElementById("reset-validation-btn");
+const probesSourceBadgeEl = document.getElementById("probes-source-badge");
 const chatColumnEl = document.querySelector(".chat-column");
 
-let validationMarks = loadValidationMarks();
+const validationState = loadValidationState();
+let validationMarks = validationState.marks || {};
+let dynamicProbes = validationState.probes || {};
+let probesSource = validationState.probesSource || "default";
 let activeBlockId = null;
 
 function getUserId() {
@@ -31,7 +39,7 @@ function getUserId() {
   return id;
 }
 
-function loadValidationMarks() {
+function loadValidationState() {
   try {
     return JSON.parse(localStorage.getItem(VALIDATION_STORAGE_KEY) || "{}");
   } catch {
@@ -39,8 +47,48 @@ function loadValidationMarks() {
   }
 }
 
-function saveValidationMarks() {
-  localStorage.setItem(VALIDATION_STORAGE_KEY, JSON.stringify(validationMarks));
+function saveValidationState() {
+  localStorage.setItem(
+    VALIDATION_STORAGE_KEY,
+    JSON.stringify({
+      marks: validationMarks,
+      probes: dynamicProbes,
+      probesSource,
+      updated_at: new Date().toISOString(),
+    })
+  );
+}
+
+function updateProbesSourceBadge() {
+  if (!probesSourceBadgeEl) return;
+  probesSourceBadgeEl.classList.remove("is-llm", "is-loading");
+  if (probesSource === "loading") {
+    probesSourceBadgeEl.textContent = "Generando preguntas con IA…";
+    probesSourceBadgeEl.classList.add("is-loading");
+  } else if (probesSource === "llm") {
+    probesSourceBadgeEl.textContent = "Preguntas dinámicas generadas por IA";
+    probesSourceBadgeEl.classList.add("is-llm");
+  } else if (probesSource === "fallback") {
+    probesSourceBadgeEl.textContent = "Preguntas de respaldo (sin IA)";
+  } else {
+    probesSourceBadgeEl.textContent = "Preguntas de ejemplo — pulse Generar para variantes con IA";
+  }
+}
+
+function getProbesForTest(test) {
+  if (dynamicProbes[test.id]?.length) {
+    return dynamicProbes[test.id];
+  }
+  return test.defaultProbes || [];
+}
+
+function initDefaultProbes() {
+  VALIDATION_TESTS.forEach((test) => {
+    if (!test.defaultProbes?.length) return;
+    if (!dynamicProbes[test.id]?.length) {
+      dynamicProbes[test.id] = [...test.defaultProbes];
+    }
+  });
 }
 
 function formatText(text) {
@@ -92,10 +140,20 @@ function setActiveBlock(blockId) {
   });
 }
 
+function computeScore() {
+  return VALIDATION_TESTS.reduce((sum, test) => {
+    if (validationMarks[test.id] === "pass") {
+      return sum + (test.weight || 0);
+    }
+    return sum;
+  }, 0);
+}
+
 function updateBlockVisualState(blockId) {
   const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
   if (!blockEl) return;
 
+  const test = VALIDATION_TESTS.find((t) => t.id === blockId);
   const mark = validationMarks[blockId];
   blockEl.classList.remove("is-pass", "is-fail");
   if (mark === "pass") blockEl.classList.add("is-pass");
@@ -105,21 +163,95 @@ function updateBlockVisualState(blockId) {
   const failBtn = blockEl.querySelector('[data-mark="fail"]');
   if (passBtn) passBtn.classList.toggle("is-selected", mark === "pass");
   if (failBtn) failBtn.classList.toggle("is-selected", mark === "fail");
+
+  const scoreTag = blockEl.querySelector(".block-score-tag");
+  if (scoreTag && test) {
+    if (mark === "pass") {
+      scoreTag.textContent = `+${test.weight} pts`;
+      scoreTag.className = "block-score-tag is-earned";
+    } else if (mark === "fail") {
+      scoreTag.textContent = "0 pts";
+      scoreTag.className = "block-score-tag is-zero";
+    } else {
+      scoreTag.textContent = `${test.weight} pts posibles`;
+      scoreTag.className = "block-score-tag";
+    }
+  }
 }
 
 function updateValidationProgress() {
-  if (!validationProgressEl) return;
+  const score = computeScore();
+  const total = VALIDATION_TOTAL_WEIGHT;
+  const marked = VALIDATION_TESTS.filter((t) => validationMarks[t.id]).length;
 
-  const testable = VALIDATION_TESTS.filter((t) => !t.connectionOnly);
-  const marked = testable.filter((t) => validationMarks[t.id]).length;
-  validationProgressEl.textContent = `${marked} de ${testable.length} pruebas marcadas`;
+  if (validationScoreEl) {
+    validationScoreEl.textContent = `Puntaje: ${score} / ${total}`;
+  }
+  if (validationScoreBarEl) {
+    validationScoreBarEl.style.width = `${Math.round((score / total) * 100)}%`;
+    validationScoreBarEl.setAttribute("aria-valuenow", String(score));
+  }
+  if (validationProgressEl) {
+    validationProgressEl.textContent = `${marked} de ${VALIDATION_TESTS.length} secciones marcadas`;
+  }
 }
 
 function setValidationMark(blockId, mark) {
   validationMarks[blockId] = mark;
-  saveValidationMarks();
+  saveValidationState();
   updateBlockVisualState(blockId);
   updateValidationProgress();
+}
+
+function buildProbeList(test) {
+  const probeList = document.createElement("div");
+  probeList.className = "probe-list";
+  probeList.dataset.probeBlock = test.id;
+
+  getProbesForTest(test).forEach((probe) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "probe-btn";
+    btn.innerHTML = `
+      <span class="probe-label">Enviar al chat</span>
+      <span class="probe-text"></span>
+    `;
+    btn.querySelector(".probe-text").textContent = probe.label;
+    btn.addEventListener("click", () => {
+      setActiveBlock(test.id);
+      scrollToChat();
+      sendMessage(probe.message);
+    });
+    probeList.appendChild(btn);
+  });
+
+  if (!probeList.childElementCount) {
+    const empty = document.createElement("p");
+    empty.className = "probe-empty";
+    empty.textContent = "Sin preguntas — use «Generar nuevas preguntas».";
+    probeList.appendChild(empty);
+  }
+
+  return probeList;
+}
+
+function refreshProbeListForBlock(blockId) {
+  const test = VALIDATION_TESTS.find((t) => t.id === blockId);
+  const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
+  if (!test || !blockEl) return;
+
+  const oldList = blockEl.querySelector(".probe-list");
+  if (oldList) {
+    oldList.replaceWith(buildProbeList(test));
+  }
+}
+
+function refreshAllProbeLists() {
+  VALIDATION_TESTS.forEach((test) => {
+    if (test.defaultProbes?.length || dynamicProbes[test.id]?.length) {
+      refreshProbeListForBlock(test.id);
+    }
+  });
 }
 
 function renderScopeBlock() {
@@ -129,10 +261,7 @@ function renderScopeBlock() {
     <h3>${VALIDATION_SCOPE.title}</h3>
     <ul>
       ${VALIDATION_SCOPE.items
-        .map(
-          (item) =>
-            `<li><strong>${item.label}:</strong> ${item.text}</li>`
-        )
+        .map((item) => `<li><strong>${item.label}:</strong> ${item.text}</li>`)
         .join("")}
     </ul>
   `;
@@ -145,7 +274,7 @@ function renderTestBlock(test, index) {
   section.dataset.testId = test.id;
 
   const heading = document.createElement("h3");
-  heading.textContent = `${index + 1}. ${test.title}`;
+  heading.innerHTML = `${index + 1}. ${test.title} <span class="block-weight">${test.weight} pts</span>`;
   if (test.reqTag) {
     const tag = document.createElement("span");
     tag.className = "req-tag";
@@ -154,6 +283,11 @@ function renderTestBlock(test, index) {
     heading.appendChild(tag);
   }
   section.appendChild(heading);
+
+  const scoreTag = document.createElement("span");
+  scoreTag.className = "block-score-tag";
+  scoreTag.textContent = `${test.weight} pts posibles`;
+  section.appendChild(scoreTag);
 
   const dl = document.createElement("dl");
   dl.className = "test-item";
@@ -173,27 +307,8 @@ function renderTestBlock(test, index) {
 
   addRow("Qué hacer", test.instructions);
 
-  if (test.probes.length > 0) {
-    const probeList = document.createElement("div");
-    probeList.className = "probe-list";
-    test.probes.forEach((probe) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "probe-btn";
-      btn.dataset.blockId = test.id;
-      btn.innerHTML = `
-        <span class="probe-label">Enviar al chat</span>
-        <span class="probe-text"></span>
-      `;
-      btn.querySelector(".probe-text").textContent = probe.label;
-      btn.addEventListener("click", () => {
-        setActiveBlock(test.id);
-        scrollToChat();
-        sendMessage(probe.message);
-      });
-      probeList.appendChild(btn);
-    });
-    addRow("Preguntas sugeridas", probeList);
+  if (test.defaultProbes?.length || dynamicProbes[test.id]?.length) {
+    addRow("Preguntas sugeridas", buildProbeList(test));
   }
 
   if (test.connectionOnly) {
@@ -244,13 +359,12 @@ function renderChecklistBlock() {
     <h3>Checklist final para la abogada</h3>
     <ul class="checklist">
       ${VALIDATION_CHECKLIST.map(
-        (item) =>
-          `<li><span class="check-box" aria-hidden="true"></span> ${item}</li>`
+        (item) => `<li><span class="check-box" aria-hidden="true"></span> ${item}</li>`
       ).join("")}
     </ul>
     <p class="validation-note">
-      Si todas las pruebas están aprobadas, Fase 0 puede considerarse validada para
-      continuar con Fase 1. Si alguna falla, documente el caso y repórtelo al equipo técnico.
+      Puntaje máximo: ${VALIDATION_TOTAL_WEIGHT}/100. Si todas las secciones están aprobadas,
+      Fase 0 puede considerarse validada. Si alguna falla, documente el caso y repórtelo al equipo técnico.
     </p>
   `;
   return section;
@@ -259,6 +373,7 @@ function renderChecklistBlock() {
 function renderValidationPanel() {
   if (!validationBlocksEl) return;
 
+  validationBlocksEl.innerHTML = "";
   validationBlocksEl.appendChild(renderScopeBlock());
 
   VALIDATION_TESTS.forEach((test, index) => {
@@ -267,6 +382,72 @@ function renderValidationPanel() {
 
   validationBlocksEl.appendChild(renderChecklistBlock());
 
+  VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
+  updateValidationProgress();
+}
+
+async function generateNewProbes(options = {}) {
+  const { silent = false } = options;
+  if (!generateProbesBtn && !silent) return;
+
+  if (generateProbesBtn) {
+    generateProbesBtn.disabled = true;
+  }
+  const prevText = generateProbesBtn?.textContent || "Generar nuevas preguntas";
+  if (generateProbesBtn) {
+    generateProbesBtn.textContent = "Generando…";
+  }
+  probesSource = "loading";
+  updateProbesSourceBadge();
+
+  try {
+    const res = await fetch("/validation/generate-probes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: getUserId(),
+        probes_per_block: 2,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (!silent) {
+        alert(err.detail || "No se pudieron generar preguntas. Intente en unos segundos.");
+      }
+      probesSource = dynamicProbes && Object.keys(dynamicProbes).length ? "fallback" : "default";
+      updateProbesSourceBadge();
+      return false;
+    }
+
+    const data = await res.json();
+    dynamicProbes = { ...dynamicProbes, ...data.blocks };
+    probesSource = data.source === "llm" ? "llm" : "fallback";
+    saveValidationState();
+    refreshAllProbeLists();
+    updateProbesSourceBadge();
+    return true;
+  } catch {
+    if (!silent) {
+      alert("Error de conexión al generar preguntas.");
+    }
+    probesSource = "default";
+    updateProbesSourceBadge();
+    return false;
+  } finally {
+    if (generateProbesBtn) {
+      generateProbesBtn.disabled = false;
+      generateProbesBtn.textContent = prevText;
+    }
+  }
+}
+
+function resetValidation() {
+  if (!confirm("¿Reiniciar marcas y puntaje? Las preguntas actuales se conservan.")) {
+    return;
+  }
+  validationMarks = {};
+  saveValidationState();
   VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
   updateValidationProgress();
 }
@@ -384,10 +565,28 @@ function initValidationPanel() {
     const isOpen = panel.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", String(isOpen));
   });
+
+  generateProbesBtn?.addEventListener("click", () => generateNewProbes());
+  resetValidationBtn?.addEventListener("click", resetValidation);
 }
 
+async function bootstrapValidationProbes() {
+  updateProbesSourceBadge();
+  if (probesSource === "llm" && Object.keys(dynamicProbes).length > 0) {
+    refreshAllProbeLists();
+    return;
+  }
+  const healthRes = await fetch("/health").catch(() => null);
+  const health = healthRes ? await healthRes.json().catch(() => ({})) : {};
+  if (health.openai_configured) {
+    await generateNewProbes({ silent: true });
+  }
+}
+
+initDefaultProbes();
 renderValidationPanel();
 renderSuggestions();
 checkHealth();
 initValidationPanel();
+bootstrapValidationProbes();
 inputEl.focus();

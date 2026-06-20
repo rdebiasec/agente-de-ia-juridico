@@ -30,8 +30,8 @@
         <span class="eyebrow">Asistente jurídico</span>
         <h1>Consulte al asistente del despacho</h1>
         <p>
-          Entorno de prueba para la abogada. Use el panel derecho para enviar preguntas
-          predefinidas al chat y marcar cada prueba como Aprobada o Rechazada.
+          Entorno de prueba para la abogada. Genere preguntas variadas, envíelas al chat
+          y marque cada sección. El puntaje máximo es 100 si todo pasa.
         </p>
       </section>
 
@@ -85,11 +85,33 @@
           <div class="validation-content" id="validation-content">
             <header class="validation-header">
               <h2 id="validation-title">Guía de validación — Fase 0</h2>
-              <p class="validation-progress" id="validation-progress">0 de 5 pruebas marcadas</p>
+              <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
+              <p class="probes-source-badge" id="probes-source-badge">
+                Cargando preguntas de validación…
+              </p>
+              <div
+                class="validation-score-track"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="Progreso de validación"
+              >
+                <div class="validation-score-bar" id="validation-score-bar"></div>
+              </div>
+              <p class="validation-progress" id="validation-progress">0 de 6 secciones marcadas</p>
+              <div class="validation-actions">
+                <button type="button" class="btn-generate" id="generate-probes-btn">
+                  Generar nuevas preguntas
+                </button>
+                <button type="button" class="btn-reset" id="reset-validation-btn">
+                  Reiniciar puntaje
+                </button>
+              </div>
               <p class="validation-intro">
-                Pulse <strong>Enviar al chat</strong> en cada pregunta sugerida, revise la
-                respuesta y marque <strong class="pass">Aprobada</strong> o
-                <strong class="fail">Rechazada</strong>.
+                Pulse <strong>Generar nuevas preguntas</strong> para variar las formulaciones.
+                Luego <strong>Enviar al chat</strong>, revise la respuesta y marque
+                <strong class="pass">Aprobada</strong> o <strong class="fail">Rechazada</strong>.
               </p>
             </header>
 

@@ -15,6 +15,8 @@ from src.agents.runner import run_agent
 from src.channels.whatsapp_webhook import router as whatsapp_router
 from src.config import get_settings
 from src.gateway.router import InboundMessage, handle_message
+from src.validation.probes import generate_probes
+from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_weight
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,6 +85,43 @@ async def chat(req: ChatRequest):
         InboundMessage(channel=req.channel, user_id=req.user_id, text=req.message)
     )
     return ChatResponse(**{k: result[k] for k in ("text", "agent", "pending_review") if k in result})
+
+
+class GenerateProbesRequest(BaseModel):
+    user_id: str = "web"
+    blocks: list[str] | None = None
+    probes_per_block: int = 2
+
+
+@app.get("/validation/rubric")
+async def validation_rubric():
+    """Pesos y metadatos de la rúbrica Fase 0."""
+    return {
+        "total_weight": total_weight(),
+        "connection": CONNECTION_BLOCK,
+        "blocks": [
+            {
+                "id": b["id"],
+                "title": b["title"],
+                "weight": b["weight"],
+            }
+            for b in VALIDATION_BLOCKS
+        ],
+    }
+
+
+@app.post("/validation/generate-probes")
+async def validation_generate_probes(req: GenerateProbesRequest):
+    try:
+        return await generate_probes(
+            user_id=req.user_id,
+            blocks=req.blocks,
+            probes_per_block=req.probes_per_block,
+        )
+    except ValueError as e:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=429, detail=str(e)) from e
 
 
 def main():
