@@ -128,16 +128,138 @@ body {
   line-height: 1.55;
 }
 
+.validation-progress {
+  display: inline-flex;
+  margin-bottom: 0.55rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
 .validation-block {
   margin-bottom: 1.15rem;
+  padding: 0.85rem;
   padding-bottom: 1rem;
+  border: 1px solid transparent;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .validation-block:last-child {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
+}
+
+.validation-block.is-active {
+  border-color: rgba(79, 209, 197, 0.55);
+  background: rgba(79, 209, 197, 0.06);
+}
+
+.validation-block.is-pass {
+  border-color: rgba(126, 232, 220, 0.45);
+  background: rgba(79, 209, 197, 0.05);
+}
+
+.validation-block.is-fail {
+  border-color: rgba(240, 160, 112, 0.45);
+  background: rgba(214, 106, 42, 0.06);
+}
+
+.validation-block--scope {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.probe-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.probe-btn {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  border-radius: 14px;
+  background: rgba(79, 209, 197, 0.08);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.probe-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(79, 209, 197, 0.14);
+  border-color: rgba(79, 209, 197, 0.55);
+}
+
+.probe-label {
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.probe-text {
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.connection-status {
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.82rem;
+}
+
+.connection-status.is-ok {
+  border-color: rgba(126, 232, 220, 0.4);
+  color: #7ee8dc;
+}
+
+.mark-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mark-btn {
+  flex: 1;
+  min-height: 36px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.mark-btn--pass.is-selected,
+.mark-btn--pass:hover {
+  border-color: rgba(126, 232, 220, 0.55);
+  background: rgba(79, 209, 197, 0.15);
+  color: #7ee8dc;
+}
+
+.mark-btn--fail.is-selected,
+.mark-btn--fail:hover {
+  border-color: rgba(240, 160, 112, 0.55);
+  background: rgba(214, 106, 42, 0.15);
+  color: #f0a070;
 }
 
 .validation-block h3 {

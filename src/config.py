@@ -3,9 +3,15 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_ENV_FILE = _PROJECT_ROOT / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=_ENV_FILE if _ENV_FILE.is_file() else None,
+        extra="ignore",
+    )
 
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"

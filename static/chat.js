@@ -1,4 +1,5 @@
 const STORAGE_KEY = "agente-juridico-user-id";
+const VALIDATION_STORAGE_KEY = "agente-juridico-validation";
 
 const suggestions = [
   "¿Qué áreas del derecho maneja el despacho?",
@@ -14,6 +15,12 @@ const sendBtn = document.getElementById("send-btn");
 const suggestionsEl = document.getElementById("suggestions");
 const statusDot = document.getElementById("status-dot");
 const statusText = document.getElementById("status-text");
+const validationBlocksEl = document.getElementById("validation-blocks");
+const validationProgressEl = document.getElementById("validation-progress");
+const chatColumnEl = document.querySelector(".chat-column");
+
+let validationMarks = loadValidationMarks();
+let activeBlockId = null;
 
 function getUserId() {
   let id = localStorage.getItem(STORAGE_KEY);
@@ -22,6 +29,18 @@ function getUserId() {
     localStorage.setItem(STORAGE_KEY, id);
   }
   return id;
+}
+
+function loadValidationMarks() {
+  try {
+    return JSON.parse(localStorage.getItem(VALIDATION_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveValidationMarks() {
+  localStorage.setItem(VALIDATION_STORAGE_KEY, JSON.stringify(validationMarks));
 }
 
 function formatText(text) {
@@ -60,19 +79,223 @@ function hideTyping() {
   document.getElementById("typing-indicator")?.remove();
 }
 
+function scrollToChat() {
+  if (window.matchMedia("(max-width: 1024px)").matches && chatColumnEl) {
+    chatColumnEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function setActiveBlock(blockId) {
+  activeBlockId = blockId;
+  document.querySelectorAll(".validation-block[data-test-id]").forEach((el) => {
+    el.classList.toggle("is-active", el.dataset.testId === blockId);
+  });
+}
+
+function updateBlockVisualState(blockId) {
+  const blockEl = document.querySelector(`.validation-block[data-test-id="${blockId}"]`);
+  if (!blockEl) return;
+
+  const mark = validationMarks[blockId];
+  blockEl.classList.remove("is-pass", "is-fail");
+  if (mark === "pass") blockEl.classList.add("is-pass");
+  if (mark === "fail") blockEl.classList.add("is-fail");
+
+  const passBtn = blockEl.querySelector('[data-mark="pass"]');
+  const failBtn = blockEl.querySelector('[data-mark="fail"]');
+  if (passBtn) passBtn.classList.toggle("is-selected", mark === "pass");
+  if (failBtn) failBtn.classList.toggle("is-selected", mark === "fail");
+}
+
+function updateValidationProgress() {
+  if (!validationProgressEl) return;
+
+  const testable = VALIDATION_TESTS.filter((t) => !t.connectionOnly);
+  const marked = testable.filter((t) => validationMarks[t.id]).length;
+  validationProgressEl.textContent = `${marked} de ${testable.length} pruebas marcadas`;
+}
+
+function setValidationMark(blockId, mark) {
+  validationMarks[blockId] = mark;
+  saveValidationMarks();
+  updateBlockVisualState(blockId);
+  updateValidationProgress();
+}
+
+function renderScopeBlock() {
+  const section = document.createElement("section");
+  section.className = "validation-block validation-block--scope";
+  section.innerHTML = `
+    <h3>${VALIDATION_SCOPE.title}</h3>
+    <ul>
+      ${VALIDATION_SCOPE.items
+        .map(
+          (item) =>
+            `<li><strong>${item.label}:</strong> ${item.text}</li>`
+        )
+        .join("")}
+    </ul>
+  `;
+  return section;
+}
+
+function renderTestBlock(test, index) {
+  const section = document.createElement("section");
+  section.className = "validation-block";
+  section.dataset.testId = test.id;
+
+  const heading = document.createElement("h3");
+  heading.textContent = `${index + 1}. ${test.title}`;
+  if (test.reqTag) {
+    const tag = document.createElement("span");
+    tag.className = "req-tag";
+    tag.textContent = test.reqTag;
+    heading.appendChild(document.createTextNode(" "));
+    heading.appendChild(tag);
+  }
+  section.appendChild(heading);
+
+  const dl = document.createElement("dl");
+  dl.className = "test-item";
+
+  const addRow = (label, contentNode) => {
+    const dt = document.createElement("dt");
+    dt.textContent = label;
+    const dd = document.createElement("dd");
+    if (typeof contentNode === "string") {
+      dd.textContent = contentNode;
+    } else {
+      dd.appendChild(contentNode);
+    }
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+  };
+
+  addRow("Qué hacer", test.instructions);
+
+  if (test.probes.length > 0) {
+    const probeList = document.createElement("div");
+    probeList.className = "probe-list";
+    test.probes.forEach((probe) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "probe-btn";
+      btn.dataset.blockId = test.id;
+      btn.innerHTML = `
+        <span class="probe-label">Enviar al chat</span>
+        <span class="probe-text"></span>
+      `;
+      btn.querySelector(".probe-text").textContent = probe.label;
+      btn.addEventListener("click", () => {
+        setActiveBlock(test.id);
+        scrollToChat();
+        sendMessage(probe.message);
+      });
+      probeList.appendChild(btn);
+    });
+    addRow("Preguntas sugeridas", probeList);
+  }
+
+  if (test.connectionOnly) {
+    const status = document.createElement("p");
+    status.className = "connection-status";
+    status.id = "connection-status";
+    status.textContent = "Verificando conexión…";
+    addRow("Estado", status);
+  }
+
+  addRow("Qué esperar", test.expect);
+
+  const passDd = document.createElement("dd");
+  passDd.className = "criteria pass";
+  passDd.textContent = test.passCriteria;
+  dl.appendChild(Object.assign(document.createElement("dt"), { textContent: "Aprobada si" }));
+  dl.appendChild(passDd);
+
+  const failDd = document.createElement("dd");
+  failDd.className = "criteria fail";
+  failDd.textContent = test.failCriteria;
+  dl.appendChild(Object.assign(document.createElement("dt"), { textContent: "Rechazada si" }));
+  dl.appendChild(failDd);
+
+  section.appendChild(dl);
+
+  const markActions = document.createElement("div");
+  markActions.className = "mark-actions";
+  ["pass", "fail"].forEach((mark) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `mark-btn mark-btn--${mark}`;
+    btn.dataset.mark = mark;
+    btn.dataset.blockId = test.id;
+    btn.textContent = mark === "pass" ? "Aprobada" : "Rechazada";
+    btn.addEventListener("click", () => setValidationMark(test.id, mark));
+    markActions.appendChild(btn);
+  });
+  section.appendChild(markActions);
+
+  return section;
+}
+
+function renderChecklistBlock() {
+  const section = document.createElement("section");
+  section.className = "validation-block validation-checklist";
+  section.innerHTML = `
+    <h3>Checklist final para la abogada</h3>
+    <ul class="checklist">
+      ${VALIDATION_CHECKLIST.map(
+        (item) =>
+          `<li><span class="check-box" aria-hidden="true"></span> ${item}</li>`
+      ).join("")}
+    </ul>
+    <p class="validation-note">
+      Si todas las pruebas están aprobadas, Fase 0 puede considerarse validada para
+      continuar con Fase 1. Si alguna falla, documente el caso y repórtelo al equipo técnico.
+    </p>
+  `;
+  return section;
+}
+
+function renderValidationPanel() {
+  if (!validationBlocksEl) return;
+
+  validationBlocksEl.appendChild(renderScopeBlock());
+
+  VALIDATION_TESTS.forEach((test, index) => {
+    validationBlocksEl.appendChild(renderTestBlock(test, index));
+  });
+
+  validationBlocksEl.appendChild(renderChecklistBlock());
+
+  VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
+  updateValidationProgress();
+}
+
+function updateConnectionStatus(connected) {
+  const el = document.getElementById("connection-status");
+  if (!el) return;
+  el.textContent = connected
+    ? "Estado actual: Conectado · Fase 0 activa"
+    : "Estado actual: sin conexión o Fase 0 no confirmada";
+  el.classList.toggle("is-ok", connected);
+}
+
 async function checkHealth() {
   try {
     const res = await fetch("/health");
     const data = await res.json();
+    const connected = data.status === "ok" && data.fase_activa === 0;
     if (data.status === "ok" && data.openai_configured) {
       statusDot.classList.add("online");
       statusText.textContent = "Conectado · Fase 0 activa";
-      return true;
+    } else {
+      statusText.textContent = "Servicio disponible · OpenAI no configurada";
     }
-    statusText.textContent = "Servicio disponible · OpenAI no configurada";
-    return false;
+    updateConnectionStatus(connected && data.openai_configured);
+    return connected;
   } catch {
     statusText.textContent = "No se pudo conectar al servidor";
+    updateConnectionStatus(false);
     return false;
   }
 }
@@ -163,6 +386,7 @@ function initValidationPanel() {
   });
 }
 
+renderValidationPanel();
 renderSuggestions();
 checkHealth();
 initValidationPanel();

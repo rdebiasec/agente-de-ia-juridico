@@ -11,6 +11,17 @@ async def test_chat_page():
         r = await client.get("/")
     assert r.status_code == 200
     assert "Asistente Jurídico" in r.text
+    assert "validation-blocks" in r.text
+    assert "validation-tests.js" in r.text
+
+
+@pytest.mark.asyncio
+async def test_validation_tests_static():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/static/validation-tests.js")
+    assert r.status_code == 200
+    assert "VALIDATION_TESTS" in r.text
 
 
 @pytest.mark.asyncio
