@@ -314,7 +314,6 @@ const SessionReport = (() => {
 
     document.getElementById("btn-generate-report")?.addEventListener("click", generateAnalysis);
     document.getElementById("btn-export-pdf")?.addEventListener("click", exportPdf);
-    document.getElementById("btn-export-doc")?.addEventListener("click", exportDoc);
 
     document.getElementById("session-report-body")?.addEventListener("click", (e) => {
       const btn = e.target.closest(".report-events-toggle");
