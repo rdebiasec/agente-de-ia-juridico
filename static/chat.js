@@ -229,7 +229,7 @@ function buildProbeList(test) {
   if (!probes.length) {
     const empty = document.createElement("p");
     empty.className = "probe-empty";
-    empty.textContent = "Sin preguntas — pulse «Generar nuevas».";
+    empty.textContent = "Sin preguntas — pulse «Generar Nuevas Preguntas».";
     probeList.appendChild(empty);
   }
 
@@ -252,7 +252,7 @@ function buildProbesSection(test) {
   genBtn.type = "button";
   genBtn.className = "btn-generate-inline";
   genBtn.dataset.blockId = test.id;
-  genBtn.textContent = "Generar nuevas";
+  genBtn.textContent = "Generar Nuevas Preguntas";
   genBtn.addEventListener("click", () => generateNewProbes({ blockId: test.id }));
 
   header.appendChild(title);
@@ -481,7 +481,7 @@ async function generateNewProbes(options = {}) {
   } finally {
     inlineButtons.forEach((btn) => {
       btn.disabled = false;
-      btn.textContent = btn.dataset.prevText || "Generar nuevas";
+      btn.textContent = btn.dataset.prevText || "Generar Nuevas Preguntas";
     });
   }
 }

@@ -85,7 +85,12 @@
           <div class="validation-content" id="validation-content">
             <header class="validation-header">
               <h2 id="validation-title">Guía de validación — Fase 0</h2>
-              <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
+              <div class="validation-score-row">
+                <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
+                <button type="button" class="btn-reset-score" id="reset-validation-btn">
+                  Reiniciar Puntaje
+                </button>
+              </div>
               <p class="probes-source-badge" id="probes-source-badge">
                 Cargando preguntas de validación…
               </p>
@@ -100,14 +105,9 @@
                 <div class="validation-score-bar" id="validation-score-bar"></div>
               </div>
               <p class="validation-progress" id="validation-progress">0 de 6 secciones marcadas</p>
-              <div class="validation-actions">
-                <button type="button" class="btn-reset" id="reset-validation-btn">
-                  Reiniciar puntaje
-                </button>
-              </div>
               <p class="validation-intro">
                 Cada sección muestra <strong>2 preguntas sugeridas</strong>. Pulse
-                <strong>Generar nuevas</strong> junto a ellas para variantes con IA, luego
+                <strong>Generar Nuevas Preguntas</strong> junto a ellas para variantes con IA, luego
                 <strong>Enviar al chat</strong> y marque <strong class="pass">Aprobada</strong> o
                 <strong class="fail">Rechazada</strong>.
               </p>
