@@ -31,8 +31,9 @@ class Settings(BaseSettings):
     port: int = 8000  # env: PORT
 
     site_username: str = "despacho"
-    site_password: str = ""
-    session_secret: str = "dev-change-me-in-production"
+    # Mantener auth web activo por defecto para paridad local/producción.
+    site_password: str = "Kx9mP2vL8nQw4RsT"
+    session_secret: str = "f7a9c2e1b4d6083a5f2e9c1b7d4a608"
     session_idle_minutes: int = 30
     session_cookie_secure: bool = False
 

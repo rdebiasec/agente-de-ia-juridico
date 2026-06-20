@@ -104,8 +104,11 @@ async def test_unauthenticated_root_redirects_to_login(monkeypatch):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:
         r = await client.get("/")
+        h = await client.get("/help")
     assert r.status_code == 302
     assert r.headers.get("location") == "/login"
+    assert h.status_code == 302
+    assert h.headers.get("location") == "/login"
 
     get_settings.cache_clear()
 
