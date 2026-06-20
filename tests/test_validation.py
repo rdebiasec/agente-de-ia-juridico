@@ -52,10 +52,9 @@ async def test_chat_page_has_score_ui():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=True) as client:
         r = await client.get("/")
-    # Sin auth configurada en tests, / sirve la app directamente
     assert r.status_code == 200
     if "validation-score" in r.text:
-        assert "Generar Nuevas Preguntas" in r.text
+        assert "Panel de Pruebas" in r.text
         assert "session-report-body" in r.text
         assert "reset-score-btn" in r.text
 

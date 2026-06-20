@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <aside class="validation-panel" id="validation-panel" aria-labelledby="validation-title">
+        <aside class="validation-panel" id="validation-panel" aria-label="Panel de Pruebas">
           <h2 class="panel-title">Panel de Pruebas</h2>
           <button
             class="validation-toggle"
@@ -97,14 +97,14 @@
             type="button"
             aria-expanded="false"
             aria-controls="validation-content"
+            aria-label="Abrir panel de pruebas"
           >
-            <span>Panel de Pruebas</span>
+            <span class="sr-only">Panel de Pruebas</span>
             <span class="toggle-icon" aria-hidden="true"></span>
           </button>
 
           <div class="validation-content" id="validation-content">
             <header class="validation-header">
-              <h2 id="validation-title">Panel de Pruebas</h2>
               <div class="validation-score-row">
                 <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
                 <div class="validation-reset-actions">
@@ -126,20 +126,13 @@
               >
                 <div class="validation-score-bar" id="validation-score-bar"></div>
               </div>
-              <p class="validation-progress" id="validation-progress">0 de 6 secciones marcadas</p>
-              <p class="validation-intro">
-                Cada sección muestra <strong>2 preguntas sugeridas</strong>. Pulse
-                <strong>Generar Nuevas Preguntas</strong> junto a ellas para variantes con IA, luego
-                <strong>Enviar al chat</strong> y marque <strong class="pass">Aprobada</strong> o
-                <strong class="fail">Rechazada</strong>.
-              </p>
             </header>
 
             <div id="validation-blocks"></div>
           </div>
         </aside>
 
-        <aside class="report-panel" id="report-panel" aria-labelledby="report-title">
+        <aside class="report-panel" id="report-panel" aria-label="Panel de Reportería">
           <h2 class="panel-title">Panel de Reportería</h2>
           <button
             class="report-toggle"
@@ -147,14 +140,14 @@
             type="button"
             aria-expanded="false"
             aria-controls="report-content"
+            aria-label="Abrir panel de reportería"
           >
-            <span>Reporte de sesión</span>
+            <span class="sr-only">Reporte de sesión</span>
             <span class="toggle-icon" aria-hidden="true"></span>
           </button>
 
           <div class="report-content" id="report-content">
             <header class="report-header">
-              <h2 id="report-title">Reporte de sesión</h2>
               <div class="session-report-actions">
                 <button type="button" class="btn-report-action" id="btn-generate-report">
                   Generar / Actualizar análisis
