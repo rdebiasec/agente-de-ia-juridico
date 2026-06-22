@@ -1149,32 +1149,34 @@ async function bootstrapValidationProbes() {
   refreshAllProbeLists();
 }
 
-initDefaultProbes();
-renderValidationPanel();
-restoreChatFromLog();
-checkHealth();
-initValidationPanel();
-syncRubricFromServer();
-bootstrapValidationProbes();
-
-SessionReport.init({
-  getSession: getSessionSnapshot,
-  saveSession: (snapshot) => {
-    // Report generation may finish after a reset; only persist analysis, not stale chat.
-    lastReport = snapshot.lastReport || null;
-    saveSessionState();
-    refreshAllLinkedMessagesUI();
-  },
-  getUserId,
-});
-
 let appBooted = false;
+let sessionReportReady = false;
 
 function bootAgentApp() {
   if (appBooted) return;
   appBooted = true;
   initOnboarding();
-  inputEl.focus();
+  restoreChatFromLog();
+  checkHealth();
+  syncRubricFromServer();
+  bootstrapValidationProbes();
+  if (!sessionReportReady) {
+    SessionReport.init({
+      getSession: getSessionSnapshot,
+      saveSession: (snapshot) => {
+        lastReport = snapshot.lastReport || null;
+        saveSessionState();
+        refreshAllLinkedMessagesUI();
+      },
+      getUserId,
+    });
+    sessionReportReady = true;
+  }
+  try {
+    inputEl?.focus({ preventScroll: true });
+  } catch {
+    /* iOS Safari puede rechazar focus automático */
+  }
   window.addEventListener("load", () => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
@@ -1184,6 +1186,6 @@ function bootAgentApp() {
 
 window.bootAgentApp = bootAgentApp;
 
-if (window.__agentAuthed) {
-  bootAgentApp();
-}
+initDefaultProbes();
+renderValidationPanel();
+initValidationPanel();

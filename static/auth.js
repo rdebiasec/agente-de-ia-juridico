@@ -9,7 +9,7 @@ const AgentAuth = (() => {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        runId: "pre-fix",
+        runId: "post-fix",
         hypothesisId,
         location,
         message,
@@ -93,9 +93,31 @@ const AgentAuth = (() => {
   }
 
   async function checkStatus() {
-    const res = await fetch("/auth/status", { credentials: "include" });
-    if (!res.ok) return { auth_enabled: false, authenticated: true };
-    return res.json();
+    const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+    try {
+      const res = await fetch("/auth/status", { credentials: "include" });
+      if (res.status >= 500) {
+        debugClientLog("H6", "auth.js:checkStatus", "server_error", {
+          status: res.status,
+          mobile: isMobile,
+        });
+        return { auth_enabled: true, authenticated: false, server_error: true };
+      }
+      if (!res.ok) {
+        return { auth_enabled: false, authenticated: true };
+      }
+      return res.json();
+    } catch {
+      debugClientLog("H6", "auth.js:checkStatus", "network_error", { mobile: isMobile });
+      return { auth_enabled: true, authenticated: false, server_error: true };
+    }
+  }
+
+  function showServerWaking() {
+    const statusText = document.getElementById("status-text");
+    if (statusText) {
+      statusText.textContent = "Servicio iniciando… recargue en unos segundos.";
+    }
   }
 
   async function logout(sessionExpired = false) {
@@ -123,6 +145,12 @@ const AgentAuth = (() => {
 
     const status = await checkStatus();
     if (status.idle_minutes) idleMs = status.idle_minutes * 60 * 1000;
+
+    if (status.server_error) {
+      showServerWaking();
+      debugClientLog("H6", "auth.js:bootstrap", "server_waking", { mobile: isMobile });
+      return;
+    }
 
     if (!status.auth_enabled) {
       updateSessionBadge(status);

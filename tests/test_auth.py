@@ -208,7 +208,7 @@ async def test_form_login_redirects_and_sets_cookie(monkeypatch):
             "/auth/login",
             data={"username": "despacho", "password": "wrong"},
         )
-        assert bad.status_code == 303
+        assert bad.status_code == 302
         assert bad.headers.get("location") == "/login?login_error=1"
         assert bad.cookies.get("agente_session") is None
 
@@ -216,7 +216,7 @@ async def test_form_login_redirects_and_sets_cookie(monkeypatch):
             "/auth/login",
             data={"username": "despacho", "password": "test-secret-pass"},
         )
-        assert ok.status_code == 303
+        assert ok.status_code == 302
         assert ok.headers.get("location") == "/"
         cookie = ok.cookies.get("agente_session")
         assert cookie

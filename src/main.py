@@ -14,7 +14,6 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.agents.runner import run_agent
 from src.auth.dev import (
@@ -80,50 +79,6 @@ class ClientDebugLog(BaseModel):
     runId: str = "pre-fix"
 
 
-class DebugRequestMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        ua = request.headers.get("user-agent", "")[:160]
-        is_mobile = any(
-            token in ua.lower()
-            for token in ("iphone", "ipad", "android", "mobile")
-        )
-        try:
-            response = await call_next(request)
-        except Exception as exc:
-            # region agent log
-            _debug_log(
-                "H1",
-                "main:middleware",
-                "unhandled_exception",
-                {
-                    "method": request.method,
-                    "path": request.url.path,
-                    "mobile": is_mobile,
-                    "error": type(exc).__name__,
-                    "detail": str(exc)[:300],
-                    "trace": traceback.format_exc()[-1200:],
-                },
-            )
-            # endregion
-            raise
-        if response.status_code >= 400 or is_mobile:
-            # region agent log
-            _debug_log(
-                "H2" if response.status_code >= 500 else "H4",
-                "main:middleware",
-                "request_completed",
-                {
-                    "method": request.method,
-                    "path": request.url.path,
-                    "status": response.status_code,
-                    "mobile": is_mobile,
-                    "ua": ua,
-                },
-            )
-            # endregion
-        return response
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
@@ -142,7 +97,52 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
-app.add_middleware(DebugRequestMiddleware)
+
+
+@app.middleware("http")
+async def debug_request_middleware(request: Request, call_next):
+    ua = request.headers.get("user-agent", "")[:160]
+    is_mobile = any(token in ua.lower() for token in ("iphone", "ipad", "android", "mobile"))
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        # region agent log
+        _debug_log(
+            "H1",
+            "main:middleware",
+            "unhandled_exception",
+            {
+                "method": request.method,
+                "path": request.url.path,
+                "mobile": is_mobile,
+                "error": type(exc).__name__,
+                "detail": str(exc)[:300],
+                "trace": traceback.format_exc()[-1200:],
+            },
+            run_id="post-fix",
+        )
+        # endregion
+        raise
+    status = getattr(response, "status_code", 0)
+    if status >= 400 or is_mobile:
+        # region agent log
+        _debug_log(
+            "H2" if status >= 500 else "H4",
+            "main:middleware",
+            "request_completed",
+            {
+                "method": request.method,
+                "path": request.url.path,
+                "status": status,
+                "mobile": is_mobile,
+                "ua": ua,
+            },
+            run_id="post-fix",
+        )
+        # endregion
+    return response
+
+
 app.include_router(whatsapp_router)
 
 _static_dir = get_settings().project_root / "static"
@@ -190,13 +190,26 @@ async def chat_page(
     request: Request,
     settings: Settings = Depends(get_settings),
 ):
-    redirect = _auth_redirect_if_needed(request, settings)
-    if redirect:
-        return redirect
-    index = _static_dir / "index.html"
-    if index.is_file():
-        return FileResponse(index)
-    return {"message": "Agente Jurídico API — use POST /chat"}
+    try:
+        redirect = _auth_redirect_if_needed(request, settings)
+        if redirect:
+            return redirect
+        index = _static_dir / "index.html"
+        if index.is_file():
+            return FileResponse(index)
+        return {"message": "Agente Jurídico API — use POST /chat"}
+    except Exception as exc:
+        # region agent log
+        _debug_log(
+            "H1",
+            "main:chat_page",
+            "chat_page_failed",
+            {"error": type(exc).__name__, "detail": str(exc)[:300]},
+            run_id="post-fix",
+        )
+        # endregion
+        logger.exception("Fallo al servir chat page")
+        return RedirectResponse(url="/login", status_code=302)
 
 
 @app.get("/help")
@@ -263,12 +276,12 @@ async def auth_login(
         # endregion
         logger.exception("Fallo al parsear login")
         if wants_redirect:
-            return RedirectResponse(url="/login?login_error=1", status_code=303)
+            return RedirectResponse(url="/login?login_error=1", status_code=302)
         raise HTTPException(status_code=400, detail="Datos de login inválidos.") from exc
 
     if not auth_enabled(settings.site_password):
         if wants_redirect:
-            return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url="/", status_code=302)
         return {"ok": True, "auth_enabled": False}
 
     credentials_ok = username == settings.site_username and verify_password(
@@ -276,12 +289,12 @@ async def auth_login(
     )
     if not credentials_ok:
         if wants_redirect:
-            return RedirectResponse(url="/login?login_error=1", status_code=303)
+            return RedirectResponse(url="/login?login_error=1", status_code=302)
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos.")
 
     token = create_session_token(settings.session_secret, username=username)
     if wants_redirect:
-        redirect = RedirectResponse(url="/", status_code=303)
+        redirect = RedirectResponse(url="/", status_code=302)
         apply_session_cookie(redirect, token, settings)
         return redirect
 
