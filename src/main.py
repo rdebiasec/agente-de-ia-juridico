@@ -3,15 +3,26 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+import time
+import traceback
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.agents.runner import run_agent
+from src.auth.dev import (
+    dev_auto_login_allowed,
+    dev_auto_login_redirect,
+    login_html_with_dev_prefill,
+    web_session_is_active,
+)
 from src.auth.deps import (
     apply_session_cookie,
     clear_session_cookie,
@@ -29,6 +40,88 @@ from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_wei
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+_DEBUG_LOG = Path(__file__).resolve().parents[1] / ".cursor" / "debug-835df5.log"
+
+
+def _debug_log(
+    hypothesis_id: str,
+    location: str,
+    message: str,
+    data: dict | None = None,
+    *,
+    run_id: str = "pre-fix",
+) -> None:
+    # region agent log
+    try:
+        payload = {
+            "sessionId": "835df5",
+            "runId": run_id,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data or {},
+            "timestamp": int(time.time() * 1000),
+        }
+        _DEBUG_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with _DEBUG_LOG.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
+        logger.warning("[DEBUG-835df5] %s", json.dumps(payload, ensure_ascii=False))
+    except Exception:
+        pass
+    # endregion
+
+
+class ClientDebugLog(BaseModel):
+    hypothesisId: str = "H4"
+    location: str = "client"
+    message: str = ""
+    data: dict | None = None
+    runId: str = "pre-fix"
+
+
+class DebugRequestMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        ua = request.headers.get("user-agent", "")[:160]
+        is_mobile = any(
+            token in ua.lower()
+            for token in ("iphone", "ipad", "android", "mobile")
+        )
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            # region agent log
+            _debug_log(
+                "H1",
+                "main:middleware",
+                "unhandled_exception",
+                {
+                    "method": request.method,
+                    "path": request.url.path,
+                    "mobile": is_mobile,
+                    "error": type(exc).__name__,
+                    "detail": str(exc)[:300],
+                    "trace": traceback.format_exc()[-1200:],
+                },
+            )
+            # endregion
+            raise
+        if response.status_code >= 400 or is_mobile:
+            # region agent log
+            _debug_log(
+                "H2" if response.status_code >= 500 else "H4",
+                "main:middleware",
+                "request_completed",
+                {
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "mobile": is_mobile,
+                    "ua": ua,
+                },
+            )
+            # endregion
+        return response
 
 
 @asynccontextmanager
@@ -49,6 +142,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
+app.add_middleware(DebugRequestMiddleware)
 app.include_router(whatsapp_router)
 
 _static_dir = get_settings().project_root / "static"
@@ -58,22 +152,37 @@ if _static_dir.is_dir():
 
 def _auth_redirect_if_needed(request: Request, settings: Settings) -> RedirectResponse | None:
     if auth_enabled(settings.site_password):
-        token = request.cookies.get(COOKIE_NAME)
-        if not is_session_active(
-            settings.session_secret,
-            token,
-            idle_seconds=idle_seconds(settings),
-        ):
-            return RedirectResponse(url="/login", status_code=302)
+        if web_session_is_active(request, settings):
+            return None
+        auto = dev_auto_login_redirect(request, settings, next_url=str(request.url.path))
+        if auto:
+            return auto
+        return RedirectResponse(url="/login", status_code=302)
     return None
 
 
 @app.get("/login")
-async def login_page():
+async def login_page(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    if web_session_is_active(request, settings):
+        return RedirectResponse(url="/", status_code=302)
+
+    if "login_error" not in request.query_params and "expired" not in request.query_params:
+        auto = dev_auto_login_redirect(request, settings, next_url="/")
+        if auto:
+            return auto
+
     login = _static_dir / "login.html"
-    if login.is_file():
-        return FileResponse(login)
-    return RedirectResponse(url="/", status_code=302)
+    if not login.is_file():
+        return RedirectResponse(url="/", status_code=302)
+
+    if dev_auto_login_allowed(settings):
+        html = login_html_with_dev_prefill(login.read_text(encoding="utf-8"), settings)
+        return HTMLResponse(html)
+
+    return FileResponse(login)
 
 
 @app.get("/")
@@ -134,14 +243,28 @@ async def auth_login(
     content_type = request.headers.get("content-type", "")
     wants_redirect = "application/json" not in content_type
 
-    if "application/json" in content_type:
-        body = await request.json()
-        username = str(body.get("username", ""))
-        password = str(body.get("password", ""))
-    else:
-        form = await request.form()
-        username = str(form.get("username", ""))
-        password = str(form.get("password", ""))
+    try:
+        if "application/json" in content_type:
+            body = await request.json()
+            username = str(body.get("username", ""))
+            password = str(body.get("password", ""))
+        else:
+            form = await request.form()
+            username = str(form.get("username", ""))
+            password = str(form.get("password", ""))
+    except Exception as exc:
+        # region agent log
+        _debug_log(
+            "H1",
+            "main:auth_login",
+            "login_parse_failed",
+            {"error": type(exc).__name__, "detail": str(exc)[:200]},
+        )
+        # endregion
+        logger.exception("Fallo al parsear login")
+        if wants_redirect:
+            return RedirectResponse(url="/login?login_error=1", status_code=303)
+        raise HTTPException(status_code=400, detail="Datos de login inválidos.") from exc
 
     if not auth_enabled(settings.site_password):
         if wants_redirect:
@@ -210,6 +333,21 @@ async def health():
         "whatsapp_configured": bool(settings.twilio_account_sid),
         "web_auth_enabled": auth_enabled(settings.site_password),
     }
+
+
+@app.post("/debug/client-log")
+async def debug_client_log(entry: ClientDebugLog):
+    """Recibe telemetría del navegador (visible en logs de Render)."""
+    # region agent log
+    _debug_log(
+        entry.hypothesisId,
+        entry.location,
+        entry.message,
+        entry.data or {},
+        run_id=entry.runId,
+    )
+    # endregion
+    return {"ok": True}
 
 
 @app.post("/chat", response_model=ChatResponse, dependencies=[Depends(require_web_session)])

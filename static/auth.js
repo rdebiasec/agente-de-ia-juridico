@@ -2,6 +2,23 @@
  * Sesión en la app — login en /login (página dedicada para el llavero de Chrome).
  */
 const AgentAuth = (() => {
+  function debugClientLog(hypothesisId, location, message, data = {}) {
+    // region agent log
+    fetch("/debug/client-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        runId: "pre-fix",
+        hypothesisId,
+        location,
+        message,
+        data: { ...data, ua: navigator.userAgent.slice(0, 160) },
+      }),
+    }).catch(() => {});
+    // endregion
+  }
+
   const IDLE_MS_DEFAULT = 30 * 60 * 1000;
   let idleMs = IDLE_MS_DEFAULT;
   let idleTimer = null;
@@ -17,6 +34,14 @@ const AgentAuth = (() => {
 
   function authFetch(url, options = {}) {
     return fetch(url, { credentials: "include", ...options }).then(async (res) => {
+      const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+      if (res.status >= 400) {
+        debugClientLog("H4", "auth.js:authFetch", "api_error", {
+          url: String(url),
+          status: res.status,
+          mobile: isMobile,
+        });
+      }
       if (res.status === 401 && !String(url).includes("/auth/")) {
         redirectToLogin("expired");
         throw new Error("Unauthorized");
@@ -88,6 +113,11 @@ const AgentAuth = (() => {
   }
 
   async function bootstrap() {
+    const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+    debugClientLog("H5", "auth.js:bootstrap", "auth_bootstrap_start", {
+      mobile: isMobile,
+      path: window.location.pathname,
+    });
     initForm();
     bindActivityListeners();
 
@@ -110,6 +140,7 @@ const AgentAuth = (() => {
       return;
     }
 
+    debugClientLog("H5", "auth.js:bootstrap", "auth_redirect_login", { mobile: isMobile });
     redirectToLogin("");
   }
 
@@ -137,5 +168,19 @@ const AgentAuth = (() => {
 window.authFetch = AgentAuth.authFetch;
 
 document.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener("error", (event) => {
+    debugClientLog("H4", "window:onerror", event.message || "script_error", {
+      mobile: /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent),
+      source: event.filename || "",
+      line: event.lineno || 0,
+    });
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason =
+      event.reason instanceof Error ? event.reason.message : String(event.reason || "rejection");
+    debugClientLog("H4", "window:unhandledrejection", reason.slice(0, 200), {
+      mobile: /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent),
+    });
+  });
   AgentAuth.bootstrap();
 });

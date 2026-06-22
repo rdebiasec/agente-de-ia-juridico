@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import os
 
 from agents import Runner
+
+logger = logging.getLogger(__name__)
 
 from src.agents.guardrails import (
     apply_output_guardrails,
@@ -63,8 +66,21 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 
     orchestrator = build_orchestrator()
-    result = await Runner.run(orchestrator, message)
-    text = apply_output_guardrails(result.final_output or "", channel)
+    try:
+        result = await Runner.run(orchestrator, message)
+        text = apply_output_guardrails(result.final_output or "", channel)
+    except Exception:
+        logger.exception("Runner.run falló para channel=%s", channel)
+        text = apply_output_guardrails(
+            "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.",
+            channel,
+        )
+        return {
+            "text": text,
+            "agent": "error",
+            "pending_review": False,
+            "session_id": session_id,
+        }
 
     from src.agents.guardrails import needs_human_review
 

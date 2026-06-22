@@ -1142,11 +1142,11 @@ async function bootstrapValidationProbes() {
     refreshAllProbeLists();
     return;
   }
-  const healthRes = await fetch("/health").catch(() => null);
-  const health = healthRes ? await healthRes.json().catch(() => ({})) : {};
-  if (health.openai_configured) {
-    await generateNewProbes({ silent: true });
-  }
+  // No llamar a OpenAI al cargar: en Render free tier puede tumbar el servicio
+  // justo después del login (cold start + LLM). Las preguntas de ejemplo bastan
+  // hasta que la abogada pulse «Generar Nuevas Preguntas».
+  initDefaultProbes();
+  refreshAllProbeLists();
 }
 
 initDefaultProbes();

@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     session_secret: str = "f7a9c2e1b4d6083a5f2e9c1b7d4a608"
     session_idle_minutes: int = 30
     session_cookie_secure: bool = False
+    # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
+    dev_auto_login: bool = False
 
     @property
     def project_root(self) -> Path:

@@ -77,7 +77,13 @@ async def test_login_logout_and_protected_routes(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_login_page_has_chrome_friendly_form():
+async def test_login_page_has_chrome_friendly_form(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.get("/login")
@@ -89,7 +95,10 @@ async def test_login_page_has_chrome_friendly_form():
     assert 'autocomplete="username"' in r.text
     assert 'autocomplete="current-password"' in r.text
     assert 'name="login"' in r.text
+    assert "auth-error-banner" in r.text
     assert "auth-logout-btn" not in r.text
+
+    get_settings.cache_clear()
 
 
 @pytest.mark.asyncio
@@ -100,6 +109,7 @@ async def test_unauthenticated_root_redirects_to_login(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:
@@ -109,6 +119,76 @@ async def test_unauthenticated_root_redirects_to_login(monkeypatch):
     assert r.headers.get("location") == "/login"
     assert h.status_code == 302
     assert h.headers.get("location") == "/login"
+
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_dev_auto_login_skips_manual_login(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
+    monkeypatch.delenv("RENDER", raising=False)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:
+        root = await client.get("/")
+        assert root.status_code == 302
+        assert root.headers.get("location") == "/"
+        assert root.cookies.get("agente_session")
+
+        login = await client.get("/login", cookies=root.cookies)
+        assert login.status_code == 302
+        assert login.headers.get("location") == "/"
+
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_dev_auto_login_blocked_in_production_like_env(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "true")
+    monkeypatch.setenv("RENDER", "true")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:
+        root = await client.get("/")
+    assert root.status_code == 302
+    assert root.headers.get("location") == "/login"
+    assert root.cookies.get("agente_session") is None
+
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_dev_login_page_prefills_credentials_on_error(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
+    monkeypatch.delenv("RENDER", raising=False)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/login?login_error=1")
+    assert r.status_code == 200
+    assert 'value="despacho"' in r.text
+    assert 'value="test-secret-pass"' in r.text
 
     get_settings.cache_clear()
 
