@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="/static/chat.css" />
   </head>
   <body class="auth-gate">
-    <main class="auth-gate-card">
+    <div class="auth-gate-wrap">
+      <p id="auth-error" class="auth-error-banner" hidden role="alert" aria-live="assertive"></p>
+      <main class="auth-gate-card">
       <img class="auth-gate-logo" src="/static/dbx-logo.png" alt="DBX Solutions" width="200" height="40" />
       <h1 class="auth-gate-title">Asistente Jurídico — Fase 0</h1>
       <p class="auth-gate-subtitle">Acceso restringido al equipo del despacho.</p>
@@ -43,10 +45,10 @@
           required
         />
 
-        <p id="auth-error" class="auth-error" hidden></p>
         <button type="submit" class="btn-auth-submit">Entrar</button>
       </form>
     </main>
+    </div>
 
     <script src="/static/login.js"></script>
   </body>

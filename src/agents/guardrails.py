@@ -2,9 +2,18 @@
 
 import re
 
-DISCLAIMER = (
-    "\n\n---\n*Borrador informativo — requiere revisión y aprobación del abogado.*"
+DISCLAIMER_TEXT = "Borrador informativo — requiere revisión y aprobación del abogado."
+DISCLAIMER = f"\n\n---\n*{DISCLAIMER_TEXT}*"
+
+_DISCLAIMER_BLOCK_RE = re.compile(
+    rf"\n*\s*---\s*\n?\s*\*?{re.escape(DISCLAIMER_TEXT)}\*?\s*",
+    re.IGNORECASE,
 )
+_DISCLAIMER_LINE_RE = re.compile(
+    rf"\n*\s*\*?{re.escape(DISCLAIMER_TEXT)}\*?\s*",
+    re.IGNORECASE,
+)
+_PHASE_DRAFT_RE = re.compile(r"\n*\s*Fase\s*0\s*·\s*Borrador\s*", re.IGNORECASE)
 
 FASE1_KEYWORDS = re.compile(
     r"\b(contrato|tutela|memorial|redactar|demanda|recurso|riesgo|estrategia|"
@@ -34,10 +43,13 @@ def check_phase_scope(text: str) -> str | None:
 
 
 def apply_output_guardrails(text: str, channel: str = "slack") -> str:
-    """Añade disclaimer y normaliza salida."""
-    if DISCLAIMER.strip() not in text:
-        text = text.rstrip() + DISCLAIMER
-    return text
+    """Añade un único disclaimer y normaliza salida."""
+    normalized = text or ""
+    normalized = _DISCLAIMER_BLOCK_RE.sub("\n", normalized)
+    normalized = _DISCLAIMER_LINE_RE.sub("\n", normalized)
+    normalized = _PHASE_DRAFT_RE.sub("\n", normalized)
+    normalized = re.sub(r"\n{3,}", "\n\n", normalized).strip()
+    return normalized + DISCLAIMER
 
 
 def needs_human_review(text: str, channel: str) -> bool:

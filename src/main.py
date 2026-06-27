@@ -41,6 +41,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 _DEBUG_LOG = Path(__file__).resolve().parents[1] / ".cursor" / "debug-835df5.log"
+_DEBUG_LOG_83755E = Path(__file__).resolve().parents[1] / ".cursor" / "debug-83755e.log"
 
 
 def _debug_log(
@@ -66,6 +67,26 @@ def _debug_log(
         with _DEBUG_LOG.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
         logger.warning("[DEBUG-835df5] %s", json.dumps(payload, ensure_ascii=False))
+    except Exception:
+        pass
+    # endregion
+
+
+def _debug_log_83755e(run_id: str, hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    # region agent log
+    try:
+        payload = {
+            "sessionId": "83755e",
+            "runId": run_id,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": int(time.time() * 1000),
+        }
+        _DEBUG_LOG_83755E.parent.mkdir(parents=True, exist_ok=True)
+        with _DEBUG_LOG_83755E.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
         pass
     # endregion
@@ -239,6 +260,20 @@ async def auth_status(
         token = request.cookies.get(COOKIE_NAME)
         data = parse_session_token(settings.session_secret, token) if token else None
         username = (data or {}).get("username") or settings.site_username
+    # region agent log
+    _debug_log_83755e(
+        "pre-fix",
+        "H2",
+        "src/main.py:267",
+        "auth_status_snapshot",
+        {
+            "auth_enabled": enabled,
+            "authenticated": authenticated if enabled else True,
+            "has_cookie": bool(request.cookies.get(COOKIE_NAME)),
+            "username_present": bool(username),
+        },
+    )
+    # endregion
     return {
         "auth_enabled": enabled,
         "authenticated": authenticated if enabled else True,
@@ -287,6 +322,20 @@ async def auth_login(
     credentials_ok = username == settings.site_username and verify_password(
         settings.site_password, password
     )
+    # region agent log
+    _debug_log_83755e(
+        "pre-fix",
+        "H2",
+        "src/main.py:322",
+        "auth_login_attempt",
+        {
+            "wants_redirect": wants_redirect,
+            "username_matches": username == settings.site_username,
+            "credentials_ok": credentials_ok,
+            "auth_enabled": auth_enabled(settings.site_password),
+        },
+    )
+    # endregion
     if not credentials_ok:
         if wants_redirect:
             return RedirectResponse(url="/login?login_error=1", status_code=302)
@@ -338,7 +387,7 @@ class ChatResponse(BaseModel):
 @app.get("/health")
 async def health():
     settings = get_settings()
-    return {
+    payload = {
         "status": "ok",
         "fase_activa": settings.active_phase,
         "openai_configured": bool(settings.openai_api_key),
@@ -346,6 +395,21 @@ async def health():
         "whatsapp_configured": bool(settings.twilio_account_sid),
         "web_auth_enabled": auth_enabled(settings.site_password),
     }
+    # region agent log
+    _debug_log_83755e(
+        "pre-fix",
+        "H4",
+        "src/main.py:392",
+        "health_flags_snapshot",
+        {
+            "fase_activa": payload["fase_activa"],
+            "slack_configured": payload["slack_configured"],
+            "whatsapp_configured": payload["whatsapp_configured"],
+            "web_auth_enabled": payload["web_auth_enabled"],
+        },
+    )
+    # endregion
+    return payload
 
 
 @app.post("/debug/client-log")

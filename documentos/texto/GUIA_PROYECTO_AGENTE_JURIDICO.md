@@ -119,18 +119,18 @@ Ver backlog completo (filtro agente-juridico)
 
 O IE E
 
-N-5  Fase0 Fundamentos (perfil y áreas del derech  REQ-001. Definir quién es el asistente, qué áreas del
+N-5  Fase0 Fundamentos (perfil y áreas del derech  [REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9). Definir quién es el asistente, qué áreas del
 11 (11) derecho domina y cómo debe
 
-KAN-6 Fase 1 MVP (consulta, redacción y comunicació  REQ-012...0 Primera versión útil: atender clientes, ver
+KAN-6 Fase 1 MVP (consulta, redacción y comunicació  [REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11)...0 Primera versión útil: atender clientes, ver
 28 (15) riesgos y redactar borradore
 
-KAN-7 Fase 2 Gestión, seguimiento y estrategia REQ-022...0 Seguimiento de casos, informes al cliente y
+KAN-7 Fase 2 Gestión, seguimiento y estrategia [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16)...0 Seguimiento de casos, informes al cliente y
 23, apoyo para pensar la estrate
-REQ-043...0
+[REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14)...0
 50 (10)
 
-KAN-8 Fase 3 Especialidades (conceptos, memoriales,  REQ-029...0 Tareas avanzadas: conceptos, memoriales
+KAN-8 Fase 3 Especialidades (conceptos, memoriales,  [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17)...0 Tareas avanzadas: conceptos, memoriales
 42 (14) procesales y tutelas con plazos.
 
 Tareas de implementación (12 tickets, 50 requisitos)
@@ -140,24 +140,24 @@ concreta que el abogado puede probar.
 
 KAN-5 Fase 0 — Fundamentos (perfil y áreas del derecho)
 KAN-9 Configurar perfil, prompts y tono jurídico colombiano
-Requisitos: REQ-001, REQ-002, REQ-003
+Requisitos: [REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9), [REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9), [REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9)
 Que el asistente suene y piense como un abogado colombiano con experiencia.
 
 KAN-10 Implementar base de conocimiento por áreas del derecho
-Requisitos: REQ-004...011
+Requisitos: [REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10)...011
 Civil, familia, penal, laboral, comercial y normas clave del despacho.
 
 KAN-6 Fase 1 — MVP (consulta, redacción y comunicación)
 KAN-11 Módulo atención y comunicación con clientes
-Requisitos: REQ-012...015
+Requisitos: [REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11)...015
 Responder con empatía, explicar en sencillo y redactar correos profesionales.
 
 KAN-12 Módulo análisis de consultas, riesgos y estrategia
-Requisitos: REQ-016...021
+Requisitos: [REQ-016](https://dbx-solutions.atlassian.net/browse/KAN-12)...021
 Detectar riesgos, ordenar hechos y proponer líneas de defensa o acción.
 
 KAN-13 Módulo redacción básica: contratos y escritos
-Requisitos: REQ-024...028
+Requisitos: [REQ-024](https://dbx-solutions.atlassian.net/browse/KAN-13)...028
 Borradores de contratos, escritos a jueces/fiscales y recursos.
 
 KAN-7 Fase 2 — Gestión, seguimiento y estrategia
@@ -183,33 +183,33 @@ KAN-19
 KAN-20
 
 Seguimiento procesal, radicaciones e informes mensuales
-Requisitos: REQ-043...047
+Requisitos: [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14)...047
 Revisar correos, estados en Rama Judicial e informar al cliente cada mes.
 
 Rol estratégico: organizar ideas, no solo jurisprudencia
-Requisitos: REQ-048...050
+Requisitos: [REQ-048](https://dbx-solutions.atlassian.net/browse/KAN-15)...050
 Ayudar a pensar el caso completo, no limitarse a buscar sentencias.
 
 Preparación entrevistas y cuestionamiento pre-escrito
-Requisitos: REQ-022, REQ-023
+Requisitos: [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16), [REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16)
 Preparar entrevistas con Fiscalía/juez y detectar debilidades antes de escribir.
 
 Fase 3 — Especialidades (conceptos, memoriales, tutelas)
 
 Emisión de conceptos jurídicos por área
-Requisitos: REQ-029...032
+Requisitos: [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17)...032
 Conceptos con problema, normas aplicables y recomendación clara al cliente.
 
 Redacción de memoriales procesales
-Requisitos: REQ-033...037
+Requisitos: [REQ-033](https://dbx-solutions.atlassian.net/browse/KAN-18)...037
 Memoriales a juzgados y entidades con datos completos del proceso.
 
 Acciones de tutela — redacción y presentación
-Requisitos: REQ-038...041
+Requisitos: [REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19)...041
 Demandas de tutela completas y seguimiento de radicación en línea.
 
 Tutelas — seguimiento de plazos de respuesta
-Requisitos: REQ-042
+Requisitos: [REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20)
 Controlar los 10 días hábiles de respuesta del juez en tutela.
 
 DBX Solutions - contact@dbx-solutions.com - www.dbx-solutions.com
@@ -369,78 +369,78 @@ Cuántos requisitos son prioritarios para la primera versión vs. los que vienen
 
 tado resumido de requisitos
 IO
-REQ-001 Contar con aproximadamente cinco años de Prioritario  Fase0 Perfil y áreas del derecho
+[REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9) Contar con aproximadamente cinco años de Prioritario  Fase0 Perfil y áreas del derecho
 
 experiencia en derecho en Colombia
-REQ-002 Tener habilidad estratégica para el análisis y  Prioritario Fase 0 Perfil y áreas del derecho
+[REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9) Tener habilidad estratégica para el análisis y  Prioritario Fase 0 Perfil y áreas del derecho
 
 conducción de asuntos jurídicos
 
-REQ-003 Demostrar muy buena redacción jurídica y técnica Prioritario Fase 0 Perfil y áreas del derecho
-REQ-004 Conocimiento en derecho civil y contractual Importante Fase 0 Perfil y reas del derecho
-REQ-005 | Conocimiento en derecho de familia Importante Fase 0 Perfil y reas del derecho
-REQ-006 Conocimiento en derecho societario Importante Fase 0 Perfil y reas del derecho
-REQ-007 Conocimiento en procesos penales ante la Fiscalía Importante Fase 0 Perfil y áreas del derecho
+[REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9) Demostrar muy buena redacción jurídica y técnica Prioritario Fase 0 Perfil y áreas del derecho
+[REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho civil y contractual Importante Fase 0 Perfil y reas del derecho
+[REQ-005](https://dbx-solutions.atlassian.net/browse/KAN-10) | Conocimiento en derecho de familia Importante Fase 0 Perfil y reas del derecho
+[REQ-006](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho societario Importante Fase 0 Perfil y reas del derecho
+[REQ-007](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en procesos penales ante la Fiscalía Importante Fase 0 Perfil y áreas del derecho
 
 General de la Nación y asuntos pena
 
-REQ-008 Conocimiento en derecho al consumidor y Específico Fase 0 Perfil y áreas del derecho
+[REQ-008](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho al consumidor y Específico Fase 0 Perfil y áreas del derecho
 reclamación ante entidades
 
-REQ-009 | Conocimiento en derecho comercial Específico — Fase 0 Perfil y áreas del derecho
+[REQ-009](https://dbx-solutions.atlassian.net/browse/KAN-10) | Conocimiento en derecho comercial Específico — Fase 0 Perfil y áreas del derecho
 
-REQ-010 Conocimiento en derecho laboral Específico Fase 0 Perfil y áreas del derecho
+[REQ-010](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho laboral Específico Fase 0 Perfil y áreas del derecho
 
 DBX Solutions - contact@dbx-solutions.com - www.dbx-solutions.com
 Página 8
 
 ### Página 09
 
-REQ-011
+[REQ-011](https://dbx-solutions.atlassian.net/browse/KAN-10)
 
-REQ-012
+[REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11)
 
-REQ-013
+[REQ-013](https://dbx-solutions.atlassian.net/browse/KAN-11)
 
-REQ-014
+[REQ-014](https://dbx-solutions.atlassian.net/browse/KAN-11)
 
-REQ-015
+[REQ-015](https://dbx-solutions.atlassian.net/browse/KAN-11)
 
-REQ-016
+[REQ-016](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-017
+[REQ-017](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-018
+[REQ-018](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-019
+[REQ-019](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-020
+[REQ-020](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-021
+[REQ-021](https://dbx-solutions.atlassian.net/browse/KAN-12)
 
-REQ-022
+[REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16)
 
-REQ-023
+[REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16)
 
-REQ-024
+[REQ-024](https://dbx-solutions.atlassian.net/browse/KAN-13)
 
-REQ-025
+[REQ-025](https://dbx-solutions.atlassian.net/browse/KAN-13)
 
-REQ-026
+[REQ-026](https://dbx-solutions.atlassian.net/browse/KAN-13)
 
-REQ-027
+[REQ-027](https://dbx-solutions.atlassian.net/browse/KAN-13)
 
-REQ-028
+[REQ-028](https://dbx-solutions.atlassian.net/browse/KAN-13)
 
-REQ-029
+[REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17)
 
-REQ-030
+[REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17)
 
-REQ-031
+[REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17)
 
-REQ-032
+[REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17)
 
-REQ-033
+[REQ-033](https://dbx-solutions.atlassian.net/browse/KAN-18)
 
 Aplicar normativa vigente del Código de Comercio y
 Código Civil
@@ -650,46 +650,46 @@ www.dbx-solutions.com
 
 AN E TI
 
-REQ-034 Los memoriales deben contener el nombre del Específico Fase 3 Redactar documentos
+[REQ-034](https://dbx-solutions.atlassian.net/browse/KAN-18) Los memoriales deben contener el nombre del Específico Fase 3 Redactar documentos
 
 proceso, las partes y el radicado
 
-REQ-035 Redactar memoriales de solicitud de expediente Específico Fase 3 Redactar documentos
-REQ-036 Redactar memoriales de impulso procesal Específico Fase 3 Redactar documentos
-REQ-037 Redactar memoriales de solicitud de audiencias ante Específico Fase 3 Redactar documentos
+[REQ-035](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de solicitud de expediente Específico Fase 3 Redactar documentos
+[REQ-036](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de impulso procesal Específico Fase 3 Redactar documentos
+[REQ-037](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de solicitud de audiencias ante Específico Fase 3 Redactar documentos
 
 jueces de control de garantías o
 
-REQ-038 Redactar acciones de tutela por vulneración de Específico Fase 3 Acciones de tutela
+[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) Redactar acciones de tutela por vulneración de Específico Fase 3 Acciones de tutela
 derechos fundamentales consagrados en
 
-REQ-039 — Incluir en la tutela datos completos del accionante y Específico | Fase 3 Acciones de tutela
+[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) — Incluir en la tutela datos completos del accionante y Específico | Fase 3 Acciones de tutela
 accionado (nombre, razón social
 
-REQ-040 — Indicar el presunto derecho vulnerado y los Específico Fase 3 Acciones de tutela
+[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) — Indicar el presunto derecho vulnerado y los Específico Fase 3 Acciones de tutela
 fundamentos de derecho en la acción de tu
 
-REQ-041 Hacer seguimiento a la radicación de tutelas en Específico | Fase3 Acciones de tutela
+[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) Hacer seguimiento a la radicación de tutelas en Específico | Fase3 Acciones de tutela
 Tutelas en línea de la Rama Judicial
 
-REQ-042 — Contabilizar el término de respuesta del fallo de tutela — Específico Fase 3 Acciones de tutela
+[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) — Contabilizar el término de respuesta del fallo de tutela — Específico Fase 3 Acciones de tutela
 
 (10 días hábiles desde la ad
 
-REQ-043 | Revisar correos del despacho Específico Fase 2 Gestionar procesos
-REQ-044 Hacer seguimiento a las radicaciones de documentos Específico  Fase2 Gestionar procesos
-REQ-045 Revisar procesos y estados en la Rama Judicial y Específico | Fase2 Gestionar procesos
+[REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14) | Revisar correos del despacho Específico Fase 2 Gestionar procesos
+[REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14) Hacer seguimiento a las radicaciones de documentos Específico  Fase2 Gestionar procesos
+[REQ-045](https://dbx-solutions.atlassian.net/browse/KAN-14) Revisar procesos y estados en la Rama Judicial y Específico | Fase2 Gestionar procesos
 
 entidades administrativas
-REQ-046 Realizar seguimiento mensual a cada caso Específico Fase 2 Gestionar procesos
-REQ-047 — Enviar a los clientes informes con las novedades de Específico  Fase2 Gestionar procesos
+[REQ-046](https://dbx-solutions.atlassian.net/browse/KAN-14) Realizar seguimiento mensual a cada caso Específico Fase 2 Gestionar procesos
+[REQ-047](https://dbx-solutions.atlassian.net/browse/KAN-14) — Enviar a los clientes informes con las novedades de Específico  Fase2 Gestionar procesos
 sus procesos o consultorías
-REQ-048 — Organizar las ideas del abogado (no limitarse a buscar — Prioritario Fase 2 Rol estratégico del asistente
+[REQ-048](https://dbx-solutions.atlassian.net/browse/KAN-15) — Organizar las ideas del abogado (no limitarse a buscar — Prioritario Fase 2 Rol estratégico del asistente
 
 jurisprudencia)
 
-REQ-049 — Estructurar la estrategia jurídica del caso Prioritario Fase 2 Rol estratégico del asistente
-REQ-050 Mejorar las comunicaciones del despacho con clientes Específico Fase 2 Rol estratégico del asistente
+[REQ-049](https://dbx-solutions.atlassian.net/browse/KAN-15) — Estructurar la estrategia jurídica del caso Prioritario Fase 2 Rol estratégico del asistente
+[REQ-050](https://dbx-solutions.atlassian.net/browse/KAN-15) Mejorar las comunicaciones del despacho con clientes Específico Fase 2 Rol estratégico del asistente
 y terceros
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
@@ -709,28 +709,28 @@ hablar.
 
 CO rion J sore
 
-REQ-001 Contar con aproximadamente cinco años de experiencia en derecho en Prioritario Perfil y áreas del derecho
+[REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9) Contar con aproximadamente cinco años de experiencia en derecho en Prioritario Perfil y áreas del derecho
 Colombia
 
-REQ-002 Tener habilidad estratégica para el análisis y conducción de asuntos  Prioritario Perfil y áreas del derecho
+[REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9) Tener habilidad estratégica para el análisis y conducción de asuntos  Prioritario Perfil y áreas del derecho
 jurídicos
 
-REQ-003 Demostrar muy buena redacción jurídica y técnica Prioritario — Perfil y áreas del derecho
+[REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9) Demostrar muy buena redacción jurídica y técnica Prioritario — Perfil y áreas del derecho
 
-REQ-004 Conocimiento en derecho civil y contractual Importante — Perfil y áreas del derecho
+[REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho civil y contractual Importante — Perfil y áreas del derecho
 
-REQ-005 Conocimiento en derecho de familia Importante Perfil y áreas del derecho
+[REQ-005](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho de familia Importante Perfil y áreas del derecho
 
-REQ-006 Conocimiento en derecho societario Importante — Perfil y áreas del derecho
+[REQ-006](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho societario Importante — Perfil y áreas del derecho
 
-REQ-007 Conocimiento en procesos penales ante la Fiscalía General de la Nación — Importante — Perfil y áreas del derecho
+[REQ-007](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en procesos penales ante la Fiscalía General de la Nación — Importante — Perfil y áreas del derecho
 
 y asuntos penales ante juzgad
 
-REQ-008 Conocimiento en derecho al consumidor y reclamación ante entidades Especifico Perfil y áreas del derecho
-REQ-009 Conocimiento en derecho comercial Especifico Perfil y áreas del derecho
-REQ-010 Conocimiento en derecho laboral Especifico Perfil y áreas del derecho
-REQ-011 Aplicar normativa vigente del Código de Comercio y Código Civil Especifico Perfil y áreas del derecho
+[REQ-008](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho al consumidor y reclamación ante entidades Especifico Perfil y áreas del derecho
+[REQ-009](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho comercial Especifico Perfil y áreas del derecho
+[REQ-010](https://dbx-solutions.atlassian.net/browse/KAN-10) Conocimiento en derecho laboral Especifico Perfil y áreas del derecho
+[REQ-011](https://dbx-solutions.atlassian.net/browse/KAN-10) Aplicar normativa vigente del Código de Comercio y Código Civil Especifico Perfil y áreas del derecho
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
 Página 11
@@ -750,31 +750,31 @@ escribir a clientes.
 
 CO se
 
-REQ-012 Brindar atención permanente a los clientes Prioritario— Atender y asesorar al cliente
-REQ-013 Manejar situaciones delicadas con los clientes Prioritario Atender y asesorar al cliente
-REQ-014 Explicar en lenguaje sencillo los escenarios jurídicos que enfrenta quien Prioritario Atender y asesorar al cliente
+[REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11) Brindar atención permanente a los clientes Prioritario— Atender y asesorar al cliente
+[REQ-013](https://dbx-solutions.atlassian.net/browse/KAN-11) Manejar situaciones delicadas con los clientes Prioritario Atender y asesorar al cliente
+[REQ-014](https://dbx-solutions.atlassian.net/browse/KAN-11) Explicar en lenguaje sencillo los escenarios jurídicos que enfrenta quien Prioritario Atender y asesorar al cliente
 
 acude al abogado
 
-REQ-015 Redactar correos corporativos y mensajes profesionales para los clientes Importante — Atender y asesorar al cliente
-REQ-016 — Identificar riesgos jurídicos que aparezcan durante la consulta Prioritario Analizar y planificar el caso
-REQ-017 Convertir los hechos relatados por el cliente en narrativas ordenadas y — Prioritario Analizar y planificar el caso
+[REQ-015](https://dbx-solutions.atlassian.net/browse/KAN-11) Redactar correos corporativos y mensajes profesionales para los clientes Importante — Atender y asesorar al cliente
+[REQ-016](https://dbx-solutions.atlassian.net/browse/KAN-12) — Identificar riesgos jurídicos que aparezcan durante la consulta Prioritario Analizar y planificar el caso
+[REQ-017](https://dbx-solutions.atlassian.net/browse/KAN-12) Convertir los hechos relatados por el cliente en narrativas ordenadas y — Prioritario Analizar y planificar el caso
 
 convincentes para la autorid
 
-REQ-018 Diferenciar cuándo un asunto puede verse como civil o como penal Prioritario Analizar y planificar el caso
-REQ-019 Construir teorías del caso Prioritario— Analizar y planificar el caso
-REQ-020 Identificar pruebas faltantes en un asunto Específico — Analizar y planificar el caso
-REQ-021 Detectar debilidades en escritos y contestaciones Importante — Analizar y planificar el caso
-REQ-024 Redactar contratos complejos y personalizados de acuerdo al caso Prioritario Redactar documentos
-REQ-025 _Blindar contratos para proteger los intereses del cliente Prioritario— Redactar documentos
-REQ-026 Redactar contratos de prestación de servicios, rendimiento, inversión, — Específico Redactar documentos
+[REQ-018](https://dbx-solutions.atlassian.net/browse/KAN-12) Diferenciar cuándo un asunto puede verse como civil o como penal Prioritario Analizar y planificar el caso
+[REQ-019](https://dbx-solutions.atlassian.net/browse/KAN-12) Construir teorías del caso Prioritario— Analizar y planificar el caso
+[REQ-020](https://dbx-solutions.atlassian.net/browse/KAN-12) Identificar pruebas faltantes en un asunto Específico — Analizar y planificar el caso
+[REQ-021](https://dbx-solutions.atlassian.net/browse/KAN-12) Detectar debilidades en escritos y contestaciones Importante — Analizar y planificar el caso
+[REQ-024](https://dbx-solutions.atlassian.net/browse/KAN-13) Redactar contratos complejos y personalizados de acuerdo al caso Prioritario Redactar documentos
+[REQ-025](https://dbx-solutions.atlassian.net/browse/KAN-13) _Blindar contratos para proteger los intereses del cliente Prioritario— Redactar documentos
+[REQ-026](https://dbx-solutions.atlassian.net/browse/KAN-13) Redactar contratos de prestación de servicios, rendimiento, inversión, — Específico Redactar documentos
 
 alianzas empresariales y acue
-REQ-027 Preparar escritos para jueces, fiscales, comisarías y entidades Importante Redactar documentos
+[REQ-027](https://dbx-solutions.atlassian.net/browse/KAN-13) Preparar escritos para jueces, fiscales, comisarías y entidades Importante Redactar documentos
 administrativas
 
-REQ-028 — Elaborar recursos, solicitudes y excepciones Específico Redactar documentos
+[REQ-028](https://dbx-solutions.atlassian.net/browse/KAN-13) — Elaborar recursos, solicitudes y excepciones Específico Redactar documentos
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
 Página 12
@@ -793,21 +793,21 @@ estratégico.
 
 CO J ne
 
-REQ-022  Cuestionar los puntos débiles de la consulta antes de presentar un Específico Analizar y planificar el caso
-REQ-023 Preparar entrevistas ante la Fiscalía y ante el juez Específico — Analizar y planificar el caso
-REQ-043 Revisar correos del despacho Específico Gestionar procesos
-REQ-044 Hacer seguimiento a las radicaciones de documentos Específico — Gestionar procesos
-REQ-045 Revisar procesos y estados en la Rama Judicial y entidades Específico Gestionar procesos
+[REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16)  Cuestionar los puntos débiles de la consulta antes de presentar un Específico Analizar y planificar el caso
+[REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16) Preparar entrevistas ante la Fiscalía y ante el juez Específico — Analizar y planificar el caso
+[REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14) Revisar correos del despacho Específico Gestionar procesos
+[REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14) Hacer seguimiento a las radicaciones de documentos Específico — Gestionar procesos
+[REQ-045](https://dbx-solutions.atlassian.net/browse/KAN-14) Revisar procesos y estados en la Rama Judicial y entidades Específico Gestionar procesos
 
 administrativas
-REQ-046 Realizar seguimiento mensual a cada caso Específico — Gestionar procesos
-REQ-047 Enviar a los clientes informes con las novedades de sus procesos o Específico Gestionar procesos
+[REQ-046](https://dbx-solutions.atlassian.net/browse/KAN-14) Realizar seguimiento mensual a cada caso Específico — Gestionar procesos
+[REQ-047](https://dbx-solutions.atlassian.net/browse/KAN-14) Enviar a los clientes informes con las novedades de sus procesos o Específico Gestionar procesos
 
 consultorías
 
-REQ-048 Organizar las ideas del abogado (no limitarse a buscar jurisprudencia) Prioritario Rol estratégico del asistente
-REQ-049 — Estructurar la estrategia jurídica del caso Prioritario Rol estratégico del asistente
-REQ-050 Mejorar las comunicaciones del despacho con clientes y terceros Específico — Rol estratégico del asistente
+[REQ-048](https://dbx-solutions.atlassian.net/browse/KAN-15) Organizar las ideas del abogado (no limitarse a buscar jurisprudencia) Prioritario Rol estratégico del asistente
+[REQ-049](https://dbx-solutions.atlassian.net/browse/KAN-15) — Estructurar la estrategia jurídica del caso Prioritario Rol estratégico del asistente
+[REQ-050](https://dbx-solutions.atlassian.net/browse/KAN-15) Mejorar las comunicaciones del despacho con clientes y terceros Específico — Rol estratégico del asistente
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
 Página 13
@@ -825,46 +825,46 @@ En pocas palabras: Conceptos, memoriales avanzados y tutelas con control de plaz
 
 CO
 
-REQ-029 Redactar, proyectar y emitir conceptos jurídicos en materia civil, Específico Emitir conceptos jurídicos
+[REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17) Redactar, proyectar y emitir conceptos jurídicos en materia civil, Específico Emitir conceptos jurídicos
 comercial, societaria, de familia
 
-REQ-030 Los conceptos jurídicos deben incluir el nombre del cliente y la Específico Emitir conceptos jurídicos
+[REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17) Los conceptos jurídicos deben incluir el nombre del cliente y la Específico Emitir conceptos jurídicos
 descripción del problema jurídico
 
-REQ-031  Indagar sobre las normas vigentes en Colombia y formular uma Específico Emitir conceptos jurídicos
+[REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17)  Indagar sobre las normas vigentes en Colombia y formular uma Específico Emitir conceptos jurídicos
 conclusión que guíe la decisión del cli
 
-REQ-032 Emitir recomendaciones jurídicas favorables para que el cliente tome Específico Emitir conceptos jurídicos
+[REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17) Emitir recomendaciones jurídicas favorables para que el cliente tome Específico Emitir conceptos jurídicos
 decisiones informadas
 
-REQ-033 Redactar memoriales dirigidos a juzgados, Fiscalía o entidades Específico Redactar documentos
+[REQ-033](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales dirigidos a juzgados, Fiscalía o entidades Específico Redactar documentos
 
 administrativas para seguimiento proc
 
-REQ-034 Los memoriales deben contener el nombre del proceso, las partes y el Específico Redactar documentos
+[REQ-034](https://dbx-solutions.atlassian.net/browse/KAN-18) Los memoriales deben contener el nombre del proceso, las partes y el Específico Redactar documentos
 radicado
 
-REQ-035 Redactar memoriales de solicitud de expediente Específico Redactar documentos
+[REQ-035](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de solicitud de expediente Específico Redactar documentos
 
-REQ-036 Redactar memoriales de impulso procesal Específico Redactar documentos
+[REQ-036](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de impulso procesal Específico Redactar documentos
 
-REQ-037 Redactar memoriales de solicitud de audiencias ante jueces de control Específico Redactar documentos
+[REQ-037](https://dbx-solutions.atlassian.net/browse/KAN-18) Redactar memoriales de solicitud de audiencias ante jueces de control Específico Redactar documentos
 
 de garantías o audiencias de c
 
-REQ-038 Redactar acciones de tutela por vulneración de derechos fundamentales — Específico Acciones de tutela
+[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) Redactar acciones de tutela por vulneración de derechos fundamentales — Específico Acciones de tutela
 consagrados en la Constitución
 
-REQ-039 Incluir en la tutela datos completos del accionante y accionado (nombre, | Específico Acciones de tutela
+[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) Incluir en la tutela datos completos del accionante y accionado (nombre, | Específico Acciones de tutela
 razón social, cédula/NIT, c
 
-REQ-040 Indicar el presunto derecho vulnerado y los fundamentos de derecho en — Específico Acciones de tutela
+[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) Indicar el presunto derecho vulnerado y los fundamentos de derecho en — Específico Acciones de tutela
 la acción de tutela
 
-REQ-041 Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Específico Acciones de tutela
+[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Específico Acciones de tutela
 Rama Judicial
 
-REQ-042 — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles Específico Acciones de tutela
+[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles Específico Acciones de tutela
 
 desde la admisión)
 
@@ -882,7 +882,7 @@ plan de construcción: dicen qué debe hacer y cómo sabremos que lo hace bien.
 II TT
 Notas y transcripciones Lo que el abogado dijo en sus propias palabras
 
-Listado de requisitos 50 necesidades concretas, numeradas (REQ-001 a REQ-050)
+Listado de requisitos 50 necesidades concretas, numeradas ([REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9) a [REQ-050](https://dbx-solutions.atlassian.net/browse/KAN-15))
 
 Instrucciones del asistente Cómo debe hablar, qué puede y qué no puede hacer
 
@@ -900,17 +900,17 @@ Recuerde: la IA apoya; el abogado decide y responde ante el cliente.
 
 o Fase | El asistente podrá... Requisitos clave
 
-Fase 0 Enseñar al asistente quién es el abogado, qué áreas practica y REQ-001,  REQ-002,  REQ-003,
-cómo debe hablar. REQ-004... (+7)
+Fase 0 Enseñar al asistente quién es el abogado, qué áreas practica y [REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9),  [REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9),  [REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9),
+cómo debe hablar. [REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10)... (+7)
 
-Fase 1 Primera versión útil: atender consultas, ver riesgos, redactar REQ-012,  REQ-013,  REQ-014,
-borradores y escribir a clientes. REQ-015... (+11)
+Fase 1 Primera versión útil: atender consultas, ver riesgos, redactar [REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11),  [REQ-013](https://dbx-solutions.atlassian.net/browse/KAN-11),  [REQ-014](https://dbx-solutions.atlassian.net/browse/KAN-11),
+borradores y escribir a clientes. [REQ-015](https://dbx-solutions.atlassian.net/browse/KAN-11)... (+11)
 
-Fase 2 Seguimiento de procesos, informes al cliente, revisión de REQ-022,  REQ-023,  REQ-043,
-correos y apoyo estratégico. REQ-044... (+6)
+Fase 2 Seguimiento de procesos, informes al cliente, revisión de [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16),  [REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16),  [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14),
+correos y apoyo estratégico. [REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14)... (+6)
 
-Fase 3 Conceptos, memoriales avanzados y tutelas con control de REQ-029, REQ-030,  REQ-031,
-plazos. REQ-032... (+10)
+Fase 3 Conceptos, memoriales avanzados y tutelas con control de [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17), [REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17),  [REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17),
+plazos. [REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17)... (+10)
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
 Página 15
@@ -921,25 +921,25 @@ Página 15
 
 Listo para la primera versión útil cuando:
 
-+ REQ-001: Contar con aproximadamente cinco años de experiencia en derecho en Colombia
++ [REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9): Contar con aproximadamente cinco años de experiencia en derecho en Colombia
 
-+ REQ-002: Tener habilidad estratégica para el análisis y conducción de asuntos jurídicos
++ [REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9): Tener habilidad estratégica para el análisis y conducción de asuntos jurídicos
 
-+ REQ-003: Demostrar muy buena redacción jurídica y técnica
++ [REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9): Demostrar muy buena redacción jurídica y técnica
 
-+ REQ-004: Conocimiento en derecho civil y contractual
++ [REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho civil y contractual
 
-+ REQ-005: Conocimiento en derecho de familia
++ [REQ-005](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho de familia
 
-+ REQ-006: Conocimiento en derecho societario
++ [REQ-006](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho societario
 
-+ REQ-007: Conocimiento en procesos penales ante la Fiscalía General de la Nación y asuntos
++ [REQ-007](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en procesos penales ante la Fiscalía General de la Nación y asuntos
 
 penales a
-+ REQ-008: Conocimiento en derecho al consumidor y reclamación ante entidades
-+ REQ-009: Conocimiento en derecho comercial
-+ REQ-010: Conocimiento en derecho laboral
-+ REQ-011: Aplicar normativa vigente del Código de Comercio y Código Civil
++ [REQ-008](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho al consumidor y reclamación ante entidades
++ [REQ-009](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho comercial
++ [REQ-010](https://dbx-solutions.atlassian.net/browse/KAN-10): Conocimiento en derecho laboral
++ [REQ-011](https://dbx-solutions.atlassian.net/browse/KAN-10): Aplicar normativa vigente del Código de Comercio y Código Civil
 
 Riesgos que tenemos presentes
 
@@ -968,97 +968,97 @@ Página 1:
 
 Referencia detallada para el equipo. Cada requisito incluye la frase del audio original.
 
-REQ-001 [Prioritario] — Contar con aproximadamente cinco años de experiencia en derecho en Colombia
+[REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9) [Prioritario] — Contar con aproximadamente cinco años de experiencia en derecho en Colombia
 Cita: «cinco años de experiencia en derecho en Colombia» - Fuente: audio_001
 
-REQ-002 [Prioritario] — Tener habilidad estratégica para el análisis y conducción de asuntos jurídicos
+[REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9) [Prioritario] — Tener habilidad estratégica para el análisis y conducción de asuntos jurídicos
 Cita: «habilidad estratégica» - Fuente: audio_001
 
-REQ-003 [Prioritario] — Demostrar muy buena redacción jurídica y técnica
+[REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9) [Prioritario] — Demostrar muy buena redacción jurídica y técnica
 
 Cita: «muy buena redacción» - Fuente: audio_001
 
-REQ-004 [Importante] — Conocimiento en derecho civil y contractual
+[REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10) [Importante] — Conocimiento en derecho civil y contractual
 
 Cita: «derecho civil y contractual» - Fuente: audio_001, audio_002
 
-REQ-005 [Importante] — Conocimiento en derecho de familia
+[REQ-005](https://dbx-solutions.atlassian.net/browse/KAN-10) [Importante] — Conocimiento en derecho de familia
 Cita: «derecho de familia» - Fuente: audio_001, audio_002
 
-REQ-006 [Importante] — Conocimiento en derecho societario
+[REQ-006](https://dbx-solutions.atlassian.net/browse/KAN-10) [Importante] — Conocimiento en derecho societario
 
 Cita: «derecho societario» - Fuente: audio_001, audio_002
 
-REQ-007 [Importante] — Conocimiento en procesos penales ante la Fiscalía General de la Nación y
+[REQ-007](https://dbx-solutions.atlassian.net/browse/KAN-10) [Importante] — Conocimiento en procesos penales ante la Fiscalía General de la Nación y
 asuntos penales ante juzgados
 
 Cita: «procesos penales ante la Fiscalía General de la Nación» - Fuente: audio_001, audio_002
 
-REQ-008 [Específico] — Conocimiento en derecho al consumidor y reclamación ante entidades
+[REQ-008](https://dbx-solutions.atlassian.net/browse/KAN-10) [Específico] — Conocimiento en derecho al consumidor y reclamación ante entidades
 
 Cita: «derecho al consumidor y reclamación de entidades» - Fuente: audio_001
 
-REQ-009 [Específico] — Conocimiento en derecho comercial
+[REQ-009](https://dbx-solutions.atlassian.net/browse/KAN-10) [Específico] — Conocimiento en derecho comercial
 Cita: «derecho comercial» + Fuente: audio_002
 
-REQ-010 [Específico] — Conocimiento en derecho laboral
+[REQ-010](https://dbx-solutions.atlassian.net/browse/KAN-10) [Específico] — Conocimiento en derecho laboral
 
 Cita: «derecho laboral» - Fuente: audio_002
 
-REQ-011 [Específico] — Aplicar normativa vigente del Código de Comercio y Código Civil
+[REQ-011](https://dbx-solutions.atlassian.net/browse/KAN-10) [Específico] — Aplicar normativa vigente del Código de Comercio y Código Civil
 
 Cita: «normativa vigente del Códido de Comercio y Código Civil» - Fuente: audio_001
 
-REQ-012 [Prioritario] — Brindar atención permanente a los clientes
+[REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11) [Prioritario] — Brindar atención permanente a los clientes
 
 Cita: «atención permanente a los clientes» - Fuente: audio_001
 
-REQ-013 [Prioritario] — Manejar situaciones delicadas con los clientes
+[REQ-013](https://dbx-solutions.atlassian.net/browse/KAN-11) [Prioritario] — Manejar situaciones delicadas con los clientes
 
 Cita: «manejo de situaciones delicadas» - Fuente: audio_001
 
-REQ-014 [Prioritario] — Explicar en lenguaje sencillo los escenarios jurídicos que enfrenta quien acude
+[REQ-014](https://dbx-solutions.atlassian.net/browse/KAN-11) [Prioritario] — Explicar en lenguaje sencillo los escenarios jurídicos que enfrenta quien acude
 al abogado
 
 Cita: «explicar en un lenguaje muy sencillo cuáles son los escenarios jurídicos» - Fuente: audio_001
 
-REQ-015 [Importante] — Redactar correos corporativos y mensajes profesionales para los clientes
+[REQ-015](https://dbx-solutions.atlassian.net/browse/KAN-11) [Importante] — Redactar correos corporativos y mensajes profesionales para los clientes
 Cita: «redactar correos corporativos, mensajes profesionales para los clientes» - Fuente: audio_001
 
-REQ-016 [Prioritario] — Identificar riesgos jurídicos que aparezcan durante la consulta
+[REQ-016](https://dbx-solutions.atlassian.net/browse/KAN-12) [Prioritario] — Identificar riesgos jurídicos que aparezcan durante la consulta
 
 Cita: «identificar los riesgos y los jurídicos que aparezcan durante la consulta» - Fuente: audio_001
 
-REQ-017 [Prioritario] — Convertir los hechos relatados por el cliente en narrativas ordenadas y
+[REQ-017](https://dbx-solutions.atlassian.net/browse/KAN-12) [Prioritario] — Convertir los hechos relatados por el cliente en narrativas ordenadas y
 convincentes para la autoridad
 
 Cita: «convertir los hechos que la cliente o cliente dice de una manera un poco más ordenada con unas narrativas que sean
 convincentes para la autoridad» - Fuente: audio_001
 
-REQ-018 [Prioritario] — Diferenciar cuándo un asunto puede verse como civil o como penal
+[REQ-018](https://dbx-solutions.atlassian.net/browse/KAN-12) [Prioritario] — Diferenciar cuándo un asunto puede verse como civil o como penal
 
 Cita: «diferenciar cuándo el asunto puede verse como civil o puede verse como penal» - Fuente: audio_001
 
-REQ-019 [Prioritario] — Construir teorías del caso
+[REQ-019](https://dbx-solutions.atlassian.net/browse/KAN-12) [Prioritario] — Construir teorías del caso
 
 Cita: «construir teorías del caso» - Fuente: audio_001
 
-REQ-020 [Específico] — Identificar pruebas faltantes en un asunto
+[REQ-020](https://dbx-solutions.atlassian.net/browse/KAN-12) [Específico] — Identificar pruebas faltantes en un asunto
 
 Cita: «identificar, digamos, pruebas faltantes» - Fuente: audio_001
 
-REQ-021 [Importante] — Detectar debilidades en escritos y contestaciones
+[REQ-021](https://dbx-solutions.atlassian.net/browse/KAN-12) [Importante] — Detectar debilidades en escritos y contestaciones
 
 Cita: «defectar algunas debilidades en los escritos, en las contestaciones» - Fuente: audio_001
 
-REQ-022 [Específico] — Cuestionar los puntos débiles de la consulta antes de presentar un escrito
+[REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16) [Específico] — Cuestionar los puntos débiles de la consulta antes de presentar un escrito
 Cita: «cuestiones los puntos débiles de la consulta antes de presentar un escrito» - Fuente: audio_001
 
-REQ-023 [Específico] — Preparar entrevistas ante la Fiscalía y ante el juez
+[REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16) [Específico] — Preparar entrevistas ante la Fiscalía y ante el juez
 
 Cita: «preparar entrevistas ante la fiscalía, ante el juez» - Fuente: audio_001
 
-REQ-024 [Prioritario] — Redactar contratos complejos y personalizados de acuerdo al caso
+[REQ-024](https://dbx-solutions.atlassian.net/browse/KAN-13) [Prioritario] — Redactar contratos complejos y personalizados de acuerdo al caso
 Cita: «redacción de contratos complejos y personalizados de acuerdo al caso» - Fuente: audio_001
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
@@ -1066,100 +1066,100 @@ Página 17
 
 ### Página 18
 
-REQ-025 [Prioritario] — Blindar contratos para proteger los intereses del cliente
+[REQ-025](https://dbx-solutions.atlassian.net/browse/KAN-13) [Prioritario] — Blindar contratos para proteger los intereses del cliente
 Cita: «blindar contratos para proteger sus intereses» - Fuente: audio_001
 
-REQ-026 [Específico] — Redactar contratos de prestación de servicios, rendi
+[REQ-026](https://dbx-solutions.atlassian.net/browse/KAN-13) [Específico] — Redactar contratos de prestación de servicios, rendi
 empresariales y acuerdos societarios
 
 Cita: «departaciones de servicios, de rendamiento, de inversión, de alianzas empresariares y acuerdos societarios» - Fuente
 audio_001
 
-REQ-027 [Importante] — Preparar escritos para jueces, fiscales, comisarías y entidades administrativas
+[REQ-027](https://dbx-solutions.atlassian.net/browse/KAN-13) [Importante] — Preparar escritos para jueces, fiscales, comisarías y entidades administrativas
 Cita: «preparar escritos para jueces, fiscales, comisarias y entidades administrativas» - Fuente: audio_001, audio_002
 
-REQ-028 [Específico] — Elaborar recursos, solicitudes y excepciones
+[REQ-028](https://dbx-solutions.atlassian.net/browse/KAN-13) [Específico] — Elaborar recursos, solicitudes y excepciones
 
 Cita: «elaborar recursos, solicitudes, excepciones» - Fuente: audio_001
 
-REQ-029 [Espe 0] — Redactar, proyectar y e
+[REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17) [Espe 0] — Redactar, proyectar y e
 societaria, de fami , laboral y penal
 
 Cita: «redactar, proyectar, emitir conceptos jurídicos» - Fuente: audio_002
 
-REQ-030 [Específico] — Los conceptos jurídicos deben incluir el nombre del cliente y la descripción del
+[REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17) [Específico] — Los conceptos jurídicos deben incluir el nombre del cliente y la descripción del
 problema jurídico
 
 Cita: «abarcar el nombre del cliente, cuál es el problema jurídico» - Fuente: audio_002
 
-REQ-031 [Específico] — Indagar sobre las normas vigentes en Colombia y formular una conclusión que
+[REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17) [Específico] — Indagar sobre las normas vigentes en Colombia y formular una conclusión que
 guíe la decisión del cliente
 
 Cita: «indagar sobre las normas vigentes en Colombia y de allí sacar una conclusión» - Fuente: audio_002
 
-REQ-032 [Específico] — Emitir recomendaciones jurídicas favorables para que el cliente tome decisiones
+[REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17) [Específico] — Emitir recomendaciones jurídicas favorables para que el cliente tome decisiones
 informadas
 
 Cita: «recomendación que en derecho sea más favorable para él» - Fuente: audio_002
 
-REQ-033 [Específico] — Redactar memoriales dirigidos a juzgados, Fiscalía o entidades admi
+[REQ-033](https://dbx-solutions.atlassian.net/browse/KAN-18) [Específico] — Redactar memoriales dirigidos a juzgados, Fiscalía o entidades admi
 para seguimiento procesal
 
 Cita: «escritos dirigidos a los juzgados o entidades ya sea la fiscalía general de la nación» - Fuente: audio_002
-REQ-034 [Específico] — Los memoriales deben contener el nombre del proceso, las partes y el radicado
+[REQ-034](https://dbx-solutions.atlassian.net/browse/KAN-18) [Específico] — Los memoriales deben contener el nombre del proceso, las partes y el radicado
 Cita: «nombre de los procesos, el nombre de las partes, el radicado» - Fuente: audio_002
 
-REQ-035 [Específico] — Redactar memoriales de solicitud de expediente
+[REQ-035](https://dbx-solutions.atlassian.net/browse/KAN-18) [Específico] — Redactar memoriales de solicitud de expediente
 
 Cita: «memoriales de solicitud de expediente» - Fuente: audio_002
 
-REQ-036 [Específico] — Redactar memoriales de impulso procesal
+[REQ-036](https://dbx-solutions.atlassian.net/browse/KAN-18) [Específico] — Redactar memoriales de impulso procesal
 
 Cita: «memoriales de impulso procesal» - Fuente: audio_002
 
-REQ-037 [Específico] — Redactar memoriales de solicitud de audiencias ante jueces de control de
+[REQ-037](https://dbx-solutions.atlassian.net/browse/KAN-18) [Específico] — Redactar memoriales de solicitud de audiencias ante jueces de control de
 garantías o audiencias de conciliación
 
 Cita: «memoriales de solicitud de audiencias ante jueves de control de garantías» - Fuente: audio_002
 
-REQ-038 [Específico] — Redactar acciones de tutela por vulneración de derechos fundamentales
+[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Redactar acciones de tutela por vulneración de derechos fundamentales
 consagrados en la Constitución Política
 
 Cita: «redacción de acciones de tutela por vulneración a derechos fundamentales» - Fuente: audio_003
 
-REQ-039 [Específico] — Incluir en la tutela datos completos del accionante y accionado (nombre, razón
+[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Incluir en la tutela datos completos del accionante y accionado (nombre, razón
 social, cédula/NIT, correo, domicilio)
 
 Cita: «datos del accionante y del accionado, datos completos» - Fuente: audio_003
 
-REQ-040 [Específico] — Indicar el presunto derecho vulnerado y los fundamentos de derecho en la
+[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Indicar el presunto derecho vulnerado y los fundamentos de derecho en la
 acción de tutela
 
 Cita: «presunto derecho que está vulnerado» - Fuente: audio_003
 
-REQ-041 [Específico] — Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Rama
+[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Rama
 Judicial
 
 Cita: «seguimiento a la radicación en la página de la Rama Judicial de Tutelas en línea» - Fuente: audio_003
 
-REQ-042 [Específico] — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles desde la
+[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) [Específico] — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles desde la
 admisión)
 
 Cita: «contabilizar el término de respuesta del fallo de tutela que son de 10 días hábiles» - Fuente: audio_003
 
-REQ-043 [Específico] — Revisar correos del despacho
+[REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Revisar correos del despacho
 
 Cita: «revisar correos» - Fuente: audio_001
 
-REQ-044 [Específico] — Hacer seguimiento a las radicaciones de documentos
+[REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Hacer seguimiento a las radicaciones de documentos
 
 Cita: «seguimiento a las radicaciones de documentos» - Fuente: audio_001
 
-REQ-045 [Específico] — Revisar procesos y estados en la Rama Judicial y entidades administrativas
+[REQ-045](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Revisar procesos y estados en la Rama Judicial y entidades administrativas
 
 Cita: «revisar procesos y los estados en la rama judicial» - Fuente: audio_001
 
-REQ-046 [Específico] — Realizar seguimiento mensual a cada caso
+[REQ-046](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Realizar seguimiento mensual a cada caso
 
 Cita: «seguimiento mensual a cada caso» - Fuente: audio_001
 
@@ -1172,16 +1172,16 @@ Pagina 1:
 
 ### Página 19
 
-REQ-047 [Específico] — Enviar a los clientes informes con las novedades de sus procesos o consultorías
+[REQ-047](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Enviar a los clientes informes con las novedades de sus procesos o consultorías
 Cita: «enviar a los clientes contándole que novedades ha habido durante sus procesos» - Fuente: audio_001
 
-REQ-048 [Prioritario] — Organizar las ideas del abogado (no limitarse a buscar jurisprudencia)
+[REQ-048](https://dbx-solutions.atlassian.net/browse/KAN-15) [Prioritario] — Organizar las ideas del abogado (no limitarse a buscar jurisprudencia)
 Cita: «no lo usaría simplemente para buscar jurisprudencia, sino para que me organizen las ideas» - Fuente: audio_001
-REQ-049 [Prioritario] — Estructurar la estrategia jurídica del caso
+[REQ-049](https://dbx-solutions.atlassian.net/browse/KAN-15) [Prioritario] — Estructurar la estrategia jurídica del caso
 
 Cita: «estructura estrategia» - Fuente: audio_001
 
-REQ-050 [Específico] — Mejorar las comunicaciones del despacho con clientes y terceros
+[REQ-050](https://dbx-solutions.atlassian.net/browse/KAN-15) [Específico] — Mejorar las comunicaciones del despacho con clientes y terceros
 Cita: «mejores comunicaciones» - Fuente: audio_001
 
 Archivos del proyecto

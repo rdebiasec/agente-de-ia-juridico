@@ -19,28 +19,14 @@ services:
       - key: SITE_USERNAME
         value: despacho
       - key: SITE_PASSWORD
-        value: Kx9mP2vL8nQw4RsT
+        sync: false
       - key: SESSION_SECRET
-        value: f7a9c2e1b4d6083a5f2e9c1b7d4a608
+        sync: false
       - key: SESSION_IDLE_MINUTES
         value: "30"
       - key: SESSION_COOKIE_SECURE
         value: "true"
       - key: OPENAI_MODEL
         value: gpt-4o-mini
-      - key: REQUIRE_HUMAN_REVIEW_WHATSAPP
-        value: "true"
-      - key: SLACK_REVIEW_CHANNEL
-        value: "#revision-abogado"
       - key: OPENAI_API_KEY
-        sync: false
-      - key: SLACK_BOT_TOKEN
-        sync: false
-      - key: SLACK_SIGNING_SECRET
-        sync: false
-      - key: TWILIO_ACCOUNT_SID
-        sync: false
-      - key: TWILIO_AUTH_TOKEN
-        sync: false
-      - key: TWILIO_WHATSAPP_FROM
         sync: false

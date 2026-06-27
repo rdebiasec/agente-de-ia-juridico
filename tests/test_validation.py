@@ -292,3 +292,7 @@ async def test_manual_page_and_app_link():
     assert "La IA propone; usted revisa y aprueba" in manual
     assert 'href="/"' in manual
     assert "Volver a Herramienta" in manual
+    assert "Descargar informe (.doc)" not in manual
+    assert "Mostrar solo pendientes" not in manual
+    assert "mensajes vinculados" in manual
+    assert "Generar Nuevas Preguntas" in manual

@@ -65,13 +65,12 @@ git push origin main
 2. **New → Blueprint** (o Web Service)
 3. Conecta el repo **`agente-de-ia-juridico`**
 4. Render detecta `render.yaml` en la raíz
-5. En **Environment**, añade secretos:
+5. En **Environment**, añade secretos para Fase 0:
    - `OPENAI_API_KEY` (obligatorio para GPT)
    - `SITE_USERNAME`, `SITE_PASSWORD`, `SESSION_SECRET` (login web Fase 0)
    - `SESSION_IDLE_MINUTES=30`
    - `SESSION_COOKIE_SECURE=true` (solo producción HTTPS)
-   - `SLACK_BOT_TOKEN` + `SLACK_SIGNING_SECRET` (Slack)
-   - `TWILIO_*` (WhatsApp, cuando lo actives)
+   - `OPENAI_MODEL=gpt-4o-mini`
 6. Deploy → URL: `https://agente-de-ia-juridico.onrender.com` (o similar)
 
 ### Probar en Render
@@ -86,13 +85,33 @@ curl -X POST https://TU-APP.onrender.com/chat \
 En producción, `GET /health` debe mostrar `"web_auth_enabled": true` para que
 el flujo de login/logout sea idéntico al local.
 
-### WhatsApp (Twilio)
+Para cierre de Fase 0, también debe verse:
 
-Webhook URL en Twilio:
+- `"slack_configured": false`
+- `"whatsapp_configured": false`
 
+## Restricción de alcance (Fase 0 y Fase 1)
+
+No activar Slack ni WhatsApp en estas fases. El despliegue de Render se usa solo
+para validar la web de pruebas, autenticación, salud del servicio y chat dentro
+del alcance REQ-001..REQ-011.
+
+---
+
+## Checklist post-deploy (Fase 0)
+
+```bash
+curl https://TU-APP.onrender.com/health
+curl https://TU-APP.onrender.com/auth/status
+curl -I https://TU-APP.onrender.com/
+curl -I https://TU-APP.onrender.com/login
 ```
-https://TU-APP.onrender.com/whatsapp/webhook
-```
+
+Resultados esperados:
+- `/health` con `status=ok`, `fase_activa=0`, `web_auth_enabled=true`
+- `/` redirige a login cuando no hay sesión
+- `/login` disponible
+- `slack_configured=false` y `whatsapp_configured=false`
 
 ---
 
