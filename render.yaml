@@ -15,7 +15,7 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: ACTIVE_PHASE
-        value: "0"
+        value: "1"
       - key: SITE_USERNAME
         value: despacho
       - key: SITE_PASSWORD
