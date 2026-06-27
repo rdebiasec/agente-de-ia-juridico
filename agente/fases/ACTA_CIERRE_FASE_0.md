@@ -1,7 +1,7 @@
 # Acta de cierre Fase 0
 
-Fecha: 2026-06-26
-Estado: Pre-aprobacion (lista para decision go/no-go)
+Fecha: 2026-06-27
+Estado: Cerrada (aprobada)
 
 ## Alcance evaluado
 
@@ -31,25 +31,25 @@ Estado: Pre-aprobacion (lista para decision go/no-go)
   - Login/chat/logout operativos.
   - `slack_configured=false`, `whatsapp_configured=false`.
 
-## Hallazgo de consistencia local vs Render
+## Cierre de consistencia local vs Render
 
-Se detecto diferencia menor de salida en Render: en algunas respuestas aparece
-disclaimer duplicado, mientras en local ya se deduplica.
+Hallazgo previo:
+- En Render aparecia disclaimer duplicado en algunas respuestas de chat.
 
-Interpretacion:
-- El baseline local contiene la correccion.
-- Render requiere redeploy de este baseline para quedar completamente alineado.
+Accion ejecutada:
+- Se desplego el baseline actualizado en `main` y se revalido la consulta en Render.
 
-## Decision recomendada
+Resultado de revalidacion en produccion (Render):
+- `GET /health` => `status=ok`, `fase_activa=0`, `web_auth_enabled=true`.
+- `POST /auth/login` => autenticacion correcta.
+- `POST /chat` => salida con disclaimer deduplicado (una sola ocurrencia).
+- `slack_configured=false` y `whatsapp_configured=false`.
 
-Go condicional.
+## Decision final
 
-Condicion unica para cierre definitivo:
-- desplegar baseline actual en Render y revalidar una consulta de chat para
-  confirmar deduplicacion de disclaimer.
+Go confirmado.
 
 ## Resultado ejecutivo
 
-Fase 0 queda tecnicamente estable y cerrable, sin activacion de canales, con un
-ultimo paso operativo de despliegue para alinear completamente Render con el
-baseline local.
+Fase 0 queda tecnicamente estable y cerrada, con entorno local y Render
+alineados y sin activacion de canales externos.
