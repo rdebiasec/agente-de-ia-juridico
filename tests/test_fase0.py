@@ -31,7 +31,7 @@ async def test_health():
         r = await client.get("/health")
     assert r.status_code == 200
     data = r.json()
-    assert data["fase_activa"] == 0
+    assert data["fase_activa"] == 1
     assert data["status"] == "ok"
 
 
@@ -50,7 +50,7 @@ async def test_chat_areas_derecho_fallback():
 
 
 @pytest.mark.asyncio
-async def test_chat_fase1_blocked():
+async def test_chat_fase1_contract_allowed():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -59,11 +59,13 @@ async def test_chat_fase1_blocked():
         )
     assert r.status_code == 200
     data = r.json()
-    assert "no está activa" in data["text"].lower() or "fase" in data["text"].lower()
+    assert "no está activa" not in data["text"].lower()
+    assert "revisión" in data["text"].lower() or "aprobación" in data["text"].lower()
+    assert data["pending_review"] is True
 
 
 @pytest.mark.asyncio
-async def test_chat_fase1_strategy_blocked():
+async def test_chat_fase1_strategy_allowed():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -72,12 +74,12 @@ async def test_chat_fase1_strategy_blocked():
         )
     assert r.status_code == 200
     data = r.json()
-    assert "fase" in data["text"].lower()
-    assert "no" in data["text"].lower() and "activa" in data["text"].lower()
+    assert "no está activa" not in data["text"].lower()
+    assert data["pending_review"] is True
 
 
 @pytest.mark.asyncio
-async def test_chat_mixed_scope_is_blocked():
+async def test_chat_mixed_scope_is_allowed_in_fase1():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -86,8 +88,36 @@ async def test_chat_mixed_scope_is_blocked():
         )
     assert r.status_code == 200
     data = r.json()
-    assert "fase" in data["text"].lower()
-    assert "no" in data["text"].lower() and "activa" in data["text"].lower()
+    assert "no está activa" not in data["text"].lower()
+    assert data["pending_review"] is True
+
+
+@pytest.mark.asyncio
+async def test_chat_fase2_capability_is_blocked():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.post(
+            "/chat",
+            json={"message": "Haga seguimiento mensual al radicado y envíe informe", "user_id": "test"},
+        )
+    assert r.status_code == 200
+    data = r.json()
+    lowered = data["text"].lower()
+    assert ("no está activa" in lowered) or ("no tengo la habilidad" in lowered) or ("no puedo" in lowered)
+
+
+@pytest.mark.asyncio
+async def test_chat_fase3_capability_is_blocked():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.post(
+            "/chat",
+            json={"message": "Redacta una tutela por derecho de petición", "user_id": "test"},
+        )
+    assert r.status_code == 200
+    data = r.json()
+    lowered = data["text"].lower()
+    assert ("no está activa" in lowered) or ("no puedo" in lowered)
 
 
 @pytest.mark.asyncio
@@ -107,8 +137,8 @@ async def test_guardrails_disclaimer_deduplicates():
         "*Borrador informativo — requiere revisión y aprobación del abogado.*\n"
         "---\n"
         "*Borrador informativo — requiere revisión y aprobación del abogado.*\n"
-        "Fase 0 · Borrador"
+        "Fase 1 · Borrador"
     )
     out = apply_output_guardrails(duplicated)
     assert out.count(DISCLAIMER_TEXT) == 1
-    assert "Fase 0 · Borrador" not in out
+    assert "Fase 1 · Borrador" not in out

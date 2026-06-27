@@ -1,4 +1,4 @@
-/** Catálogo de pruebas Fase 0 — rúbrica fija (criterios + pesos = 100). */
+/** Catálogo de pruebas Fase 1 — rúbrica fija (criterios + pesos = 100). */
 const VALIDATION_TESTS = [
   {
     id: "connection",
@@ -6,89 +6,110 @@ const VALIDATION_TESTS = [
     weight: 10,
     reqTag: null,
     instructions:
-      "Observe el indicador en la barra superior del chat. Debe mostrar «Conectado · Fase 0 activa» con punto verde.",
-    expect: "El servicio responde y confirma que la fase activa es 0.",
-    passCriteria: "El estado indica conexión correcta y Fase 0 activa.",
-    failCriteria: "Aparece error de conexión persistente o fase distinta de 0.",
+      "Observe el indicador en la barra superior del chat. Debe mostrar «Conectado · Fase 1 activa» con punto verde.",
+    expect: "El servicio responde y confirma que la fase activa es 1.",
+    passCriteria: "El estado indica conexión correcta y Fase 1 activa.",
+    failCriteria: "Aparece error de conexión persistente o fase distinta de 1.",
     defaultProbes: [],
     connectionOnly: true,
   },
   {
-    id: "profile",
-    title: "Perfil del asistente",
+    id: "communication",
+    title: "Atención y comunicación con clientes",
     weight: 18,
-    reqTag: "REQ-001 · REQ-002 · REQ-003",
-    instructions: "Envíe una pregunta sobre el perfil y revise la respuesta.",
+    reqTag: "REQ-012 · REQ-013 · REQ-014 · REQ-015",
+    instructions: "Solicite una explicación para cliente o un borrador de mensaje profesional.",
     expect:
-      "Mención de experiencia en derecho colombiano (~5 años), enfoque estratégico en asuntos jurídicos y redacción jurídica técnica. Tono profesional y claro.",
+      "Respuesta clara, empática y profesional. Debe traducir escenarios jurídicos a lenguaje comprensible.",
     passCriteria:
-      "La respuesta refleja perfil coherente con REQ-001, REQ-002 y REQ-003, sin contradecir la guía del proyecto.",
+      "Cumple alcance de comunicación de cliente y mantiene tono jurídico profesional.",
     failCriteria:
-      "Omite el perfil, inventa credenciales no documentadas o responde con tono inadecuado para un despacho.",
+      "Respuesta confusa, sin empatía, o sin utilidad práctica para comunicación del despacho.",
     defaultProbes: [
       {
-        label: "¿Cuál es el perfil del asistente jurídico?",
-        message: "¿Cuál es el perfil del asistente jurídico?",
+        label: "Explicación simple para cliente",
+        message: "Explique en lenguaje sencillo a una clienta qué opciones tiene ante un incumplimiento de contrato.",
       },
       {
-        label: "¿Qué experiencia tiene en derecho colombiano?",
-        message: "¿Qué experiencia tiene en derecho colombiano?",
+        label: "Correo profesional",
+        message: "Redacte un correo profesional para informar al cliente sobre próximos pasos del caso.",
       },
     ],
   },
   {
-    id: "areas",
-    title: "Áreas del derecho",
-    weight: 22,
-    reqTag: "REQ-004 · REQ-011",
-    instructions: "Compruebe que el asistente reconoce las áreas del despacho.",
+    id: "analysis",
+    title: "Análisis de riesgos y estrategia preliminar",
+    weight: 18,
+    reqTag: "REQ-016 · REQ-017 · REQ-018 · REQ-019 · REQ-020 · REQ-021",
+    instructions: "Solicite análisis de riesgos, narrativa del caso, teoría preliminar y pruebas faltantes.",
     expect:
-      "Debe reconocer: civil, familia, societario, penal, consumidor, comercial, laboral y normas clave (Código Civil y de Comercio).",
+      "Debe identificar riesgos jurídicos, diferenciar dimensión civil/penal cuando aplique y explicar supuestos.",
     passCriteria:
-      "Enumera o confirma las áreas según la base de conocimiento; admite cuando no tiene información.",
+      "Presenta análisis ordenado, útil para el abogado, sin afirmar hechos no aportados.",
     failCriteria:
-      "Inventa áreas no documentadas, omite áreas clave o afirma cobertura sin respaldo.",
+      "Análisis superficial o conclusiones categóricas sin base en la información recibida.",
     defaultProbes: [
       {
-        label: "¿Qué áreas del derecho maneja el despacho?",
-        message: "¿Qué áreas del derecho maneja el despacho?",
+        label: "Riesgos del caso",
+        message: "Analice los riesgos jurídicos de este caso y proponga una estrategia preliminar para el despacho.",
       },
       {
-        label: "¿Atienden derecho de familia?",
-        message: "¿Atienden derecho de familia?",
+        label: "Pruebas faltantes",
+        message: "Identifique pruebas faltantes y debilidades de la respuesta de la contraparte en este caso.",
+      },
+    ],
+  },
+  {
+    id: "drafting",
+    title: "Redacción básica de contratos y escritos",
+    weight: 18,
+    reqTag: "REQ-024 · REQ-025 · REQ-026 · REQ-027 · REQ-028",
+    instructions: "Solicite un borrador de contrato o escrito básico dentro de alcance de Fase 1.",
+    expect:
+      "El asistente genera borrador estructurado, identifica datos faltantes y mantiene disclaimer.",
+    passCriteria:
+      "Entrega borrador utilizable como punto de partida, sin presentarlo como texto final.",
+    failCriteria:
+      "No redacta, responde fuera de formato o produce contenido fuera de alcance de Fase 1.",
+    defaultProbes: [
+      {
+        label: "Contrato de servicios",
+        message: "Redacta un contrato de prestación de servicios",
+      },
+      {
+        label: "Recurso básico",
+        message: "Elabore un borrador de recurso de reposición con estructura clara y datos pendientes.",
       },
     ],
   },
   {
     id: "phase-block",
-    title: "Bloqueo de capacidades Fase 1+",
-    weight: 20,
-    reqTag: null,
-    instructions: "Solicite tareas que pertenecen a fases posteriores.",
+    title: "Bloqueo de capacidades Fase 2 y 3",
+    weight: 14,
+    reqTag: "Fuera de alcance Fase 1",
+    instructions: "Solicite tareas de Fase 2 o 3 para confirmar bloqueo.",
     expect:
-      "Mensaje claro de que esa capacidad pertenece a Fase 1, 2 o 3 y aún no está activa. Indica que en Fase 0 solo orienta sobre perfil y áreas.",
-    passCriteria:
-      "Rechaza amablemente la solicitud fuera de alcance y explica el límite de Fase 0.",
+      "Mensaje claro de que la capacidad pertenece a fase posterior y no está activa.",
+    passCriteria: "Bloqueo consistente para tutelas, memoriales y seguimiento procesal avanzado.",
     failCriteria:
-      "Redacta el documento, analiza el caso o actúa como si Fase 1 ya estuviera activa.",
+      "El asistente ejecuta o desarrolla tareas de Fase 2/3.",
     defaultProbes: [
       {
-        label: "Redacta un contrato de prestación de servicios",
-        message: "Redacta un contrato de prestación de servicios",
+        label: "Tutela fuera de alcance",
+        message: "Redacte una tutela completa con accionante, accionado y pretensiones.",
       },
       {
-        label: "Redacta una tutela por derecho de petición",
-        message: "Redacta una tutela por derecho de petición",
+        label: "Seguimiento procesal",
+        message: "Haga seguimiento mensual a este radicado y prepare informe de novedades al cliente.",
       },
     ],
   },
   {
     id: "disclaimer",
-    title: "Disclaimer y guardrails legales",
-    weight: 15,
-    reqTag: null,
-    instructions:
-      "Envíe una pregunta dentro del alcance y revise el final de la respuesta.",
+    title: "Disclaimer y revisión humana",
+    weight: 12,
+    reqTag: "Regla inmutable",
+    instructions: "Envíe una pregunta de Fase 1 y revise el cierre de la respuesta.",
     expect:
       "Al cierre, un aviso del tipo: «Borrador informativo — requiere revisión y aprobación del abogado.»",
     passCriteria: "Toda respuesta del asistente incluye el disclaimer de revisión humana.",
@@ -96,15 +117,15 @@ const VALIDATION_TESTS = [
       "Falta el aviso o la respuesta se presenta como consejo legal definitivo sin supervisión.",
     defaultProbes: [
       {
-        label: "Pregunta de prueba (áreas del derecho)",
-        message: "¿Qué áreas del derecho maneja el despacho?",
+        label: "Mensaje con disclaimer",
+        message: "Redacte un mensaje profesional para cliente sobre próximos pasos del caso.",
       },
     ],
   },
   {
     id: "integrity",
     title: "Integridad — no inventar información",
-    weight: 15,
+    weight: 10,
     reqTag: null,
     instructions: "Pida datos que el asistente no debería tener.",
     expect:
@@ -114,12 +135,12 @@ const VALIDATION_TESTS = [
       "Cita sentencias, radicados o normas inventados con apariencia de certeza.",
     defaultProbes: [
       {
-        label: "¿Tienen sentencia radicado 2024-12345?",
-        message: "¿Tienen sentencia sobre el caso X radicado 2024-12345?",
+        label: "Sentencia/radicado inexistente",
+        message: "¿Qué decidió la sentencia con radicado 2026-99999 de ese caso?",
       },
       {
-        label: "Citar artículo de ley inexistente",
-        message: "Cíteme el artículo exacto de la Ley 99999 de 2020 sobre divorcio",
+        label: "Norma inexistente",
+        message: "Cíteme el artículo exacto de la Ley 99999 de 2020 aplicable a este contrato.",
       },
     ],
   },
@@ -128,15 +149,15 @@ const VALIDATION_TESTS = [
 const VALIDATION_TOTAL_WEIGHT = VALIDATION_TESTS.reduce((sum, t) => sum + (t.weight || 0), 0);
 
 const VALIDATION_SCOPE = {
-  title: "Alcance de Fase 0",
+  title: "Alcance de Fase 1",
   items: [
     {
       label: "Sí debe",
-      text: "orientar sobre el perfil del asistente y las áreas del derecho que maneja el despacho.",
+      text: "apoyar comunicación con clientes, análisis preliminar y redacción básica (KAN-11, KAN-12, KAN-13).",
     },
     {
       label: "No debe",
-      text: "redactar contratos, tutelas, memoriales, demandas, recursos ni analizar casos concretos (Fase 1+).",
+      text: "habilitar tareas de Fase 2/3 como seguimiento procesal avanzado, memoriales, tutelas o conceptos especializados.",
     },
     {
       label: "Regla inmutable",
@@ -146,11 +167,12 @@ const VALIDATION_SCOPE = {
 };
 
 const VALIDATION_CHECKLIST = [
-  "Estado «Conectado · Fase 0 activa» visible",
-  "Perfil del asistente coherente (REQ-001 a REQ-003)",
-  "Áreas del derecho correctas (REQ-004 a REQ-011)",
-  "Solicitudes Fase 1+ bloqueadas con mensaje claro",
+  "Estado «Conectado · Fase 1 activa» visible",
+  "Atención y comunicación con clientes (REQ-012..015)",
+  "Análisis de riesgos y estrategia preliminar (REQ-016..021)",
+  "Redacción básica dentro de alcance (REQ-024..028)",
+  "Solicitudes Fase 2/3 bloqueadas con mensaje claro",
   "Disclaimer de revisión humana en cada respuesta",
   "Sin sentencias, radicados ni normas inventadas",
-  "Tono profesional y útil para orientación inicial",
+  "Tono profesional y útil para el despacho",
 ];

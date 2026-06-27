@@ -1,4 +1,4 @@
-"""Generación dinámica de preguntas de validación Fase 0 vía LLM."""
+"""Generación dinámica de preguntas de validación Fase 1 vía LLM."""
 
 from __future__ import annotations
 
@@ -31,7 +31,9 @@ def _check_rate_limit(user_id: str) -> None:
 
 def _build_prompt(probes_per_block: int) -> str:
     blocks_text = []
+    block_keys = []
     for block in VALIDATION_BLOCKS:
+        block_keys.append(f'    "{block["id"]}": [...]')
         blocks_text.append(
             f'- id: "{block["id"]}"\n'
             f"  objetivo: {block['generation_goal']}\n"
@@ -39,7 +41,8 @@ def _build_prompt(probes_per_block: int) -> str:
             f"  prohibido: {block['must_not']}"
         )
     blocks_joined = "\n".join(blocks_text)
-    return f"""Eres un generador de preguntas de prueba para validar un asistente jurídico colombiano (Fase 0).
+    block_keys_joined = "\n".join(block_keys)
+    return f"""Eres un generador de preguntas de prueba para validar un asistente jurídico colombiano (Fase 1).
 
 Genera exactamente {probes_per_block} preguntas DISTINTAS por cada bloque listado.
 Cada pregunta debe probar la MISMA función del bloque pero con redacción diferente:
@@ -52,11 +55,7 @@ Bloques:
 Responde SOLO JSON válido con esta forma:
 {{
   "blocks": {{
-    "profile": [{{"label": "descripción corta", "message": "texto exacto a enviar al chat"}}],
-    "areas": [...],
-    "phase-block": [...],
-    "disclaimer": [...],
-    "integrity": [...]
+{block_keys_joined}
   }}
 }}
 

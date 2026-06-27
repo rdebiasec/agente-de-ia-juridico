@@ -1,4 +1,4 @@
-"""Tests de validación Fase 0 — probes dinámicos y rúbrica."""
+"""Tests de validación Fase 1 — probes dinámicos y rúbrica."""
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -16,7 +16,7 @@ async def test_validation_rubric():
     assert r.status_code == 200
     data = r.json()
     assert data["total_weight"] == 100
-    assert len(data["blocks"]) == 5
+    assert len(data["blocks"]) == 6
     assert data["connection"]["weight"] == 10
 
 
@@ -29,8 +29,8 @@ async def test_generate_probes_fallback():
     result = await generate_probes(user_id="test-py", probes_per_block=2)
     assert "session_id" in result
     assert result["source"] in ("fallback", "llm")
-    assert "profile" in result["blocks"]
-    assert len(result["blocks"]["profile"]) >= 1
+    assert "communication" in result["blocks"]
+    assert len(result["blocks"]["communication"]) >= 1
 
 
 @pytest.mark.asyncio
@@ -44,7 +44,7 @@ async def test_generate_probes_endpoint():
     assert r.status_code == 200
     data = r.json()
     assert "blocks" in data
-    assert "areas" in data["blocks"]
+    assert "analysis" in data["blocks"]
 
 
 @pytest.mark.asyncio
@@ -66,13 +66,13 @@ def test_compute_metrics_and_rules():
         "sessionId": "sess-test",
         "startedAt": "2026-06-20T10:00:00",
         "lastActivityAt": "2026-06-20T10:30:00",
-        "marks": {"profile": "pass", "phase-block": "fail"},
+        "marks": {"communication": "pass", "phase-block": "fail"},
         "checklistChecked": {"0": True, "1": True},
         "chatLog": [
             {"role": "user", "text": "Hola", "via": "manual"},
             {"role": "assistant", "text": "Respuesta", "latencyMs": 1200},
         ],
-        "events": [{"type": "mark", "blockId": "profile", "mark": "pass"}],
+        "events": [{"type": "mark", "blockId": "communication", "mark": "pass"}],
     }
     metrics = compute_metrics(session)
     assert metrics["score"] == 18
@@ -115,8 +115,8 @@ async def test_session_rules_endpoint():
 
     session = {
         "sessionId": "sess-rules",
-        "marks": {"profile": "pass"},
-        "chatLog": [{"role": "user", "text": "Hola", "blockId": "profile"}],
+        "marks": {"communication": "pass"},
+        "chatLog": [{"role": "user", "text": "Hola", "blockId": "communication"}],
         "events": [],
         "checklistChecked": {},
     }
@@ -135,8 +135,8 @@ async def test_session_export_translated_marks():
         "sessionId": "sess-export-marks",
         "startedAt": "2026-06-20T10:00:00",
         "lastActivityAt": "2026-06-20T10:05:00",
-        "marks": {"profile": "pass"},
-        "markNotes": {"profile": "Cumple criterios"},
+        "marks": {"communication": "pass"},
+        "markNotes": {"communication": "Cumple criterios"},
         "chatLog": [],
         "events": [],
         "checklistChecked": {},
@@ -274,25 +274,11 @@ async def test_manual_page_and_app_link():
 
     assert manual_r.status_code == 200
     manual = manual_r.text
-    assert "Manual de uso — Validación Fase 0" in manual
+    assert "Manual de uso — Fase 1" in manual
     assert 'class="manual-page"' in manual
-    for section_id in (
-        "acceso",
-        "barra-superior",
-        "vista-general",
-        "chat",
-        "pruebas",
-        "reporteria",
-        "reinicios",
-        "alcance",
-        "flujo",
-    ):
-        assert f'id="{section_id}"' in manual
-    assert "Reiniciar puntaje, marcas y chat" in manual
-    assert "La IA propone; usted revisa y aprueba" in manual
+    assert "Capacidades habilitadas" in manual
+    assert "Capacidades fuera de alcance" in manual
+    assert "Reglas inmutables" in manual
+    assert "la ia propone" in manual.lower()
     assert 'href="/"' in manual
     assert "Volver a Herramienta" in manual
-    assert "Descargar informe (.doc)" not in manual
-    assert "Mostrar solo pendientes" not in manual
-    assert "mensajes vinculados" in manual
-    assert "Generar Nuevas Preguntas" in manual

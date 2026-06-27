@@ -25,8 +25,9 @@ class Settings(BaseSettings):
     twilio_whatsapp_from: str = "whatsapp:+14155238886"
 
     redis_url: str = "redis://localhost:6379/0"
-    active_phase: int = 0
+    active_phase: int = 1
     require_human_review_whatsapp: bool = True
+    require_human_review_web: bool = True
     # Render inyecta PORT automáticamente; local default 8000
     port: int = 8000  # env: PORT
 

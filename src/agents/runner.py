@@ -35,20 +35,41 @@ from src.agents.guardrails import (
     apply_output_guardrails,
     check_input,
     check_phase_scope,
+    needs_human_review,
 )
 from src.agents.orchestrator import build_orchestrator
 from src.config import get_settings
 
 
-def _fallback_response(message: str) -> str:
+def _fallback_response(message: str, active_phase: int) -> str:
     """Respuesta offline cuando no hay OPENAI_API_KEY."""
     from src.mcp.tools import _list_areas
 
-    scope = check_phase_scope(message)
+    scope = check_phase_scope(message, active_phase=active_phase)
     if scope:
         return apply_output_guardrails(scope)
 
     lower = message.lower()
+    if active_phase >= 1:
+        if any(w in lower for w in ("correo", "mensaje", "cliente")):
+            body = (
+                "Puedo proponer un borrador de comunicación profesional para cliente. "
+                "Compárteme destinatario, objetivo y tono deseado para redactarlo."
+            )
+            return apply_output_guardrails(body)
+        if any(w in lower for w in ("riesgo", "estrategia", "teoría", "teoria", "prueba")):
+            body = (
+                "Puedo hacer un análisis preliminar de riesgos y estrategia. "
+                "Compárteme hechos clave, estado del caso y objetivo del despacho."
+            )
+            return apply_output_guardrails(body)
+        if any(w in lower for w in ("contrato", "escrito", "recurso", "solicitud", "excepción", "excepcion")):
+            body = (
+                "Puedo redactar un borrador base en Fase 1. "
+                "Indica tipo de documento, partes involucradas, hechos y petición principal."
+            )
+            return apply_output_guardrails(body)
+
     if any(w in lower for w in ("área", "area", "derecho", "cubre", "maneja")):
         body = _list_areas()
     elif any(w in lower for w in ("perfil", "experiencia", "quien eres", "quién eres")):
@@ -57,18 +78,24 @@ def _fallback_response(message: str) -> str:
             "de experiencia en derecho colombiano. Apoyo al abogado; no lo reemplazo."
         )
     else:
-        body = (
-            "En Fase 0 puedo orientar sobre el perfil del despacho y las áreas del "
-            "derecho. ¿Sobre qué área desea información?"
-        )
+        if active_phase >= 1:
+            body = (
+                "En Fase 1 puedo apoyar comunicación con clientes, análisis preliminar "
+                "de riesgos y redacción básica. ¿Qué tipo de apoyo necesita?"
+            )
+        else:
+            body = (
+                "En Fase 0 puedo orientar sobre el perfil del despacho y las áreas del "
+                "derecho. ¿Sobre qué área desea información?"
+            )
     return apply_output_guardrails(body)
 
 
 async def run_agent(message: str, channel: str = "slack", session_id: str = "default") -> dict:
     """Ejecuta orquestador y aplica guardrails."""
     ok, err = check_input(message)
-    scope_block = check_phase_scope(message)
     settings = get_settings()
+    scope_block = check_phase_scope(message, active_phase=settings.active_phase)
     has_key = bool(settings.openai_api_key or os.environ.get("OPENAI_API_KEY"))
     # region agent log
     _debug_log_83755e(
@@ -99,10 +126,14 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
             {"channel": channel, "disclaimer_count": text.count("Borrador informativo")},
         )
         # endregion
-        return {"text": text, "agent": "orquestador_fase0", "pending_review": False}
+        return {
+            "text": text,
+            "agent": f"orquestador_fase{settings.active_phase}",
+            "pending_review": False,
+        }
 
     if not has_key:
-        text = _fallback_response(message)
+        text = _fallback_response(message, settings.active_phase)
         # region agent log
         _debug_log_83755e(
             "pre-fix",
@@ -115,7 +146,7 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
         return {
             "text": text,
             "agent": "fallback",
-            "pending_review": channel == "whatsapp",
+            "pending_review": needs_human_review(text, channel, message),
         }
 
     if settings.openai_api_key:
@@ -147,11 +178,9 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
             "session_id": session_id,
         }
 
-    from src.agents.guardrails import needs_human_review
-
     return {
         "text": text,
-        "agent": "orquestador_fase0",
-        "pending_review": needs_human_review(text, channel),
+        "agent": f"orquestador_fase{settings.active_phase}",
+        "pending_review": needs_human_review(text, channel, message),
         "session_id": session_id,
     }

@@ -1,4 +1,4 @@
-"""Reporte analítico de sesión Fase 0 — métricas, reglas e IA."""
+"""Reporte analítico de sesión Fase 1 — métricas, reglas e IA."""
 
 from __future__ import annotations
 
@@ -114,8 +114,10 @@ def build_rules_insights(session: dict[str, Any]) -> list[str]:
         insights.append(f"Puntaje {score}/100: por debajo del umbral recomendado (70). Revise secciones rechazadas con el equipo técnico.")
 
     critical = {
-        "connection": "Conexión y Fase 0",
-        "phase-block": "Bloqueo Fase 1+",
+        "connection": "Conexión y Fase 1",
+        "phase-block": "Bloqueo Fase 2/3",
+        "drafting": "Redacción básica",
+        "analysis": "Análisis de riesgos",
         "disclaimer": "Disclaimer legal",
         "integrity": "Integridad (no inventar datos)",
     }
@@ -159,7 +161,7 @@ def build_rules_insights(session: dict[str, Any]) -> list[str]:
 
 
 def build_rules_only(session: dict[str, Any]) -> dict[str, Any]:
-    """Reglas Fase 0 sin LLM — para refresh automático del panel."""
+    """Reglas Fase 1 sin LLM — para refresh automático del panel."""
     return {
         "rules_insights": build_rules_insights(session),
         "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
@@ -198,7 +200,7 @@ async def generate_llm_analysis(session: dict[str, Any]) -> tuple[dict[str, Any]
             "No hay conversación ni marcas suficientes para generar análisis IA.",
         )
 
-    prompt = f"""Analiza esta sesión de prueba Fase 0 de un asistente jurídico colombiano.
+    prompt = f"""Analiza esta sesión de prueba Fase 1 de un asistente jurídico colombiano.
 La evaluación la hace la abogada manualmente (Aprobada/Rechazada). NO inventes hechos ni sentencias.
 Usa SOLO los datos proporcionados.
 
@@ -330,10 +332,10 @@ def build_export_html(session: dict[str, Any], report: dict[str, Any]) -> str:
 
     return f"""<!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><title>Reporte sesión Fase 0</title></head>
+<head><meta charset="UTF-8"><title>Reporte sesión Fase 1</title></head>
 <body>
 {disclaimer}
-<h1>Reporte analítico — Fase 0</h1>
+<h1>Reporte analítico — Fase 1</h1>
 <p>Sesión: {escape(str(session.get('sessionId', '')))}<br>
 Inicio: {escape(str(session.get('startedAt', '')))}<br>
 Generado: {escape(str(report.get('generated_at', '')))}</p>

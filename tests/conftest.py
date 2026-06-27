@@ -7,6 +7,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def disable_web_auth_by_default(monkeypatch, request):
+    monkeypatch.setenv("ACTIVE_PHASE", "1")
     if request.module.__name__.endswith("test_auth"):
         yield
         return

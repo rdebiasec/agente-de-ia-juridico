@@ -241,7 +241,8 @@ async def help_page(
     redirect = _auth_redirect_if_needed(request, settings)
     if redirect:
         return redirect
-    manual = _static_dir / "GUIA_FASE0.html"
+    manual_name = "GUIA_FASE1.html" if settings.active_phase >= 1 else "GUIA_FASE0.html"
+    manual = _static_dir / manual_name
     if manual.is_file():
         return FileResponse(manual)
     raise HTTPException(status_code=404, detail="Manual no encontrado")

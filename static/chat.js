@@ -4,9 +4,10 @@ const LEGACY_V3_KEY = "agente-juridico-session-v3";
 const LEGACY_STORAGE_KEY = "agente-juridico-validation-v2";
 const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
 const ENABLE_SERVER_RUBRIC = true;
+const ACTIVE_PHASE_EXPECTED = 1;
 
 const WELCOME_MESSAGE =
-  "Bienvenida. Soy el asistente jurídico del despacho (Fase 0). Puedo orientarla sobre el perfil del despacho y las áreas del derecho en nuestra base de conocimiento.\n\n¿En qué puedo ayudarla hoy?";
+  "Bienvenida. Soy el asistente jurídico del despacho (Fase 1). Puedo apoyarla en comunicación con clientes, análisis preliminar de riesgos y redacción básica.\n\n¿En qué puedo ayudarla hoy?";
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
@@ -275,7 +276,7 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   el.innerHTML = `
     ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
-    ${role === "assistant" ? '<span class="message-phase-badge">Fase 0 · Borrador</span>' : ""}
+    ${role === "assistant" ? '<span class="message-phase-badge">Fase 1 · Borrador</span>' : ""}
   `;
 
   el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
@@ -828,7 +829,7 @@ function renderChecklistBlock() {
 
   const note = document.createElement("p");
   note.className = "validation-note";
-  note.textContent = `Puntaje máximo: ${VALIDATION_TOTAL_WEIGHT}/100. Si todas las secciones están aprobadas, Fase 0 puede considerarse validada. Si alguna falla, documente el caso y repórtelo al equipo técnico.`;
+  note.textContent = `Puntaje máximo: ${VALIDATION_TOTAL_WEIGHT}/100. Si todas las secciones están aprobadas, Fase 1 puede considerarse validada. Si alguna falla, documente el caso y repórtelo al equipo técnico.`;
   section.appendChild(note);
 
   return section;
@@ -958,8 +959,8 @@ function updateConnectionStatus(connected) {
   const el = document.getElementById("connection-status");
   if (!el) return;
   el.textContent = connected
-    ? "Estado actual: Conectado · Fase 0 activa"
-    : "Estado actual: sin conexión o Fase 0 no confirmada";
+    ? "Estado actual: Conectado · Fase 1 activa"
+    : "Estado actual: sin conexión o Fase 1 no confirmada";
   el.classList.toggle("is-ok", connected);
 }
 
@@ -967,10 +968,10 @@ async function checkHealth() {
   try {
     const res = await fetch("/health");
     const data = await res.json();
-    const connected = data.status === "ok" && data.fase_activa === 0;
+    const connected = data.status === "ok" && data.fase_activa === ACTIVE_PHASE_EXPECTED;
     if (data.status === "ok" && data.openai_configured) {
       statusDot.classList.add("online");
-      statusText.textContent = "Conectado · Fase 0 activa";
+      statusText.textContent = "Conectado · Fase 1 activa";
     } else {
       statusText.textContent = "Servicio disponible · OpenAI no configurada";
     }
