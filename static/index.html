@@ -19,7 +19,7 @@
   </head>
   <body>
     <a class="skip-link" href="#messages">Ir al chat</a>
-    <a class="skip-link" href="#validation-blocks">Ir a pruebas</a>
+    <a class="skip-link" href="#trace-panel-content">Ir a trazabilidad</a>
     <a class="skip-link" href="#session-report-body">Ir al reporte</a>
 
     <div id="onboarding-modal" class="onboarding-modal" hidden>
@@ -27,8 +27,8 @@
         <h2 id="onboarding-title">Validación Fase 1 — 60 segundos</h2>
         <ol class="onboarding-steps">
           <li><strong>Panel de Chat:</strong> envíe preguntas sugeridas o escriba las suyas.</li>
-          <li><strong>Panel de Pruebas:</strong> marque Aprobada/Rechazada con nota opcional.</li>
-          <li><strong>Panel de Reportería:</strong> genere análisis y exporte el informe.</li>
+          <li><strong>Panel de Trazabilidad:</strong> haga clic en un mensaje del chat para ver cómo se procesó.</li>
+          <li><strong>Panel de Reportería:</strong> vea estado general, hallazgos y próximos pasos.</li>
         </ol>
         <button type="button" class="btn-onboarding-close" id="onboarding-close">Entendido</button>
       </div>
@@ -88,43 +88,26 @@
           </div>
         </div>
 
-        <aside class="validation-panel" id="validation-panel" aria-label="Panel de Pruebas">
-          <h2 class="panel-title">Panel de Pruebas</h2>
+        <aside class="trace-panel" id="trace-panel" aria-label="Panel de Trazabilidad">
+          <h2 class="panel-title">Panel de Trazabilidad</h2>
           <button
-            class="validation-toggle"
-            id="validation-toggle"
+            class="trace-toggle"
+            id="trace-toggle"
             type="button"
             aria-expanded="false"
-            aria-controls="validation-content"
-            aria-label="Abrir panel de pruebas"
+            aria-controls="trace-panel-content"
+            aria-label="Abrir panel de trazabilidad"
           >
-            <span class="sr-only">Panel de Pruebas</span>
+            <span class="sr-only">Panel de Trazabilidad</span>
             <span class="toggle-icon" aria-hidden="true"></span>
           </button>
 
-          <div class="validation-content" id="validation-content">
-            <header class="validation-header">
-              <div class="validation-score-row">
-                <p class="validation-score" id="validation-score">Puntaje: 0 / 100</p>
-                <div class="validation-reset-actions">
-                  <button type="button" class="btn-reset-score" id="reset-score-btn">
-                    Reiniciar puntaje, marcas y chat
-                  </button>
-                </div>
-              </div>
-              <div
-                class="validation-score-track"
-                role="progressbar"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                aria-label="Progreso de validación"
-              >
-                <div class="validation-score-bar" id="validation-score-bar"></div>
-              </div>
+          <div class="trace-content" id="trace-panel-content">
+            <header class="trace-header">
+              <p class="trace-header-title">Detalle del flujo por respuesta</p>
+              <p class="trace-header-note">Seleccione un mensaje del asistente para ver metadatos y acciones.</p>
             </header>
-
-            <div id="validation-blocks"></div>
+            <section class="trace-body" id="trace-body"></section>
           </div>
         </aside>
 

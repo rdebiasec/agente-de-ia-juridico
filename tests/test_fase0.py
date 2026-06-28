@@ -11,7 +11,8 @@ async def test_chat_page():
         r = await client.get("/")
     assert r.status_code == 200
     assert "Asistente Jurídico" in r.text
-    assert "validation-blocks" in r.text
+    assert "trace-panel-content" in r.text
+    assert "Panel de Trazabilidad" in r.text
     assert "validation-tests.js" in r.text
 
 

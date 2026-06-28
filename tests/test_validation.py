@@ -197,7 +197,8 @@ async def test_chat_page_has_report_and_reset_buttons():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.get("/")
     assert r.status_code == 200
-    assert "reset-score-btn" in r.text
+    assert "trace-body" in r.text
+    assert "trace-toggle" in r.text
     assert "reset-session-btn" not in r.text
     assert "btn-export-doc" not in r.text
     assert "Descargar informe (.doc)" not in r.text

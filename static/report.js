@@ -137,48 +137,18 @@ const SessionReport = (() => {
 
   function buildExecutiveSummary(metrics) {
     if (metrics.sectionsPending === VALIDATION_TESTS.length) {
-      return "";
+      return "Sesión iniciada. Aún no hay suficiente evaluación para un estado concluyente.";
     }
     if (metrics.score === 100) {
-      return "Veredicto: puntaje máximo (100/100). Fase 0 puede considerarse validada según la rúbrica.";
+      return "Estado óptimo: todas las validaciones están aprobadas en Fase 1.";
     }
     if (metrics.score >= 70 && metrics.sectionsFailed === 0) {
-      return `Veredicto: desempeño aceptable (${metrics.score}/100). Revise secciones pendientes antes de cerrar.`;
+      return `Estado estable: desempeño aceptable (${metrics.score}/100), con ajustes menores pendientes.`;
     }
     if (metrics.sectionsFailed > 0) {
-      return `Veredicto: requiere corrección (${metrics.score}/100). Hay ${metrics.sectionsFailed} sección(es) rechazada(s).`;
+      return `Estado crítico: requiere corrección (${metrics.score}/100). Hay ${metrics.sectionsFailed} sección(es) rechazadas.`;
     }
     return `Veredicto: en progreso (${metrics.score}/100). Complete las pruebas pendientes.`;
-  }
-
-  function renderMetricsCards(metrics) {
-    return `
-      <div class="report-cards">
-        <div class="report-card"><span class="report-card-label">Puntaje</span><strong>${metrics.score}/${metrics.totalWeight}</strong><span class="report-card-sub">${metrics.scorePercent}%</span></div>
-        <div class="report-card"><span class="report-card-label">Duración</span><strong>${formatDuration(metrics.durationMinutes)}</strong></div>
-        <div class="report-card"><span class="report-card-label">Mensajes</span><strong>${metrics.chatTurns}</strong></div>
-        <div class="report-card"><span class="report-card-label">Checklist</span><strong>${metrics.checklistDone}/${metrics.checklistTotal}</strong></div>
-      </div>`;
-  }
-
-  function renderSectionsTable(metrics) {
-    const rows = metrics.sections
-      .map(
-        (s) => `
-      <tr class="report-row report-row--${s.mark}">
-        <td>${escapeHtml(s.title)}</td>
-        <td>${formatMark(s.mark)}</td>
-        <td>${s.pointsEarned}/${s.weight}</td>
-        <td>${s.interactions}</td>
-        <td>${s.note ? escapeHtml(s.note) : "—"}</td>
-      </tr>`
-      )
-      .join("");
-    return `
-      <table class="report-table">
-        <thead><tr><th>Sección</th><th>Estado</th><th>Puntos</th><th>Mensajes vinculados</th><th>Nota del revisor</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
   }
 
   function renderInsightsList(items, emptyText) {
@@ -186,37 +156,60 @@ const SessionReport = (() => {
     return `<ul class="report-insights">${items.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`;
   }
 
-  function renderTraceSummary(chatLog) {
-    const assistantEntries = (chatLog || []).filter((entry) => entry.role === "assistant");
-    if (!assistantEntries.length) {
-      return `<p class="report-empty">Sin trazas de flujo registradas en esta sesión.</p>`;
+  function deriveTraceInsights(chatLog) {
+    const assistants = (chatLog || []).filter((m) => m.role === "assistant");
+    const skillCount = {};
+    assistants.forEach((m) => {
+      const skill = m.trace?.skill_kan;
+      if (!skill) return;
+      skillCount[skill] = (skillCount[skill] || 0) + 1;
+    });
+    const top = Object.entries(skillCount).sort((a, b) => b[1] - a[1])[0];
+    if (!top) return null;
+    return `Skill más utilizado en esta sesión: ${top[0]} (${top[1]} respuesta(s)).`;
+  }
+
+  function deriveKeyFindings(metrics, rules, chatLog) {
+    const findings = [];
+    if (metrics.sectionsFailed > 0) {
+      findings.push(`Hay ${metrics.sectionsFailed} sección(es) rechazadas y deben corregirse antes de cierre.`);
+    } else {
+      findings.push("No hay secciones rechazadas actualmente.");
     }
-    const rows = assistantEntries
-      .slice(-8)
-      .reverse()
-      .map((entry) => {
-        const trace = entry.trace || null;
-        const route = trace?.selected_agent || entry.agent || "sin ruta";
-        const blocked = Boolean(trace?.blocked);
-        const review = Boolean(trace?.human_review_required ?? entry.pendingReview);
-        const status = blocked ? "Bloqueada" : review ? "Pendiente revisión" : "Completada";
-        const statusClass = blocked ? "is-blocked" : review ? "is-pending" : "is-done";
-        const firstStep =
-          Array.isArray(trace?.steps) && trace.steps.length
-            ? trace.steps[trace.steps.length - 1]?.detail || "Sin detalle."
-            : "Sin detalle de traza.";
-        return `
-          <li class="report-trace-item ${statusClass}">
-            <span class="report-trace-head">
-              <strong>${escapeHtml(status)}</strong>
-              <em>${escapeHtml(route)}</em>
-            </span>
-            <p>${escapeHtml(firstStep)}</p>
-          </li>
-        `;
-      })
-      .join("");
-    return `<ul class="report-trace-list">${rows}</ul>`;
+    if (metrics.sectionsPending > 0) {
+      findings.push(`Quedan ${metrics.sectionsPending} sección(es) pendientes de marcar.`);
+    } else {
+      findings.push("Todas las secciones ya tienen estado (aprobada o rechazada).");
+    }
+    if (rules?.length) {
+      findings.push(rules[0]);
+    } else if (deriveTraceInsights(chatLog)) {
+      findings.push(deriveTraceInsights(chatLog));
+    } else if (metrics.avgLatencyMs != null) {
+      findings.push(`Latencia promedio observada: ${metrics.avgLatencyMs} ms.`);
+    } else {
+      findings.push("Sin señales adicionales aún para destacar.");
+    }
+    return findings.slice(0, 3);
+  }
+
+  function deriveNextSteps(metrics) {
+    const next = [];
+    if (metrics.sectionsFailed > 0) {
+      next.push("Corregir respuestas en secciones rechazadas y volver a probar.");
+    }
+    if (metrics.sectionsPending > 0) {
+      next.push("Completar las secciones pendientes con casos reales del despacho.");
+    }
+    if (metrics.checklistDone < metrics.checklistTotal) {
+      next.push("Terminar checklist final de revisión de la abogada.");
+    }
+    if (!next.length) {
+      next.push("Aprobar sesión y proceder a siguiente lote de pruebas.");
+      next.push("Exportar reporte en PDF para archivo interno.");
+      next.push("Mantener monitoreo de trazabilidad en nuevas consultas.");
+    }
+    return next.slice(0, 3);
   }
 
   function renderLlmBlock(llm, status, message, hasGenerated) {
@@ -301,34 +294,25 @@ const SessionReport = (() => {
         : rulesOverride?.length
           ? rulesOverride
           : cachedRulesInsights || [];
-    const llm = normalized?.llm_analysis || null;
-    const llmStatus = normalized?.llm_status || null;
-    const llmMessage = normalized?.llm_message || "";
     const generatedAt = normalized?.generated_at
       ? new Date(normalized.generated_at).toLocaleString("es-CO")
       : null;
-    const hasGenerated = Boolean(normalized?.generated_at);
+    const findings = deriveKeyFindings(metrics, rules, session.chatLog);
+    const nextSteps = deriveNextSteps(metrics);
 
     return `
       <div class="report-panel-inner" id="report-print-area">
         ${renderStaleBanner(normalized, session)}
-        ${buildExecutiveSummary(metrics) ? `<p class="report-executive">${escapeHtml(buildExecutiveSummary(metrics))}</p>` : ""}
-        ${renderMetricsCards(metrics)}
-        <p class="report-substats">
-          Probe: ${metrics.probeQuestions} · Manual: ${metrics.manualQuestions} ·
-          Latencia media: ${metrics.avgLatencyMs != null ? `${metrics.avgLatencyMs} ms` : "—"} ·
-          Regeneraciones IA: ${metrics.probeRegenerations}
-        </p>
-        <h4>Por sección</h4>
-        ${renderSectionsTable(metrics)}
-        <h4>Recorrido del asistente</h4>
-        ${renderTraceSummary(session.chatLog)}
-        <h4>Eventos recientes</h4>
-        <div id="report-events-wrap">${renderEventsTimeline(session.events)}</div>
-        <h4>Conclusiones (reglas Fase 1)</h4>
-        ${renderInsightsList(rules, "Cargando conclusiones…")}
-        <h4>Análisis IA ${generatedAt ? `<span class="report-generated-at">(${escapeHtml(generatedAt)})</span>` : ""}</h4>
-        <div id="report-llm-block">${renderLlmBlock(llm, llmStatus, llmMessage, hasGenerated)}</div>
+        <article class="report-card">
+          <span class="report-card-label">Estado general</span>
+          <strong>${metrics.score}/${metrics.totalWeight} · ${metrics.scorePercent}%</strong>
+          <span class="report-card-sub">${escapeHtml(buildExecutiveSummary(metrics))}</span>
+          <span class="report-card-sub">Mensajes: ${metrics.chatTurns} · Duración: ${formatDuration(metrics.durationMinutes)} · Checklist: ${metrics.checklistDone}/${metrics.checklistTotal}</span>
+        </article>
+        <h4>Hallazgos clave ${generatedAt ? `<span class="report-generated-at">(${escapeHtml(generatedAt)})</span>` : ""}</h4>
+        ${renderInsightsList(findings, "Sin hallazgos disponibles todavía.")}
+        <h4>Próximos pasos</h4>
+        ${renderInsightsList(nextSteps, "Sin próximos pasos sugeridos.")}
       </div>`;
   }
 
@@ -609,7 +593,7 @@ const SessionReport = (() => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `reporte-fase0-${session.sessionId || "sesion"}.doc`;
+      a.download = `reporte-fase1-${session.sessionId || "sesion"}.doc`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {

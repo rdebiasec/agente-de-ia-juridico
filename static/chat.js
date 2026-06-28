@@ -24,6 +24,7 @@ const validationStepperEl = document.getElementById("validation-stepper");
 const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
 const chatColumnEl = document.querySelector(".chat-column");
+const traceBodyEl = document.getElementById("trace-body");
 
 const sessionState = loadSessionState();
 let sessionId = sessionState.sessionId;
@@ -41,6 +42,7 @@ let activeBlockId = null;
 let pendingChatMeta = null;
 let sendViaOverride = null;
 let filterPendingOnly = false;
+let selectedTraceMsgId = sessionState.selectedTraceMsgId || null;
 /** Bumped on reset so in-flight /chat responses cannot repopulate the UI. */
 let chatEpoch = 0;
 
@@ -150,6 +152,7 @@ function getSessionSnapshot() {
     chatLog: chatLog.slice(),
     events: events.slice(),
     lastReport,
+    selectedTraceMsgId,
   };
 }
 
@@ -270,6 +273,11 @@ function formatAgentRoute(agent) {
   if (!agent) return "";
   if (agent.startsWith("orquestador_fase1")) return "Ruta IA Fase 1";
   if (agent.startsWith("orquestador_fase0")) return "Ruta IA Fase 0";
+  if (agent === "comunicacion_clientes_fase1") return "Especialista KAN-11 (Comunicación)";
+  if (agent === "analisis_riesgo_fase1") return "Especialista KAN-12 (Análisis y riesgo)";
+  if (agent === "redaccion_basica_fase1") return "Especialista KAN-13 (Redacción)";
+  if (agent === "conocimiento_areas_derecho") return "Especialista KAN-4 (Conocimiento)";
+  if (agent === "perfil_abogado_colombia") return "Especialista KAN-4 (Perfil)";
   if (agent === "fallback") return "Modo respaldo";
   if (agent === "guardrail") return "Bloqueo de seguridad";
   if (agent === "error") return "Ruta de error controlado";
@@ -282,11 +290,18 @@ function inferTrace(options = {}, text = "") {
   const route = options.agent ? formatAgentRoute(options.agent) : "Ruta no reportada";
   const needsReview = Boolean(options.pendingReview);
   return {
+    trace_version: "2.0",
+    trace_id: "local-inferido",
     session_id: null,
     route: options.agent || "unknown",
+    received_by_agent: `orquestador_fase${ACTIVE_PHASE_EXPECTED}`,
+    sent_to_agent: options.agent || "none",
+    skill_kan: "KAN-N/A",
+    skill_reason: "Inferido localmente por falta de metadata backend.",
     selected_agent: options.agent || "",
     blocked,
     human_review_required: needsReview,
+    actions: [],
     steps: [
       { step: "Recibí su consulta", status: "done", detail: "Consulta recibida por el asistente." },
       {
@@ -319,37 +334,91 @@ function inferTrace(options = {}, text = "") {
   };
 }
 
-function renderTraceSection(tracePayload, text = "") {
-  const trace = tracePayload && Array.isArray(tracePayload.steps) ? tracePayload : inferTrace({}, text);
-  const statusLabel =
-    trace.blocked
-      ? "Bloqueada por alcance de fase"
-      : trace.human_review_required
-        ? "Pendiente de aprobación humana"
-        : "Completada";
-  const rows = (trace.steps || [])
-    .map((step) => {
-      const state = step.status || "done";
-      return `
-        <li class="workflow-trace-item workflow-trace-item--${state}">
-          <span class="workflow-trace-dot" aria-hidden="true"></span>
-          <div class="workflow-trace-copy">
-            <strong>${escapeHtml(step.step || "Paso")}</strong>
-            <p>${escapeHtml(step.detail || "")}</p>
-          </div>
-        </li>
-      `;
-    })
+function getAssistantEntryByMsgId(msgId) {
+  if (!msgId) return null;
+  return chatLog.find((entry) => entry.id === msgId && entry.role === "assistant") || null;
+}
+
+function getLatestAssistantEntry() {
+  for (let i = chatLog.length - 1; i >= 0; i -= 1) {
+    if (chatLog[i].role === "assistant") return chatLog[i];
+  }
+  return null;
+}
+
+function renderTracePanelForEntry(entry) {
+  if (!traceBodyEl) return;
+  if (!entry) {
+    traceBodyEl.innerHTML = `
+      <div class="trace-empty">
+        Seleccione un mensaje del asistente en el Panel de Chat para ver la trazabilidad de decisiones, metadatos y acciones.
+      </div>
+    `;
+    return;
+  }
+  const trace = entry.trace || inferTrace({ agent: entry.agent, pendingReview: entry.pendingReview }, entry.text);
+  const statusLabel = trace.blocked
+    ? "Bloqueada por alcance de fase"
+    : trace.human_review_required
+      ? "Pendiente de aprobación humana"
+      : "Completada";
+  const actionsSource = Array.isArray(trace.actions) && trace.actions.length ? trace.actions : trace.steps || [];
+  const actions = actionsSource
+    .map((step) => `
+      <li>
+        <strong>${escapeHtml(step.step || step.type || "Acción")}</strong>
+        <span>${escapeHtml(step.detail || "")}</span>
+      </li>
+    `)
     .join("");
-  return `
-    <details class="workflow-trace" open>
-      <summary>
-        Workflow Trace
-        <span class="workflow-trace-status">${escapeHtml(statusLabel)}</span>
-      </summary>
-      <ul class="workflow-trace-list">${rows}</ul>
-    </details>
+  const receiver = trace.received_by_agent || `orquestador_fase${ACTIVE_PHASE_EXPECTED}`;
+  const destination = trace.sent_to_agent || trace.selected_agent || "none";
+  const skill = trace.skill_kan || "KAN-N/A";
+  traceBodyEl.innerHTML = `
+    <article class="trace-card">
+      <h3>Resumen</h3>
+      <div class="trace-kv">
+        <p><strong>Estado:</strong> ${escapeHtml(statusLabel)}</p>
+        <p><strong>Skill determinado:</strong> ${escapeHtml(skill)}</p>
+        <p><strong>Ruta usada:</strong> ${escapeHtml(formatAgentRoute(entry.agent || destination || trace.route || "Sin ruta"))}</p>
+      </div>
+    </article>
+    <article class="trace-card">
+      <h3>Enrutamiento de agentes</h3>
+      <div class="trace-kv">
+        <p><strong>Agente receptor:</strong> ${escapeHtml(receiver)}</p>
+        <p><strong>Agente destino:</strong> ${escapeHtml(destination)}</p>
+        <p><strong>Motivo skill:</strong> ${escapeHtml(trace.skill_reason || "Sin motivo reportado.")}</p>
+      </div>
+    </article>
+    <article class="trace-card">
+      <h3>Metadatos clave</h3>
+      <div class="trace-kv">
+        <p><strong>Trace ID:</strong> ${escapeHtml(trace.trace_id || "No reportado")}</p>
+        <p><strong>Session:</strong> ${escapeHtml(trace.session_id || "No reportado")}</p>
+        <p><strong>Mensaje:</strong> ${escapeHtml(entry.id || "No reportado")}</p>
+        <p><strong>Canal:</strong> ${escapeHtml(trace.channel || "web")}</p>
+        <p><strong>Fase:</strong> ${escapeHtml(String(trace.phase ?? ACTIVE_PHASE_EXPECTED))}</p>
+        <p><strong>Latencia:</strong> ${typeof entry.latencyMs === "number" ? `${entry.latencyMs} ms` : "No reportada"}</p>
+      </div>
+    </article>
+    <article class="trace-card">
+      <h3>Acciones ejecutadas</h3>
+      <ul class="trace-actions">${actions || "<li><span>Sin acciones reportadas.</span></li>"}</ul>
+    </article>
   `;
+}
+
+function setSelectedTraceMessage(msgId, options = {}) {
+  selectedTraceMsgId = msgId || null;
+  const { skipSave = false } = options;
+  document.querySelectorAll(".message.assistant[data-msg-id]").forEach((el) => {
+    el.classList.toggle("message--selected", el.dataset.msgId === selectedTraceMsgId);
+  });
+  const selected = getAssistantEntryByMsgId(selectedTraceMsgId) || getLatestAssistantEntry();
+  if (!selectedTraceMsgId && selected?.id) selectedTraceMsgId = selected.id;
+  renderTracePanelForEntry(selected || null);
+  if (!skipSave) saveSessionState();
 }
 
 function scrollToBottom() {
@@ -363,15 +432,10 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   if (options.blockId) el.dataset.blockId = options.blockId;
 
   const metaHtml = meta || buildMessageMeta(role, options);
-  const traceHtml =
-    role === "assistant"
-      ? renderTraceSection(options.trace || inferTrace(options, text), text)
-      : "";
   el.innerHTML = `
     ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
     ${role === "assistant" ? '<span class="message-phase-badge">Fase 1 · Borrador</span>' : ""}
-    ${traceHtml}
   `;
 
   el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
@@ -382,6 +446,11 @@ function addMessageToUI(role, text, meta = "", options = {}) {
       if (blockEl) scrollBlockIntoValidationPanel(blockEl);
     }
   });
+  if (role === "assistant" && options.msgId) {
+    el.addEventListener("click", () => {
+      setSelectedTraceMessage(options.msgId);
+    });
+  }
 
   messagesEl.appendChild(el);
   scrollToBottom();
@@ -403,6 +472,7 @@ function restoreChatFromLog() {
   clearChatUI();
   if (!chatLog.length) {
     showWelcomeMessage();
+    renderTracePanelForEntry(null);
     return;
   }
   chatLog.forEach((entry) => {
@@ -416,6 +486,8 @@ function restoreChatFromLog() {
       trace: entry.trace || null,
     });
   });
+  const preferred = getAssistantEntryByMsgId(selectedTraceMsgId) || getLatestAssistantEntry();
+  setSelectedTraceMessage(preferred?.id || null, { skipSave: true });
 }
 
 function showTyping() {
@@ -1027,8 +1099,10 @@ function resetChatConversation() {
   pendingChatMeta = null;
   sendViaOverride = null;
   chatLog = [];
+  selectedTraceMsgId = null;
   clearChatUI();
   showWelcomeMessage();
+  renderTracePanelForEntry(null);
   if (sendBtn) sendBtn.disabled = false;
 }
 
@@ -1177,6 +1251,8 @@ async function sendMessage(text) {
   });
   const assistantEl = messagesEl.lastElementChild;
   if (assistantEl && assistantEntry.id) assistantEl.dataset.msgId = assistantEntry.id;
+  setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
+  saveSessionState();
   pendingChatMeta = null;
 
   sendBtn.disabled = false;
@@ -1207,7 +1283,7 @@ function initCollapsiblePanel(panelId, toggleId) {
 }
 
 function initValidationPanel() {
-  initCollapsiblePanel("validation-panel", "validation-toggle");
+  initCollapsiblePanel("trace-panel", "trace-toggle");
   initCollapsiblePanel("report-panel", "report-toggle");
   resetScoreBtn?.addEventListener("click", resetScoreOnly);
   filterPendingEl?.addEventListener("change", applyPendingFilter);

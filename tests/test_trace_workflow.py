@@ -20,6 +20,10 @@ async def test_trace_allowed_drafting_sets_pending_review():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
+    assert trace.get("received_by_agent", "").startswith("orquestador_fase")
+    assert trace.get("sent_to_agent") in {"comunicacion_clientes_fase1", "redaccion_basica_fase1"}
+    assert trace.get("skill_kan") in {"KAN-11", "KAN-13"}
+    assert isinstance(trace.get("actions"), list)
     assert any(step.get("step") == "Revisión humana" and step.get("status") == "pending" for step in trace.get("steps", []))
 
 
@@ -37,6 +41,8 @@ async def test_trace_blocked_scope_has_no_pending_review():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is True
     assert trace.get("human_review_required") is False
+    assert trace.get("sent_to_agent") == "none"
+    assert trace.get("skill_kan") == "KAN-OUT-OF-SCOPE"
     assert any(step.get("step") == "Validé alcance de fase" and step.get("status") == "blocked" for step in trace.get("steps", []))
 
 
@@ -76,6 +82,9 @@ async def test_debug_trace_returns_session_history(monkeypatch):
         assert payload["session_id"] == "web:trace-session"
         assert len(payload["traces"]) >= 2
         assert all("steps" in trace for trace in payload["traces"])
+        assert all("received_by_agent" in trace for trace in payload["traces"])
+        assert all("sent_to_agent" in trace for trace in payload["traces"])
+        assert all("skill_kan" in trace for trace in payload["traces"])
 
     get_settings.cache_clear()
 
