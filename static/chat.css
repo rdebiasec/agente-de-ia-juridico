@@ -1723,6 +1723,10 @@ footer a:hover {
   font-size: 0.68rem;
   color: var(--muted);
 }
+.message-agent-route {
+  font-size: 0.68rem;
+  color: #b8f0ea;
+}
 .message-phase-badge {
   display: inline-block;
   margin-top: 0.35rem;
@@ -1731,6 +1735,77 @@ footer a:hover {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
+}
+.workflow-trace {
+  margin-top: 0.6rem;
+  border: 1px solid rgba(79, 209, 197, 0.25);
+  border-radius: 12px;
+  background: rgba(79, 209, 197, 0.06);
+  overflow: hidden;
+}
+.workflow-trace summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.workflow-trace summary::-webkit-details-marker {
+  display: none;
+}
+.workflow-trace-status {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.workflow-trace-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.2rem 0.6rem 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.workflow-trace-item {
+  display: grid;
+  grid-template-columns: 0.6rem 1fr;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.workflow-trace-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: 0.28rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 209, 197, 0.2);
+}
+.workflow-trace-item--pending .workflow-trace-dot {
+  background: #f0a070;
+  box-shadow: 0 0 0 2px rgba(240, 160, 112, 0.22);
+}
+.workflow-trace-item--blocked .workflow-trace-dot {
+  background: #ef6b6b;
+  box-shadow: 0 0 0 2px rgba(239, 107, 107, 0.2);
+}
+.workflow-trace-copy strong {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+.workflow-trace-copy p {
+  margin: 0.1rem 0 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.35;
 }
 .message--highlight {
   outline: 2px solid var(--accent);
@@ -1895,6 +1970,47 @@ footer a:hover {
   cursor: pointer;
   margin-top: 0.35rem;
   text-decoration: underline;
+}
+.report-trace-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.report-trace-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.55rem;
+  background: var(--panel);
+}
+.report-trace-item.is-pending {
+  border-color: rgba(240, 160, 112, 0.45);
+}
+.report-trace-item.is-blocked {
+  border-color: rgba(239, 107, 107, 0.5);
+}
+.report-trace-item.is-done {
+  border-color: rgba(79, 209, 197, 0.35);
+}
+.report-trace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+}
+.report-trace-head strong {
+  color: var(--text);
+}
+.report-trace-head em {
+  color: var(--muted);
+  font-style: normal;
+}
+.report-trace-item p {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
 }
 
 /* --- Toasts --- */

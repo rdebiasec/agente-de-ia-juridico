@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from src.agents.runner import run_agent
 from src.gateway.session import session_store
+from src.gateway.trace import trace_store
 
 
 @dataclass
@@ -17,7 +18,10 @@ class InboundMessage:
 
 
 async def handle_message(msg: InboundMessage) -> dict:
+    session_id = f"{msg.channel}:{msg.user_id}"
     session_store.append(msg.channel, msg.user_id, "user", msg.text)
-    result = await run_agent(msg.text, channel=msg.channel, session_id=f"{msg.channel}:{msg.user_id}")
+    result = await run_agent(msg.text, channel=msg.channel, session_id=session_id)
     session_store.append(msg.channel, msg.user_id, "assistant", result["text"])
+    if result.get("trace"):
+        trace_store.add(session_id, result["trace"])
     return result

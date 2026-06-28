@@ -41,6 +41,43 @@ from src.agents.orchestrator import build_orchestrator
 from src.config import get_settings
 
 
+def _trace_step(step: str, status: str, detail: str) -> dict[str, str]:
+    return {"step": step, "status": status, "detail": detail}
+
+
+def _base_trace(session_id: str, channel: str, active_phase: int, message: str) -> dict:
+    return {
+        "session_id": session_id,
+        "phase": active_phase,
+        "channel": channel,
+        "route": "pending",
+        "blocked": False,
+        "selected_agent": "",
+        "human_review_required": False,
+        "steps": [
+            _trace_step("Recibí su consulta", "done", "Consulta recibida por el asistente."),
+            _trace_step(
+                "Validé entrada",
+                "done" if bool(message and message.strip()) else "blocked",
+                "La consulta tiene formato válido." if bool(message and message.strip()) else "La consulta llegó vacía.",
+            ),
+        ],
+    }
+
+
+def _finalize_trace(trace: dict, text: str) -> dict:
+    trace["steps"].append(
+        _trace_step(
+            "Apliqué aviso legal",
+            "done",
+            "Respuesta marcada como borrador informativo para revisión humana."
+            if "Borrador informativo" in text
+            else "Respuesta generada sin aviso legal detectado.",
+        )
+    )
+    return trace
+
+
 def _fallback_response(message: str, active_phase: int) -> str:
     """Respuesta offline cuando no hay OPENAI_API_KEY."""
     from src.mcp.tools import _list_areas
@@ -95,6 +132,7 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
     """Ejecuta orquestador y aplica guardrails."""
     ok, err = check_input(message)
     settings = get_settings()
+    trace = _base_trace(session_id=session_id, channel=channel, active_phase=settings.active_phase, message=message)
     scope_block = check_phase_scope(message, active_phase=settings.active_phase)
     has_key = bool(settings.openai_api_key or os.environ.get("OPENAI_API_KEY"))
     # region agent log
@@ -113,7 +151,16 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
     )
     # endregion
     if not ok:
-        return {"text": err or "Entrada no válida.", "agent": "guardrail", "pending_review": False}
+        trace["route"] = "guardrail_input"
+        trace["blocked"] = True
+        trace["selected_agent"] = "guardrail"
+        trace["steps"].append(
+            _trace_step("Validé alcance de fase", "blocked", "La consulta no pasó validaciones básicas de entrada.")
+        )
+        trace["human_review_required"] = False
+        text = err or "Entrada no válida."
+        _finalize_trace(trace, text)
+        return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace}
 
     if scope_block:
         text = apply_output_guardrails(scope_block, channel)
@@ -126,10 +173,19 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
             {"channel": channel, "disclaimer_count": text.count("Borrador informativo")},
         )
         # endregion
+        trace["route"] = "scope_block"
+        trace["blocked"] = True
+        trace["selected_agent"] = f"orquestador_fase{settings.active_phase}"
+        trace["steps"].append(
+            _trace_step("Validé alcance de fase", "blocked", "La solicitud pertenece a una fase posterior y se bloqueó.")
+        )
+        trace["human_review_required"] = False
+        _finalize_trace(trace, text)
         return {
             "text": text,
             "agent": f"orquestador_fase{settings.active_phase}",
             "pending_review": False,
+            "trace": trace,
         }
 
     if not has_key:
@@ -143,10 +199,40 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
             {"channel": channel, "disclaimer_count": text.count("Borrador informativo")},
         )
         # endregion
+        pending_review = needs_human_review(text, channel, message)
+        trace["route"] = "fallback_no_api_key"
+        trace["blocked"] = False
+        trace["selected_agent"] = "fallback"
+        trace["steps"].append(
+            _trace_step(
+                "Validé alcance de fase",
+                "done",
+                "Consulta dentro del alcance de la fase activa.",
+            )
+        )
+        trace["steps"].append(
+            _trace_step(
+                "Procesé la solicitud",
+                "done",
+                "Se usó modo de respaldo porque la integración IA no está disponible.",
+            )
+        )
+        trace["human_review_required"] = pending_review
+        trace["steps"].append(
+            _trace_step(
+                "Revisión humana",
+                "pending" if pending_review else "done",
+                "Pendiente de aprobación del abogado."
+                if pending_review
+                else "No requiere aprobación adicional para este tipo de salida.",
+            )
+        )
+        _finalize_trace(trace, text)
         return {
             "text": text,
             "agent": "fallback",
-            "pending_review": needs_human_review(text, channel, message),
+            "pending_review": pending_review,
+            "trace": trace,
         }
 
     if settings.openai_api_key:
@@ -171,16 +257,55 @@ async def run_agent(message: str, channel: str = "slack", session_id: str = "def
             "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.",
             channel,
         )
+        trace["route"] = "error"
+        trace["blocked"] = False
+        trace["selected_agent"] = "error"
+        trace["steps"].append(
+            _trace_step("Validé alcance de fase", "done", "Consulta dentro del alcance de la fase activa.")
+        )
+        trace["steps"].append(
+            _trace_step("Procesé la solicitud", "blocked", "Ocurrió un error interno al procesar la consulta.")
+        )
+        trace["human_review_required"] = False
+        trace["steps"].append(
+            _trace_step("Revisión humana", "done", "Se devolvió mensaje de error controlado.")
+        )
+        _finalize_trace(trace, text)
         return {
             "text": text,
             "agent": "error",
             "pending_review": False,
             "session_id": session_id,
+            "trace": trace,
         }
 
+    pending_review = needs_human_review(text, channel, message)
+    trace["route"] = "orchestrator"
+    trace["blocked"] = False
+    trace["selected_agent"] = f"orquestador_fase{settings.active_phase}"
+    trace["steps"].append(
+        _trace_step("Validé alcance de fase", "done", "Consulta dentro del alcance de la fase activa.")
+    )
+    trace["steps"].append(
+        _trace_step(
+            "Enruté al especialista",
+            "done",
+            "La consulta fue enrutada al flujo de agentes de Fase 1.",
+        )
+    )
+    trace["human_review_required"] = pending_review
+    trace["steps"].append(
+        _trace_step(
+            "Revisión humana",
+            "pending" if pending_review else "done",
+            "Pendiente de aprobación del abogado." if pending_review else "No requiere aprobación adicional.",
+        )
+    )
+    _finalize_trace(trace, text)
     return {
         "text": text,
         "agent": f"orquestador_fase{settings.active_phase}",
-        "pending_review": needs_human_review(text, channel, message),
+        "pending_review": pending_review,
         "session_id": session_id,
+        "trace": trace,
     }

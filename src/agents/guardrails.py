@@ -27,8 +27,8 @@ FASE1_PLUS_KEYWORDS = re.compile(
 FASE2_3_KEYWORDS = re.compile(
     r"\b("
     r"tutela|memorial|concepto jur[ií]dico|radicaci[oó]n|rama judicial|"
-    r"seguimiento procesal|informe mensual|entrevista|fiscal[ií]a|juez|"
-    r"impulso procesal|expediente|audiencia|accionante|accionado"
+    r"radicado|seguimiento procesal|seguimiento mensual|informe mensual|alertas autom[aá]ticas|"
+    r"entrevista|fiscal[ií]a|juez|impulso procesal|expediente|audiencia|accionante|accionado"
     r")\b",
     re.IGNORECASE,
 )

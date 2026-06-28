@@ -1,5 +1,5 @@
 /**
- * Reporte analítico por sesión Fase 0 — métricas, panel UI y exportación.
+ * Reporte analítico por sesión Fase 1 — métricas, panel UI y exportación.
  */
 const SessionReport = (() => {
   const META_LABELS = {
@@ -186,6 +186,39 @@ const SessionReport = (() => {
     return `<ul class="report-insights">${items.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`;
   }
 
+  function renderTraceSummary(chatLog) {
+    const assistantEntries = (chatLog || []).filter((entry) => entry.role === "assistant");
+    if (!assistantEntries.length) {
+      return `<p class="report-empty">Sin trazas de flujo registradas en esta sesión.</p>`;
+    }
+    const rows = assistantEntries
+      .slice(-8)
+      .reverse()
+      .map((entry) => {
+        const trace = entry.trace || null;
+        const route = trace?.selected_agent || entry.agent || "sin ruta";
+        const blocked = Boolean(trace?.blocked);
+        const review = Boolean(trace?.human_review_required ?? entry.pendingReview);
+        const status = blocked ? "Bloqueada" : review ? "Pendiente revisión" : "Completada";
+        const statusClass = blocked ? "is-blocked" : review ? "is-pending" : "is-done";
+        const firstStep =
+          Array.isArray(trace?.steps) && trace.steps.length
+            ? trace.steps[trace.steps.length - 1]?.detail || "Sin detalle."
+            : "Sin detalle de traza.";
+        return `
+          <li class="report-trace-item ${statusClass}">
+            <span class="report-trace-head">
+              <strong>${escapeHtml(status)}</strong>
+              <em>${escapeHtml(route)}</em>
+            </span>
+            <p>${escapeHtml(firstStep)}</p>
+          </li>
+        `;
+      })
+      .join("");
+    return `<ul class="report-trace-list">${rows}</ul>`;
+  }
+
   function renderLlmBlock(llm, status, message, hasGenerated) {
     if (llm && status === "ok") {
       return `
@@ -288,9 +321,11 @@ const SessionReport = (() => {
         </p>
         <h4>Por sección</h4>
         ${renderSectionsTable(metrics)}
+        <h4>Recorrido del asistente</h4>
+        ${renderTraceSummary(session.chatLog)}
         <h4>Eventos recientes</h4>
         <div id="report-events-wrap">${renderEventsTimeline(session.events)}</div>
-        <h4>Conclusiones (reglas Fase 0)</h4>
+        <h4>Conclusiones (reglas Fase 1)</h4>
         ${renderInsightsList(rules, "Cargando conclusiones…")}
         <h4>Análisis IA ${generatedAt ? `<span class="report-generated-at">(${escapeHtml(generatedAt)})</span>` : ""}</h4>
         <div id="report-llm-block">${renderLlmBlock(llm, llmStatus, llmMessage, hasGenerated)}</div>
@@ -508,7 +543,7 @@ const SessionReport = (() => {
   <style>${PRINT_STYLES}</style>
 </head>
 <body>
-  <h1>Reporte de sesión — Fase 0</h1>
+  <h1>Reporte de sesión — Fase 1</h1>
   <div class="report-panel-inner">${reportHtml}</div>
   ${transcriptBlock}
 </body>
@@ -526,7 +561,7 @@ const SessionReport = (() => {
 
     const session = getSessionFn();
     const transcriptHtml = renderTranscript(session.chatLog);
-    const docTitle = `Reporte Fase 0 — ${session.sessionId || "sesión"}`;
+    const docTitle = `Reporte Fase 1 — ${session.sessionId || "sesión"}`;
     const printWin = window.open("", "_blank");
     if (!printWin) {
       if (Toast?.show) Toast.show("Permita ventanas emergentes para exportar a PDF.", "error");

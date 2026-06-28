@@ -229,3 +229,51 @@ async def test_form_login_redirects_and_sets_cookie(monkeypatch):
         assert authed.status_code == 200
 
     get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_debug_trace_requires_auth_and_scope(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        unauth = await client.get("/debug/trace/web:t")
+        assert unauth.status_code == 401
+
+        login = await client.post(
+            "/auth/login",
+            json={"username": "despacho", "password": "test-secret-pass"},
+        )
+        assert login.status_code == 200
+        cookie = login.cookies.get("agente_session")
+        assert cookie
+
+        chat = await client.post(
+            "/chat",
+            json={"message": "hola", "channel": "web", "user_id": "trace-user"},
+            cookies={"agente_session": cookie},
+        )
+        assert chat.status_code == 200
+
+        scoped = await client.get(
+            "/debug/trace/web:trace-user",
+            cookies={"agente_session": cookie},
+        )
+        assert scoped.status_code == 200
+        payload = scoped.json()
+        assert payload["session_id"] == "web:trace-user"
+        assert isinstance(payload["traces"], list)
+        assert payload["traces"]
+
+        forbidden = await client.get(
+            "/debug/trace/whatsapp:trace-user",
+            cookies={"agente_session": cookie},
+        )
+        assert forbidden.status_code == 403
+
+    get_settings.cache_clear()

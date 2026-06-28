@@ -33,6 +33,7 @@ from src.auth.gate import COOKIE_NAME, auth_enabled, create_session_token, is_se
 from src.channels.whatsapp_webhook import router as whatsapp_router
 from src.config import Settings, get_settings
 from src.gateway.router import InboundMessage, handle_message
+from src.gateway.trace import trace_store
 from src.validation.probes import generate_probes
 from src.validation.report import build_export_html, build_rules_only, build_session_report
 from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_weight
@@ -383,6 +384,12 @@ class ChatResponse(BaseModel):
     text: str
     agent: str
     pending_review: bool = False
+    trace: dict | None = None
+
+
+class TraceDebugResponse(BaseModel):
+    session_id: str
+    traces: list[dict]
 
 
 @app.get("/health")
@@ -433,7 +440,25 @@ async def chat(req: ChatRequest):
     result = await handle_message(
         InboundMessage(channel=req.channel, user_id=req.user_id, text=req.message)
     )
-    return ChatResponse(**{k: result[k] for k in ("text", "agent", "pending_review") if k in result})
+    return ChatResponse(**{k: result[k] for k in ("text", "agent", "pending_review", "trace") if k in result})
+
+
+def _validate_trace_session_id(session_id: str) -> str:
+    raw = (session_id or "").strip()
+    if not raw or len(raw) > 120:
+        raise HTTPException(status_code=400, detail="session_id inválido.")
+    if not raw.startswith("web:"):
+        raise HTTPException(status_code=403, detail="Solo se permite traza interna de sesiones web.")
+    return raw
+
+
+@app.get("/debug/trace/{session_id}", response_model=TraceDebugResponse, dependencies=[Depends(require_web_session)])
+async def debug_trace(session_id: str, limit: int = 20):
+    """Consulta traza interna del flujo de agentes por sesión web autenticada."""
+    sid = _validate_trace_session_id(session_id)
+    max_limit = max(1, min(limit, 100))
+    traces = trace_store.get(sid, limit=max_limit)
+    return TraceDebugResponse(session_id=sid, traces=traces)
 
 
 class GenerateProbesRequest(BaseModel):

@@ -246,7 +246,7 @@ function getBlockTitle(blockId) {
 }
 
 function buildMessageMeta(role, options = {}) {
-  const { blockId, via, latencyMs } = options;
+  const { blockId, via, latencyMs, agent } = options;
   const parts = [];
   if (role === "user") parts.push("Usted");
   else if (role === "assistant") parts.push("Asistente jurídico");
@@ -256,10 +256,100 @@ function buildMessageMeta(role, options = {}) {
     parts.push(`<button type="button" class="message-block-badge" data-block-id="${escapeHtml(blockId)}">${escapeHtml(title)}</button>`);
   }
   if (via === "probe") parts.push('<span class="message-via-badge">probe</span>');
+  if (role === "assistant" && agent) {
+    const route = formatAgentRoute(agent);
+    if (route) parts.push(`<span class="message-agent-route">${escapeHtml(route)}</span>`);
+  }
   if (role === "assistant" && typeof latencyMs === "number") {
     parts.push(`<span class="message-latency">${latencyMs} ms</span>`);
   }
   return parts.join(" · ");
+}
+
+function formatAgentRoute(agent) {
+  if (!agent) return "";
+  if (agent.startsWith("orquestador_fase1")) return "Ruta IA Fase 1";
+  if (agent.startsWith("orquestador_fase0")) return "Ruta IA Fase 0";
+  if (agent === "fallback") return "Modo respaldo";
+  if (agent === "guardrail") return "Bloqueo de seguridad";
+  if (agent === "error") return "Ruta de error controlado";
+  return agent;
+}
+
+function inferTrace(options = {}, text = "") {
+  const blocked = /(no está activa|no esta activa|no puedo|no tengo la habilidad)/i.test(text || "");
+  const disclaimer = /borrador informativo/i.test(text || "");
+  const route = options.agent ? formatAgentRoute(options.agent) : "Ruta no reportada";
+  const needsReview = Boolean(options.pendingReview);
+  return {
+    session_id: null,
+    route: options.agent || "unknown",
+    selected_agent: options.agent || "",
+    blocked,
+    human_review_required: needsReview,
+    steps: [
+      { step: "Recibí su consulta", status: "done", detail: "Consulta recibida por el asistente." },
+      {
+        step: "Validé alcance de fase",
+        status: blocked ? "blocked" : "done",
+        detail: blocked
+          ? "La solicitud corresponde a una fase posterior y se bloqueó."
+          : "La solicitud está dentro del alcance de la fase activa.",
+      },
+      {
+        step: "Enruté al flujo de respuesta",
+        status: "done",
+        detail: route,
+      },
+      {
+        step: "Apliqué aviso legal",
+        status: disclaimer ? "done" : "blocked",
+        detail: disclaimer
+          ? "Respuesta marcada como borrador informativo."
+          : "No se detectó aviso legal en la respuesta.",
+      },
+      {
+        step: "Revisión humana",
+        status: needsReview ? "pending" : "done",
+        detail: needsReview
+          ? "Pendiente de aprobación del abogado."
+          : "No requiere aprobación adicional para este tipo de salida.",
+      },
+    ],
+  };
+}
+
+function renderTraceSection(tracePayload, text = "") {
+  const trace = tracePayload && Array.isArray(tracePayload.steps) ? tracePayload : inferTrace({}, text);
+  const statusLabel =
+    trace.blocked
+      ? "Bloqueada por alcance de fase"
+      : trace.human_review_required
+        ? "Pendiente de aprobación humana"
+        : "Completada";
+  const rows = (trace.steps || [])
+    .map((step) => {
+      const state = step.status || "done";
+      return `
+        <li class="workflow-trace-item workflow-trace-item--${state}">
+          <span class="workflow-trace-dot" aria-hidden="true"></span>
+          <div class="workflow-trace-copy">
+            <strong>${escapeHtml(step.step || "Paso")}</strong>
+            <p>${escapeHtml(step.detail || "")}</p>
+          </div>
+        </li>
+      `;
+    })
+    .join("");
+  return `
+    <details class="workflow-trace" open>
+      <summary>
+        Workflow Trace
+        <span class="workflow-trace-status">${escapeHtml(statusLabel)}</span>
+      </summary>
+      <ul class="workflow-trace-list">${rows}</ul>
+    </details>
+  `;
 }
 
 function scrollToBottom() {
@@ -273,10 +363,15 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   if (options.blockId) el.dataset.blockId = options.blockId;
 
   const metaHtml = meta || buildMessageMeta(role, options);
+  const traceHtml =
+    role === "assistant"
+      ? renderTraceSection(options.trace || inferTrace(options, text), text)
+      : "";
   el.innerHTML = `
     ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
     ${role === "assistant" ? '<span class="message-phase-badge">Fase 1 · Borrador</span>' : ""}
+    ${traceHtml}
   `;
 
   el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
@@ -316,6 +411,9 @@ function restoreChatFromLog() {
       blockId: entry.blockId,
       via: entry.via,
       latencyMs: entry.latencyMs,
+      agent: entry.agent,
+      pendingReview: entry.pendingReview,
+      trace: entry.trace || null,
     });
   });
 }
@@ -1023,6 +1121,9 @@ async function sendMessage(text) {
 
   let assistantText =
     "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.";
+  let assistantAgent = "error";
+  let assistantPendingReview = false;
+  let assistantTrace = null;
 
   try {
     const res = await authFetch("/chat", {
@@ -1042,6 +1143,9 @@ async function sendMessage(text) {
     if (res.ok) {
       const data = await res.json();
       assistantText = data.text;
+      assistantAgent = data.agent || assistantAgent;
+      assistantPendingReview = Boolean(data.pending_review);
+      assistantTrace = data.trace || null;
     }
   } catch {
     if (abortIfStale()) return;
@@ -1059,11 +1163,17 @@ async function sendMessage(text) {
     blockId,
     latencyMs,
     replyTo: pendingChatMeta?.userEntryId,
+    agent: assistantAgent,
+    pendingReview: assistantPendingReview,
+    trace: assistantTrace || inferTrace({ agent: assistantAgent, pendingReview: assistantPendingReview }, assistantText),
   });
   addMessageToUI("assistant", assistantText, "", {
     msgId: assistantEntry.id,
     blockId,
     latencyMs,
+    agent: assistantAgent,
+    pendingReview: assistantPendingReview,
+    trace: assistantEntry.trace,
   });
   const assistantEl = messagesEl.lastElementChild;
   if (assistantEl && assistantEntry.id) assistantEl.dataset.msgId = assistantEntry.id;

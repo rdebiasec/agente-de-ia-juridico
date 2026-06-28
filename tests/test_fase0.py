@@ -47,6 +47,9 @@ async def test_chat_areas_derecho_fallback():
     data = r.json()
     assert "civil" in data["text"].lower() or "familia" in data["text"].lower()
     assert "revisión" in data["text"].lower() or "aprobación" in data["text"].lower()
+    assert isinstance(data.get("trace"), dict)
+    assert data["trace"].get("route")
+    assert isinstance(data["trace"].get("steps"), list)
 
 
 @pytest.mark.asyncio
@@ -103,7 +106,13 @@ async def test_chat_fase2_capability_is_blocked():
     assert r.status_code == 200
     data = r.json()
     lowered = data["text"].lower()
-    assert ("no está activa" in lowered) or ("no tengo la habilidad" in lowered) or ("no puedo" in lowered)
+    assert (
+        ("no está activa" in lowered)
+        or ("fase posterior" in lowered)
+        or ("no tengo la habilidad" in lowered)
+        or ("no tengo la capacidad" in lowered)
+        or ("no puedo" in lowered)
+    )
 
 
 @pytest.mark.asyncio
