@@ -22,7 +22,7 @@ echo "→ Migraciones Alembic..."
 PYTHONPATH=. .venv/bin/python -c "
 from src.storage.migrate import run_migrations
 run_migrations('$LOCAL_URL')
-print('OK: esquema al día (0001 + vector)')
+print('OK: esquema al día (0001 + 0002 + vector)')
 "
 
 if [[ "${1:-}" == "--ingest" ]]; then
