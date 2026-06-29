@@ -1,5 +1,7 @@
 """Conversación multi-turno, trazas persistidas y pipeline de validación."""
 
+import pytest
+
 from src.agents.pipeline import run_pre_validations, run_post_validations
 from src.gateway.agent_session import RepositoryAgentSession
 from src.storage import get_repository
@@ -61,3 +63,36 @@ def test_repository_agent_session_roundtrip():
         assert items[0]["content"] == "Primera pregunta"
 
     asyncio.run(_run())
+
+
+@pytest.mark.asyncio
+async def test_chat_reset_endpoint_clears_session(monkeypatch):
+    from httpx import ASGITransport, AsyncClient
+
+    from src.gateway import reset as reset_module
+    from src.main import app
+    from src.storage.memory import InMemoryRepository
+    from src.storage.models import SessionTrace
+
+    repo = InMemoryRepository()
+    monkeypatch.setattr(reset_module, "get_repository", lambda: repo)
+
+    uid = "reset-user"
+    sid = f"web:{uid}"
+    repo.append_chat_message(sid, channel="web", user_id=uid, role="user", content="Hola", max_messages=50)
+    repo.add_session_trace(SessionTrace(session_id=sid, trace_id="tr-1", turn_index=1, payload={"ok": True}))
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        res = await client.post("/chat/reset", json={"channel": "web", "user_id": uid})
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["ok"] is True
+    assert data["session_id"] == sid
+    assert data["cleared_messages"] is True
+    assert data["cleared_traces"] == 1
+    session = repo.get_chat_session(sid)
+    assert session is not None
+    assert session.messages == []
+    assert repo.list_session_traces(sid) == []

@@ -64,7 +64,17 @@
                 <span class="status-dot" id="status-dot" aria-hidden="true"></span>
                 <span id="status-text">Conectando…</span>
               </div>
-              <span class="toolbar-note">Human-supervised · Su equipo en control</span>
+              <div class="chat-header-actions">
+                <button
+                  type="button"
+                  class="btn-reset-chat"
+                  id="reset-chat-btn"
+                  title="Borra el historial del agente y empieza una conversación nueva"
+                >
+                  Reiniciar chat
+                </button>
+                <span class="toolbar-note">Human-supervised · Su equipo en control</span>
+              </div>
             </header>
 
             <div class="messages" id="messages" role="log" aria-live="polite"></div>

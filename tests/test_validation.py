@@ -199,7 +199,8 @@ async def test_chat_page_has_report_and_reset_buttons():
     assert r.status_code == 200
     assert "trace-body" in r.text
     assert "trace-toggle" in r.text
-    assert "reset-session-btn" not in r.text
+    assert "reset-chat-btn" in r.text
+    assert "Reiniciar chat" in r.text
     assert "btn-export-doc" not in r.text
     assert "Descargar informe (.doc)" not in r.text
     assert "Imprimir / Guardar PDF" in r.text

@@ -31,6 +31,7 @@ from src.auth.deps import (
 )
 from src.auth.gate import COOKIE_NAME, auth_enabled, create_session_token, is_session_active, parse_session_token, verify_password
 from src.config import Settings, get_settings
+from src.gateway.reset import reset_conversation
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
 from src.validation.probes import generate_probes
@@ -415,6 +416,18 @@ class ChatResponse(BaseModel):
     trace: dict | None = None
 
 
+class ChatResetRequest(BaseModel):
+    channel: str = "web"
+    user_id: str = "web"
+
+
+class ChatResetResponse(BaseModel):
+    ok: bool = True
+    session_id: str
+    cleared_messages: bool = False
+    cleared_traces: int = 0
+
+
 class TraceDebugResponse(BaseModel):
     session_id: str
     traces: list[dict]
@@ -457,6 +470,18 @@ async def chat(req: ChatRequest):
     return ChatResponse(
         **{k: result[k] for k in ("text", "agent", "pending_review", "draft_id", "trace") if k in result}
     )
+
+
+@app.post("/chat/reset", response_model=ChatResetResponse, dependencies=[Depends(require_web_session)])
+async def chat_reset(req: ChatResetRequest):
+    """Reinicia historial del agente, trazas y expediente sin esperar idle de sesión."""
+    if req.channel != "web":
+        raise HTTPException(status_code=400, detail="Solo se admite reinicio en canal web.")
+    user_id = (req.user_id or "").strip()
+    if not user_id or len(user_id) > 120:
+        raise HTTPException(status_code=400, detail="user_id inválido.")
+    result = reset_conversation(channel=req.channel, user_id=user_id)
+    return ChatResetResponse(**result)
 
 
 def _validate_trace_session_id(session_id: str) -> str:

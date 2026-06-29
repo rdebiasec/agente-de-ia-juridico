@@ -19,6 +19,7 @@ const validationProgressEl = document.getElementById("validation-progress");
 const validationScoreEl = document.getElementById("validation-score");
 const validationScoreBarEl = document.getElementById("validation-score-bar");
 const resetScoreBtn = document.getElementById("reset-score-btn");
+const resetChatBtn = document.getElementById("reset-chat-btn");
 const validationStepperEl = document.getElementById("validation-stepper");
 const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
@@ -1160,6 +1161,45 @@ function resetChatConversation() {
   if (sendBtn) sendBtn.disabled = false;
 }
 
+async function resetChatSession() {
+  if (
+    !confirm(
+      "¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar 6 horas."
+    )
+  ) {
+    return;
+  }
+  if (resetChatBtn) {
+    resetChatBtn.disabled = true;
+    resetChatBtn.textContent = "Reiniciando…";
+  }
+  try {
+    const res = await authFetch("/chat/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channel: "web", user_id: getUserId() }),
+    });
+    if (!res.ok) {
+      throw new Error("reset_failed");
+    }
+    resetChatConversation();
+    recordEvent({ type: "reset_chat" });
+    saveSessionState();
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("Conversación reiniciada. El agente no recordará mensajes anteriores.", "info");
+    }
+  } catch {
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("No se pudo reiniciar el chat. Intente de nuevo.", "error");
+    }
+  } finally {
+    if (resetChatBtn) {
+      resetChatBtn.disabled = false;
+      resetChatBtn.textContent = "Reiniciar chat";
+    }
+  }
+}
+
 function resetScoreOnly() {
   if (
     !confirm(
@@ -1351,6 +1391,9 @@ function initValidationPanel() {
   initCollapsiblePanel("trace-panel", "trace-toggle");
   initCollapsiblePanel("report-panel", "report-toggle");
   resetScoreBtn?.addEventListener("click", resetScoreOnly);
+  resetChatBtn?.addEventListener("click", () => {
+    resetChatSession();
+  });
   filterPendingEl?.addEventListener("change", applyPendingFilter);
 }
 
