@@ -6,7 +6,7 @@ alwaysApply: true
 # Agente jurídico — reglas globales
 
 - Fuente sagrada: `agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md` y `agente/requisitos/requisitos_asistente.json`
-- Fase activa: 0 — solo perfil y áreas del derecho
+- Estado actual: **firma virtual** — ver `agente/fases/ESTADO_PROYECTO.md` (no gating por Fase 0/1/2/3)
 - La IA propone; el abogado revisa y aprueba
 - No inventar sentencias, radicados ni normas
-- Canales producción: Slack y WhatsApp vía `src/`
+- Canales producción: web (activo), Slack (configurar token), WhatsApp (pendiente decisión)

@@ -428,6 +428,12 @@ class ChatResetResponse(BaseModel):
     cleared_traces: int = 0
 
 
+class ChatHistoryResponse(BaseModel):
+    session_id: str
+    messages: list[dict]
+    traces: list[dict]
+    expediente: dict | None = None
+
 class TraceDebugResponse(BaseModel):
     session_id: str
     traces: list[dict]
@@ -492,6 +498,28 @@ async def chat_reset(req: ChatResetRequest):
             ) from exc
         raise HTTPException(status_code=500, detail="No se pudo reiniciar la conversación.") from exc
     return ChatResetResponse(**result)
+
+
+@app.get("/chat/history", response_model=ChatHistoryResponse, dependencies=[Depends(require_web_session)])
+async def chat_history(channel: str = "web", user_id: str = "web"):
+    """Historial de conversación, trazas y expediente persistidos para la sesión web."""
+    if channel != "web":
+        raise HTTPException(status_code=400, detail="Solo canal web.")
+    uid = (user_id or "").strip()
+    if not uid or len(uid) > 120:
+        raise HTTPException(status_code=400, detail="user_id inválido.")
+    session_id = f"{channel}:{uid}"
+    from src.gateway.expediente import expediente_store
+    from src.storage import get_repository
+
+    chat = get_repository().get_chat_session(session_id)
+    exp = expediente_store.get(session_id)
+    return ChatHistoryResponse(
+        session_id=session_id,
+        messages=list(chat.messages) if chat else [],
+        traces=trace_store.get(session_id, limit=40),
+        expediente=exp.to_dict() if exp else None,
+    )
 
 
 def _validate_trace_session_id(session_id: str) -> str:

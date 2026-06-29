@@ -481,6 +481,9 @@ async def run_agent(
 
     chat = get_repository().get_chat_session(session_id)
     history = list(chat.messages) if chat else []
+    from src.services.expediente_sync import sync_expediente_from_chat
+
+    sync_expediente_from_chat(session_id, message, history, trace=trace)
     expediente = expediente_store.get_or_create(session_id)
     exp_resumen = expediente.resumen()
 
@@ -568,6 +571,34 @@ async def run_agent(
     context_block = ""
     if exp_resumen and "sin datos" not in exp_resumen.lower():
         context_block = f"[Expediente del caso]\n{exp_resumen}\n\n"
+    try:
+        from src.services.rag import buscar, contexto_para_prompt
+
+        rag_chunks = buscar(message, incluir_kb=True, k=4)
+        rag_text = contexto_para_prompt(rag_chunks)
+        if rag_text and "No se encontraron" not in rag_text:
+            context_block += f"[Base de conocimiento — fragmentos relevantes]\n{rag_text}\n\n"
+            trace.setdefault("spans", []).append(
+                {
+                    "name": "RAG: recuperación KB",
+                    "kind": "context",
+                    "status": "done",
+                    "detail": f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno.",
+                    "at_ms": int(time.time() * 1000),
+                }
+            )
+            trace["rag_chunks_count"] = len(rag_chunks)
+    except Exception:
+        logger.exception("RAG prefetch falló")
+        trace.setdefault("spans", []).append(
+            {
+                "name": "RAG: recuperación KB",
+                "kind": "context",
+                "status": "pending",
+                "detail": "No se pudo recuperar contexto de la KB en este turno.",
+                "at_ms": int(time.time() * 1000),
+            }
+        )
     agent_input = f"{context_block}{message}" if context_block else message
     trace.setdefault("spans", []).append(
         {

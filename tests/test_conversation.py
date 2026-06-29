@@ -44,6 +44,25 @@ def test_attach_session_continuity_enriches_trace():
     assert any(s["name"] == "Sesión: encadenar turno anterior" for s in trace["spans"])
 
 
+def test_expediente_sync_from_tutela_message():
+    from src.services.expediente_sync import sync_expediente_from_chat
+    from src.storage.memory import InMemoryRepository
+    from src.gateway import expediente as exp_mod
+
+    repo = InMemoryRepository()
+    exp_mod.expediente_store.repo = repo
+    msg = (
+        "Accionante: Carlos Andrés Gómez Vega CC 71234567. "
+        "Accionado: Cementerio Jardines de la Esperanza S.A.S. NIT 900.123.456-7. "
+        "Quiero una tutela por vulneración del debido proceso. Radicado interno CE-PET-2026-0315."
+    )
+    trace = {"timestamp": 1, "spans": []}
+    result = sync_expediente_from_chat("web:tut", msg, [], trace=trace)
+    assert result["cambios"]
+    assert "tutela" in result["resumen"].lower() or "Expediente" in result["resumen"]
+    assert any(s["name"] == "Expediente: sincronización" for s in trace["spans"])
+
+
 def test_post_validations_pide_datos_tutela():
     trace = {"timestamp": 1, "sent_to_agent": "tutela_constitucional"}
     text = run_post_validations("Redacte una tutela", "Borrador preliminar.", trace)
