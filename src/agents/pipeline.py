@@ -28,6 +28,90 @@ def _span(trace: dict, name: str, status: str, detail: str, *, kind: str = "vali
     trace.setdefault("steps", []).append({"step": name, "status": status, "detail": detail})
 
 
+def _preview(content: str, limit: int = 120) -> str:
+    text = " ".join((content or "").split())
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 3]}..."
+
+
+def attach_session_continuity(
+    trace: dict,
+    *,
+    history: list[dict],
+    session_id: str,
+    prior_traces: list | None = None,
+) -> None:
+    """Inyecta contexto de sesión multi-turno y spans de historial en la traza."""
+    from src.storage import get_repository
+
+    if prior_traces is None:
+        prior_traces = get_repository().list_session_traces(session_id, limit=40)
+
+    user_msgs = [m for m in history if m.get("role") == "user"]
+    assistant_msgs = [m for m in history if m.get("role") == "assistant"]
+    trace["session_message_count"] = len(history)
+    trace["session_user_turns"] = len(user_msgs)
+    trace["prior_traces_count"] = len(prior_traces)
+    trace["session_history_preview"] = [
+        {"role": m.get("role", "?"), "preview": _preview(str(m.get("content", "")))}
+        for m in history[-12:]
+    ]
+    trace["session_flow"] = [
+        {
+            "turn_index": t.turn_index,
+            "trace_id": t.trace_id,
+            "input_summary": (t.payload or {}).get("input_summary", ""),
+            "sent_to_agent": (t.payload or {}).get("sent_to_agent", ""),
+            "spans_count": len((t.payload or {}).get("spans", [])),
+            "conversation_continues": (t.payload or {}).get("conversation_continues", False),
+        }
+        for t in prior_traces
+    ]
+
+    _span(
+        trace,
+        "Sesión: cargar historial",
+        "done",
+        f"{len(history)} mensajes en memoria ({len(user_msgs)} usuario / {len(assistant_msgs)} asistente).",
+        kind="session",
+    )
+    _span(
+        trace,
+        "Sesión: trazas previas",
+        "done",
+        f"{len(prior_traces)} turno(s) ya persistido(s) en esta sesión.",
+        kind="session",
+    )
+
+    if not history:
+        _span(trace, "Sesión: primer turno", "done", "Inicio de conversación sin historial previo.", kind="session")
+    else:
+        for idx, msg in enumerate(history[-8:], start=max(1, len(history) - 7)):
+            role = str(msg.get("role", "?"))
+            _span(
+                trace,
+                f"Historial turno previo [{idx}]",
+                "done",
+                f"{role}: {_preview(str(msg.get('content', '')))}",
+                kind="session",
+            )
+
+    if len(prior_traces) >= 1:
+        last = prior_traces[-1]
+        payload = last.payload or {}
+        _span(
+            trace,
+            "Sesión: encadenar turno anterior",
+            "done",
+            (
+                f"Turno {last.turn_index} → {payload.get('sent_to_agent', 'n/a')}; "
+                f"continúa={payload.get('conversation_continues', False)}."
+            ),
+            kind="session",
+        )
+
+
 def run_pre_validations(
     message: str,
     *,

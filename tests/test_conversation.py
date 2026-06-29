@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.agents.pipeline import run_pre_validations, run_post_validations
+from src.agents.pipeline import attach_session_continuity, run_pre_validations, run_post_validations
 from src.gateway.agent_session import RepositoryAgentSession
 from src.storage import get_repository
 from src.storage.memory import InMemoryRepository
@@ -16,6 +16,32 @@ def test_pre_validations_multi_turn():
     assert err is None
     assert trace["turn_index"] == 2
     assert any(s["name"] == "Validación: diálogo multi-turno" for s in trace["spans"])
+
+
+def test_attach_session_continuity_enriches_trace():
+    from src.storage.memory import InMemoryRepository
+    from src.storage.models import SessionTrace
+
+    repo = InMemoryRepository()
+    history = [
+        {"role": "user", "content": "Quiero una tutela"},
+        {"role": "assistant", "content": "Indíqueme el accionante"},
+    ]
+    prior = [
+        SessionTrace(
+            session_id="web:u1",
+            trace_id="tr-prev",
+            turn_index=1,
+            payload={"input_summary": "Quiero una tutela", "sent_to_agent": "tutela_constitucional", "spans": [{}]},
+        )
+    ]
+    trace = {"timestamp": 1, "spans": [], "steps": []}
+    attach_session_continuity(trace, history=history, session_id="web:u1", prior_traces=prior)
+    assert trace["session_message_count"] == 2
+    assert trace["prior_traces_count"] == 1
+    assert len(trace["session_flow"]) == 1
+    assert any(s["kind"] == "session" and "Historial turno previo" in s["name"] for s in trace["spans"])
+    assert any(s["name"] == "Sesión: encadenar turno anterior" for s in trace["spans"])
 
 
 def test_post_validations_pide_datos_tutela():

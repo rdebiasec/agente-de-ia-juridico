@@ -360,7 +360,87 @@ function getLatestAssistantEntry() {
   return null;
 }
 
-function renderTracePanelForEntry(entry) {
+function buildSessionTimelineHtml(trace, serverTraces = []) {
+  const flow = Array.isArray(trace.session_flow) ? trace.session_flow : [];
+  const merged = [];
+  const seen = new Set();
+  for (const row of flow) {
+    if (!row?.trace_id || seen.has(row.trace_id)) continue;
+    merged.push(row);
+    seen.add(row.trace_id);
+  }
+  for (const row of serverTraces) {
+    if (!row?.trace_id || seen.has(row.trace_id)) continue;
+    merged.push({
+      turn_index: row.turn_index,
+      trace_id: row.trace_id,
+      input_summary: row.input_summary,
+      sent_to_agent: row.sent_to_agent,
+      spans_count: Array.isArray(row.spans) ? row.spans.length : 0,
+      conversation_continues: row.conversation_continues,
+    });
+    seen.add(row.trace_id);
+  }
+  if (trace.trace_id && !seen.has(trace.trace_id)) {
+    merged.push({
+      turn_index: trace.turn_index,
+      trace_id: trace.trace_id,
+      input_summary: trace.input_summary,
+      sent_to_agent: trace.sent_to_agent,
+      spans_count: Array.isArray(trace.spans) ? trace.spans.length : 0,
+      conversation_continues: trace.conversation_continues,
+      current: true,
+    });
+  }
+  merged.sort((a, b) => (a.turn_index || 0) - (b.turn_index || 0));
+  if (!merged.length) {
+    return "<p class=\"trace-muted\">Aún no hay turnos persistidos en el servidor para esta sesión.</p>";
+  }
+  return `<ol class="trace-session-timeline">${merged
+    .map(
+      (row) => `
+      <li class="trace-session-turn${row.current ? " trace-session-turn--current" : ""}">
+        <strong>Turno ${escapeHtml(String(row.turn_index ?? "—"))}</strong>
+        <span>${escapeHtml(row.trace_id || "")}</span>
+        <p>${escapeHtml(row.input_summary || "Sin resumen")}</p>
+        <p class="trace-turn-meta">
+          Agente: ${escapeHtml(row.sent_to_agent || "n/a")} ·
+          Spans: ${escapeHtml(String(row.spans_count ?? 0))} ·
+          Continúa: ${row.conversation_continues ? "Sí" : "No"}
+        </p>
+      </li>`
+    )
+    .join("")}</ol>`;
+}
+
+function buildHistoryPreviewHtml(trace) {
+  const rows = Array.isArray(trace.session_history_preview) ? trace.session_history_preview : [];
+  if (!rows.length) {
+    return "<p class=\"trace-muted\">Sin historial previo cargado en este turno.</p>";
+  }
+  return `<ul class="trace-history-preview">${rows
+    .map(
+      (row) => `
+      <li>
+        <strong>${escapeHtml(row.role || "?")}</strong>
+        <span>${escapeHtml(row.preview || "")}</span>
+      </li>`
+    )
+    .join("")}</ul>`;
+}
+
+async function fetchSessionTracesFromServer() {
+  try {
+    const res = await authFetch(`/debug/trace/web:${encodeURIComponent(getUserId())}?limit=40`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.traces) ? data.traces : [];
+  } catch {
+    return [];
+  }
+}
+
+async function renderTracePanelForEntry(entry) {
   if (!traceBodyEl) return;
   if (!entry) {
     traceBodyEl.innerHTML = `
@@ -371,6 +451,9 @@ function renderTracePanelForEntry(entry) {
     return;
   }
   const trace = entry.trace || inferTrace({ agent: entry.agent, pendingReview: entry.pendingReview }, entry.text);
+  const serverTraces = await fetchSessionTracesFromServer();
+  const sessionTimeline = buildSessionTimelineHtml(trace, serverTraces);
+  const historyPreview = buildHistoryPreviewHtml(trace);
   const statusLabel = trace.blocked
     ? "Bloqueada por alcance de fase"
     : trace.human_review_required
@@ -440,8 +523,19 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Mensaje:</strong> ${escapeHtml(entry.id || "No reportado")}</p>
         <p><strong>Canal:</strong> ${escapeHtml(trace.channel || "web")}</p>
         <p><strong>Turno:</strong> ${escapeHtml(String(trace.turn_index ?? "—"))}</p>
+        <p><strong>Mensajes en sesión:</strong> ${escapeHtml(String(trace.session_message_count ?? "—"))}</p>
+        <p><strong>Trazas previas:</strong> ${escapeHtml(String(trace.prior_traces_count ?? "—"))}</p>
+        <p><strong>Spans en este turno:</strong> ${escapeHtml(String(trace.span_count ?? (trace.spans || []).length))}</p>
         <p><strong>Conversación continúa:</strong> ${trace.conversation_continues ? "Sí" : "No"}</p>
       </div>
+    </article>
+    <article class="trace-card">
+      <h3>Continuidad de sesión (${(trace.prior_traces_count ?? 0) + 1} turnos)</h3>
+      ${sessionTimeline}
+    </article>
+    <article class="trace-card">
+      <h3>Historial cargado en este turno</h3>
+      ${historyPreview}
     </article>
     <article class="trace-card">
       <h3>Completion LLM</h3>
@@ -472,7 +566,7 @@ function setSelectedTraceMessage(msgId, options = {}) {
   });
   const selected = getAssistantEntryByMsgId(selectedTraceMsgId) || getLatestAssistantEntry();
   if (!selectedTraceMsgId && selected?.id) selectedTraceMsgId = selected.id;
-  renderTracePanelForEntry(selected || null);
+  void renderTracePanelForEntry(selected || null);
   if (!skipSave) saveSessionState();
 }
 
@@ -527,7 +621,7 @@ function restoreChatFromLog() {
   clearChatUI();
   if (!chatLog.length) {
     showWelcomeMessage();
-    renderTracePanelForEntry(null);
+    void renderTracePanelForEntry(null);
     return;
   }
   chatLog.forEach((entry) => {
@@ -1157,7 +1251,7 @@ function resetChatConversation() {
   selectedTraceMsgId = null;
   clearChatUI();
   showWelcomeMessage();
-  renderTracePanelForEntry(null);
+  void renderTracePanelForEntry(null);
   if (sendBtn) sendBtn.disabled = false;
 }
 

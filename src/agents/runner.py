@@ -20,7 +20,7 @@ from src.agents.guardrails import (
     needs_human_review,
 )
 from src.agents.orchestrator import build_orchestrator
-from src.agents.pipeline import run_post_validations, run_pre_validations
+from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.config import get_settings
 from src.gateway.agent_session import RepositoryAgentSession
 from src.gateway.expediente import expediente_store
@@ -366,6 +366,19 @@ def _append_action(trace: dict, action_type: str, status: str, actor: str, detai
 
 def _finalize_trace(trace: dict, text: str) -> dict:
     has_disclaimer = "Borrador informativo" in text
+    span_count = len(trace.get("spans") or [])
+    step_count = len(trace.get("steps") or [])
+    trace["span_count"] = span_count
+    trace["step_count"] = step_count
+    trace.setdefault("spans", []).append(
+        {
+            "name": "Traza: cierre de turno",
+            "kind": "session",
+            "status": "done",
+            "detail": f"Turno {trace.get('turn_index', 0)} finalizado con {span_count} spans y {step_count} pasos.",
+            "at_ms": int(time.time() * 1000),
+        }
+    )
     _append_action(
         trace,
         action_type="output_guardrail",
@@ -474,6 +487,8 @@ async def run_agent(
     ok_pre, pre_err = run_pre_validations(
         message, history=history, expediente_resumen=exp_resumen, trace=trace
     )
+    prior_traces = get_repository().list_session_traces(session_id, limit=40)
+    attach_session_continuity(trace, history=history, session_id=session_id, prior_traces=prior_traces)
     if not ok or not ok_pre:
         trace["route"] = "guardrail_input" if not ok else "pipeline_pre"
         trace["blocked"] = True
@@ -506,6 +521,7 @@ async def run_agent(
         trace["steps"].append(
             _trace_step("Procesé la solicitud", "done", "Se usó modo de respaldo porque la integración IA no está disponible.")
         )
+        text = run_post_validations(message, text, trace)
         trace["human_review_required"] = pending_review
         trace["completion"]["note"] = "Sin OPENAI_API_KEY; no hubo completion real."
         draft_id = None
@@ -553,6 +569,15 @@ async def run_agent(
     if exp_resumen and "sin datos" not in exp_resumen.lower():
         context_block = f"[Expediente del caso]\n{exp_resumen}\n\n"
     agent_input = f"{context_block}{message}" if context_block else message
+    trace.setdefault("spans", []).append(
+        {
+            "name": "runner:inicio",
+            "kind": "agent",
+            "status": "in_progress",
+            "detail": f"Runner.run con hasta {settings.agent_max_turns} turnos internos y sesión persistida.",
+            "at_ms": int(time.time() * 1000),
+        }
+    )
     run_config = RunConfig(
         workflow_name="firma-juridica",
         group_id=session_id,
@@ -570,6 +595,15 @@ async def run_agent(
             max_turns=settings.agent_max_turns,
             hooks=trace_hooks,
             run_config=run_config,
+        )
+        trace.setdefault("spans", []).append(
+            {
+                "name": "runner:fin",
+                "kind": "agent",
+                "status": "done",
+                "detail": f"Ejecución completada; {len(getattr(result, 'new_items', []) or [])} eventos nuevos.",
+                "at_ms": int(time.time() * 1000),
+            }
         )
         text = apply_output_guardrails(result.final_output or "", channel)
         text = run_post_validations(message, text, trace)
