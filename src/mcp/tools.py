@@ -70,6 +70,38 @@ def leer_normas_clave() -> str:
     return _read_kb_file(AREA_FILES["normas"])
 
 
+@function_tool
+def buscar_en_conocimiento(consulta: str) -> str:
+    """Busca por similitud (RAG) en la base de conocimiento de la firma.
+
+    Devuelve fragmentos citables para fundamentar la respuesta. Úsala antes de
+    afirmar normas o criterios; cita las fuentes y no inventes.
+    """
+    from src.services.rag import buscar, contexto_para_prompt
+
+    chunks = buscar(consulta, incluir_kb=True, k=5)
+    return contexto_para_prompt(chunks)
+
+
+@function_tool
+def buscar_en_expediente(consulta: str, expediente_id: str) -> str:
+    """Busca por similitud (RAG) en los documentos subidos de un expediente.
+
+    Útil para responder con base en las pruebas y escritos del caso concreto.
+    """
+    from src.services.rag import buscar, contexto_para_prompt
+
+    chunks = buscar(consulta, expediente_id=expediente_id, incluir_kb=False, k=5)
+    return contexto_para_prompt(chunks)
+
+
 def get_knowledge_tools():
     """Tools de grounding compartidas por los agentes."""
-    return [listar_areas_derecho, leer_area_derecho, leer_playbook_proceso, leer_normas_clave]
+    return [
+        listar_areas_derecho,
+        leer_area_derecho,
+        leer_playbook_proceso,
+        leer_normas_clave,
+        buscar_en_conocimiento,
+        buscar_en_expediente,
+    ]

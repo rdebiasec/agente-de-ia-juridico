@@ -2536,3 +2536,210 @@ body.manual-body {
     padding: 1rem;
   }
 }
+
+/* ===== Panel de la Firma (bandeja HITL, RAG, términos) ===== */
+.firma-panel {
+  margin: 1.5rem auto 0;
+  width: min(1200px, 94%);
+  padding: 1.25rem 1.5rem 1.75rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 20px;
+  background: rgba(20, 24, 38, 0.72);
+}
+.firma-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.firma-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+.firma-card {
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  padding: 1rem;
+  background: rgba(12, 16, 28, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.firma-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.firma-card-head h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+.firma-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.firma-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.firma-form--inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 0.4rem;
+  align-items: end;
+}
+.firma-label {
+  font-size: 0.74rem;
+  color: rgba(238, 241, 255, 0.6);
+}
+.firma-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 9px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  background: rgba(8, 11, 20, 0.7);
+  color: #eef1ff;
+  font-size: 0.86rem;
+}
+.firma-input--num {
+  max-width: 120px;
+}
+.firma-check {
+  font-size: 0.78rem;
+  color: rgba(238, 241, 255, 0.72);
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.firma-draft,
+.firma-term,
+.firma-hit {
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 11px;
+  padding: 0.7rem 0.8rem;
+  background: rgba(8, 11, 20, 0.55);
+}
+.firma-draft-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+.firma-draft-body {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  color: rgba(238, 241, 255, 0.82);
+  margin: 0 0 0.5rem;
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: inherit;
+}
+.firma-edit {
+  width: 100%;
+  min-height: 120px;
+  margin-bottom: 0.5rem;
+  border-radius: 9px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  background: rgba(8, 11, 20, 0.8);
+  color: #eef1ff;
+  padding: 0.5rem;
+  font: inherit;
+}
+.firma-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.firma-badge {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(214, 106, 42, 0.28);
+  color: #ffd9bf;
+}
+.firma-state {
+  font-size: 0.68rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(238, 241, 255, 0.75);
+}
+.firma-state--aprobado,
+.firma-term--cumplido {
+  color: #b8f5c9;
+}
+.firma-state--rechazado,
+.firma-term--vencido {
+  color: #ffb4b4;
+}
+.firma-score {
+  font-size: 0.72rem;
+  color: rgba(238, 241, 255, 0.55);
+  float: right;
+}
+.firma-muted {
+  color: rgba(238, 241, 255, 0.5);
+  font-size: 0.82rem;
+}
+.firma-ok,
+.firma-result .firma-ok {
+  color: #b8f5c9;
+  font-size: 0.84rem;
+}
+.firma-error {
+  color: #ffb4b4;
+  font-size: 0.84rem;
+}
+.firma-term {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.btn-firma-primary,
+.btn-firma-action,
+.btn-firma-danger,
+.btn-firma-close,
+.btn-firma-link {
+  border-radius: 9px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.18));
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef1ff;
+  text-decoration: none;
+}
+.btn-firma-primary {
+  background: linear-gradient(160deg, rgba(240, 160, 112, 0.32), rgba(214, 106, 42, 0.3));
+  border-color: rgba(240, 160, 112, 0.5);
+}
+.btn-firma-danger {
+  border-color: rgba(255, 120, 120, 0.45);
+  color: #ffcaca;
+}
+.btn-firma-primary:hover,
+.btn-firma-action:hover,
+.btn-firma-danger:hover,
+.btn-firma-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.firma-hit p {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(238, 241, 255, 0.82);
+}
+@media (max-width: 680px) {
+  .firma-form--inline {
+    grid-template-columns: 1fr;
+  }
+}

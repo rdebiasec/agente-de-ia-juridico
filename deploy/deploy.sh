@@ -3,7 +3,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> Validando estructura Fase 0..."
+echo "==> Validando estructura de la firma (Fases A+B)..."
 python3 scripts/validate_fase0.py
 
 echo "==> Build Docker..."

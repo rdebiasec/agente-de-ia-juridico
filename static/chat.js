@@ -4,10 +4,9 @@ const LEGACY_V3_KEY = "agente-juridico-session-v3";
 const LEGACY_STORAGE_KEY = "agente-juridico-validation-v2";
 const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
 const ENABLE_SERVER_RUBRIC = true;
-const ACTIVE_PHASE_EXPECTED = 1;
 
 const WELCOME_MESSAGE =
-  "Bienvenida. Soy el asistente jurídico del despacho (Fase 1). Puedo apoyarla en comunicación con clientes, análisis preliminar de riesgos y redacción básica.\n\n¿En qué puedo ayudarla hoy?";
+  "Bienvenida. Soy el asistente jurídico del despacho. Puedo apoyarla en intake, estrategia, redacción de documentos, conceptos, tutelas y seguimiento de procesos civiles y penales.\n\n¿En qué puedo ayudarla hoy?";
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
@@ -426,7 +425,6 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Session:</strong> ${escapeHtml(trace.session_id || "No reportado")}</p>
         <p><strong>Mensaje:</strong> ${escapeHtml(entry.id || "No reportado")}</p>
         <p><strong>Canal:</strong> ${escapeHtml(trace.channel || "web")}</p>
-        <p><strong>Fase:</strong> ${escapeHtml(String(trace.phase ?? ACTIVE_PHASE_EXPECTED))}</p>
         <p><strong>Latencia:</strong> ${typeof entry.latencyMs === "number" ? `${entry.latencyMs} ms` : "No reportada"}</p>
       </div>
     </article>
@@ -1178,10 +1176,10 @@ async function checkHealth() {
   try {
     const res = await fetch("/health");
     const data = await res.json();
-    const connected = data.status === "ok" && data.fase_activa === ACTIVE_PHASE_EXPECTED;
+    const connected = data.status === "ok";
     if (data.status === "ok" && data.openai_configured) {
       statusDot.classList.add("online");
-      statusText.textContent = "Conectado · Fase 1 activa";
+      statusText.textContent = "Conectado · Firma activa";
     } else {
       statusText.textContent = "Servicio disponible · OpenAI no configurada";
     }
@@ -1236,6 +1234,7 @@ async function sendMessage(text) {
   let assistantAgent = "error";
   let assistantPendingReview = false;
   let assistantTrace = null;
+  let assistantDraftId = null;
 
   try {
     const res = await authFetch("/chat", {
@@ -1258,6 +1257,7 @@ async function sendMessage(text) {
       assistantAgent = data.agent || assistantAgent;
       assistantPendingReview = Boolean(data.pending_review);
       assistantTrace = data.trace || null;
+      assistantDraftId = data.draft_id || null;
     }
   } catch {
     if (abortIfStale()) return;
@@ -1292,6 +1292,15 @@ async function sendMessage(text) {
   setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
   saveSessionState();
   pendingChatMeta = null;
+
+  if (assistantDraftId) {
+    document.dispatchEvent(
+      new CustomEvent("draft-created", { detail: { draftId: assistantDraftId } })
+    );
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("Borrador enviado a la bandeja del abogado para aprobación.", "info");
+    }
+  }
 
   sendBtn.disabled = false;
   inputEl.focus();

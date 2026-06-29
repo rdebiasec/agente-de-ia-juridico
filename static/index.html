@@ -41,6 +41,7 @@
         </a>
         <div class="site-header-actions">
           <span class="session-user-badge" id="session-user-badge" hidden></span>
+          <button type="button" class="btn-help" id="btn-open-firma">Bandeja del abogado</button>
           <a class="btn-help" href="/help">Manual de Uso</a>
           <button type="button" class="btn-logout" id="auth-logout-btn">Cerrar sesión</button>
         </div>
@@ -148,6 +149,65 @@
         </aside>
       </div>
 
+      <section class="firma-panel" id="firma-panel" aria-label="Panel de la Firma" hidden>
+        <div class="firma-header">
+          <h2 class="panel-title">Firma · Bandeja del abogado</h2>
+          <button type="button" class="btn-firma-close" id="btn-close-firma" aria-label="Cerrar panel de firma">Cerrar</button>
+        </div>
+
+        <div class="firma-grid">
+          <article class="firma-card" id="firma-bandeja-card">
+            <header class="firma-card-head">
+              <h3>Borradores pendientes</h3>
+              <button type="button" class="btn-firma-action" id="btn-refresh-bandeja">Actualizar</button>
+            </header>
+            <div class="firma-list" id="firma-bandeja-list" aria-live="polite"></div>
+          </article>
+
+          <article class="firma-card">
+            <header class="firma-card-head"><h3>Subir documento al expediente</h3></header>
+            <form class="firma-form" id="firma-upload-form">
+              <label class="firma-label" for="firma-exp-id">ID de expediente / sesión</label>
+              <input class="firma-input" id="firma-exp-id" type="text" placeholder="web:usuario o radicado" required />
+              <label class="firma-label" for="firma-file">Archivo (PDF, Word, TXT)</label>
+              <input class="firma-input" id="firma-file" type="file" accept=".pdf,.docx,.txt" required />
+              <label class="firma-check">
+                <input type="checkbox" id="firma-ingest" checked /> Indexar al RAG del expediente
+              </label>
+              <button type="submit" class="btn-firma-primary" id="btn-upload">Subir y analizar</button>
+            </form>
+            <div class="firma-result" id="firma-upload-result"></div>
+          </article>
+
+          <article class="firma-card">
+            <header class="firma-card-head"><h3>Búsqueda en conocimiento (RAG)</h3></header>
+            <form class="firma-form" id="firma-search-form">
+              <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: caducidad de la acción contractual" required />
+              <label class="firma-check">
+                <input type="checkbox" id="firma-search-kb" checked /> Incluir base de la firma
+              </label>
+              <input class="firma-input" id="firma-search-exp" type="text" placeholder="ID de expediente (opcional)" />
+              <button type="submit" class="btn-firma-primary" id="btn-search">Buscar</button>
+            </form>
+            <div class="firma-result" id="firma-search-result" aria-live="polite"></div>
+          </article>
+
+          <article class="firma-card">
+            <header class="firma-card-head">
+              <h3>Términos procesales</h3>
+              <button type="button" class="btn-firma-action" id="btn-refresh-terminos">Actualizar</button>
+            </header>
+            <form class="firma-form firma-form--inline" id="firma-term-form">
+              <input class="firma-input" id="firma-term-exp" type="text" placeholder="ID expediente/sesión" required />
+              <input class="firma-input" id="firma-term-desc" type="text" placeholder="Descripción" required />
+              <input class="firma-input firma-input--num" id="firma-term-dias" type="number" min="1" placeholder="Días hábiles" required />
+              <button type="submit" class="btn-firma-primary" id="btn-add-term">Crear término</button>
+            </form>
+            <div class="firma-list" id="firma-terminos-list" aria-live="polite"></div>
+          </article>
+        </div>
+      </section>
+
       <footer>
         <span>Desarrollado con el theme de</span>
         <a class="footer-logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
@@ -160,6 +220,7 @@
     <script src="/static/toast.js"></script>
     <script src="/static/validation-tests.js"></script>
     <script src="/static/report.js"></script>
+    <script src="/static/firma.js" defer></script>
     <script src="/static/chat.js" defer></script>
   </body>
 </html>

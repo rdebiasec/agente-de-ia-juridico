@@ -32,7 +32,7 @@ async def test_health():
         r = await client.get("/health")
     assert r.status_code == 200
     data = r.json()
-    assert data["fase_activa"] == 1
+    assert data["modo"] == "firma"
     assert data["status"] == "ok"
 
 

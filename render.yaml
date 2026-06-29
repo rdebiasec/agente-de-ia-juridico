@@ -14,8 +14,6 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
-      - key: ACTIVE_PHASE
-        value: "1"
       - key: SITE_USERNAME
         value: despacho
       - key: SITE_PASSWORD
@@ -30,3 +28,21 @@ services:
         value: gpt-4o-mini
       - key: OPENAI_API_KEY
         sync: false
+      - key: EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: DATABASE_URL
+        fromDatabase:
+          name: agente-db
+          property: connectionString
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: SLACK_REVIEW_CHANNEL
+        value: "#revision-abogado"
+
+databases:
+  - name: agente-db
+    plan: free
+    databaseName: agente
+    user: agente

@@ -170,6 +170,57 @@ def _kan_for_agent(agent_name: str | None) -> str:
     return _AGENT_SKILL_MAP.get(agent_name, "KAN-N/A")
 
 
+_AGENT_DRAFT_TIPO = {
+    "tutela_constitucional": "tutela",
+    "conceptos_juridicos": "concepto",
+    "redaccion_documental": "documento",
+    "comunicacion_clientes": "correo",
+    "estratega": "estrategia",
+    "litigante_civil": "memorial",
+    "litigante_penal": "memorial",
+    "dependiente_judicial": "seguimiento",
+}
+
+
+def _draft_tipo(destination_agent: str) -> str:
+    return _AGENT_DRAFT_TIPO.get(destination_agent, "documento")
+
+
+def _maybe_create_draft(
+    *,
+    session_id: str,
+    message: str,
+    text: str,
+    destination_agent: str,
+    trace: dict,
+) -> str | None:
+    """Materializa una salida accionable como borrador HITL y notifica a Slack."""
+    try:
+        from src.hitl.drafts import crear_borrador, enviar_a_revision
+        from src.hitl.slack_review import notificar_borrador
+
+        tipo = _draft_tipo(destination_agent)
+        titulo = f"{tipo.capitalize()} · {_summarize_input(message)[:80]}"
+        draft = crear_borrador(
+            session_id=session_id, contenido=text, tipo=tipo, titulo=titulo
+        )
+        slack_ts = notificar_borrador(draft)
+        if slack_ts:
+            enviar_a_revision(draft.id, slack_ts=slack_ts)
+        trace["draft_id"] = draft.id
+        _append_action(
+            trace,
+            action_type="draft_created",
+            status="pending",
+            actor="hitl",
+            detail=f"Borrador {draft.id} ({tipo}) creado y pendiente de aprobación del abogado.",
+        )
+        return draft.id
+    except Exception:
+        logger.exception("No se pudo registrar el borrador HITL")
+        return None
+
+
 def _infer_destination_agent(message: str) -> str:
     if _TUTELA_RE.search(message):
         return "tutela_constitucional"
@@ -390,6 +441,15 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
         )
         trace["human_review_required"] = pending_review
         trace["completion"]["note"] = "Sin OPENAI_API_KEY; no hubo completion real."
+        draft_id = None
+        if pending_review:
+            draft_id = _maybe_create_draft(
+                session_id=session_id,
+                message=message,
+                text=text,
+                destination_agent=inferred_destination,
+                trace=trace,
+            )
         _append_action(
             trace,
             action_type="human_review",
@@ -405,7 +465,7 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
             )
         )
         _finalize_trace(trace, text)
-        return {"text": text, "agent": "fallback", "pending_review": pending_review, "trace": trace}
+        return {"text": text, "agent": "fallback", "pending_review": pending_review, "draft_id": draft_id, "trace": trace}
 
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
@@ -493,6 +553,15 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
         _trace_step("Enruté al especialista", "done", f"La consulta fue enrutada a {destination_agent}.")
     )
     trace["human_review_required"] = pending_review
+    draft_id = None
+    if pending_review:
+        draft_id = _maybe_create_draft(
+            session_id=session_id,
+            message=message,
+            text=text,
+            destination_agent=destination_agent,
+            trace=trace,
+        )
     _append_action(
         trace,
         action_type="human_review",
@@ -512,6 +581,7 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
         "text": text,
         "agent": destination_agent,
         "pending_review": pending_review,
+        "draft_id": draft_id,
         "session_id": session_id,
         "trace": trace,
     }

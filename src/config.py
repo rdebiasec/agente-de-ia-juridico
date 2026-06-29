@@ -20,13 +20,12 @@ class Settings(BaseSettings):
     slack_signing_secret: str = ""
     slack_review_channel: str = "#revision-abogado"
 
-    twilio_account_sid: str = ""
-    twilio_auth_token: str = ""
-    twilio_whatsapp_from: str = "whatsapp:+14155238886"
+    # Persistencia (Fase B). Vacío => repositorio en memoria (tests / local sin Docker).
+    # Con valor (p. ej. postgresql+psycopg://...) => backend Postgres/pgvector.
+    database_url: str = ""
+    embedding_model: str = "text-embedding-3-small"
 
     redis_url: str = "redis://localhost:6379/0"
-    active_phase: int = 1
-    require_human_review_whatsapp: bool = True
     require_human_review_web: bool = True
     # Render inyecta PORT automáticamente; local default 8000
     port: int = 8000  # env: PORT

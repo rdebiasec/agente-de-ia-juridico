@@ -1,4 +1,20 @@
 services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_USER=agente
+      - POSTGRES_PASSWORD=agente
+      - POSTGRES_DB=agente
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agente -d agente"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   app:
     build:
       context: ..
@@ -8,12 +24,12 @@ services:
     env_file:
       - ../.env
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      # Paridad dev==prod: la app habla con el Postgres del compose.
+      - DATABASE_URL=postgresql+psycopg://agente:agente@db:5432/agente
     depends_on:
-      - redis
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+volumes:
+  pgdata:

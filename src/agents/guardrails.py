@@ -39,7 +39,7 @@ def check_input(text: str) -> tuple[bool, str | None]:
 
 
 def check_phase_scope(text: str, active_phase: int | None = None) -> str | None:
-    """Compatibilidad: en el modelo de firma no se bloquea por fases."""
+    """Compatibilidad histórica: en el modelo de firma no se bloquea por fases."""
     return None
 
 
@@ -58,9 +58,6 @@ def needs_human_review(text: str, channel: str, user_message: str = "") -> bool:
     from src.config import get_settings
 
     settings = get_settings()
-    if channel == "whatsapp" and settings.require_human_review_whatsapp:
-        return True
-
     if settings.require_human_review_web:
         candidate = f"{user_message}\n{text}".strip()
         if channel in {"web", "api", "slack"} and DRAFT_REVIEW_INTENT.search(candidate):

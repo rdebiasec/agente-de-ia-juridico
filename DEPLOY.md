@@ -85,16 +85,41 @@ curl -X POST https://TU-APP.onrender.com/chat \
 En producción, `GET /health` debe mostrar `"web_auth_enabled": true` para que
 el flujo de login/logout sea idéntico al local.
 
-Para cierre de Fase 0, también debe verse:
+`/health` también reporta:
 
-- `"slack_configured": false`
-- `"whatsapp_configured": false`
+- `"modo": "firma"`
+- `"persistencia": "postgres"` cuando `DATABASE_URL` está configurado (Render/Docker), o `"memoria"` en local sin base de datos.
+- `"slack_configured"`: `true` solo si se cargan los secretos de Slack para HITL.
 
-## Restricción de alcance (Fase 0 y Fase 1)
+## Persistencia y Slack (Fase B)
 
-No activar Slack ni WhatsApp en estas fases. El despliegue de Render se usa solo
-para validar la web de pruebas, autenticación, salud del servicio y chat dentro
-del alcance REQ-001..REQ-011.
+- `render.yaml` provisiona una base de datos administrada `agente-db` e inyecta `DATABASE_URL`.
+- El esquema se gestiona con **Alembic**: al arrancar con `DATABASE_URL`, la app ejecuta
+  `alembic upgrade head` (migración inicial: extensión `vector` + tablas `drafts`, `expedientes`,
+  `deadlines`, `document_chunks`). Si Alembic falla, hay fallback a `create_all`.
+  - Migración manual (opcional): `DATABASE_URL=... .venv/bin/alembic upgrade head`.
+- Para habilitar la aprobación desde Slack, configure `SLACK_BOT_TOKEN` y `SLACK_SIGNING_SECRET`
+  (secretos `sync:false`) y apunte la URL de interactividad a `POST /slack/interactivity`.
+- **Scheduler de plazos**: arranca con la app (APScheduler). Job diario que marca términos
+  vencidos y avisa por Slack los próximos a vencer, más un recordatorio mensual de seguimiento.
+- **PDF**: el `Dockerfile` ya incluye las libs de WeasyPrint (pango/cairo/gdk-pixbuf), por lo que
+  `GET /drafts/{id}/pdf` funciona en Render/Docker sin pasos extra.
+
+### RAG (pgvector)
+
+- La extensión `vector` se crea automáticamente al primer uso del repositorio.
+- Tras el primer deploy (o tras cambiar la KB), indexe el conocimiento:
+
+```bash
+# Local con Docker:
+DATABASE_URL=postgresql+psycopg://agente:agente@localhost:5432/agente \
+  .venv/bin/python scripts/ingest_kb.py
+# o vía API autenticada:
+curl -X POST https://TU-APP.onrender.com/rag/ingest-kb
+```
+
+- Requiere `OPENAI_API_KEY` y `EMBEDDING_MODEL` para embeddings reales (sin clave usa un
+  embedding local determinista, solo apto para pruebas).
 
 ---
 
@@ -108,10 +133,10 @@ curl -I https://TU-APP.onrender.com/login
 ```
 
 Resultados esperados:
-- `/health` con `status=ok`, `fase_activa=0`, `web_auth_enabled=true`
+- `/health` con `status=ok`, `modo=firma`, `web_auth_enabled=true`
 - `/` redirige a login cuando no hay sesión
 - `/login` disponible
-- `slack_configured=false` y `whatsapp_configured=false`
+- `persistencia=postgres` cuando hay `DATABASE_URL`
 
 ---
 

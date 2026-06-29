@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Valida la estructura base de la firma virtual jurídica (Fase A)."""
+"""Valida la estructura de la firma virtual jurídica (Fases A y B)."""
 
 import json
 import sys
@@ -11,6 +11,9 @@ PROMPT = ROOT / "agente" / "prompts" / "sistema.md"
 KB = ROOT / "agente" / "conocimiento"
 AGENTS = ROOT / "src" / "agents"
 GATEWAY = ROOT / "src" / "gateway"
+STORAGE = ROOT / "src" / "storage"
+HITL = ROOT / "src" / "hitl"
+SERVICES = ROOT / "src" / "services"
 
 KB_EXPECTED = [
     "civil.md",
@@ -48,10 +51,30 @@ for module in ("orchestrator.py", "runner.py", "guardrails.py", "schemas.py"):
 if not (GATEWAY / "expediente.py").exists():
     errors.append("Falta src/gateway/expediente.py")
 
+# Fase B: persistencia, HITL y servicios.
+for module in ("base.py", "memory.py", "sql.py", "models.py", "__init__.py"):
+    if not (STORAGE / module).exists():
+        errors.append(f"Falta storage: {module}")
+
+for module in ("drafts.py", "slack_review.py"):
+    if not (HITL / module).exists():
+        errors.append(f"Falta hitl: {module}")
+
+for module in ("plazos.py", "documentos.py", "rag.py", "scheduler.py"):
+    if not (SERVICES / module).exists():
+        errors.append(f"Falta services: {module}")
+
+if not (ROOT / "alembic.ini").exists() or not (ROOT / "migrations" / "env.py").exists():
+    errors.append("Falta configuración de Alembic (alembic.ini / migrations/env.py)")
+
+for api in ("firma_api.py", "slack_interactivity.py"):
+    if not (GATEWAY / api).exists():
+        errors.append(f"Falta gateway API: {api}")
+
 if errors:
     print("VALIDACIÓN FALLIDA:")
     for e in errors:
         print(f"  - {e}")
     sys.exit(1)
 
-print("OK: firma virtual — 50 REQ, persona, KB con playbooks, agentes, esquemas y expediente presentes.")
+print("OK: firma virtual (A+B) — 50 REQ, persona, KB, agentes, esquemas, persistencia, HITL y servicios presentes.")

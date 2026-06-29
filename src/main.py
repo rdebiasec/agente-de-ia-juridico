@@ -103,6 +103,25 @@ class ClientDebugLog(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+
+    # Inicializa el repositorio (ejecuta migraciones Alembic si hay Postgres).
+    if settings.database_url:
+        try:
+            from src.storage import get_repository
+
+            get_repository()
+            logger.info("Repositorio Postgres inicializado (migraciones aplicadas)")
+        except Exception:
+            logger.exception("No se pudo inicializar el repositorio Postgres")
+
+    # Scheduler de plazos (vigilancia de términos y recordatorios).
+    try:
+        from src.services.scheduler import start_scheduler
+
+        start_scheduler()
+    except Exception:
+        logger.exception("No se pudo iniciar el scheduler")
+
     slack_task = None
     if settings.slack_bot_token and settings.slack_signing_secret:
         try:
@@ -115,6 +134,12 @@ async def lifespan(app: FastAPI):
     yield
     if slack_task:
         slack_task.cancel()
+    try:
+        from src.services.scheduler import stop_scheduler
+
+        stop_scheduler()
+    except Exception:
+        logger.exception("Error al detener el scheduler")
 
 
 app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
@@ -163,6 +188,12 @@ async def debug_request_middleware(request: Request, call_next):
         # endregion
     return response
 
+
+from src.gateway.firma_api import router as firma_router
+from src.gateway.slack_interactivity import router as slack_router
+
+app.include_router(firma_router)
+app.include_router(slack_router)
 
 _static_dir = get_settings().project_root / "static"
 if _static_dir.is_dir():
@@ -239,8 +270,7 @@ async def help_page(
     redirect = _auth_redirect_if_needed(request, settings)
     if redirect:
         return redirect
-    manual_name = "GUIA_FASE1.html" if settings.active_phase >= 1 else "GUIA_FASE0.html"
-    manual = _static_dir / manual_name
+    manual = _static_dir / "GUIA_FASE1.html"
     if manual.is_file():
         return FileResponse(manual)
     raise HTTPException(status_code=404, detail="Manual no encontrado")
@@ -381,6 +411,7 @@ class ChatResponse(BaseModel):
     text: str
     agent: str
     pending_review: bool = False
+    draft_id: str | None = None
     trace: dict | None = None
 
 
@@ -394,26 +425,12 @@ async def health():
     settings = get_settings()
     payload = {
         "status": "ok",
-        "fase_activa": settings.active_phase,
+        "modo": "firma",
         "openai_configured": bool(settings.openai_api_key),
         "slack_configured": bool(settings.slack_bot_token),
-        "whatsapp_configured": bool(settings.twilio_account_sid),
+        "persistencia": "postgres" if settings.database_url else "memoria",
         "web_auth_enabled": auth_enabled(settings.site_password),
     }
-    # region agent log
-    _debug_log_83755e(
-        "pre-fix",
-        "H4",
-        "src/main.py:392",
-        "health_flags_snapshot",
-        {
-            "fase_activa": payload["fase_activa"],
-            "slack_configured": payload["slack_configured"],
-            "whatsapp_configured": payload["whatsapp_configured"],
-            "web_auth_enabled": payload["web_auth_enabled"],
-        },
-    )
-    # endregion
     return payload
 
 
@@ -437,7 +454,9 @@ async def chat(req: ChatRequest):
     result = await handle_message(
         InboundMessage(channel=req.channel, user_id=req.user_id, text=req.message)
     )
-    return ChatResponse(**{k: result[k] for k in ("text", "agent", "pending_review", "trace") if k in result})
+    return ChatResponse(
+        **{k: result[k] for k in ("text", "agent", "pending_review", "draft_id", "trace") if k in result}
+    )
 
 
 def _validate_trace_session_id(session_id: str) -> str:
