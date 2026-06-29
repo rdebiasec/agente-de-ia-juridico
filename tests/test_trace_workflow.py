@@ -20,30 +20,33 @@ async def test_trace_allowed_drafting_sets_pending_review():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
-    assert trace.get("received_by_agent", "").startswith("orquestador_fase")
-    assert trace.get("sent_to_agent") in {"comunicacion_clientes_fase1", "redaccion_basica_fase1"}
+    assert trace.get("received_by_agent") == "orquestador"
+    assert trace.get("sent_to_agent") in {"comunicacion_clientes", "redaccion_documental"}
     assert trace.get("skill_kan") in {"KAN-11", "KAN-13"}
     assert isinstance(trace.get("actions"), list)
+    assert isinstance(trace.get("completion"), dict)
+    assert "summary" in trace.get("completion", {})
     assert any(step.get("step") == "Revisión humana" and step.get("status") == "pending" for step in trace.get("steps", []))
 
 
 @pytest.mark.asyncio
-async def test_trace_blocked_scope_has_no_pending_review():
+async def test_trace_followup_capability_is_active():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         res = await client.post(
             "/chat",
-            json={"message": "Haga seguimiento mensual de radicado y alertas automáticas.", "channel": "web", "user_id": "trace-block"},
+            json={"message": "Haga seguimiento mensual de radicado y prepare informe de novedades.", "channel": "web", "user_id": "trace-followup"},
         )
     assert res.status_code == 200
     data = res.json()
-    assert data["pending_review"] is False
+    assert data["pending_review"] is True
     trace = data.get("trace") or {}
-    assert trace.get("blocked") is True
-    assert trace.get("human_review_required") is False
-    assert trace.get("sent_to_agent") == "none"
-    assert trace.get("skill_kan") == "KAN-OUT-OF-SCOPE"
-    assert any(step.get("step") == "Validé alcance de fase" and step.get("status") == "blocked" for step in trace.get("steps", []))
+    assert trace.get("blocked") is False
+    assert trace.get("human_review_required") is True
+    assert trace.get("sent_to_agent") == "dependiente_judicial"
+    assert trace.get("skill_kan") == "KAN-14"
+    assert isinstance(trace.get("completion"), dict)
+    assert any(step.get("step") == "Enruté al especialista" and step.get("status") == "done" for step in trace.get("steps", []))
 
 
 @pytest.mark.asyncio
@@ -85,6 +88,7 @@ async def test_debug_trace_returns_session_history(monkeypatch):
         assert all("received_by_agent" in trace for trace in payload["traces"])
         assert all("sent_to_agent" in trace for trace in payload["traces"])
         assert all("skill_kan" in trace for trace in payload["traces"])
+        assert all("completion" in trace for trace in payload["traces"])
 
     get_settings.cache_clear()
 

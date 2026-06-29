@@ -30,7 +30,6 @@ from src.auth.deps import (
     require_web_session,
 )
 from src.auth.gate import COOKIE_NAME, auth_enabled, create_session_token, is_session_active, parse_session_token, verify_password
-from src.channels.whatsapp_webhook import router as whatsapp_router
 from src.config import Settings, get_settings
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
@@ -164,8 +163,6 @@ async def debug_request_middleware(request: Request, call_next):
         # endregion
     return response
 
-
-app.include_router(whatsapp_router)
 
 _static_dir = get_settings().project_root / "static"
 if _static_dir.is_dir():

@@ -1,6 +1,6 @@
-# Agente Jurídico — Fase 0
+# Agente Jurídico — Firma virtual (web-only)
 
-Asistente multi-agente para despacho colombiano. Canales: **Slack** y **WhatsApp**.
+Asistente multi-agente para despacho colombiano, modelado como una firma: un orquestador enruta hacia roles transversales y litigantes por área (civil CGP, penal Ley 906). Canal único: **web**.
 
 **Repo:** `agente-de-ia-juridico`  
 **Flujo:** Mac (desarrollo) → GitHub → Render (hosting)
@@ -32,16 +32,12 @@ chmod +x deploy/deploy.sh
 docker compose -f deploy/docker-compose.yml up
 ```
 
-## Arquitectura Fase 0
+## Arquitectura (Fase A — local, sin estado)
 
-- `orquestador_fase0` → handoff a perfil o conocimiento
-- Base conocimiento: `agente/conocimiento/*.md`
-- WhatsApp (Twilio): `POST /whatsapp/webhook`
-- Slack: Socket Mode si hay `SLACK_BOT_TOKEN`
+- `orquestador` → handoffs a roles transversales (intake, estratega, comunicación, redacción, conceptos, tutela, dependiente judicial, conocimiento) y litigantes por área (civil, penal).
+- Persona compartida: `agente/prompts/sistema.md`
+- Base de conocimiento + playbooks procesales: `agente/conocimiento/*.md`
+- Esquemas estructurados: `src/agents/schemas.py`
+- Expediente en memoria (seam para persistencia futura): `src/gateway/expediente.py`
 
-## Fases
-
-| Fase | Estado |
-|------|--------|
-| 0 | Activa |
-| 1–3 | Stub en `agente/fases/` |
+La persistencia (PostgreSQL/pgvector vía Docker), HITL en Slack, RAG y plazos se abordan en la Fase B. Ver `docs/plan-rediseno-firma.md`.

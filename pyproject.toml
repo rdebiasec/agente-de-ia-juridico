@@ -1,7 +1,7 @@
 [project]
 name = "agente-juridico"
 version = "0.1.0"
-description = "Asistente jurídico multi-agente — Fase 0 (Slack + WhatsApp)"
+description = "Asistente jurídico multi-agente — firma virtual web-only"
 requires-python = ">=3.11"
 dependencies = [
     "openai-agents>=0.0.14",
@@ -12,7 +12,6 @@ dependencies = [
     "httpx>=0.28.0",
     "python-dotenv>=1.0.0",
     "redis>=5.2.0",
-    "twilio>=9.4.0",
     "pydantic-settings>=2.7.0",
     "itsdangerous>=2.2.0",
 ]

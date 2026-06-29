@@ -97,7 +97,7 @@ async def test_chat_mixed_scope_is_allowed_in_fase1():
 
 
 @pytest.mark.asyncio
-async def test_chat_fase2_capability_is_blocked():
+async def test_chat_seguimiento_capability_is_active():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -107,17 +107,13 @@ async def test_chat_fase2_capability_is_blocked():
     assert r.status_code == 200
     data = r.json()
     lowered = data["text"].lower()
-    assert (
-        ("no está activa" in lowered)
-        or ("fase posterior" in lowered)
-        or ("no tengo la habilidad" in lowered)
-        or ("no tengo la capacidad" in lowered)
-        or ("no puedo" in lowered)
-    )
+    assert "no está activa" not in lowered
+    assert data["pending_review"] is True
+    assert data["trace"].get("sent_to_agent") == "dependiente_judicial"
 
 
 @pytest.mark.asyncio
-async def test_chat_fase3_capability_is_blocked():
+async def test_chat_tutela_capability_is_active():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -127,7 +123,9 @@ async def test_chat_fase3_capability_is_blocked():
     assert r.status_code == 200
     data = r.json()
     lowered = data["text"].lower()
-    assert ("no está activa" in lowered) or ("no puedo" in lowered)
+    assert "no está activa" not in lowered
+    assert data["pending_review"] is True
+    assert data["trace"].get("sent_to_agent") == "tutela_constitucional"
 
 
 @pytest.mark.asyncio

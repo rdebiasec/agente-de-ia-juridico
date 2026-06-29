@@ -1,4 +1,9 @@
-"""Guardrails legales — supervisión humana."""
+"""Guardrails legales — supervisión humana.
+
+En el modelo de firma virtual todas las capacidades están activas; los
+guardrails ya no bloquean por fases, solo aseguran el disclaimer único,
+la validación básica de entrada y la marca de revisión humana.
+"""
 
 import re
 
@@ -15,28 +20,12 @@ _DISCLAIMER_LINE_RE = re.compile(
 )
 _PHASE_DRAFT_RE = re.compile(r"\n*\s*Fase\s*\d+\s*·\s*Borrador\s*", re.IGNORECASE)
 
-FASE1_PLUS_KEYWORDS = re.compile(
-    r"\b("
-    r"contrato|redactar|demanda|recurso|riesgo|estrategia|teor[ií]a del caso|"
-    r"correo corporativo|escrito|prueba faltante|debilidad|civil o penal|"
-    r"solicitud|excepci[oó]n"
-    r")\b",
-    re.IGNORECASE,
-)
-
-FASE2_3_KEYWORDS = re.compile(
-    r"\b("
-    r"tutela|memorial|concepto jur[ií]dico|radicaci[oó]n|rama judicial|"
-    r"radicado|seguimiento procesal|seguimiento mensual|informe mensual|alertas autom[aá]ticas|"
-    r"entrevista|fiscal[ií]a|juez|impulso procesal|expediente|audiencia|accionante|accionado"
-    r")\b",
-    re.IGNORECASE,
-)
-
+# Intenciones accionables que deben quedar pendientes de aprobación del abogado.
 DRAFT_REVIEW_INTENT = re.compile(
     r"\b("
-    r"redact|contrato|escrito|recurso|solicitud|excepci[oó]n|correo|mensaje profesional|"
-    r"estrategia|riesgo|teor[ií]a del caso"
+    r"redact|proyect|contrato|escrito|recurso|solicitud|excepci[oó]n|correo|mensaje profesional|"
+    r"demanda|contestaci[oó]n|memorial|tutela|concepto|estrategia|riesgo|teor[ií]a del caso|"
+    r"seguimiento|informe|radicaci[oó]n|audiencia|interrogatorio|entrevista"
     r")\w*",
     re.IGNORECASE,
 )
@@ -49,37 +38,12 @@ def check_input(text: str) -> tuple[bool, str | None]:
     return True, None
 
 
-def _phase_block_message(active_phase: int) -> str:
-    if active_phase <= 0:
-        return (
-            "Esa capacidad pertenece a una fase posterior del proyecto (Fase 1, 2 o 3) "
-            "y aún no está activa. En Fase 0 solo puedo orientar sobre el perfil del "
-            "despacho y las áreas del derecho en nuestra base de conocimiento."
-        )
-    if active_phase == 1:
-        return (
-            "Esa capacidad pertenece a una fase posterior del proyecto (Fase 2 o 3) "
-            "y aún no está activa. En Fase 1 puedo apoyar consulta, análisis de riesgos "
-            "y redacción básica dentro del alcance habilitado."
-        )
-    return None
-
-
 def check_phase_scope(text: str, active_phase: int | None = None) -> str | None:
-    """Detecta solicitudes fuera de alcance según la fase activa."""
-    if active_phase is None:
-        from src.config import get_settings
-
-        active_phase = get_settings().active_phase
-
-    if active_phase <= 0 and FASE1_PLUS_KEYWORDS.search(text):
-        return _phase_block_message(active_phase)
-    if active_phase == 1 and FASE2_3_KEYWORDS.search(text):
-        return _phase_block_message(active_phase)
+    """Compatibilidad: en el modelo de firma no se bloquea por fases."""
     return None
 
 
-def apply_output_guardrails(text: str, channel: str = "slack") -> str:
+def apply_output_guardrails(text: str, channel: str = "web") -> str:
     """Añade un único disclaimer y normaliza salida."""
     normalized = text or ""
     normalized = _DISCLAIMER_BLOCK_RE.sub("\n", normalized)
@@ -97,7 +61,7 @@ def needs_human_review(text: str, channel: str, user_message: str = "") -> bool:
     if channel == "whatsapp" and settings.require_human_review_whatsapp:
         return True
 
-    if settings.active_phase >= 1 and settings.require_human_review_web:
+    if settings.require_human_review_web:
         candidate = f"{user_message}\n{text}".strip()
         if channel in {"web", "api", "slack"} and DRAFT_REVIEW_INTENT.search(candidate):
             return True

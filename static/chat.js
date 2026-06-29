@@ -271,13 +271,17 @@ function buildMessageMeta(role, options = {}) {
 
 function formatAgentRoute(agent) {
   if (!agent) return "";
-  if (agent.startsWith("orquestador_fase1")) return "Ruta IA Fase 1";
-  if (agent.startsWith("orquestador_fase0")) return "Ruta IA Fase 0";
-  if (agent === "comunicacion_clientes_fase1") return "Especialista KAN-11 (Comunicación)";
-  if (agent === "analisis_riesgo_fase1") return "Especialista KAN-12 (Análisis y riesgo)";
-  if (agent === "redaccion_basica_fase1") return "Especialista KAN-13 (Redacción)";
-  if (agent === "conocimiento_areas_derecho") return "Especialista KAN-4 (Conocimiento)";
-  if (agent === "perfil_abogado_colombia") return "Especialista KAN-4 (Perfil)";
+  if (agent === "orquestador") return "Orquestador (firma)";
+  if (agent === "conocimiento_areas") return "Especialista (Conocimiento)";
+  if (agent === "intake") return "Especialista (Intake)";
+  if (agent === "estratega") return "Especialista (Estrategia)";
+  if (agent === "comunicacion_clientes") return "Especialista (Comunicación)";
+  if (agent === "litigante_civil") return "Litigante Civil (CGP)";
+  if (agent === "litigante_penal") return "Litigante Penal (Ley 906)";
+  if (agent === "redaccion_documental") return "Especialista (Redacción)";
+  if (agent === "conceptos_juridicos") return "Especialista (Conceptos)";
+  if (agent === "tutela_constitucional") return "Especialista (Tutela)";
+  if (agent === "dependiente_judicial") return "Dependiente judicial";
   if (agent === "fallback") return "Modo respaldo";
   if (agent === "guardrail") return "Bloqueo de seguridad";
   if (agent === "error") return "Ruta de error controlado";
@@ -294,13 +298,20 @@ function inferTrace(options = {}, text = "") {
     trace_id: "local-inferido",
     session_id: null,
     route: options.agent || "unknown",
-    received_by_agent: `orquestador_fase${ACTIVE_PHASE_EXPECTED}`,
+    received_by_agent: "orquestador",
     sent_to_agent: options.agent || "none",
     skill_kan: "KAN-N/A",
     skill_reason: "Inferido localmente por falta de metadata backend.",
     selected_agent: options.agent || "",
     blocked,
     human_review_required: needsReview,
+    completion: {
+      available: false,
+      provider: "openai-responses",
+      calls: [],
+      summary: { calls: 0, input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+      note: "Sin completion backend reportado.",
+    },
     actions: [],
     steps: [
       { step: "Recibí su consulta", status: "done", detail: "Consulta recibida por el asistente." },
@@ -371,9 +382,26 @@ function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
-  const receiver = trace.received_by_agent || `orquestador_fase${ACTIVE_PHASE_EXPECTED}`;
+  const receiver = trace.received_by_agent || "orquestador";
   const destination = trace.sent_to_agent || trace.selected_agent || "none";
   const skill = trace.skill_kan || "KAN-N/A";
+  const completion = trace.completion || { available: false, calls: [], summary: null, note: "Sin datos." };
+  const completionCalls = Array.isArray(completion.calls) ? completion.calls : [];
+  const completionRows = completionCalls
+    .map((call) => `
+      <li>
+        <strong>${escapeHtml(call.call_id || "completion")}</strong>
+        <span>
+          Modelo: ${escapeHtml(call.model || "No reportado")} ·
+          Hora: ${escapeHtml(call.started_at_iso || "No reportada")} ·
+          Tokens I/O/T: ${escapeHtml(String(call.usage?.input_tokens ?? 0))}/${escapeHtml(String(call.usage?.output_tokens ?? 0))}/${escapeHtml(String(call.usage?.total_tokens ?? 0))}
+        </span>
+        <span>Response ID: ${escapeHtml(call.response_id || "N/A")} · Request ID: ${escapeHtml(call.request_id || "N/A")}</span>
+        <span>Prompt: ${escapeHtml(call.system_prompt || "No reportado")}</span>
+        <span>Input enviado: ${escapeHtml(call.input_preview || "No reportado")}</span>
+      </li>
+    `)
+    .join("");
   traceBodyEl.innerHTML = `
     <article class="trace-card">
       <h3>Resumen</h3>
@@ -401,6 +429,16 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Fase:</strong> ${escapeHtml(String(trace.phase ?? ACTIVE_PHASE_EXPECTED))}</p>
         <p><strong>Latencia:</strong> ${typeof entry.latencyMs === "number" ? `${entry.latencyMs} ms` : "No reportada"}</p>
       </div>
+    </article>
+    <article class="trace-card">
+      <h3>Completion LLM</h3>
+      <div class="trace-kv">
+        <p><strong>Proveedor:</strong> ${escapeHtml(completion.provider || "openai-responses")}</p>
+        <p><strong>Llamadas:</strong> ${escapeHtml(String(completion.summary?.calls ?? completionCalls.length ?? 0))}</p>
+        <p><strong>Tokens entrada/salida/total:</strong> ${escapeHtml(String(completion.summary?.input_tokens ?? 0))} / ${escapeHtml(String(completion.summary?.output_tokens ?? 0))} / ${escapeHtml(String(completion.summary?.total_tokens ?? 0))}</p>
+        <p><strong>Nota:</strong> ${escapeHtml(completion.note || "Sin nota")}</p>
+      </div>
+      <ul class="trace-actions">${completionRows || "<li><span>Sin completions reportados para este mensaje.</span></li>"}</ul>
     </article>
     <article class="trace-card">
       <h3>Acciones ejecutadas</h3>
