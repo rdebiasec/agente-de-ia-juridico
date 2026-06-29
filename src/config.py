@@ -34,7 +34,9 @@ class Settings(BaseSettings):
     # Mantener auth web activo por defecto para paridad local/producción.
     site_password: str = "Kx9mP2vL8nQw4RsT"
     session_secret: str = "f7a9c2e1b4d6083a5f2e9c1b7d4a608"
-    session_idle_minutes: int = 30
+    session_idle_minutes: int = 360
+    session_max_messages: int = 120
+    agent_max_turns: int = 25
     session_cookie_secure: bool = False
     # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
     dev_auto_login: bool = False

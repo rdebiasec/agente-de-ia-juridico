@@ -311,6 +311,9 @@ function inferTrace(options = {}, text = "") {
       summary: { calls: 0, input_tokens: 0, output_tokens: 0, total_tokens: 0 },
       note: "Sin completion backend reportado.",
     },
+    conversation_continues: false,
+    turn_index: 0,
+    spans: [],
     actions: [],
     steps: [
       { step: "Recibí su consulta", status: "done", detail: "Consulta recibida por el asistente." },
@@ -401,6 +404,16 @@ function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
+  const spanRows = (Array.isArray(trace.spans) ? trace.spans : [])
+    .map(
+      (span) => `
+      <li class="trace-span trace-span--${escapeHtml(span.status || "done")}">
+        <strong>${escapeHtml(span.name || "span")}</strong>
+        <span class="trace-span-kind">${escapeHtml(span.kind || "")}</span>
+        <p>${escapeHtml(span.detail || "")}</p>
+      </li>`
+    )
+    .join("");
   traceBodyEl.innerHTML = `
     <article class="trace-card">
       <h3>Resumen</h3>
@@ -425,7 +438,8 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Session:</strong> ${escapeHtml(trace.session_id || "No reportado")}</p>
         <p><strong>Mensaje:</strong> ${escapeHtml(entry.id || "No reportado")}</p>
         <p><strong>Canal:</strong> ${escapeHtml(trace.channel || "web")}</p>
-        <p><strong>Latencia:</strong> ${typeof entry.latencyMs === "number" ? `${entry.latencyMs} ms` : "No reportada"}</p>
+        <p><strong>Turno:</strong> ${escapeHtml(String(trace.turn_index ?? "—"))}</p>
+        <p><strong>Conversación continúa:</strong> ${trace.conversation_continues ? "Sí" : "No"}</p>
       </div>
     </article>
     <article class="trace-card">
@@ -437,6 +451,10 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Nota:</strong> ${escapeHtml(completion.note || "Sin nota")}</p>
       </div>
       <ul class="trace-actions">${completionRows || "<li><span>Sin completions reportados para este mensaje.</span></li>"}</ul>
+    </article>
+    <article class="trace-card">
+      <h3>Spans del flujo (${(trace.spans || []).length})</h3>
+      <ul class="trace-actions trace-spans-list">${spanRows || "<li><span>Sin spans detallados.</span></li>"}</ul>
     </article>
     <article class="trace-card">
       <h3>Acciones ejecutadas</h3>

@@ -264,6 +264,43 @@ body {
   color: var(--muted);
 }
 
+.trace-spans-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.trace-span {
+  border-left: 3px solid var(--line);
+}
+
+.trace-span--done {
+  border-left-color: #2e7d32;
+}
+
+.trace-span--pending {
+  border-left-color: #ed6c02;
+}
+
+.trace-span--blocked,
+.trace-span--in_progress {
+  border-left-color: var(--accent);
+}
+
+.trace-span-kind {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.trace-span p {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
 .trace-empty {
   border: 1px dashed var(--line);
   border-radius: 12px;

@@ -6,7 +6,9 @@ import math
 import threading
 from datetime import datetime, timezone
 
-from src.storage.models import Deadline, DocumentChunk, Draft, Expediente, SCOPE_KB
+from datetime import datetime, timezone
+
+from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace, SCOPE_KB
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -26,6 +28,8 @@ class InMemoryRepository:
         self._deadlines: dict[str, Deadline] = {}
         self._chunks: dict[str, DocumentChunk] = {}
         self._expedientes: dict[str, Expediente] = {}
+        self._chat_sessions: dict[str, ChatSession] = {}
+        self._session_traces: dict[str, list[SessionTrace]] = {}
         self._lock = threading.Lock()
 
     # --- Borradores ---
@@ -156,3 +160,57 @@ class InMemoryRepository:
         with self._lock:
             self._expedientes[expediente.session_id] = expediente
         return expediente
+
+    # --- Conversación y trazas ---
+    def get_chat_session(self, session_id: str) -> ChatSession | None:
+        return self._chat_sessions.get(session_id)
+
+    def save_chat_session(self, session: ChatSession) -> ChatSession:
+        with self._lock:
+            self._chat_sessions[session.session_id] = session
+        return session
+
+    def append_chat_message(
+        self, session_id: str, *, channel: str, user_id: str, role: str, content: str, max_messages: int
+    ) -> ChatSession:
+        import time
+
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            session = self._chat_sessions.get(session_id)
+            if session is None:
+                session = ChatSession(session_id=session_id, channel=channel, user_id=user_id)
+                self._chat_sessions[session_id] = session
+            session.messages.append({"role": role, "content": content, "ts": time.time()})
+            if len(session.messages) > max_messages:
+                session.messages = session.messages[-max_messages:]
+            session.updated_at = now
+            session.channel = channel
+            session.user_id = user_id
+        return session
+
+    def add_session_trace(self, trace: SessionTrace) -> SessionTrace:
+        with self._lock:
+            self._session_traces.setdefault(trace.session_id, []).append(trace)
+            bucket = self._session_traces[trace.session_id]
+            if len(bucket) > 200:
+                self._session_traces[trace.session_id] = bucket[-200:]
+        return trace
+
+    def list_session_traces(self, session_id: str, *, limit: int = 50) -> list[SessionTrace]:
+        traces = self._session_traces.get(session_id, [])
+        return traces[-limit:]
+
+    def reset_chat_session(self, session_id: str) -> bool:
+        with self._lock:
+            session = self._chat_sessions.get(session_id)
+            if session is None:
+                return False
+            session.messages = []
+            session.updated_at = datetime.now(timezone.utc)
+            return True
+
+    def clear_session_traces(self, session_id: str) -> int:
+        with self._lock:
+            traces = self._session_traces.pop(session_id, [])
+            return len(traces)

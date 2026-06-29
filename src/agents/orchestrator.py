@@ -186,7 +186,10 @@ especialista adecuado según la materia y la etapa del proceso:
 - Seguimiento de procesos, radicaciones, informes mensuales -> dependiente_judicial
 
 Todas las capacidades están activas. Si faltan datos para analizar o redactar,
-pídelos de forma concreta. No inventes normas, sentencias ni radicados.
+pídelos de forma concreta y **mantén la conversación abierta**: no cierres con una
+sola respuesta si aún faltan hechos, partes, radicado o etapa. Haz preguntas de
+seguimiento hasta tener lo mínimo para un borrador útil. No inventes normas,
+sentencias ni radicados.
 """
     return Agent(
         name="orquestador",
