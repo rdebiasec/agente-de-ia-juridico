@@ -12,6 +12,7 @@ from typing import Any
 
 from agents import Runner
 from agents.lifecycle import RunHooksBase
+from agents.run_config import RunConfig
 
 from src.agents.guardrails import (
     apply_output_guardrails,
@@ -19,7 +20,11 @@ from src.agents.guardrails import (
     needs_human_review,
 )
 from src.agents.orchestrator import build_orchestrator
+from src.agents.pipeline import run_post_validations, run_pre_validations
 from src.config import get_settings
+from src.gateway.agent_session import RepositoryAgentSession
+from src.gateway.expediente import expediente_store
+from src.storage import get_repository
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +126,57 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
     def __init__(self, trace: dict):
         self.trace = trace
 
+    def _span(self, name: str, kind: str, status: str, detail: str) -> None:
+        self.trace.setdefault("spans", []).append(
+            {
+                "name": name,
+                "kind": kind,
+                "status": status,
+                "detail": detail,
+                "at_ms": int(time.time() * 1000),
+            }
+        )
+
+    async def on_agent_start(self, context: Any, agent: Any) -> None:
+        self._span(f"agent:{getattr(agent, 'name', 'unknown')}", "agent", "in_progress", "Agente iniciado.")
+
+    async def on_agent_end(self, context: Any, agent: Any, output: Any) -> None:
+        preview = _truncate(str(output), limit=120)
+        self._span(
+            f"agent:{getattr(agent, 'name', 'unknown')}",
+            "agent",
+            "done",
+            f"Agente finalizó. Salida: {preview}",
+        )
+
+    async def on_handoff(self, context: Any, from_agent: Any, to_agent: Any) -> None:
+        self._span(
+            "handoff",
+            "handoff",
+            "done",
+            f"{getattr(from_agent, 'name', '?')} → {getattr(to_agent, 'name', '?')}",
+        )
+        _append_action(
+            self.trace,
+            action_type="handoff",
+            status="done",
+            actor=getattr(from_agent, "name", "orquestador"),
+            detail=f"Handoff hacia {getattr(to_agent, 'name', 'especialista')}.",
+        )
+
+    async def on_tool_start(self, context: Any, agent: Any, tool: Any) -> None:
+        tool_name = getattr(tool, "name", None) or type(tool).__name__
+        self._span(f"tool:{tool_name}", "tool", "in_progress", f"Ejecutando {tool_name}.")
+
+    async def on_tool_end(self, context: Any, agent: Any, tool: Any, result: object) -> None:
+        tool_name = getattr(tool, "name", None) or type(tool).__name__
+        self._span(
+            f"tool:{tool_name}",
+            "tool",
+            "done",
+            f"Resultado: {_truncate(_safe_json_preview(result, limit=200))}",
+        )
+
     async def on_llm_start(
         self,
         context: Any,
@@ -130,6 +186,7 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
     ) -> None:
         started_at_ms = int(time.time() * 1000)
         model_name = getattr(agent, "model", None) or get_settings().openai_model or "default"
+        self._span(f"llm:{getattr(agent, 'name', 'unknown')}", "llm", "in_progress", f"Modelo {model_name}.")
         call = {
             "call_id": f"cmp-{len(self.trace['completion']['calls']) + 1}",
             "agent": getattr(agent, "name", "unknown"),
@@ -162,6 +219,12 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
         call["duration_ms"] = max(0, ended_at_ms - int(call.get("started_at_ms", ended_at_ms)))
         call["status"] = "done"
         self.trace["completion"]["available"] = True
+        self._span(
+            f"llm:{getattr(agent, 'name', 'unknown')}",
+            "llm",
+            "done",
+            f"Tokens: {usage.get('total_tokens', 0)} (in {usage.get('input_tokens', 0)} / out {usage.get('output_tokens', 0)}).",
+        )
 
 
 def _kan_for_agent(agent_name: str | None) -> str:
@@ -254,12 +317,14 @@ def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> 
 def _base_trace(session_id: str, channel: str, message: str) -> dict:
     receiver = "orquestador"
     return {
-        "trace_version": "3.0",
+        "trace_version": "4.0",
         "trace_id": _trace_id(session_id, message),
         "session_id": session_id,
         "timestamp": int(time.time() * 1000),
         "input_summary": _summarize_input(message),
         "channel": channel,
+        "turn_index": 0,
+        "spans": [],
         "received_by_agent": receiver,
         "sent_to_agent": "none",
         "skill_kan": _kan_for_agent(receiver),
@@ -388,33 +453,35 @@ def _fallback_response(message: str) -> str:
     return apply_output_guardrails(body)
 
 
-async def run_agent(message: str, channel: str = "web", session_id: str = "default") -> dict:
-    """Ejecuta el orquestador de la firma y aplica guardrails."""
+async def run_agent(
+    message: str,
+    channel: str = "web",
+    session_id: str = "default",
+    user_id: str = "",
+) -> dict:
+    """Ejecuta el orquestador con sesión multi-turno, validaciones encadenadas y traza enriquecida."""
     ok, err = check_input(message)
     settings = get_settings()
     trace = _base_trace(session_id=session_id, channel=channel, message=message)
     has_key = bool(settings.openai_api_key or os.environ.get("OPENAI_API_KEY"))
+    uid = user_id or (session_id.split(":", 1)[-1] if ":" in session_id else session_id)
 
-    if not ok:
-        trace["route"] = "guardrail_input"
+    chat = get_repository().get_chat_session(session_id)
+    history = list(chat.messages) if chat else []
+    expediente = expediente_store.get_or_create(session_id)
+    exp_resumen = expediente.resumen()
+
+    ok_pre, pre_err = run_pre_validations(
+        message, history=history, expediente_resumen=exp_resumen, trace=trace
+    )
+    if not ok or not ok_pre:
+        trace["route"] = "guardrail_input" if not ok else "pipeline_pre"
         trace["blocked"] = True
         trace["skill_kan"] = "KAN-GUARDRAIL"
-        trace["skill_reason"] = "Bloqueo temprano por validación de entrada."
         trace["selected_agent"] = "guardrail"
-        _append_action(
-            trace,
-            action_type="input_validation",
-            status="blocked",
-            actor="guardrails",
-            detail="La entrada no cumple validaciones mínimas.",
-        )
-        trace["steps"].append(
-            _trace_step("Validé la entrada", "blocked", "La consulta no pasó validaciones básicas de entrada.")
-        )
-        trace["human_review_required"] = False
-        text = err or "Entrada no válida."
+        text = err or pre_err or "Entrada no válida."
         _finalize_trace(trace, text)
-        return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace}
+        return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace, "session_id": session_id}
 
     if not has_key:
         text = _fallback_response(message)
@@ -465,7 +532,15 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
             )
         )
         _finalize_trace(trace, text)
-        return {"text": text, "agent": "fallback", "pending_review": pending_review, "draft_id": draft_id, "trace": trace}
+        get_repository().append_chat_message(
+            session_id, channel=channel, user_id=uid, role="user", content=message,
+            max_messages=settings.session_max_messages,
+        )
+        get_repository().append_chat_message(
+            session_id, channel=channel, user_id=uid, role="assistant", content=text,
+            max_messages=settings.session_max_messages,
+        )
+        return {"text": text, "agent": "fallback", "pending_review": pending_review, "draft_id": draft_id, "session_id": session_id, "trace": trace}
 
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
@@ -473,9 +548,31 @@ async def run_agent(message: str, channel: str = "web", session_id: str = "defau
     orchestrator = build_orchestrator()
     destination_agent = trace["received_by_agent"]
     trace_hooks = _TraceRunHooks(trace)
+    agent_session = RepositoryAgentSession(session_id, channel=channel, user_id=uid)
+    context_block = ""
+    if exp_resumen and "sin datos" not in exp_resumen.lower():
+        context_block = f"[Expediente del caso]\n{exp_resumen}\n\n"
+    agent_input = f"{context_block}{message}" if context_block else message
+    run_config = RunConfig(
+        workflow_name="firma-juridica",
+        group_id=session_id,
+        trace_metadata={
+            "session_id": session_id,
+            "channel": channel,
+            "turn_index": trace.get("turn_index", 0),
+        },
+    )
     try:
-        result = await Runner.run(orchestrator, message, hooks=trace_hooks)
+        result = await Runner.run(
+            orchestrator,
+            agent_input,
+            session=agent_session,
+            max_turns=settings.agent_max_turns,
+            hooks=trace_hooks,
+            run_config=run_config,
+        )
         text = apply_output_guardrails(result.final_output or "", channel)
+        text = run_post_validations(message, text, trace)
         destination_agent = getattr(getattr(result, "last_agent", None), "name", None) or trace["received_by_agent"]
         if destination_agent == trace["received_by_agent"]:
             destination_agent = _infer_destination_agent(message)

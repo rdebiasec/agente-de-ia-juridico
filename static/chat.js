@@ -19,6 +19,7 @@ const validationProgressEl = document.getElementById("validation-progress");
 const validationScoreEl = document.getElementById("validation-score");
 const validationScoreBarEl = document.getElementById("validation-score-bar");
 const resetScoreBtn = document.getElementById("reset-score-btn");
+const resetChatBtn = document.getElementById("reset-chat-btn");
 const validationStepperEl = document.getElementById("validation-stepper");
 const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
@@ -311,6 +312,9 @@ function inferTrace(options = {}, text = "") {
       summary: { calls: 0, input_tokens: 0, output_tokens: 0, total_tokens: 0 },
       note: "Sin completion backend reportado.",
     },
+    conversation_continues: false,
+    turn_index: 0,
+    spans: [],
     actions: [],
     steps: [
       { step: "Recibí su consulta", status: "done", detail: "Consulta recibida por el asistente." },
@@ -401,6 +405,16 @@ function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
+  const spanRows = (Array.isArray(trace.spans) ? trace.spans : [])
+    .map(
+      (span) => `
+      <li class="trace-span trace-span--${escapeHtml(span.status || "done")}">
+        <strong>${escapeHtml(span.name || "span")}</strong>
+        <span class="trace-span-kind">${escapeHtml(span.kind || "")}</span>
+        <p>${escapeHtml(span.detail || "")}</p>
+      </li>`
+    )
+    .join("");
   traceBodyEl.innerHTML = `
     <article class="trace-card">
       <h3>Resumen</h3>
@@ -425,7 +439,8 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Session:</strong> ${escapeHtml(trace.session_id || "No reportado")}</p>
         <p><strong>Mensaje:</strong> ${escapeHtml(entry.id || "No reportado")}</p>
         <p><strong>Canal:</strong> ${escapeHtml(trace.channel || "web")}</p>
-        <p><strong>Latencia:</strong> ${typeof entry.latencyMs === "number" ? `${entry.latencyMs} ms` : "No reportada"}</p>
+        <p><strong>Turno:</strong> ${escapeHtml(String(trace.turn_index ?? "—"))}</p>
+        <p><strong>Conversación continúa:</strong> ${trace.conversation_continues ? "Sí" : "No"}</p>
       </div>
     </article>
     <article class="trace-card">
@@ -437,6 +452,10 @@ function renderTracePanelForEntry(entry) {
         <p><strong>Nota:</strong> ${escapeHtml(completion.note || "Sin nota")}</p>
       </div>
       <ul class="trace-actions">${completionRows || "<li><span>Sin completions reportados para este mensaje.</span></li>"}</ul>
+    </article>
+    <article class="trace-card">
+      <h3>Spans del flujo (${(trace.spans || []).length})</h3>
+      <ul class="trace-actions trace-spans-list">${spanRows || "<li><span>Sin spans detallados.</span></li>"}</ul>
     </article>
     <article class="trace-card">
       <h3>Acciones ejecutadas</h3>
@@ -1142,6 +1161,45 @@ function resetChatConversation() {
   if (sendBtn) sendBtn.disabled = false;
 }
 
+async function resetChatSession() {
+  if (
+    !confirm(
+      "¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar 6 horas."
+    )
+  ) {
+    return;
+  }
+  if (resetChatBtn) {
+    resetChatBtn.disabled = true;
+    resetChatBtn.textContent = "Reiniciando…";
+  }
+  try {
+    const res = await authFetch("/chat/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channel: "web", user_id: getUserId() }),
+    });
+    if (!res.ok) {
+      throw new Error("reset_failed");
+    }
+    resetChatConversation();
+    recordEvent({ type: "reset_chat" });
+    saveSessionState();
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("Conversación reiniciada. El agente no recordará mensajes anteriores.", "info");
+    }
+  } catch {
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("No se pudo reiniciar el chat. Intente de nuevo.", "error");
+    }
+  } finally {
+    if (resetChatBtn) {
+      resetChatBtn.disabled = false;
+      resetChatBtn.textContent = "Reiniciar chat";
+    }
+  }
+}
+
 function resetScoreOnly() {
   if (
     !confirm(
@@ -1333,6 +1391,9 @@ function initValidationPanel() {
   initCollapsiblePanel("trace-panel", "trace-toggle");
   initCollapsiblePanel("report-panel", "report-toggle");
   resetScoreBtn?.addEventListener("click", resetScoreOnly);
+  resetChatBtn?.addEventListener("click", () => {
+    resetChatSession();
+  });
   filterPendingEl?.addEventListener("change", applyPendingFilter);
 }
 

@@ -1,29 +1,32 @@
-"""Registro en memoria para trazas de flujo por sesión."""
+"""Trazas de flujo por sesión (Postgres o memoria según DATABASE_URL)."""
 
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+
+from src.storage import get_repository
+from src.storage.models import SessionTrace
 
 
-@dataclass
 class TraceStore:
-    _data: dict[str, list[dict]] = field(default_factory=dict)
-
     def add(self, session_id: str, trace: dict) -> None:
         payload = {"ts": time.time(), **trace}
-        self._data.setdefault(session_id, []).append(payload)
-        if len(self._data[session_id]) > 100:
-            self._data[session_id] = self._data[session_id][-100:]
+        get_repository().add_session_trace(
+            SessionTrace(
+                session_id=session_id,
+                trace_id=str(trace.get("trace_id") or ""),
+                turn_index=int(trace.get("turn_index") or 0),
+                payload=payload,
+            )
+        )
 
     def get(self, session_id: str, limit: int = 20) -> list[dict]:
-        traces = self._data.get(session_id, [])
-        return traces[-limit:]
+        records = get_repository().list_session_traces(session_id, limit=limit)
+        return [r.to_dict() for r in records]
 
     def latest(self, session_id: str) -> dict | None:
-        traces = self._data.get(session_id, [])
-        return traces[-1] if traces else None
+        records = get_repository().list_session_traces(session_id, limit=1)
+        return records[-1].to_dict() if records else None
 
 
 trace_store = TraceStore()
-

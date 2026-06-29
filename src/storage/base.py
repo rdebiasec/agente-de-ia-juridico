@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from src.storage.models import Deadline, DocumentChunk, Draft, Expediente
+from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace
 
 
 @runtime_checkable
@@ -55,3 +55,20 @@ class Repository(Protocol):
     def get_expediente(self, session_id: str) -> Expediente | None: ...
 
     def save_expediente(self, expediente: Expediente) -> Expediente: ...
+
+    # --- Conversación y trazas ---
+    def get_chat_session(self, session_id: str) -> ChatSession | None: ...
+
+    def save_chat_session(self, session: ChatSession) -> ChatSession: ...
+
+    def append_chat_message(
+        self, session_id: str, *, channel: str, user_id: str, role: str, content: str, max_messages: int
+    ) -> ChatSession: ...
+
+    def add_session_trace(self, trace: SessionTrace) -> SessionTrace: ...
+
+    def list_session_traces(self, session_id: str, *, limit: int = 50) -> list[SessionTrace]: ...
+
+    def reset_chat_session(self, session_id: str) -> bool: ...
+
+    def clear_session_traces(self, session_id: str) -> int: ...

@@ -21,7 +21,11 @@ services:
       - key: SESSION_SECRET
         sync: false
       - key: SESSION_IDLE_MINUTES
-        value: "30"
+        value: "360"
+      - key: SESSION_MAX_MESSAGES
+        value: "120"
+      - key: AGENT_MAX_TURNS
+        value: "25"
       - key: SESSION_COOKIE_SECURE
         value: "true"
       - key: OPENAI_MODEL

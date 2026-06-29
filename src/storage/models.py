@@ -168,3 +168,51 @@ class Deadline:
             "estado": self.estado,
             "created_at": self.created_at.isoformat(),
         }
+
+
+@dataclass
+class ChatSession:
+    """Conversación multi-turno del abogado (mensajes + metadatos de sesión)."""
+
+    session_id: str
+    channel: str = "web"
+    user_id: str = ""
+    messages: list[dict] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+    expires_at: datetime | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "session_id": self.session_id,
+            "channel": self.channel,
+            "user_id": self.user_id,
+            "messages": self.messages,
+            "metadata": self.metadata,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
+            "message_count": len(self.messages),
+        }
+
+
+@dataclass
+class SessionTrace:
+    """Traza enriquecida de un turno (spans, validaciones, completions)."""
+
+    id: str = field(default_factory=lambda: _new_id())
+    session_id: str = ""
+    trace_id: str = ""
+    turn_index: int = 0
+    payload: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        out = dict(self.payload)
+        out.setdefault("trace_id", self.trace_id)
+        out.setdefault("session_id", self.session_id)
+        out["turn_index"] = self.turn_index
+        out["record_id"] = self.id
+        out["created_at"] = self.created_at.isoformat()
+        return out

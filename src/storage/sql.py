@@ -9,10 +9,10 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import JSON, Date, DateTime, Float, String, Text, create_engine, select, text
+from sqlalchemy import JSON, Date, DateTime, Float, String, Text, create_engine, delete, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from src.storage.models import Deadline, DocumentChunk, Draft, EMBED_DIM, Expediente
+from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, EMBED_DIM, Expediente, SessionTrace
 
 
 def normalize_database_url(url: str) -> str:
@@ -87,6 +87,30 @@ class DeadlineRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class ChatSessionRow(Base):
+    __tablename__ = "chat_sessions"
+
+    session_id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    channel: Mapped[str] = mapped_column(String(20), default="web")
+    user_id: Mapped[str] = mapped_column(String(120), default="", index=True)
+    messages: Mapped[list] = mapped_column(JSON, default=list)
+    session_metadata: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class SessionTraceRow(Base):
+    __tablename__ = "session_traces"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(120), index=True)
+    trace_id: Mapped[str] = mapped_column(String(40), index=True)
+    turn_index: Mapped[int] = mapped_column(default=0)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 def _to_draft(row: DraftRow) -> Draft:
     return Draft(
         id=row.id,
@@ -130,6 +154,30 @@ def _to_expediente(row: ExpedienteRow) -> Expediente:
         partes=row.partes or [],
         terminos=row.terminos or [],
         actualizado_en=row.actualizado_en or 0.0,
+    )
+
+
+def _to_chat_session(row: ChatSessionRow) -> ChatSession:
+    return ChatSession(
+        session_id=row.session_id,
+        channel=row.channel,
+        user_id=row.user_id,
+        messages=row.messages or [],
+        metadata=row.session_metadata or {},
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        expires_at=row.expires_at,
+    )
+
+
+def _to_session_trace(row: SessionTraceRow) -> SessionTrace:
+    return SessionTrace(
+        id=row.id,
+        session_id=row.session_id,
+        trace_id=row.trace_id,
+        turn_index=row.turn_index,
+        payload=row.payload or {},
+        created_at=row.created_at,
     )
 
 
@@ -345,3 +393,99 @@ class SqlRepository:
             row.actualizado_en = expediente.actualizado_en
             s.commit()
         return expediente
+
+    # --- Conversación y trazas ---
+    def get_chat_session(self, session_id: str) -> ChatSession | None:
+        with self._session() as s:
+            row = s.get(ChatSessionRow, session_id)
+            return _to_chat_session(row) if row else None
+
+    def save_chat_session(self, session: ChatSession) -> ChatSession:
+        with self._session() as s:
+            row = s.get(ChatSessionRow, session.session_id)
+            if row is None:
+                row = ChatSessionRow(session_id=session.session_id)
+                s.add(row)
+            row.channel = session.channel
+            row.user_id = session.user_id
+            row.messages = session.messages
+            row.session_metadata = session.metadata
+            row.created_at = session.created_at
+            row.updated_at = session.updated_at
+            row.expires_at = session.expires_at
+            s.commit()
+            return _to_chat_session(row)
+
+    def append_chat_message(
+        self, session_id: str, *, channel: str, user_id: str, role: str, content: str, max_messages: int
+    ) -> ChatSession:
+        import time
+
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            row = s.get(ChatSessionRow, session_id)
+            if row is None:
+                row = ChatSessionRow(
+                    session_id=session_id,
+                    channel=channel,
+                    user_id=user_id,
+                    messages=[],
+                    session_metadata={},
+                    created_at=now,
+                    updated_at=now,
+                )
+                s.add(row)
+            messages = list(row.messages or [])
+            messages.append({"role": role, "content": content, "ts": time.time()})
+            if len(messages) > max_messages:
+                messages = messages[-max_messages:]
+            row.messages = messages
+            row.channel = channel
+            row.user_id = user_id
+            row.updated_at = now
+            s.commit()
+            return _to_chat_session(row)
+
+    def add_session_trace(self, trace: SessionTrace) -> SessionTrace:
+        with self._session() as s:
+            row = SessionTraceRow(
+                id=trace.id,
+                session_id=trace.session_id,
+                trace_id=trace.trace_id,
+                turn_index=trace.turn_index,
+                payload=trace.payload,
+                created_at=trace.created_at,
+            )
+            s.add(row)
+            s.commit()
+        return trace
+
+    def list_session_traces(self, session_id: str, *, limit: int = 50) -> list[SessionTrace]:
+        with self._session() as s:
+            stmt = (
+                select(SessionTraceRow)
+                .where(SessionTraceRow.session_id == session_id)
+                .order_by(SessionTraceRow.created_at.desc())
+                .limit(limit)
+            )
+            rows = list(s.scalars(stmt).all())
+            rows.reverse()
+            return [_to_session_trace(r) for r in rows]
+
+    def reset_chat_session(self, session_id: str) -> bool:
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            row = s.get(ChatSessionRow, session_id)
+            if row is None:
+                return False
+            row.messages = []
+            row.updated_at = now
+            s.commit()
+            return True
+
+    def clear_session_traces(self, session_id: str) -> int:
+        with self._session() as s:
+            stmt = delete(SessionTraceRow).where(SessionTraceRow.session_id == session_id)
+            result = s.execute(stmt)
+            s.commit()
+            return int(result.rowcount or 0)

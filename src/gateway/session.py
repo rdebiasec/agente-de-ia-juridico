@@ -1,32 +1,31 @@
-"""Sesiones por canal/usuario."""
+"""Sesiones de conversación (Postgres o memoria según DATABASE_URL)."""
 
 from __future__ import annotations
 
-import json
-import time
-from dataclasses import dataclass, field
+from src.config import get_settings
+from src.storage import get_repository
 
 
-@dataclass
 class SessionStore:
-    """Almacén en memoria; Redis opcional en producción."""
-
-    _data: dict[str, list[dict]] = field(default_factory=dict)
-    _redis: object | None = None
+    """Historial multi-turno por canal/usuario, persistido en el repositorio."""
 
     def _key(self, channel: str, user_id: str) -> str:
         return f"{channel}:{user_id}"
 
     def append(self, channel: str, user_id: str, role: str, content: str) -> None:
-        key = self._key(channel, user_id)
-        self._data.setdefault(key, []).append(
-            {"role": role, "content": content, "ts": time.time()}
+        settings = get_settings()
+        get_repository().append_chat_message(
+            self._key(channel, user_id),
+            channel=channel,
+            user_id=user_id,
+            role=role,
+            content=content,
+            max_messages=settings.session_max_messages,
         )
-        if len(self._data[key]) > 20:
-            self._data[key] = self._data[key][-20:]
 
     def history(self, channel: str, user_id: str) -> list[dict]:
-        return self._data.get(self._key(channel, user_id), [])
+        session = get_repository().get_chat_session(self._key(channel, user_id))
+        return list(session.messages) if session else []
 
 
 session_store = SessionStore()
