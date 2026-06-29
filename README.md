@@ -18,7 +18,26 @@ cp .env.example .env   # OPENAI_API_KEY, Slack, DATABASE_URL (opcional)
 # POST http://localhost:8000/chat  {"message": "¿Qué áreas del derecho cubre?"}
 ```
 
-Sin `DATABASE_URL` la app usa un repositorio en memoria (ideal para pruebas).
+Sin `DATABASE_URL` la app usa un repositorio en memoria (ideal para tests rápidos).
+Con Postgres local o Render usa el mismo esquema (Alembic + pgvector).
+
+### Postgres local + producción (paridad)
+
+| Entorno | Cómo | `DATABASE_URL` |
+|---------|------|----------------|
+| **Local — app en Mac** | `docker compose -f deploy/docker-compose.yml up -d db` + en `.env`: `postgresql+psycopg://agente:agente@localhost:5432/agente` | `localhost:5432` |
+| **Local — todo en Docker** | `docker compose -f deploy/docker-compose.yml up -d` | compose usa `@db:5432` (automático) |
+| **Producción (Render)** | `render.yaml` → base `agente-db` | inyectada por Render |
+
+Atajo local (DB + migraciones, opcional `--ingest` para RAG):
+
+```bash
+./scripts/local_db.sh
+./scripts/local_db.sh --ingest   # indexa agente/conocimiento/*.md
+```
+
+Verifique: `GET /health` → `"persistencia": "postgres"`.
+
 Con Docker (abajo) se inyecta Postgres+pgvector para paridad con producción.
 
 **PDF en local (Mac).** WeasyPrint necesita libs nativas de Homebrew:
