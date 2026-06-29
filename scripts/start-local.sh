@@ -10,6 +10,18 @@ if lsof -ti :8000 >/dev/null 2>&1; then
   sleep 1
 fi
 
+if [[ -f "$ROOT/.env" ]] && grep -qE '^DATABASE_URL=.+' "$ROOT/.env"; then
+  echo "→ Postgres en .env: verificando base local..."
+  if ! "$ROOT/scripts/local_db.sh"; then
+    echo ""
+    echo "AVISO: Postgres no disponible (¿Docker Desktop apagado?)."
+    echo "       Arrancando en modo memoria — reinicio de chat y chat funcionan,"
+    echo "       pero sin persistencia. Para paridad con prod: abra Docker y vuelva a ejecutar."
+    echo ""
+    export DATABASE_URL=
+  fi
+fi
+
 echo "Iniciando asistente jurídico en http://localhost:8000"
 echo "Abra esa URL en el navegador para chatear. Ctrl+C para detener."
 exec "$ROOT/.venv/bin/python" -m src.main

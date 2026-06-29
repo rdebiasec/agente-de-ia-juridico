@@ -8,6 +8,24 @@ cd "$ROOT"
 
 LOCAL_URL="${DATABASE_URL:-postgresql+psycopg://agente:agente@localhost:5432/agente}"
 
+ensure_docker() {
+  if docker info >/dev/null 2>&1; then
+    return 0
+  fi
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    echo "→ Docker no responde; intentando abrir Docker Desktop..."
+    open -a Docker 2>/dev/null || true
+    for _ in $(seq 1 45); do
+      docker info >/dev/null 2>&1 && return 0
+      sleep 2
+    done
+  fi
+  echo "ERROR: Docker no está disponible. Ábralo manualmente e intente de nuevo."
+  return 1
+}
+
+ensure_docker
+
 echo "→ Levantando Postgres+pgvector (Docker)..."
 docker compose -f deploy/docker-compose.yml up -d db
 

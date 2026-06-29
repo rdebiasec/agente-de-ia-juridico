@@ -1180,7 +1180,14 @@ async function resetChatSession() {
       body: JSON.stringify({ channel: "web", user_id: getUserId() }),
     });
     if (!res.ok) {
-      throw new Error("reset_failed");
+      let detail = "No se pudo reiniciar el chat.";
+      try {
+        const err = await res.json();
+        if (err?.detail) detail = typeof err.detail === "string" ? err.detail : detail;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(detail);
     }
     resetChatConversation();
     recordEvent({ type: "reset_chat" });
@@ -1188,9 +1195,9 @@ async function resetChatSession() {
     if (typeof Toast !== "undefined" && Toast.show) {
       Toast.show("Conversación reiniciada. El agente no recordará mensajes anteriores.", "info");
     }
-  } catch {
+  } catch (err) {
     if (typeof Toast !== "undefined" && Toast.show) {
-      Toast.show("No se pudo reiniciar el chat. Intente de nuevo.", "error");
+      Toast.show(err?.message || "No se pudo reiniciar el chat. Intente de nuevo.", "error");
     }
   } finally {
     if (resetChatBtn) {

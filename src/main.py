@@ -480,7 +480,17 @@ async def chat_reset(req: ChatResetRequest):
     user_id = (req.user_id or "").strip()
     if not user_id or len(user_id) > 120:
         raise HTTPException(status_code=400, detail="user_id inválido.")
-    result = reset_conversation(channel=req.channel, user_id=user_id)
+    try:
+        result = reset_conversation(channel=req.channel, user_id=user_id)
+    except Exception as exc:
+        logger.exception("Fallo al reiniciar chat para web:%s", user_id)
+        msg = str(exc).lower()
+        if "connection refused" in msg or "operationalerror" in type(exc).__name__.lower():
+            raise HTTPException(
+                status_code=503,
+                detail="Base de datos no disponible. Ejecute ./scripts/start-local.sh o ./scripts/local_db.sh.",
+            ) from exc
+        raise HTTPException(status_code=500, detail="No se pudo reiniciar la conversación.") from exc
     return ChatResetResponse(**result)
 
 
