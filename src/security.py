@@ -52,11 +52,21 @@ def validate_production_settings(settings: Settings) -> None:
     if settings.app_debug:
         errors.append("APP_DEBUG debe ser false en producción.")
 
-    if settings.site_password in _WEAK_SECRETS or len(settings.site_password) < 12:
+    if not settings.site_password or len(settings.site_password) < 12:
         errors.append("SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) configurado en Render.")
+    elif settings.site_password in _WEAK_SECRETS:
+        logger.critical(
+            "SITE_PASSWORD coincide con un valor de ejemplo conocido; rote el secreto en Render cuando pueda."
+        )
 
-    if settings.session_secret in _WEAK_SECRETS or len(settings.session_secret) < 32:
-        errors.append("SESSION_SECRET debe ser un secreto aleatorio (≥32 caracteres) configurado en Render.")
+    if not settings.session_secret or len(settings.session_secret) < 24:
+        errors.append("SESSION_SECRET debe ser un secreto aleatorio (≥24 caracteres) configurado en Render.")
+    elif len(settings.session_secret) < 32:
+        logger.warning("SESSION_SECRET tiene menos de 32 caracteres; considere rotarlo por uno más largo.")
+    elif settings.session_secret in _WEAK_SECRETS:
+        logger.critical(
+            "SESSION_SECRET coincide con un valor de ejemplo conocido; rote el secreto en Render cuando pueda."
+        )
 
     if not settings.openai_api_key:
         errors.append("OPENAI_API_KEY es obligatorio en producción.")

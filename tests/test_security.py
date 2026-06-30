@@ -14,7 +14,7 @@ def test_debug_disabled_in_production(monkeypatch):
     assert debug_enabled(settings) is False
 
 
-def test_validate_production_rejects_weak_secrets(monkeypatch):
+def test_validate_production_rejects_short_secrets(monkeypatch):
     monkeypatch.setenv("RENDER", "true")
     settings = Settings(
         site_password="short",
@@ -25,6 +25,25 @@ def test_validate_production_rejects_weak_secrets(monkeypatch):
     )
     with pytest.raises(RuntimeError, match="SITE_PASSWORD"):
         validate_production_settings(settings)
+
+
+def test_validate_production_warns_known_weak_but_long_secrets(monkeypatch, caplog):
+    import logging
+
+    monkeypatch.setenv("RENDER", "true")
+    settings = Settings(
+        site_password="Kx9mP2vL8nQw4RsT",
+        session_secret="f7a9c2e1b4d6083a5f2e9c1b7d4a608",
+        openai_api_key="sk-test",
+        database_url="postgresql+psycopg://x",
+        session_cookie_secure=True,
+        dev_auto_login=False,
+        app_debug=False,
+    )
+    with caplog.at_level(logging.WARNING):
+        validate_production_settings(settings)
+    assert "SITE_PASSWORD coincide" in caplog.text
+    assert "SESSION_SECRET tiene menos de 32" in caplog.text
 
 
 def test_validate_production_accepts_strong_config(monkeypatch):
