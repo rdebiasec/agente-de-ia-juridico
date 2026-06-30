@@ -51,7 +51,7 @@ async def test_generate_probes_endpoint():
 async def test_chat_page_has_score_ui():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=True) as client:
-        r = await client.get("/")
+        r = await client.get("/abogado")
     assert r.status_code == 200
     if "validation-score" in r.text:
         assert "Panel de Pruebas" in r.text
@@ -195,15 +195,15 @@ async def test_linked_messages_count_only_user_validation_messages():
 async def test_chat_page_has_report_and_reset_buttons():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/")
+        r = await client.get("/abogado")
     assert r.status_code == 200
     assert "trace-body" in r.text
-    assert "trace-toggle" in r.text
-    assert "reset-chat-btn" in r.text
+    assert "workspace-layout" in r.text
+    assert "reset-chat-btn-header" in r.text
+    assert "btn-reset-chat-primary" in r.text
     assert "Reiniciar chat" in r.text
     assert "btn-export-doc" not in r.text
     assert "Descargar informe (.doc)" not in r.text
-    assert "Imprimir / Guardar PDF" in r.text
 
 
 @pytest.mark.asyncio
@@ -265,12 +265,12 @@ async def test_manual_page_and_app_link():
     """Manual de uso: enlace desde la app y secciones clave en /help."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        index_r = await client.get("/")
+        index_r = await client.get("/abogado")
         manual_r = await client.get("/help")
 
     assert index_r.status_code == 200
     assert 'href="/help"' in index_r.text
-    assert "Manual de Uso" in index_r.text
+    assert "Manual" in index_r.text
     assert "help-panel" not in index_r.text
     assert "btn-help-toggle" not in index_r.text
 

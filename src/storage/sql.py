@@ -472,6 +472,18 @@ class SqlRepository:
             rows.reverse()
             return [_to_session_trace(r) for r in rows]
 
+    def list_recent_session_traces(self, *, limit: int = 50) -> list[SessionTrace]:
+        with self._session() as s:
+            stmt = select(SessionTraceRow).order_by(SessionTraceRow.created_at.desc()).limit(limit)
+            rows = list(s.scalars(stmt).all())
+            return [_to_session_trace(r) for r in rows]
+
+    def list_chat_sessions(self, *, limit: int = 30) -> list[ChatSession]:
+        with self._session() as s:
+            stmt = select(ChatSessionRow).order_by(ChatSessionRow.updated_at.desc()).limit(limit)
+            rows = list(s.scalars(stmt).all())
+            return [_to_chat_session(r) for r in rows]
+
     def reset_chat_session(self, session_id: str) -> bool:
         now = datetime.now(timezone.utc)
         with self._session() as s:

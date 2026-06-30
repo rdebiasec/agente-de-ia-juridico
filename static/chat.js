@@ -25,6 +25,8 @@ const filterPendingEl = document.getElementById("filter-pending-only");
 const probesSourceBadgeEl = document.getElementById("probes-source-badge");
 const chatColumnEl = document.querySelector(".chat-column");
 const traceBodyEl = document.getElementById("trace-body");
+const chatFileInputEl = document.getElementById("chat-file-input");
+const composerAttachStatusEl = document.getElementById("composer-attach-status");
 
 const sessionState = loadSessionState();
 let sessionId = sessionState.sessionId;
@@ -193,6 +195,115 @@ function getUserId() {
   return id;
 }
 
+window.getChatUserId = getUserId;
+
+function getWebSessionId() {
+  return `web:${getUserId()}`;
+}
+
+function normalizeHistoryText(role, content) {
+  const raw = String(content ?? "");
+  if (role !== "assistant") {
+    return stripInjectedContext(raw);
+  }
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{") && trimmed.includes("text")) {
+    try {
+      const parsed = JSON.parse(trimmed.replace(/'/g, '"'));
+      if (parsed && typeof parsed.text === "string") return parsed.text;
+    } catch {
+      /* legacy Python dict — handled below */
+    }
+    const m = trimmed.match(/['"]text['"]:\s*['"]((?:\\.|[^'\\])*)['"]/);
+    if (m) {
+      try {
+        return JSON.parse(`"${m[1]}"`);
+      } catch {
+        return m[1].replace(/\\n/g, "\n");
+      }
+    }
+  }
+  return raw;
+}
+
+function stripInjectedContext(text) {
+  const raw = String(text ?? "").trim();
+  if (
+    raw.includes("[Base de conocimiento") ||
+    raw.includes("[Expediente del caso]") ||
+    (raw.match(/## Etapas/g) || []).length >= 2 ||
+    raw.includes("[Fuente 1:")
+  ) {
+    const parts = raw.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+    for (let i = parts.length - 1; i >= 0; i -= 1) {
+      const p = parts[i];
+      if (p.startsWith("[") || p.startsWith("[Fuente")) continue;
+      if (p.startsWith("##") && p.length > 160) continue;
+      return p;
+    }
+  }
+  const parts = raw.split(/\n\n+/).map((p) => p.trim()).filter((p) => p && !p.startsWith("["));
+  return parts.length ? parts.join("\n\n") : raw;
+}
+
+async function loadServerHistory() {
+  try {
+    const res = await authFetch(`/chat/history?user_id=${encodeURIComponent(getUserId())}`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data.expediente && window.Workspace?.setExpediente) {
+      window.Workspace.setExpediente(data.expediente);
+    }
+    if (Array.isArray(data.messages) && data.messages.length) {
+      chatLog = data.messages.map((m, i) => {
+        const role = m.role === "assistant" ? "assistant" : "user";
+        return {
+          id: `srv-${i}-${m.ts || i}`,
+          role,
+          text: normalizeHistoryText(role, m.content || ""),
+          ts: m.ts ? new Date(Number(m.ts) * 1000).toISOString() : new Date().toISOString(),
+        };
+      });
+      saveSessionState();
+      return true;
+    }
+  } catch {
+    /* fallback a localStorage */
+  }
+  return false;
+}
+
+async function uploadChatAttachment(file) {
+  if (!file) return;
+  const sid = getWebSessionId();
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("expediente_id", sid);
+  fd.append("ingestar", "true");
+  if (composerAttachStatusEl) {
+    composerAttachStatusEl.hidden = false;
+    composerAttachStatusEl.textContent = `Subiendo ${file.name}…`;
+    composerAttachStatusEl.className = "composer-attach-status composer-attach-status--loading";
+  }
+  try {
+    const res = await authFetch("/documents/extract", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "No se pudo subir el archivo.");
+    if (composerAttachStatusEl) {
+      composerAttachStatusEl.textContent = `${file.name} indexado (${data.fragmentos_indexados || 0} fragmentos).`;
+      composerAttachStatusEl.className = "composer-attach-status composer-attach-status--ok";
+    }
+    window.Workspace?.addHito?.(`Documento adjunto: ${file.name}`);
+    Toast?.show?.("Documento indexado al expediente.", "success");
+  } catch (err) {
+    if (composerAttachStatusEl) {
+      composerAttachStatusEl.textContent = err?.message || "Error al subir el archivo.";
+      composerAttachStatusEl.className = "composer-attach-status composer-attach-status--error";
+    }
+    Toast?.show?.(err?.message || "No se pudo subir el archivo.", "error");
+  }
+}
+
 function updateProbesSourceBadge() {
   if (!probesSourceBadgeEl) return;
   probesSourceBadgeEl.classList.remove("is-llm", "is-loading");
@@ -217,6 +328,7 @@ function getProbesForTest(test) {
 }
 
 function initDefaultProbes() {
+  if (typeof VALIDATION_TESTS === "undefined") return;
   VALIDATION_TESTS.forEach((test) => {
     if (!test.defaultProbes?.length) return;
     if (!dynamicProbes[test.id]?.length) {
@@ -567,6 +679,7 @@ function setSelectedTraceMessage(msgId, options = {}) {
   const selected = getAssistantEntryByMsgId(selectedTraceMsgId) || getLatestAssistantEntry();
   if (!selectedTraceMsgId && selected?.id) selectedTraceMsgId = selected.id;
   void renderTracePanelForEntry(selected || null);
+  if (selectedTraceMsgId) window.Workspace?.smartTab?.("trazas");
   if (!skipSave) saveSessionState();
 }
 
@@ -1255,18 +1368,35 @@ function resetChatConversation() {
   if (sendBtn) sendBtn.disabled = false;
 }
 
+function setResetButtonsBusy(busy) {
+  [resetChatBtn, document.getElementById("reset-chat-btn-header")].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = busy;
+    btn.textContent = busy ? "Reiniciando…" : btn.dataset.defaultLabel || "⟲ Reiniciar chat";
+  });
+}
+
 async function resetChatSession() {
+  let pendingDrafts = 0;
+  try {
+    pendingDrafts = (await window.FirmaPanel?.fetchPendingDrafts?.())?.length || 0;
+  } catch {
+    /* ignore */
+  }
+  const warnPending = pendingDrafts
+    ? `\n\nAtención: hay ${pendingDrafts} borrador(es) pendiente(s) de aprobación.`
+    : "";
   if (
     !confirm(
-      "¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar 6 horas."
+      `¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar 6 horas.${warnPending}`
     )
   ) {
     return;
   }
-  if (resetChatBtn) {
-    resetChatBtn.disabled = true;
-    resetChatBtn.textContent = "Reiniciando…";
-  }
+  if (resetChatBtn) resetChatBtn.dataset.defaultLabel = resetChatBtn.textContent;
+  const resetHeaderBtn = document.getElementById("reset-chat-btn-header");
+  if (resetHeaderBtn) resetHeaderBtn.dataset.defaultLabel = resetHeaderBtn.textContent;
+  setResetButtonsBusy(true);
   try {
     const res = await authFetch("/chat/reset", {
       method: "POST",
@@ -1286,6 +1416,9 @@ async function resetChatSession() {
     resetChatConversation();
     recordEvent({ type: "reset_chat" });
     saveSessionState();
+    window.Workspace?.setExpediente?.(null);
+    window.FirmaPanel?.loadBandeja?.();
+    window.FirmaPanel?.loadTerminos?.();
     if (typeof Toast !== "undefined" && Toast.show) {
       Toast.show("Conversación reiniciada. El agente no recordará mensajes anteriores.", "info");
     }
@@ -1294,10 +1427,9 @@ async function resetChatSession() {
       Toast.show(err?.message || "No se pudo reiniciar el chat. Intente de nuevo.", "error");
     }
   } finally {
-    if (resetChatBtn) {
-      resetChatBtn.disabled = false;
-      resetChatBtn.textContent = "Reiniciar chat";
-    }
+    setResetButtonsBusy(false);
+    if (resetChatBtn) resetChatBtn.textContent = "⟲ Reiniciar";
+    if (resetHeaderBtn) resetHeaderBtn.textContent = "⟲ Reiniciar chat";
   }
 }
 
@@ -1456,6 +1588,9 @@ async function sendMessage(text) {
     document.dispatchEvent(
       new CustomEvent("draft-created", { detail: { draftId: assistantDraftId } })
     );
+    window.Workspace?.updateBandejaBadge?.(
+      ((await window.FirmaPanel?.fetchPendingDrafts?.()) || []).length
+    );
     if (typeof Toast !== "undefined" && Toast.show) {
       Toast.show("Borrador enviado a la bandeja del abogado para aprobación.", "info");
     }
@@ -1495,7 +1630,15 @@ function initValidationPanel() {
   resetChatBtn?.addEventListener("click", () => {
     resetChatSession();
   });
+  document.getElementById("reset-chat-btn-header")?.addEventListener("click", () => {
+    resetChatSession();
+  });
   filterPendingEl?.addEventListener("change", applyPendingFilter);
+  chatFileInputEl?.addEventListener("change", () => {
+    const file = chatFileInputEl.files?.[0];
+    if (file) void uploadChatAttachment(file);
+    chatFileInputEl.value = "";
+  });
 }
 
 async function syncRubricFromServer() {
@@ -1548,14 +1691,19 @@ async function bootstrapValidationProbes() {
 let appBooted = false;
 let sessionReportReady = false;
 
-function bootAgentApp() {
+async function bootAgentApp() {
   if (appBooted) return;
   appBooted = true;
-  initOnboarding();
+  const hadServerHistory = await loadServerHistory();
   restoreChatFromLog();
+  if (hadServerHistory && typeof Toast !== "undefined" && Toast.show) {
+    Toast.show("Sesión restaurada desde el servidor.", "info");
+  }
   checkHealth();
-  syncRubricFromServer();
-  bootstrapValidationProbes();
+  if (typeof VALIDATION_TESTS !== "undefined") {
+    syncRubricFromServer();
+    bootstrapValidationProbes();
+  }
   if (!sessionReportReady) {
     SessionReport.init({
       getSession: getSessionSnapshot,
@@ -1582,6 +1730,8 @@ function bootAgentApp() {
 
 window.bootAgentApp = bootAgentApp;
 
-initDefaultProbes();
-renderValidationPanel();
+if (typeof VALIDATION_TESTS !== "undefined") {
+  initDefaultProbes();
+  renderValidationPanel();
+}
 initValidationPanel();

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Consola de soporte — trazas OpenAI y operaciones del agente jurídico." />
+    <link rel="icon" href="/static/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/chat.css" />
+    <link rel="stylesheet" href="/static/desk.css" />
+    <title>Soporte · Trazas OpenAI | DBX Solutions</title>
+  </head>
+  <body class="workspace-body desk-soporte">
+    <div class="page desk-page desk-soporte-page">
+      <header class="site-header desk-header desk-header--soporte">
+        <a class="logo" href="/abogado">
+          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="140" height="28" />
+        </a>
+        <div class="workspace-header-center">
+          <span class="desk-product-label desk-product-label--soporte">Consola de soporte</span>
+          <span class="support-health" id="support-health">Verificando…</span>
+        </div>
+        <div class="site-header-actions">
+          <a class="btn-help" href="/abogado">Escritorio abogado</a>
+          <button type="button" class="btn-logout" id="auth-logout-btn">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <div class="support-toolbar">
+        <form class="support-search" id="support-search-form">
+          <label class="sr-only" for="support-session-input">Session ID</label>
+          <input
+            class="support-input"
+            id="support-session-input"
+            type="text"
+            placeholder="web:usuario o session_id"
+          />
+          <button type="submit" class="btn-firma-primary">Buscar sesión</button>
+          <button type="button" class="btn-firma-action" id="support-refresh">Actualizar</button>
+        </form>
+      </div>
+
+      <div class="support-layout">
+        <aside class="support-col support-col--ops" aria-label="Operaciones recientes">
+          <h2 class="support-col-title">Operaciones recientes</h2>
+          <div class="support-ops-list" id="support-ops-list"></div>
+          <h2 class="support-col-title">Sesiones</h2>
+          <div class="support-sessions-list" id="support-sessions-list"></div>
+        </aside>
+
+        <section class="support-col support-col--timeline" aria-label="Timeline de spans">
+          <h2 class="support-col-title">Flujo del turno</h2>
+          <div class="support-turn-meta" id="support-turn-meta">
+            <p class="support-empty">Seleccione una operación para ver spans, agentes y validaciones.</p>
+          </div>
+          <div class="support-span-timeline" id="support-span-timeline"></div>
+        </section>
+
+        <aside class="support-col support-col--detail" aria-label="OpenAI y detalle técnico">
+          <h2 class="support-col-title">OpenAI · Completions</h2>
+          <div class="support-openai-panel" id="support-openai-panel"></div>
+          <h2 class="support-col-title">Payload JSON</h2>
+          <pre class="support-json" id="support-json">{}</pre>
+        </aside>
+      </div>
+    </div>
+
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
+    <script src="/static/desk-soporte.js" defer></script>
+  </body>
+</html>

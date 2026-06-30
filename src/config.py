@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     slack_signing_secret: str = ""
     slack_review_channel: str = "#revision-abogado"
 
+    # Twilio SMS — alertas transaccionales de plazos (complemento a Slack).
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_messaging_service_sid: str = ""
+    twilio_from_number: str = ""
+    twilio_alert_to: str = ""
+    twilio_status_callback: str = ""
+
     # Persistencia (Fase B). Vacío => repositorio en memoria (tests / local sin Docker).
     # Con valor (p. ej. postgresql+psycopg://...) => backend Postgres/pgvector.
     database_url: str = ""
@@ -31,15 +39,17 @@ class Settings(BaseSettings):
     port: int = 8000  # env: PORT
 
     site_username: str = "despacho"
-    # Mantener auth web activo por defecto para paridad local/producción.
-    site_password: str = "Kx9mP2vL8nQw4RsT"
-    session_secret: str = "f7a9c2e1b4d6083a5f2e9c1b7d4a608"
+    # Sin valores por defecto débiles: configurar en .env local o secretos de Render.
+    site_password: str = ""
+    session_secret: str = ""
     session_idle_minutes: int = 360
     session_max_messages: int = 120
     agent_max_turns: int = 25
     session_cookie_secure: bool = False
     # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
     dev_auto_login: bool = False
+    # Telemetría de depuración (middleware /debug/*). Nunca activar en producción.
+    app_debug: bool = False
 
     @property
     def project_root(self) -> Path:

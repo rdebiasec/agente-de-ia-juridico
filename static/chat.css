@@ -167,6 +167,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .chat-header-actions {
@@ -202,6 +203,10 @@ body {
 .btn-reset-chat:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.btn-reset-chat--header {
+  min-height: 38px;
 }
 
 .report-header h2 {
@@ -2887,5 +2892,533 @@ body.manual-body {
 @media (max-width: 680px) {
   .firma-form--inline {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Mesa de trabajo del abogado ===== */
+.workspace-body {
+  overflow: hidden;
+}
+
+.workspace-page {
+  padding: 0.5rem 0.75rem 0.35rem;
+}
+
+.workspace-header {
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.workspace-header .site-header-actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.btn-reset-chat-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.55rem 1.15rem;
+  border: 2px solid rgba(79, 209, 197, 0.75);
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(79, 209, 197, 0.28), rgba(79, 209, 197, 0.12));
+  color: #eafffb;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(79, 209, 197, 0.22);
+  flex-shrink: 0;
+}
+
+.btn-reset-chat-primary:hover:not(:disabled) {
+  background: linear-gradient(160deg, rgba(79, 209, 197, 0.38), rgba(79, 209, 197, 0.18));
+  border-color: var(--accent);
+  box-shadow: 0 6px 24px rgba(79, 209, 197, 0.32);
+}
+
+.btn-reset-chat-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-reset-chat-primary--compact {
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.btn-reset-chat-primary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.workspace-header-center {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.workspace-case-chip,
+.workspace-deadline-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.workspace-deadline-chip--tutela {
+  border-color: rgba(214, 106, 42, 0.55);
+  background: rgba(214, 106, 42, 0.14);
+  color: #ffb48a;
+}
+
+.btn-bandeja {
+  position: relative;
+}
+
+.bandeja-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.workspace-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) minmax(360px, 1fr) minmax(300px, 380px);
+  gap: 0.85rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.expediente-sidebar,
+.context-panel,
+.workspace-chat {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(79, 209, 197, 0.22);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.expediente-sidebar {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at top left, rgba(79, 209, 197, 0.08), transparent 12rem);
+}
+
+.panel-title--compact {
+  font-size: 1.05rem;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.expediente-sidebar-head {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.case-list-stub {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.case-list-item {
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.case-list-item--active {
+  border-color: rgba(79, 209, 197, 0.45);
+  background: var(--accent-soft);
+}
+
+.case-list-note,
+.expediente-future-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.expediente-fields {
+  padding: 0.75rem 1rem;
+  overflow: auto;
+  flex: 1;
+}
+
+.expediente-dl {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.expediente-dl dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.expediente-dl dd {
+  margin: 0.1rem 0 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.expediente-empty {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.expediente-hitos {
+  padding: 0.65rem 1rem 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.expediente-hitos h3 {
+  font-size: 0.82rem;
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+}
+
+.expediente-hitos ul {
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.84rem;
+}
+
+.expediente-hitos li::before {
+  content: "○ ";
+  color: var(--accent);
+}
+
+.workspace-chat {
+  max-width: none;
+  min-width: 0;
+}
+
+.chat-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.context-chip {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: rgba(79, 209, 197, 0.12);
+  border: 1px solid rgba(79, 209, 197, 0.28);
+  color: #b8fff6;
+}
+
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.composer-row textarea {
+  flex: 1;
+}
+
+.btn-attach {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.composer-attach-status {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.composer-attach-status--ok {
+  color: #7dffc8;
+}
+
+.composer-attach-status--error {
+  color: #ff9b9b;
+}
+
+.context-panel {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at top right, rgba(214, 106, 42, 0.08), transparent 12rem);
+}
+
+.context-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.context-tab {
+  padding: 0.65rem 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.context-tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(79, 209, 197, 0.06);
+}
+
+.context-tab-panels {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.context-tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem;
+  display: none;
+}
+
+.context-tab-panel.is-active {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.context-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.context-panel-head p {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.context-tab-panel .trace-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.firma-form--compact .firma-form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.firma-form--compact .firma-input--num {
+  max-width: 7rem;
+}
+
+.rag-upload-details {
+  margin-top: 0.5rem;
+  font-size: 0.86rem;
+}
+
+.rag-upload-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.firma-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 90;
+}
+
+.firma-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(480px, 92vw);
+  height: 100dvh;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: #121622;
+  border-left: 1px solid var(--line);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
+}
+
+.firma-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.firma-drawer-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.firma-drawer-actions {
+  padding: 0.5rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.firma-list--drawer {
+  flex: 1;
+  overflow: auto;
+  padding: 0.85rem 1.1rem 1.25rem;
+}
+
+body.drawer-open {
+  overflow: hidden;
+}
+
+.draft-diff {
+  margin: 0.35rem 0;
+  font-size: 0.82rem;
+}
+
+.draft-diff-body {
+  margin-top: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 180px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.diff-line {
+  padding: 0.15rem 0.45rem;
+}
+
+.diff-line--removed {
+  background: rgba(255, 80, 80, 0.12);
+}
+
+.diff-line--added {
+  background: rgba(80, 200, 120, 0.12);
+}
+
+.diff-line--same {
+  color: var(--muted);
+}
+
+.firma-term--urgente {
+  border-left: 3px solid var(--orange);
+}
+
+.workspace-footer {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  padding: 0.35rem 0;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .workspace-header-center {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .workspace-header .site-header-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .btn-reset-chat-primary {
+    order: -1;
+  }
+}
+
+@media (max-width: 1180px) {
+  .workspace-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    overflow: auto;
+  }
+
+  .expediente-sidebar {
+    max-height: 220px;
+  }
+
+  .context-panel {
+    max-height: 340px;
+  }
+
+  html,
+  body {
+    overflow: auto;
+  }
+
+  .workspace-page {
+    height: auto;
+    max-height: none;
+    min-height: 100dvh;
   }
 }

@@ -90,6 +90,34 @@ el flujo de login/logout sea idéntico al local.
 - `"modo": "firma"`
 - `"persistencia": "postgres"` cuando `DATABASE_URL` está configurado (Render/Docker), o `"memoria"` en local sin base de datos.
 - `"slack_configured"`: `true` solo si se cargan los secretos de Slack para HITL.
+- `"twilio_configured"`: `true` solo si hay credenciales Twilio + número destino (`TWILIO_ALERT_TO`).
+- `"environment"`: `production` en Render; `development` en local.
+- `"dev_auto_login"`: debe ser `false` en producción.
+
+## Seguridad en producción (checklist obligatorio)
+
+Antes del primer deploy en Render, confirme:
+
+| Control | Render / prod | Local dev |
+|--------|----------------|-----------|
+| `SITE_PASSWORD` | Secreto fuerte (≥12 chars), único | `.env` local |
+| `SESSION_SECRET` | Aleatorio (≥32 chars) | `.env` local |
+| `DEV_AUTO_LOGIN` | **`false`** | `true` opcional |
+| `APP_DEBUG` | **`false`** | `false` (o `true` solo al depurar) |
+| `SESSION_COOKIE_SECURE` | **`true`** | `false` |
+| `OPENAI_API_KEY` | Obligatorio | `.env` |
+| `DATABASE_URL` | Inyectado por blueprint | Docker local |
+| Twilio (opcional) | `TWILIO_*` secretos | `.env` |
+
+La app **falla al arrancar** en Render si detecta secretos débiles, `DEV_AUTO_LOGIN=true`,
+`APP_DEBUG=true`, o falta `OPENAI_API_KEY` / `DATABASE_URL`.
+
+Endpoints de depuración (`POST /debug/client-log`, middleware de telemetría) quedan
+**desactivados** en producción. `/debug/trace/{session_id}` sigue protegido por login web.
+
+Headers de seguridad (HSTS, X-Frame-Options, nosniff) se aplican automáticamente en Render.
+
+**Nunca** suba `.env` a GitHub — solo `.env.example` con placeholders.
 
 ## Persistencia y Slack (Fase B)
 

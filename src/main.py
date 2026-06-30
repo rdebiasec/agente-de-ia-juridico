@@ -34,6 +34,7 @@ from src.config import Settings, get_settings
 from src.gateway.reset import reset_conversation
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
+from src.security import debug_enabled, is_production, security_headers, validate_production_settings
 from src.validation.probes import generate_probes
 from src.validation.report import build_export_html, build_rules_only, build_session_report
 from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_weight
@@ -53,6 +54,8 @@ def _debug_log(
     *,
     run_id: str = "pre-fix",
 ) -> None:
+    if not debug_enabled(get_settings()):
+        return
     # region agent log
     try:
         payload = {
@@ -74,6 +77,8 @@ def _debug_log(
 
 
 def _debug_log_83755e(run_id: str, hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    if not debug_enabled(get_settings()):
+        return
     # region agent log
     try:
         payload = {
@@ -104,6 +109,7 @@ class ClientDebugLog(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+    validate_production_settings(settings)
 
     # Inicializa el repositorio (ejecuta migraciones Alembic si hay Postgres).
     if settings.database_url:
@@ -147,7 +153,20 @@ app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
 
 
 @app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    if is_production(get_settings()):
+        for header, value in security_headers().items():
+            response.headers.setdefault(header, value)
+    return response
+
+
+@app.middleware("http")
 async def debug_request_middleware(request: Request, call_next):
+    settings = get_settings()
+    if not debug_enabled(settings):
+        return await call_next(request)
+
     ua = request.headers.get("user-agent", "")[:160]
     is_mobile = any(token in ua.lower() for token in ("iphone", "ipad", "android", "mobile"))
     try:
@@ -192,9 +211,11 @@ async def debug_request_middleware(request: Request, call_next):
 
 from src.gateway.firma_api import router as firma_router
 from src.gateway.slack_interactivity import router as slack_router
+from src.gateway.support_api import router as support_router
 
 app.include_router(firma_router)
 app.include_router(slack_router)
+app.include_router(support_router)
 
 _static_dir = get_settings().project_root / "static"
 if _static_dir.is_dir():
@@ -237,30 +258,57 @@ async def login_page(
 
 
 @app.get("/")
-async def chat_page(
+async def root_redirect(
     request: Request,
     settings: Settings = Depends(get_settings),
 ):
-    try:
-        redirect = _auth_redirect_if_needed(request, settings)
-        if redirect:
-            return redirect
-        index = _static_dir / "index.html"
-        if index.is_file():
-            return FileResponse(index)
-        return {"message": "Agente Jurídico API — use POST /chat"}
-    except Exception as exc:
-        # region agent log
-        _debug_log(
-            "H1",
-            "main:chat_page",
-            "chat_page_failed",
-            {"error": type(exc).__name__, "detail": str(exc)[:300]},
-            run_id="post-fix",
-        )
-        # endregion
-        logger.exception("Fallo al servir chat page")
-        return RedirectResponse(url="/login", status_code=302)
+    redirect = _auth_redirect_if_needed(request, settings)
+    if redirect:
+        return redirect
+    return RedirectResponse(url="/abogado", status_code=302)
+
+
+@app.get("/abogado")
+async def abogado_desk(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    redirect = _auth_redirect_if_needed(request, settings)
+    if redirect:
+        return redirect
+    page = _static_dir / "desk" / "abogado.html"
+    if page.is_file():
+        return FileResponse(page)
+    index = _static_dir / "index.html"
+    if index.is_file():
+        return FileResponse(index)
+    raise HTTPException(status_code=404, detail="Escritorio del abogado no encontrado.")
+
+
+@app.get("/soporte")
+async def soporte_desk(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    redirect = _auth_redirect_if_needed(request, settings)
+    if redirect:
+        return redirect
+    page = _static_dir / "desk" / "soporte.html"
+    if not page.is_file():
+        raise HTTPException(status_code=404, detail="Consola de soporte no encontrada.")
+    return FileResponse(page)
+
+
+@app.get("/chat")
+async def chat_page_legacy(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    """Compatibilidad: redirige al escritorio del abogado."""
+    redirect = _auth_redirect_if_needed(request, settings)
+    if redirect:
+        return redirect
+    return RedirectResponse(url="/abogado", status_code=302)
 
 
 @app.get("/help")
@@ -404,7 +452,7 @@ async def auth_heartbeat(
 
 class ChatRequest(BaseModel):
     message: str
-    channel: str = "api"
+    channel: str = "web"
     user_id: str = "test"
 
 
@@ -442,20 +490,27 @@ class TraceDebugResponse(BaseModel):
 @app.get("/health")
 async def health():
     settings = get_settings()
+    from src.services.twilio_notify import twilio_habilitado
+
     payload = {
         "status": "ok",
         "modo": "firma",
+        "environment": "production" if is_production(settings) else "development",
         "openai_configured": bool(settings.openai_api_key),
         "slack_configured": bool(settings.slack_bot_token),
+        "twilio_configured": twilio_habilitado(),
         "persistencia": "postgres" if settings.database_url else "memoria",
         "web_auth_enabled": auth_enabled(settings.site_password),
+        "dev_auto_login": dev_auto_login_allowed(settings) if auth_enabled(settings.site_password) else False,
     }
     return payload
 
 
-@app.post("/debug/client-log")
+@app.post("/debug/client-log", dependencies=[Depends(require_web_session)])
 async def debug_client_log(entry: ClientDebugLog):
-    """Recibe telemetría del navegador (visible en logs de Render)."""
+    """Recibe telemetría del navegador (solo desarrollo con APP_DEBUG=true)."""
+    if not debug_enabled(get_settings()):
+        raise HTTPException(status_code=404, detail="No encontrado.")
     # region agent log
     _debug_log(
         entry.hypothesisId,
@@ -514,9 +569,20 @@ async def chat_history(channel: str = "web", user_id: str = "web"):
 
     chat = get_repository().get_chat_session(session_id)
     exp = expediente_store.get(session_id)
+    raw_messages = list(chat.messages) if chat else []
+    messages = []
+    for msg in raw_messages:
+        role = str(msg.get("role") or "user")
+        content = msg.get("content", "")
+        from src.gateway.message_content import normalize_message_content, strip_runner_injected_context
+
+        text = normalize_message_content(content)
+        if role == "user":
+            text = strip_runner_injected_context(text)
+        messages.append({**msg, "content": text})
     return ChatHistoryResponse(
         session_id=session_id,
-        messages=list(chat.messages) if chat else [],
+        messages=messages,
         traces=trace_store.get(session_id, limit=40),
         expediente=exp.to_dict() if exp else None,
     )

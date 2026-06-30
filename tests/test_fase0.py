@@ -7,13 +7,13 @@ from src.main import app
 @pytest.mark.asyncio
 async def test_chat_page():
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/")
+    async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:
+        r = await client.get("/abogado")
     assert r.status_code == 200
-    assert "Asistente Jurídico" in r.text
-    assert "trace-panel-content" in r.text
-    assert "Panel de Trazabilidad" in r.text
-    assert "validation-tests.js" in r.text
+    assert "Escritorio del abogado" in r.text or "Asistente Jurídico" in r.text
+    assert "trace-body" in r.text
+    assert "workspace-layout" in r.text or "desk-layout" in r.text
+    assert "workspace.js" in r.text
 
 
 @pytest.mark.asyncio

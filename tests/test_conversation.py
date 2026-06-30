@@ -103,9 +103,18 @@ def test_repository_agent_session_roundtrip():
 
     async def _run():
         await session.add_items([{"role": "user", "content": "Primera pregunta"}])
+        await session.add_items(
+            [
+                {
+                    "role": "assistant",
+                    "content": {"text": "Respuesta clara", "type": "output_text", "annotations": []},
+                }
+            ]
+        )
         items = await session.get_items()
-        assert len(items) == 1
+        assert len(items) == 2
         assert items[0]["content"] == "Primera pregunta"
+        assert items[1]["content"] == "Respuesta clara"
 
     asyncio.run(_run())
 

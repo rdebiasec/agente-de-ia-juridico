@@ -12,6 +12,8 @@ def disable_web_auth_by_default(monkeypatch, request):
         return
 
     monkeypatch.setenv("SITE_PASSWORD", "")
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.delenv("RENDER", raising=False)
     from src.config import get_settings
 
     get_settings.cache_clear()

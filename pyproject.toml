@@ -23,6 +23,7 @@ dependencies = [
     "holidays>=0.60",
     "apscheduler>=3.11.0",
     "weasyprint>=63.0",
+    "twilio>=9.4.0",
 ]
 
 [project.optional-dependencies]

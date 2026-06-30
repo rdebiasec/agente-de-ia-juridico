@@ -22,7 +22,7 @@ from src.agents.guardrails import (
 from src.agents.orchestrator import build_orchestrator
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.config import get_settings
-from src.gateway.agent_session import RepositoryAgentSession
+from src.gateway.agent_session import RepositoryAgentSession, reconcile_turn_messages
 from src.gateway.expediente import expediente_store
 from src.storage import get_repository
 
@@ -615,7 +615,7 @@ async def run_agent(
         trace_metadata={
             "session_id": session_id,
             "channel": channel,
-            "turn_index": trace.get("turn_index", 0),
+            "turn_index": str(trace.get("turn_index", 0)),
         },
     )
     try:
@@ -739,6 +739,7 @@ async def run_agent(
         )
     )
     _finalize_trace(trace, text)
+    reconcile_turn_messages(session_id, user_text=message, assistant_text=text)
     return {
         "text": text,
         "agent": destination_agent,

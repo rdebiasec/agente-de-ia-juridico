@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Mesa de trabajo del despacho — asistente jurídico con supervisión humana."
+      content="Escritorio del abogado — asistente jurídico con supervisión humana, expediente y bandeja HITL."
     />
     <link rel="icon" href="/static/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,18 +15,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/chat.css" />
-    <title>Mesa de trabajo | Asistente Jurídico</title>
+    <link rel="stylesheet" href="/static/desk.css" />
+    <title>Escritorio del abogado | DBX Solutions</title>
   </head>
-  <body class="workspace-body">
+  <body class="workspace-body desk-abogado">
     <a class="skip-link" href="#messages">Ir al chat</a>
-    <a class="skip-link" href="#trace-body">Ir a trazabilidad</a>
 
-    <div id="app-root" class="page workspace-page">
-      <header class="site-header workspace-header">
+    <div id="app-root" class="page workspace-page desk-page">
+      <header class="site-header workspace-header desk-header">
         <a class="logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
           <img src="/static/dbx-logo.png" alt="DBX Solutions" width="160" height="32" />
         </a>
         <div class="workspace-header-center">
+          <span class="desk-product-label">Escritorio del abogado</span>
           <span class="workspace-case-chip" id="workspace-case-chip">Caso activo</span>
           <span class="workspace-deadline-chip" id="workspace-deadline-chip" hidden></span>
         </div>
@@ -49,26 +50,32 @@
         </div>
       </header>
 
-      <div class="workspace-layout">
+      <p class="desk-value-banner" id="desk-value-banner">
+        La IA organiza hechos, redacta borradores y calcula plazos — usted revisa, edita y aprueba cada salida antes de usarla.
+      </p>
+
+      <div class="workspace-layout desk-layout">
         <aside class="expediente-sidebar" id="expediente-sidebar" aria-label="Expediente del caso">
           <div class="expediente-sidebar-head">
             <h2 class="panel-title panel-title--compact">Expediente</h2>
+            <button type="button" class="btn-sidebar-toggle" id="btn-sidebar-collapse" title="Ocultar expediente">‹</button>
           </div>
           <div class="case-list-stub" id="case-list-stub">
             <div class="case-list-item case-list-item--active">
               <strong>Caso activo</strong>
-              <span class="case-list-note">Sesión web actual</span>
+              <span class="case-list-note">Sesión web · continúa al reabrir</span>
             </div>
-            <p class="expediente-future-note">Lista multi-caso — próximamente.</p>
           </div>
           <div class="expediente-fields" id="expediente-fields">
             <p class="expediente-empty">Sin datos de expediente aún. Describa el caso en el chat.</p>
           </div>
           <div class="expediente-hitos" id="expediente-hitos" hidden>
-            <h3>Hitos</h3>
+            <h3>Hitos del caso</h3>
             <ul id="expediente-hitos-list"></ul>
           </div>
         </aside>
+
+        <button type="button" class="btn-sidebar-expand" id="btn-sidebar-expand" hidden title="Mostrar expediente">Expediente ›</button>
 
         <main class="chat-column workspace-chat">
           <div class="chat-content" aria-label="Chat con el asistente jurídico">
@@ -98,18 +105,12 @@
                   <span aria-hidden="true">📎</span>
                   <span class="sr-only">Adjuntar archivo</span>
                 </label>
-                <input
-                  type="file"
-                  id="chat-file-input"
-                  class="chat-file-input"
-                  accept=".pdf,.docx,.txt"
-                  hidden
-                />
+                <input type="file" id="chat-file-input" class="chat-file-input" accept=".pdf,.docx,.txt" hidden />
                 <label class="sr-only" for="message-input">Escriba su consulta</label>
                 <textarea
                   id="message-input"
                   rows="2"
-                  placeholder="Escriba su consulta jurídica…"
+                  placeholder="Describa el caso, pida un borrador o consulte estrategia…"
                   maxlength="8000"
                   required
                 ></textarea>
@@ -119,38 +120,27 @@
             </form>
 
             <p class="disclaimer">
-              <strong>Aviso legal:</strong> este asistente apoya al abogado; no lo reemplaza. Toda
-              respuesta es un borrador informativo sujeto a revisión y aprobación del abogado del
-              despacho.
+              <strong>Aviso legal:</strong> borrador informativo sujeto a revisión y aprobación del abogado. No sustituye criterio profesional ni relación abogado-cliente.
             </p>
           </div>
         </main>
 
         <aside class="context-panel" id="context-panel" aria-label="Panel contextual">
           <div class="context-tabs" role="tablist">
-            <button type="button" class="context-tab is-active" data-tab="borrador" role="tab" aria-selected="true">
-              Borrador
-            </button>
-            <button type="button" class="context-tab" data-tab="plazos" role="tab" aria-selected="false">
-              Plazos
-            </button>
-            <button type="button" class="context-tab" data-tab="trazas" role="tab" aria-selected="false">
-              Trazas
-            </button>
-            <button type="button" class="context-tab" data-tab="rag" role="tab" aria-selected="false">
-              RAG
-            </button>
+            <button type="button" class="context-tab is-active" data-tab="borrador" role="tab">Borrador</button>
+            <button type="button" class="context-tab" data-tab="plazos" role="tab">Plazos</button>
+            <button type="button" class="context-tab" data-tab="trazas" role="tab">Detalle</button>
+            <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
-
           <div class="context-tab-panels">
             <section class="context-tab-panel is-active" id="tab-borrador" data-panel="borrador" role="tabpanel">
               <header class="context-panel-head">
-                <p>Borradores pendientes de firma</p>
+                <p>Pendientes de su firma</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-borrador-tab">Actualizar</button>
               </header>
+              <p class="context-panel-hint">Todo documento accionable pasa por aquí antes de salir del despacho.</p>
               <div class="firma-list" id="tab-borrador-list" aria-live="polite"></div>
             </section>
-
             <section class="context-tab-panel" id="tab-plazos" data-panel="plazos" role="tabpanel" hidden>
               <header class="context-panel-head">
                 <p>Términos procesales</p>
@@ -166,22 +156,16 @@
               </form>
               <div class="firma-list" id="firma-terminos-list" aria-live="polite"></div>
             </section>
-
             <section class="context-tab-panel" id="tab-trazas" data-panel="trazas" role="tabpanel" hidden>
-              <header class="context-panel-head">
-                <p>Trazabilidad del turno seleccionado</p>
-              </header>
+              <header class="context-panel-head"><p>Cómo llegó el asistente a esta respuesta</p></header>
               <p class="trace-header-note">Seleccione un mensaje del asistente en el chat.</p>
               <section class="trace-body" id="trace-body"></section>
             </section>
-
             <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
-              <header class="context-panel-head"><p>Búsqueda en conocimiento</p></header>
+              <header class="context-panel-head"><p>Conocimiento del despacho y del caso</p></header>
               <form class="firma-form" id="firma-search-form">
-                <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: término de caducidad contractual" required />
-                <label class="firma-check">
-                  <input type="checkbox" id="firma-search-kb" checked /> Incluir base de la firma
-                </label>
+                <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: caducidad, tutela, término" required />
+                <label class="firma-check"><input type="checkbox" id="firma-search-kb" checked /> Base de la firma</label>
                 <input class="firma-input" id="firma-search-exp" type="hidden" />
                 <button type="submit" class="btn-firma-primary" id="btn-search">Buscar</button>
               </form>
@@ -190,12 +174,9 @@
                 <summary>Subir documento al expediente</summary>
                 <form class="firma-form" id="firma-upload-form">
                   <input class="firma-input" id="firma-exp-id" type="hidden" />
-                  <label class="firma-label" for="firma-file">Archivo (PDF, Word, TXT)</label>
                   <input class="firma-input" id="firma-file" type="file" accept=".pdf,.docx,.txt" required />
-                  <label class="firma-check">
-                    <input type="checkbox" id="firma-ingest" checked /> Indexar al RAG del expediente
-                  </label>
-                  <button type="submit" class="btn-firma-primary" id="btn-upload">Subir y analizar</button>
+                  <label class="firma-check"><input type="checkbox" id="firma-ingest" checked /> Indexar al RAG</label>
+                  <button type="submit" class="btn-firma-primary" id="btn-upload">Subir</button>
                 </form>
                 <div class="firma-result" id="firma-upload-result"></div>
               </details>
@@ -208,7 +189,7 @@
       <aside class="firma-drawer" id="firma-drawer" aria-label="Bandeja del abogado" hidden>
         <div class="firma-drawer-head">
           <h2>Bandeja del abogado</h2>
-          <button type="button" class="btn-firma-close" id="btn-close-firma" aria-label="Cerrar bandeja">×</button>
+          <button type="button" class="btn-firma-close" id="btn-close-firma" aria-label="Cerrar">×</button>
         </div>
         <div class="firma-drawer-actions">
           <button type="button" class="btn-firma-action" id="btn-refresh-bandeja">Actualizar</button>
@@ -216,23 +197,14 @@
         <div class="firma-list firma-list--drawer" id="firma-bandeja-list" aria-live="polite"></div>
       </aside>
 
-      <footer class="workspace-footer">
-        <span>Desarrollado con el theme de</span>
-        <a class="footer-logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
-          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="120" height="24" />
-        </a>
+      <footer class="workspace-footer desk-footer">
+        <span>Human-supervised · DBX Solutions</span>
+        <a class="desk-footer-link" href="/soporte">Consola soporte</a>
       </footer>
     </div>
 
     <script src="/static/auth.js"></script>
     <script src="/static/toast.js"></script>
-    <script>
-      if (new URLSearchParams(location.search).has("dev")) {
-        const s = document.createElement("script");
-        s.src = "/static/validation-tests.js";
-        document.head.appendChild(s);
-      }
-    </script>
     <script src="/static/report.js"></script>
     <script src="/static/workspace.js" defer></script>
     <script src="/static/firma.js" defer></script>

@@ -6,7 +6,15 @@ from typing import Any
 
 from agents.memory.session import SessionABC
 
+from src.gateway.message_content import normalize_message_content, strip_runner_injected_context
 from src.storage import get_repository
+
+
+def _stored_content(role: str, content: Any) -> str:
+    text = normalize_message_content(content)
+    if role == "user":
+        text = strip_runner_injected_context(text)
+    return text.strip()
 
 
 class RepositoryAgentSession(SessionABC):
@@ -20,7 +28,7 @@ class RepositoryAgentSession(SessionABC):
 
     def _to_input_item(self, msg: dict) -> dict[str, Any]:
         role = msg.get("role", "user")
-        content = msg.get("content", "")
+        content = _stored_content(str(role), msg.get("content", ""))
         if role == "assistant":
             return {"role": "assistant", "content": content}
         return {"role": "user", "content": content}
@@ -44,19 +52,18 @@ class RepositoryAgentSession(SessionABC):
             if isinstance(item, dict):
                 role = item.get("role") or "user"
                 content = item.get("content") or ""
-                if isinstance(content, list):
-                    content = " ".join(str(part) for part in content)
             else:
                 role = getattr(item, "role", "user")
                 content = getattr(item, "content", str(item))
-            if not str(content).strip():
+            stored = _stored_content(str(role), content)
+            if not stored:
                 continue
             repo.append_chat_message(
                 self.session_id,
                 channel=self.channel,
                 user_id=self.user_id,
                 role=str(role),
-                content=str(content),
+                content=stored,
                 max_messages=max_messages,
             )
 
@@ -76,3 +83,20 @@ class RepositoryAgentSession(SessionABC):
             return
         session.messages = []
         repo.save_chat_session(session)
+
+
+def reconcile_turn_messages(session_id: str, *, user_text: str, assistant_text: str) -> None:
+    """Corrige el último par user/assistant tras Runner.run (RAG en input, dict en output)."""
+    repo = get_repository()
+    session = repo.get_chat_session(session_id)
+    if not session or not session.messages:
+        return
+    user_clean = _stored_content("user", user_text)
+    asst_clean = _stored_content("assistant", assistant_text)
+    if session.messages[-1].get("role") == "assistant":
+        session.messages[-1]["content"] = asst_clean
+    for i in range(len(session.messages) - 1, -1, -1):
+        if session.messages[i].get("role") == "user":
+            session.messages[i]["content"] = user_clean
+            break
+    repo.save_chat_session(session)

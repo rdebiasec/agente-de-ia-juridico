@@ -57,7 +57,7 @@
       if (!res.ok) return;
       const data = await res.json();
       if (!data.auth_enabled || data.authenticated) {
-        window.location.replace("/");
+        window.location.replace("/abogado");
         return;
       }
     } catch {

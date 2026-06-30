@@ -10,6 +10,7 @@ import logging
 from datetime import date
 
 from src.hitl.slack_review import notificar_texto
+from src.services.twilio_notify import formatear_alerta_plazos, notificar_texto_sms
 from src.storage import Repository, get_repository
 from src.storage.models import Deadline
 
@@ -48,13 +49,13 @@ def revisar_plazos(repo: Repository | None = None, *, hoy: date | None = None) -
         repository.update_deadline(d.id, estado="vencido")
 
     if vencidos or proximos:
-        lineas = ["*Alerta de términos procesales*"]
-        for d in vencidos:
-            lineas.append(f":red_circle: VENCIDO: {d.descripcion} (límite {d.fecha_limite})")
-        for d in proximos:
-            restantes = (d.fecha_limite - referencia).days
-            lineas.append(f":warning: Por vencer en {restantes} día(s): {d.descripcion} (límite {d.fecha_limite})")
-        notificar_texto("\n".join(lineas))
+        resumen = formatear_alerta_plazos(vencidos, proximos, referencia=referencia)
+        lineas_slack = ["*Alerta de términos procesales*"]
+        for linea in resumen.splitlines()[1:]:
+            prefijo = ":red_circle: " if linea.startswith("VENCIDO:") else ":warning: "
+            lineas_slack.append(f"{prefijo}{linea.replace('limite', 'límite').replace('dia(s)', 'día(s)')}")
+        notificar_texto("\n".join(lineas_slack))
+        notificar_texto_sms(resumen)
 
     return {"vencidos": len(vencidos), "proximos": len(proximos)}
 

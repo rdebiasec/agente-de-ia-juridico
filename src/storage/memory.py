@@ -6,8 +6,6 @@ import math
 import threading
 from datetime import datetime, timezone
 
-from datetime import datetime, timezone
-
 from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace, SCOPE_KB
 
 
@@ -200,6 +198,20 @@ class InMemoryRepository:
     def list_session_traces(self, session_id: str, *, limit: int = 50) -> list[SessionTrace]:
         traces = self._session_traces.get(session_id, [])
         return traces[-limit:]
+
+    def list_recent_session_traces(self, *, limit: int = 50) -> list[SessionTrace]:
+        with self._lock:
+            all_traces: list[SessionTrace] = []
+            for bucket in self._session_traces.values():
+                all_traces.extend(bucket)
+            all_traces.sort(key=lambda t: t.created_at, reverse=True)
+            return all_traces[:limit]
+
+    def list_chat_sessions(self, *, limit: int = 30) -> list[ChatSession]:
+        with self._lock:
+            sessions = list(self._chat_sessions.values())
+            sessions.sort(key=lambda s: s.updated_at, reverse=True)
+            return sessions[:limit]
 
     def reset_chat_session(self, session_id: str) -> bool:
         with self._lock:
