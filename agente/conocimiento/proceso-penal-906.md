@@ -21,7 +21,7 @@
 
 ## Rol del despacho
 
-Puede actuar como **defensa**, como **representante de víctima** o como apoyo a la acusación. Preguntar siempre la posición antes de preparar audiencias, interrogatorios o memoriales.
+En materia penal este despacho actúa como **representante de víctimas** (Ley 906). Para el playbook específico de víctima usar `proceso-penal-victima-906.md` y las KB asociadas en `agente/conocimiento/`.
 
 ## Términos
 
