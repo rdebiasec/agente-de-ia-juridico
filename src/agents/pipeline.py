@@ -165,7 +165,11 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
     lower_msg = message.lower()
     missing: list[str] = []
 
-    if "tutela" in lower_msg or trace.get("sent_to_agent") == "tutela_constitucional":
+    if "tutela" in lower_msg or trace.get("sent_to_agent") in {
+        AGENTE_TUTELA_CONSTITUCIONAL,
+        "tutela",
+        "tutela_constitucional",
+    }:
         combined = f"{message}\n{text}"
         for label, pattern in _TUTELA_FIELDS:
             if not pattern.search(combined):

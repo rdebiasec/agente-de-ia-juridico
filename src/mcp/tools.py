@@ -20,6 +20,7 @@ AREA_FILES = {
 PLAYBOOK_FILES = {
     "civil": "proceso-civil-cgp.md",
     "penal": "proceso-penal-906.md",
+    "penal_victima": "proceso-penal-victima-906.md",
 }
 
 
@@ -57,10 +58,10 @@ def leer_area_derecho(area: str) -> str:
 
 @function_tool
 def leer_playbook_proceso(materia: str) -> str:
-    """Lee el playbook procesal de una materia: 'civil' (CGP) o 'penal' (Ley 906)."""
-    key = materia.strip().lower()
+    """Lee el playbook procesal: 'civil' (CGP), 'penal' (Ley 906) o 'penal_victima' (representación víctimas)."""
+    key = materia.strip().lower().replace(" ", "_")
     if key not in PLAYBOOK_FILES:
-        return "Playbook no disponible. Materias con playbook: civil, penal."
+        return "Playbook no disponible. Materias: civil, penal, penal_victima."
     return _read_kb_file(PLAYBOOK_FILES[key])
 
 

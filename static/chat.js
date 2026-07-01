@@ -381,23 +381,84 @@ function buildMessageMeta(role, options = {}) {
   return parts.join(" · ");
 }
 
+const AGENT_ROUTE_LABELS = {
+  agente_coordinador_principal: "Coordinador principal",
+  agente_conocimiento_derecho: "Conocimiento del derecho",
+  agente_recepcionista: "Recepcionista",
+  agente_estrategia_casos: "Estrategia de casos",
+  agente_servicio_cliente: "Servicio al cliente",
+  agente_redaccion_documental: "Redacción documental",
+  agente_conceptos_juridicos: "Conceptos jurídicos",
+  agente_tutela_constitucional: "Tutela constitucional",
+  agente_seguimiento_procesal: "Seguimiento procesal",
+  agente_coordinador_penal: "Coordinador penal (víctima)",
+  subagente_investigacion_victima: "Penal — Investigación víctima",
+  subagente_penal_garantias: "Penal — Garantías",
+  subagente_penal_juicios: "Penal — Juicios",
+  subagente_penal_pruebas: "Penal — Pruebas",
+  subagente_penal_reparacion: "Penal — Reparación",
+  subagente_penal_negociacion: "Penal — Negociación",
+  subagente_penal_recursos: "Penal — Recursos",
+  agente_coordinador_civil: "Coordinador civil (CGP)",
+  agente_civil_demanda: "Civil — Demanda",
+  agente_civil_contestacion: "Civil — Contestación",
+  agente_civil_audiencia_inicial: "Civil — Audiencia inicial (372)",
+  agente_civil_instruccion: "Civil — Instrucción (373)",
+  agente_civil_prueba: "Civil — Prueba",
+  agente_civil_recursos: "Civil — Recursos",
+  agente_civil_ejecucion: "Civil — Ejecución",
+  fallback: "Modo respaldo",
+  guardrail: "Bloqueo de seguridad",
+  error: "Ruta de error controlado",
+  // históricos
+  orquestador: "Coordinador principal",
+  socio_coordinador: "Coordinador principal",
+  conocimiento_areas: "Conocimiento del derecho",
+  areas_derecho: "Conocimiento del derecho",
+  intake: "Recepcionista",
+  recepcion_casos: "Recepción de casos",
+  estratega: "Estrategia de casos",
+  estrategia_caso: "Estrategia de casos",
+  comunicacion_clientes: "Servicio al cliente",
+  atencion_cliente: "Servicio al cliente",
+  redaccion_escritos: "Redacción documental",
+  redaccion_documental: "Redacción documental",
+  conceptos: "Conceptos jurídicos",
+  conceptos_juridicos: "Conceptos jurídicos",
+  tutela: "Tutela constitucional",
+  tutela_constitucional: "Tutela constitucional",
+  dependiente_judicial: "Seguimiento procesal",
+  seguimiento_procesal: "Seguimiento procesal",
+  coordinador_penal: "Coordinador penal (víctima)",
+  penal_fiscalia: "Penal — Investigación víctima",
+  penal_garantias: "Penal — Garantías",
+  penal_juicio: "Penal — Juicios",
+  penal_prueba: "Penal — Pruebas",
+  penal_reparacion: "Penal — Reparación",
+  penal_negociacion: "Penal — Negociación",
+  penal_recursos: "Penal — Recursos",
+  coordinador_civil: "Coordinador civil (CGP)",
+  litigante_civil: "Coordinador civil (CGP)",
+  civil_demanda: "Civil — Demanda",
+  civil_contestacion: "Civil — Contestación",
+  civil_audiencia_inicial: "Civil — Audiencia inicial (372)",
+  civil_instruccion: "Civil — Instrucción (373)",
+  civil_prueba: "Civil — Prueba",
+  civil_recursos: "Civil — Recursos",
+  civil_ejecucion: "Civil — Ejecución",
+  litigante_orquestador_penal: "Coordinador penal (víctima)",
+  litigante_investigacion_victima: "Penal — Investigación víctima",
+  litigante_garantias: "Penal — Garantías",
+  litigante_conocimiento: "Penal — Juicios",
+  litigante_prueba: "Penal — Pruebas",
+  litigante_reparacion_integral: "Penal — Reparación",
+  litigante_negociacion_victima: "Penal — Negociación",
+  litigante_recursos_penales: "Penal — Recursos",
+};
+
 function formatAgentRoute(agent) {
   if (!agent) return "";
-  if (agent === "orquestador") return "Orquestador (firma)";
-  if (agent === "conocimiento_areas") return "Especialista (Conocimiento)";
-  if (agent === "intake") return "Especialista (Intake)";
-  if (agent === "estratega") return "Especialista (Estrategia)";
-  if (agent === "comunicacion_clientes") return "Especialista (Comunicación)";
-  if (agent === "litigante_civil") return "Litigante Civil (CGP)";
-  if (agent === "litigante_penal") return "Litigante Penal (Ley 906)";
-  if (agent === "redaccion_documental") return "Especialista (Redacción)";
-  if (agent === "conceptos_juridicos") return "Especialista (Conceptos)";
-  if (agent === "tutela_constitucional") return "Especialista (Tutela)";
-  if (agent === "dependiente_judicial") return "Dependiente judicial";
-  if (agent === "fallback") return "Modo respaldo";
-  if (agent === "guardrail") return "Bloqueo de seguridad";
-  if (agent === "error") return "Ruta de error controlado";
-  return agent;
+  return AGENT_ROUTE_LABELS[agent] || agent;
 }
 
 function inferTrace(options = {}, text = "") {
@@ -410,7 +471,7 @@ function inferTrace(options = {}, text = "") {
     trace_id: "local-inferido",
     session_id: null,
     route: options.agent || "unknown",
-    received_by_agent: "orquestador",
+    received_by_agent: "agente_coordinador_principal",
     sent_to_agent: options.agent || "none",
     skill_kan: "KAN-N/A",
     skill_reason: "Inferido localmente por falta de metadata backend.",
@@ -580,7 +641,7 @@ async function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
-  const receiver = trace.received_by_agent || "orquestador";
+  const receiver = trace.received_by_agent || "agente_coordinador_principal";
   const destination = trace.sent_to_agent || trace.selected_agent || "none";
   const skill = trace.skill_kan || "KAN-N/A";
   const completion = trace.completion || { available: false, calls: [], summary: null, note: "Sin datos." };

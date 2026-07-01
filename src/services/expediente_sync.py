@@ -85,6 +85,9 @@ def sync_expediente_from_chat(
         if exp.materia != mapped:
             exp.materia = mapped
             cambios.append(f"materia={mapped}")
+        if mapped == "penal" and exp.rol_despacho != "victima":
+            exp.rol_despacho = "victima"
+            cambios.append("rol_despacho=victima")
         if "tutela" in text.lower() and exp.tipo_proceso != "tutela":
             exp.tipo_proceso = "tutela"
             cambios.append("tipo_proceso=tutela")
@@ -130,9 +133,7 @@ def sync_expediente_from_chat(
         import time
 
         exp.actualizado_en = time.time()
-        from src.storage import get_repository
-
-        get_repository().save_expediente(exp)
+        expediente_store._repo().save_expediente(exp)
 
     if trace is not None:
         if cambios:
