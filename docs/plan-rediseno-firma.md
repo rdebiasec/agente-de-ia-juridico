@@ -1,6 +1,8 @@
 # Plan local-first: firma virtual del abogado experto (dev == prod)
 
 > **Estado 2026-06-29:** Fase A ✅ · Fase B ✅ (mayoría) · Ver detalle en `agente/fases/ESTADO_PROYECTO.md`
+>
+> **Plan complementario RAG/OpenAI managed:** `docs/plan-rag-openai-managed-colombia.md`
 
 Estrategia: como no hay Postgres local, **primero** construimos todo lo que es **sin estado** y por tanto idéntico en local y en Render (Fase A): la **persona del abogado experto** y la **firma de agentes con sus skills**. La **persistencia y servicios con estado** (Postgres/pgvector, HITL Slack, RAG, plazos) se hacen después (Fase B), con paridad garantizada vía **Docker** local. Regla inmutable: la IA propone, el abogado aprueba; nunca inventa normas, sentencias ni radicados.
 

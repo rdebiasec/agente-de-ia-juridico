@@ -19,6 +19,35 @@ from src.agents.guardrails import (
     check_input,
     needs_human_review,
 )
+from src.agents.agent_names import (
+    AGENTE_CIVIL_AUDIENCIA_INICIAL,
+    AGENTE_CIVIL_CONTESTACION,
+    AGENTE_CIVIL_DEMANDA,
+    AGENTE_CIVIL_EJECUCION,
+    AGENTE_CIVIL_INSTRUCCION,
+    AGENTE_CIVIL_PRUEBA,
+    AGENTE_CIVIL_RECURSOS,
+    AGENTE_CONCEPTOS_JURIDICOS,
+    AGENTE_CONOCIMIENTO_DERECHO,
+    AGENTE_COORDINADOR_CIVIL,
+    AGENTE_COORDINADOR_PENAL,
+    AGENTE_COORDINADOR_PRINCIPAL,
+    AGENTE_ESTRATEGIA_CASOS,
+    AGENTE_RECEPCIONISTA,
+    AGENTE_REDACTION_DOCUMENTAL,
+    AGENTE_SEGUIMIENTO_PROCESAL,
+    AGENTE_SERVICIO_CLIENTE,
+    AGENTE_TUTELA_CONSTITUCIONAL,
+    LEGACY_AGENT_ALIASES,
+    SUBAGENTE_INVESTIGACION_VICTIMA,
+    SUBAGENTE_PENAL_GARANTIAS,
+    SUBAGENTE_PENAL_JUICIOS,
+    SUBAGENTE_PENAL_NEGOCIACION,
+    SUBAGENTE_PENAL_PRUEBAS,
+    SUBAGENTE_PENAL_REPARACION,
+    SUBAGENTE_PENAL_RECURSOS,
+    normalize_agent_name,
+)
 from src.agents.orchestrator import build_orchestrator
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.config import get_settings
@@ -41,21 +70,39 @@ _KNOWLEDGE_RE = re.compile(r"\b([áa]rea|derecho|cubre|maneja)\b", re.IGNORECASE
 _PROFILE_RE = re.compile(r"\b(perfil|experiencia|qu[ií]en eres|quien eres)\b", re.IGNORECASE)
 
 _AGENT_SKILL_MAP = {
-    "orquestador": "KAN-4",
-    "conocimiento_areas": "KAN-10",
-    "intake": "KAN-11",
-    "comunicacion_clientes": "KAN-11",
-    "estratega": "KAN-12",
-    "litigante_civil": "KAN-13",
-    "litigante_penal": "KAN-13",
-    "redaccion_documental": "KAN-13",
-    "conceptos_juridicos": "KAN-17",
-    "tutela_constitucional": "KAN-19",
-    "dependiente_judicial": "KAN-14",
+    AGENTE_COORDINADOR_PRINCIPAL: "KAN-4",
+    AGENTE_CONOCIMIENTO_DERECHO: "KAN-10",
+    AGENTE_RECEPCIONISTA: "KAN-11",
+    AGENTE_SERVICIO_CLIENTE: "KAN-11",
+    AGENTE_ESTRATEGIA_CASOS: "KAN-12",
+    AGENTE_COORDINADOR_CIVIL: "KAN-13-CIV-ORQ",
+    AGENTE_CIVIL_DEMANDA: "KAN-13-CIV-DEM",
+    AGENTE_CIVIL_CONTESTACION: "KAN-13-CIV-CON",
+    AGENTE_CIVIL_AUDIENCIA_INICIAL: "KAN-13-CIV-372",
+    AGENTE_CIVIL_INSTRUCCION: "KAN-13-CIV-373",
+    AGENTE_CIVIL_PRUEBA: "KAN-13-CIV-PRU",
+    AGENTE_CIVIL_RECURSOS: "KAN-13-CIV-REC",
+    AGENTE_CIVIL_EJECUCION: "KAN-13-CIV-EJE",
+    AGENTE_COORDINADOR_PENAL: "KAN-13-PEN-ORQ",
+    SUBAGENTE_INVESTIGACION_VICTIMA: "KAN-13-PEN-INV",
+    SUBAGENTE_PENAL_GARANTIAS: "KAN-13-PEN-GAR",
+    SUBAGENTE_PENAL_JUICIOS: "KAN-13-PEN-CON",
+    SUBAGENTE_PENAL_PRUEBAS: "KAN-13-PEN-PRU",
+    SUBAGENTE_PENAL_REPARACION: "KAN-13-PEN-REP",
+    SUBAGENTE_PENAL_NEGOCIACION: "KAN-13-PEN-NEG",
+    SUBAGENTE_PENAL_RECURSOS: "KAN-13-PEN-REC",
+    AGENTE_REDACTION_DOCUMENTAL: "KAN-13",
+    AGENTE_CONCEPTOS_JURIDICOS: "KAN-17",
+    AGENTE_TUTELA_CONSTITUCIONAL: "KAN-19",
+    AGENTE_SEGUIMIENTO_PROCESAL: "KAN-14",
     "fallback": "KAN-FALLBACK",
     "guardrail": "KAN-GUARDRAIL",
     "error": "KAN-ERROR",
 }
+# Trazas históricas con nombres antiguos
+for _legacy, _current in LEGACY_AGENT_ALIASES.items():
+    if _current in _AGENT_SKILL_MAP and _legacy not in _AGENT_SKILL_MAP:
+        _AGENT_SKILL_MAP[_legacy] = _AGENT_SKILL_MAP[_current]
 
 
 def _trace_id(session_id: str, message: str) -> str:
@@ -160,7 +207,7 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             self.trace,
             action_type="handoff",
             status="done",
-            actor=getattr(from_agent, "name", "orquestador"),
+            actor=getattr(from_agent, "name", AGENTE_COORDINADOR_PRINCIPAL),
             detail=f"Handoff hacia {getattr(to_agent, 'name', 'especialista')}.",
         )
 
@@ -230,23 +277,40 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
 def _kan_for_agent(agent_name: str | None) -> str:
     if not agent_name:
         return "KAN-N/A"
-    return _AGENT_SKILL_MAP.get(agent_name, "KAN-N/A")
+    return _AGENT_SKILL_MAP.get(normalize_agent_name(agent_name), "KAN-N/A")
 
 
 _AGENT_DRAFT_TIPO = {
-    "tutela_constitucional": "tutela",
-    "conceptos_juridicos": "concepto",
-    "redaccion_documental": "documento",
-    "comunicacion_clientes": "correo",
-    "estratega": "estrategia",
-    "litigante_civil": "memorial",
-    "litigante_penal": "memorial",
-    "dependiente_judicial": "seguimiento",
+    AGENTE_TUTELA_CONSTITUCIONAL: "tutela",
+    AGENTE_CONCEPTOS_JURIDICOS: "concepto",
+    AGENTE_REDACTION_DOCUMENTAL: "documento",
+    AGENTE_SERVICIO_CLIENTE: "correo",
+    AGENTE_ESTRATEGIA_CASOS: "estrategia",
+    AGENTE_COORDINADOR_CIVIL: "memorial",
+    AGENTE_CIVIL_DEMANDA: "memorial",
+    AGENTE_CIVIL_CONTESTACION: "memorial",
+    AGENTE_CIVIL_AUDIENCIA_INICIAL: "memorial",
+    AGENTE_CIVIL_INSTRUCCION: "memorial",
+    AGENTE_CIVIL_PRUEBA: "estrategia",
+    AGENTE_CIVIL_RECURSOS: "recurso_civil",
+    AGENTE_CIVIL_EJECUCION: "memorial",
+    AGENTE_COORDINADOR_PENAL: "memorial",
+    SUBAGENTE_INVESTIGACION_VICTIMA: "denuncia",
+    SUBAGENTE_PENAL_GARANTIAS: "memorial",
+    SUBAGENTE_PENAL_JUICIOS: "memorial",
+    SUBAGENTE_PENAL_PRUEBAS: "estrategia",
+    SUBAGENTE_PENAL_REPARACION: "reparacion",
+    SUBAGENTE_PENAL_NEGOCIACION: "documento",
+    SUBAGENTE_PENAL_RECURSOS: "recurso_penal",
+    AGENTE_SEGUIMIENTO_PROCESAL: "seguimiento",
 }
+for _legacy, _current in LEGACY_AGENT_ALIASES.items():
+    if _current in _AGENT_DRAFT_TIPO and _legacy not in _AGENT_DRAFT_TIPO:
+        _AGENT_DRAFT_TIPO[_legacy] = _AGENT_DRAFT_TIPO[_current]
 
 
 def _draft_tipo(destination_agent: str) -> str:
-    return _AGENT_DRAFT_TIPO.get(destination_agent, "documento")
+    return _AGENT_DRAFT_TIPO.get(normalize_agent_name(destination_agent), "documento")
 
 
 def _maybe_create_draft(
@@ -286,28 +350,38 @@ def _maybe_create_draft(
 
 def _infer_destination_agent(message: str) -> str:
     if _TUTELA_RE.search(message):
-        return "tutela_constitucional"
+        return AGENTE_TUTELA_CONSTITUCIONAL
     if _FOLLOWUP_RE.search(message):
-        return "dependiente_judicial"
+        return AGENTE_SEGUIMIENTO_PROCESAL
     if _CONCEPT_RE.search(message):
-        return "conceptos_juridicos"
+        return AGENTE_CONCEPTOS_JURIDICOS
     if _MEMORIAL_RE.search(message):
-        return "redaccion_documental"
+        return AGENTE_REDACTION_DOCUMENTAL
     if _PENAL_RE.search(message):
-        return "litigante_penal"
+        from src.mcp.penal_tools import infer_penal_specialist
+
+        specialist = infer_penal_specialist(message)
+        if specialist != AGENTE_COORDINADOR_PENAL:
+            return specialist
+        return AGENTE_COORDINADOR_PENAL
     if _CIVIL_RE.search(message):
-        return "litigante_civil"
+        from src.mcp.civil_tools import infer_civil_specialist
+
+        specialist = infer_civil_specialist(message)
+        if specialist != AGENTE_COORDINADOR_CIVIL:
+            return specialist
+        return AGENTE_COORDINADOR_CIVIL
     if _DRAFTING_RE.search(message):
-        return "redaccion_documental"
+        return AGENTE_REDACTION_DOCUMENTAL
     if _COMMUNICATION_RE.search(message):
-        return "comunicacion_clientes"
+        return AGENTE_SERVICIO_CLIENTE
     if _ANALYSIS_RE.search(message):
-        return "estratega"
+        return AGENTE_ESTRATEGIA_CASOS
     if _PROFILE_RE.search(message):
-        return "intake"
+        return AGENTE_RECEPCIONISTA
     if _KNOWLEDGE_RE.search(message):
-        return "conocimiento_areas"
-    return "conocimiento_areas"
+        return AGENTE_CONOCIMIENTO_DERECHO
+    return AGENTE_CONOCIMIENTO_DERECHO
 
 
 def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> dict[str, str]:
@@ -315,7 +389,7 @@ def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> 
 
 
 def _base_trace(session_id: str, channel: str, message: str) -> dict:
-    receiver = "orquestador"
+    receiver = AGENTE_COORDINADOR_PRINCIPAL
     return {
         "trace_version": "4.0",
         "trace_id": _trace_id(session_id, message),
@@ -428,8 +502,9 @@ def _fallback_response(message: str) -> str:
         )
     elif _PENAL_RE.search(lower):
         body = (
-            "Puedo apoyar el asunto penal según la etapa (Ley 906). Indícame la etapa procesal y la "
-            "postura del despacho (defensa o representación de víctima)."
+            "Puedo apoyar el asunto penal como representante de víctimas (Ley 906). "
+            "Indícame la etapa procesal (investigación, garantías, conocimiento/juicio, recursos) "
+            "y el objetivo (denuncia, audiencia, reparación, preacuerdo, recurso)."
         )
     elif _CIVIL_RE.search(lower):
         body = (
@@ -643,7 +718,7 @@ async def run_agent(
             destination_agent = _infer_destination_agent(message)
         trace["sent_to_agent"] = destination_agent
         trace["skill_kan"] = _kan_for_agent(destination_agent)
-        trace["skill_reason"] = f"Handoff/resultado final del orquestador hacia {destination_agent}."
+        trace["skill_reason"] = f"Handoff/resultado final del socio coordinador hacia {destination_agent}."
         _append_action(
             trace,
             action_type="routing_decision",
