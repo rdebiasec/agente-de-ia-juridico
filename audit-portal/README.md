@@ -22,7 +22,11 @@ python scripts/generar_audit_portal.py
 python -m http.server 8080 --directory audit-portal/dist
 ```
 
-Abra `http://localhost:8080` (versión **v2.1** — si no ve cambios, recargue con Cmd+Shift+R).
+Abra `http://localhost:8080` (versión **v2.2** — si no ve cambios, recargue con Cmd+Shift+R).
+
+## Manual de uso (sección 0)
+
+La sección **0. Guía** incluye el manual completo para la abogada líder: jerarquía de 4 niveles, las 8 Reglas Estrictas con ejemplos, el flujo de los 11 agentes (3 gráficas) y el manual de auditoría en 7 pasos. Contenido dinámico desde `audit-data.json`.
 
 ## Qué audita la abogada
 
@@ -44,6 +48,15 @@ Las decisiones se guardan en `localStorage` (`legal-audit-sync-v2`), incluyendo 
 Push a `main` → workflow `.github/workflows/deploy-audit-portal.yml` publica `dist/`.
 
 Ver también [`DEPLOY.md`](../DEPLOY.md).
+
+### Login (solo GitHub Pages)
+
+| Entorno | Login |
+|---|---|
+| `localhost` | No — `auth-config.js` con `enabled: false` |
+| GitHub Pages | Sí — si existe el secreto `AUDIT_PORTAL_PASSWORD` en Actions |
+
+Secreto opcional: `AUDIT_PORTAL_USERNAME` (por defecto `auditor`). Sesión: 8 h en `sessionStorage`.
 
 ## Fuente de datos
 

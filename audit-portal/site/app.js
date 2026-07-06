@@ -8,6 +8,76 @@ const GROUP_LABELS = {
     calidad: 'Control de calidad',
 };
 
+const GROUP_BADGE_CLASS = {
+    coordinacion: 'guia-badge-coord',
+    especialista: 'guia-badge-spec',
+    calidad: 'guia-badge-cal',
+};
+
+const AGENT_ORDER = [
+    'coordinador_expediente_penal',
+    'analista_cronologia_hechos_penales',
+    'analista_tipicidad_y_responsabilidad_penal',
+    'analista_ruta_procesal_ley906',
+    'analista_representacion_victimas',
+    'gestor_evidencia_y_soporte_probatorio',
+    'preparador_estrategico_audiencias_penales',
+    'redactor_documentos_juridicos_penales',
+    'gestor_seguimiento_procesal_penal',
+    'evaluador_derechos_fundamentales_tutela',
+    'analista_calidad_juridica',
+];
+
+const GUARDRAIL_EJEMPLOS = {
+    g1: 'Si no hay auto en expediente, marca [PENDIENTE DE VERIFICAR] en lugar de citar sentencia o artículo.',
+    g2: 'Si falta etapa procesal o radicado, pregunta antes de recomendar tutela o memorial.',
+    g3: 'Distingue relato de víctima (narrado) de conclusión típica (inferida).',
+    g4: 'Memorial, tutela o reporte a cliente siempre como borrador para su revisión y firma.',
+    g5: 'Evita lenguaje que culpe a la víctima o exponga datos innecesarios del caso.',
+    g6: 'No repite cédula, dirección o datos de salud sin necesidad probatoria.',
+    g7: 'Consulta civil o laboral se declara fuera de alcance penal-víctimas.',
+    g8: 'Cierra con aviso de que la salida requiere revisión profesional.',
+};
+
+const GUARDRAIL_PROTEGE = {
+    g1: 'Integridad factual y normativa',
+    g2: 'Oportunidad procesal',
+    g3: 'Trazabilidad probatoria',
+    g4: 'HITL / firma profesional',
+    g5: 'Dignidad de la víctima',
+    g6: 'Datos sensibles',
+    g7: 'Especialización del sistema',
+    g8: 'Transparencia al despacho',
+};
+
+const FLUJO_LINEAL_STEPS = [
+    {
+        title: '1. Usted pregunta',
+        sub: 'Pregunta o sube contexto del caso (hechos, etapa, urgencia).',
+        cls: 'bg-slate-100 border-slate-300',
+    },
+    {
+        title: '2. Coordinador',
+        sub: 'Clasifica la tarea, pide faltantes y envía al especialista correcto.',
+        cls: 'bg-blue-50 border-blue-300',
+    },
+    {
+        title: '3. Especialista',
+        sub: 'Uno de los 9 roles: cronología, tipicidad, ruta 906, víctimas, evidencia, audiencias, redacción, seguimiento o tutela.',
+        cls: 'bg-purple-50 border-purple-300',
+    },
+    {
+        title: '4. Calidad jurídica',
+        sub: 'Revisa coherencia, tono, citas y riesgos antes de mostrarle el borrador.',
+        cls: 'bg-amber-50 border-amber-300',
+    },
+    {
+        title: '5. Usted aprueba',
+        sub: 'Revisa, ajusta y decide si radica, complementa o rechaza la propuesta.',
+        cls: 'bg-emerald-50 border-emerald-300',
+    },
+];
+
 let catalog = {
     guardrails: [], agentes: [], skills: [], categorias: [],
     generated_at: '', totals: {}, intro: {},
@@ -529,6 +599,206 @@ function populateFilters() {
     });
 }
 
+function renderGuiaDiagrama() {
+    const el = document.getElementById('guia-diagrama');
+    if (!el) return;
+
+    const gr = getEffectiveGuardrails().length;
+    const ag = catalog.agentes?.length || 11;
+    const sk = catalog.intro?.skills || catalog.skills?.length || 90;
+    const pas = countEffectivePasos();
+
+    let ejemploHtml = '';
+    const coord = catalog.agentes?.find(a => a.id === 'coordinador_expediente_penal');
+    const skillId = coord?.skill_ids?.[0];
+    const skill = skillId ? catalog.skills?.find(s => s.id === skillId) : null;
+    if (coord && skill) {
+        const steps = getEffectiveSteps(skill).slice(0, 3);
+        const stepsList = steps.map(st => `Paso ${st.displayNum}: ${escapeHtml(st.text.slice(0, 80))}${st.text.length > 80 ? '…' : ''}`).join('<br>');
+        ejemploHtml = `
+            <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-xs">
+                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-link text-blue-500 mr-1"></i> Ejemplo anclado al catálogo:</p>
+                <p class="text-slate-600 font-mono text-[11px]">${escapeHtml(coord.name)}</p>
+                <p class="text-purple-700 font-mono text-[11px]">→ ${escapeHtml(skill.name)}</p>
+                <p class="text-slate-500 mt-1">${stepsList || 'Sin pasos definidos'}</p>
+            </div>`;
+    }
+
+    el.innerHTML = `
+        <div class="archi-level archi-level-0 border-slate-300 bg-slate-50 mb-3">
+            <p class="text-xs font-bold uppercase text-slate-500">Sistema</p>
+            <p class="text-sm font-semibold text-slate-800">Penal-víctimas (Colombia · Ley 906)</p>
+        </div>
+        <div class="archi-level archi-level-1">
+            <p class="text-xs font-bold uppercase text-blue-600">Nivel 1 · Reglas Estrictas (${gr})</p>
+            <p class="text-sm text-slate-700">Barreras globales — aplican a <em>toda</em> respuesta</p>
+        </div>
+        <div class="archi-arrow">▼ usan</div>
+        <div class="archi-level archi-level-2">
+            <p class="text-xs font-bold uppercase text-purple-600">Nivel 2 · Agentes (${ag})</p>
+            <p class="text-sm text-slate-700">Roles especializados (coordinador, especialistas, calidad)</p>
+        </div>
+        <div class="archi-arrow">▼ usan</div>
+        <div class="archi-level archi-level-3">
+            <p class="text-xs font-bold uppercase text-amber-600">Nivel 3 · Skills (${sk})</p>
+            <p class="text-sm text-slate-700">Procedimientos / capacidades (compartidos entre agentes)</p>
+        </div>
+        <div class="archi-arrow">▼ descompuestos en</div>
+        <div class="archi-level archi-level-4">
+            <p class="text-xs font-bold uppercase text-emerald-600">Nivel 4 · Pasos (${pas})</p>
+            <p class="text-sm text-slate-700">Unidad mínima que usted aprueba o ajusta</p>
+        </div>
+        ${ejemploHtml}`;
+}
+
+function renderFlujoLineal() {
+    const el = document.getElementById('guia-flujo-lineal');
+    if (!el) return;
+    const steps = FLUJO_LINEAL_STEPS.map(s => `
+        <div class="flujo-step">
+            <div class="flujo-step-title border ${s.cls}">${escapeHtml(s.title)}</div>
+            <p class="flujo-step-sub">${escapeHtml(s.sub)}</p>
+        </div>`).join('<div class="flow-arrow self-start mt-3">→</div>');
+    el.innerHTML = `<div class="flex flex-wrap items-start justify-center gap-2 py-3">${steps}</div>`;
+}
+
+function renderFlujoMapa() {
+    const el = document.getElementById('guia-flujo-mapa');
+    if (!el || !catalog.agentes?.length) return;
+
+    const byId = Object.fromEntries(catalog.agentes.map(a => [a.id, a]));
+    const coord = byId['coordinador_expediente_penal'];
+    const calidad = byId['analista_calidad_juridica'];
+    const specs = AGENT_ORDER.filter(id =>
+        id !== 'coordinador_expediente_penal' && id !== 'analista_calidad_juridica',
+    ).map(id => byId[id]).filter(Boolean);
+
+    const spokeHtml = specs.map(a => `
+        <div class="agente-spoke" title="${escapeHtml(a.desc || '')}">
+            <div class="font-bold">${escapeHtml(a.nombre_corto)}</div>
+            <code class="text-[9px] text-purple-500 block truncate">${escapeHtml(a.name)}</code>
+        </div>`).join('');
+
+    const mobileAccordion = ['coordinacion', 'especialista', 'calidad'].map(grupo => {
+        const agents = grupo === 'especialista' ? specs : catalog.agentes.filter(a => a.grupo === grupo);
+        const items = agents.map(a => `
+            <div class="text-xs py-1 border-b border-slate-100 last:border-0">
+                <strong>${escapeHtml(a.nombre_corto)}</strong>
+                <span class="text-slate-400 block text-[10px]">${escapeHtml(a.desc || '')}</span>
+            </div>`).join('');
+        return `
+            <details class="md:hidden border border-slate-200 rounded-lg mb-2">
+                <summary class="px-3 py-2 font-semibold text-sm cursor-pointer">${escapeHtml(GROUP_LABELS[grupo] || grupo)} (${agents.length})</summary>
+                <div class="px-3 pb-3">${items}</div>
+            </details>`;
+    }).join('');
+
+    el.innerHTML = `
+        ${mobileAccordion}
+        <div class="hidden md:block space-y-3 py-4">
+            <div class="text-center">
+                <div class="inline-block bg-slate-100 border border-slate-300 rounded-xl px-6 py-2 text-sm font-semibold text-slate-700">Abogada — consulta</div>
+            </div>
+            <div class="text-center text-slate-400 text-lg">↓</div>
+            <div class="flex justify-center">
+                <div class="agente-hub max-w-md w-full">
+                    <div>COORDINADOR</div>
+                    <code class="text-[10px] font-normal opacity-80">${escapeHtml(coord?.name || 'coordinador_expediente_penal')}</code>
+                </div>
+            </div>
+            <div class="text-center text-slate-400 text-lg">↓</div>
+            <div class="grid grid-cols-3 lg:grid-cols-5 gap-2 max-w-4xl mx-auto">
+                ${spokeHtml}
+            </div>
+            <div class="text-center text-slate-400 text-lg">↓</div>
+            <div class="flex justify-center">
+                <div class="agente-calidad-node max-w-md w-full">
+                    <div>CALIDAD JURÍDICA</div>
+                    <code class="text-[10px] font-normal opacity-80">${escapeHtml(calidad?.name || 'analista_calidad_juridica')}</code>
+                </div>
+            </div>
+            <div class="text-center text-slate-400 text-lg">↓</div>
+            <div class="text-center">
+                <div class="inline-block bg-emerald-100 border border-emerald-300 rounded-xl px-6 py-2 text-sm font-semibold text-emerald-800">Abogada — HITL (aprueba y firma)</div>
+            </div>
+        </div>`;
+}
+
+function renderAgentesDetalle() {
+    const el = document.getElementById('guia-agentes-detalle');
+    if (!el || !catalog.agentes?.length) return;
+
+    const byId = Object.fromEntries(catalog.agentes.map(a => [a.id, a]));
+    const ordered = AGENT_ORDER.map(id => byId[id]).filter(Boolean);
+
+    el.innerHTML = ordered.map(a => {
+        const badge = GROUP_BADGE_CLASS[a.grupo] || 'guia-badge-spec';
+        return `
+            <div class="agente-card-guia">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="${badge}">${escapeHtml(GROUP_LABELS[a.grupo] || a.grupo)}</span>
+                    <code class="text-[10px] text-slate-400">${escapeHtml(a.name)}</code>
+                </div>
+                <h5 class="font-bold text-slate-900 text-sm">${escapeHtml(a.nombre_corto)}</h5>
+                <p class="text-xs text-slate-600 mt-1">${escapeHtml(a.desc || '')}</p>
+                <p class="text-xs text-slate-500 mt-2"><strong>Problema:</strong> ${escapeHtml(a.problema || '—')}</p>
+                <p class="text-xs text-slate-500"><strong>No reemplaza:</strong> ${escapeHtml(a.no_reemplaza || '—')}</p>
+                <p class="text-xs text-purple-600 mt-2">${a.skills_count || 0} skills asignados</p>
+                <a href="#agentes" class="inline-block mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800" data-agent-highlight="${escapeHtml(a.id)}">Ir a auditar este agente →</a>
+            </div>`;
+    }).join('');
+}
+
+function renderGuiaAgentesFlujo() {
+    renderFlujoLineal();
+    renderFlujoMapa();
+    renderAgentesDetalle();
+}
+
+function renderGuiaGuardrails() {
+    const el = document.getElementById('guia-guardrails-detalle');
+    if (!el) return;
+    el.innerHTML = catalog.guardrails.map(g => `
+        <div class="guardrail-guia-card">
+            <h5 class="font-bold text-slate-900 text-sm">${escapeHtml(g.name)}</h5>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(g.desc)}</p>
+            <p class="text-xs text-blue-700 mt-2"><strong>Protege:</strong> ${escapeHtml(GUARDRAIL_PROTEGE[g.id] || '—')}</p>
+            <p class="text-xs text-slate-500 mt-1"><strong>Ejemplo penal-víctimas:</strong> ${escapeHtml(GUARDRAIL_EJEMPLOS[g.id] || '—')}</p>
+        </div>`).join('');
+}
+
+function renderGuiaEjemploSkill() {
+    const el = document.getElementById('guia-ejemplo-skill');
+    if (!el) return;
+    const skill = catalog.skills?.find(s => s.id === 'redactar_memorial_penal')
+        || catalog.skills?.[0];
+    if (!skill) {
+        el.innerHTML = '';
+        return;
+    }
+    const steps = getEffectiveSteps(skill);
+    const preview = steps.slice(0, 2).map(st =>
+        `<li class="text-xs text-slate-600">Paso ${st.displayNum}: ${escapeHtml(st.text.slice(0, 100))}${st.text.length > 100 ? '…' : ''}</li>`,
+    ).join('');
+    el.innerHTML = `
+        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+            <p class="text-xs font-bold uppercase text-slate-400 mb-1">Skill de ejemplo</p>
+            <code class="text-sm font-bold text-slate-800">${escapeHtml(skill.name)}</code>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(skill.desc || '')}</p>
+            <p class="text-xs text-amber-700 mt-2"><strong>${steps.length} pasos</strong> en este skill (cantidad variable según catálogo)</p>
+            ${preview ? `<ul class="mt-2 space-y-1 list-disc list-inside">${preview}</ul>` : ''}
+            <a href="#skills" class="inline-block mt-2 text-xs font-semibold text-amber-700">Ver en sección 3 →</a>
+        </div>`;
+}
+
+function renderGuiaCompleta() {
+    renderGuiaCategorias();
+    renderGuiaDiagrama();
+    renderGuiaAgentesFlujo();
+    renderGuiaGuardrails();
+    renderGuiaEjemploSkill();
+}
+
 function renderGuiaCategorias() {
     const el = document.getElementById('guia-categorias');
     const intro = document.getElementById('guia-intro-text');
@@ -844,6 +1114,10 @@ function exportarMarkdown() {
 }
 
 async function init() {
+    if (typeof window.waitForAuditAuth === 'function') {
+        const ok = await window.waitForAuditAuth();
+        if (!ok) return;
+    }
     loadAuditLog();
     ensureCustom();
     try {
@@ -862,7 +1136,7 @@ async function init() {
         buildEl.textContent = `· catálogo ${catalog.generated_at}`;
         buildEl.classList.remove('hidden');
     }
-    renderGuiaCategorias();
+    renderGuiaCompleta();
     populateFilters();
 
     document.getElementById('search-input').addEventListener('input', applyFilters);

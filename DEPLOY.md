@@ -209,7 +209,19 @@ python scripts/generar_audit_portal.py
 python -m http.server 8080 --directory audit-portal/dist
 ```
 
-Portal v2.1: audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
+Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
+
+### Login del portal (solo GitHub Pages)
+
+El sitio en Pages es estático; el acceso se protege con un **gate en el navegador** (contraseña hasheada en `auth-config.js`, generado en CI). En `localhost` **nunca** se pide contraseña.
+
+1. En el repo GitHub → **Settings → Secrets and variables → Actions**, cree:
+   - `AUDIT_PORTAL_PASSWORD` — mínimo 12 caracteres (obligatorio para activar login)
+   - `AUDIT_PORTAL_USERNAME` — opcional (por defecto `auditor`)
+2. `git push origin main` → el workflow regenera `dist/` con login habilitado.
+3. La sesión dura 8 h en `sessionStorage` del navegador.
+
+**Nota:** esto evita acceso casual; no sustituye autenticación de servidor. Los archivos estáticos siguen siendo descargables por quien conozca la URL y evite el JS.
 
 ### Despliegue a Pages (patrón `dbx-solutions-website`)
 

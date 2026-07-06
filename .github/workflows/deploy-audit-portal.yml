@@ -33,6 +33,9 @@ jobs:
           python-version: '3.12'
 
       - name: Build audit portal
+        env:
+          AUDIT_PORTAL_PASSWORD: ${{ secrets.AUDIT_PORTAL_PASSWORD }}
+          AUDIT_PORTAL_USERNAME: ${{ secrets.AUDIT_PORTAL_USERNAME }}
         run: python scripts/generar_audit_portal.py
 
       - name: Deploy to gh-pages

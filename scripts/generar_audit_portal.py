@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -116,6 +118,28 @@ def build_audit_data() -> dict:
     }
 
 
+def build_auth_config_js() -> str:
+    """Genera auth-config.js. Login activo solo si AUDIT_PORTAL_PASSWORD está en el entorno (CI)."""
+    password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
+    if not password:
+        return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
+    if len(password) < 12:
+        raise SystemExit("AUDIT_PORTAL_PASSWORD debe tener al menos 12 caracteres.")
+    username = os.environ.get("AUDIT_PORTAL_USERNAME", "auditor").strip() or "auditor"
+    digest = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    payload = {"enabled": True, "username": username, "passwordHash": digest}
+    return f"window.AUDIT_AUTH_CONFIG={json.dumps(payload, ensure_ascii=False)};\n"
+
+
+def write_auth_config() -> None:
+    out = DIST_DIR / "auth-config.js"
+    out.write_text(build_auth_config_js(), encoding="utf-8")
+    if os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip():
+        print("  auth: login habilitado en build de producción (GitHub Pages)")
+    else:
+        print("  auth: sin contraseña en entorno — login desactivado (desarrollo local)")
+
+
 def copy_site_to_dist() -> None:
     if DIST_DIR.exists():
         shutil.rmtree(DIST_DIR)
@@ -131,6 +155,8 @@ def main() -> None:
 
     out_json = DIST_DIR / "audit-data.json"
     out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    write_auth_config()
 
     step_sum = sum(s["step_count"] for s in data["skills"])
     totals = data["totals"]
