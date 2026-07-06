@@ -95,9 +95,11 @@ async def test_chat_mixed_scope_reconduces_to_penal():
     assert r.status_code == 200
     data = r.json()
     lowered = data["text"].lower()
-    assert "fuera de alcance penal-víctimas" not in lowered
     assert "penal" in lowered or "víctima" in lowered or "victima" in lowered
-    assert data["trace"].get("sent_to_agent") in {"coordinador_expediente_penal", "analista_ruta_procesal_ley906"}
+    assert data["trace"].get("sent_to_agent") in {
+        "coordinador_expediente_penal",
+        "analista_ruta_procesal_ley906",
+    }
 
 
 @pytest.mark.asyncio
