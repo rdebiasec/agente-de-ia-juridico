@@ -50,31 +50,78 @@ const GUARDRAIL_PROTEGE = {
     g8: 'Transparencia al despacho',
 };
 
-const FLUJO_LINEAL_STEPS = [
+const FLUJO_CONSULTA = [
     {
-        title: '1. Usted pregunta',
-        sub: 'Pregunta o sube contexto del caso (hechos, etapa, urgencia).',
-        cls: 'bg-slate-100 border-slate-300',
+        title: 'Usted pregunta',
+        sub: 'Describe el caso o lo que necesita — como le escribiría a un practicante.',
+        color: 'bg-slate-500',
+        icon: 'fa-comment-dots',
     },
     {
-        title: '2. Coordinador',
-        sub: 'Clasifica la tarea, pide faltantes y envía al especialista correcto.',
-        cls: 'bg-blue-50 border-blue-300',
+        title: 'Recepción del caso',
+        sub: 'El coordinador entiende la urgencia, la etapa y qué procedimiento aplica.',
+        color: 'bg-blue-500',
+        icon: 'fa-inbox',
     },
     {
-        title: '3. Especialista',
-        sub: 'Uno de los 9 roles: cronología, tipicidad, ruta 906, víctimas, evidencia, audiencias, redacción, seguimiento o tutela.',
-        cls: 'bg-purple-50 border-purple-300',
+        title: 'Se abre el procedimiento',
+        sub: 'El especialista correcto abre el SKILL.md — el manual de esa tarea.',
+        color: 'bg-purple-500',
+        icon: 'fa-book-open',
     },
     {
-        title: '4. Calidad jurídica',
-        sub: 'Revisa coherencia, tono, citas y riesgos antes de mostrarle el borrador.',
-        cls: 'bg-amber-50 border-amber-300',
+        title: 'Paso a paso',
+        sub: 'La IA sigue las instrucciones numeradas que usted audita en este portal.',
+        color: 'bg-amber-500',
+        icon: 'fa-list-check',
     },
     {
-        title: '5. Usted aprueba',
-        sub: 'Revisa, ajusta y decide si radica, complementa o rechaza la propuesta.',
-        cls: 'bg-emerald-50 border-emerald-300',
+        title: 'Control de calidad',
+        sub: 'Revisión técnica antes de mostrarle el resultado.',
+        color: 'bg-orange-500',
+        icon: 'fa-magnifying-glass',
+    },
+    {
+        title: 'Usted aprueba y firma',
+        sub: 'Recibe un borrador — usted decide si radica, ajusta o rechaza.',
+        color: 'bg-emerald-500',
+        icon: 'fa-signature',
+    },
+];
+
+const PROTO_LAYERS = [
+    {
+        icon: 'fa-shield-halved',
+        iconBg: 'bg-blue-100 text-blue-600',
+        border: 'border-blue-200 bg-blue-50/40',
+        title: 'Reglas de oro',
+        countKey: 'guardrails',
+        desc: 'Límites que aplican siempre — como el código de ética del despacho digital.',
+    },
+    {
+        icon: 'fa-user-tie',
+        iconBg: 'bg-purple-100 text-purple-600',
+        border: 'border-purple-200 bg-purple-50/40',
+        title: 'Roles del equipo',
+        countKey: 'agentes',
+        desc: 'Once «personas» digitales: quién recibe, quién analiza, quién redacta.',
+    },
+    {
+        icon: 'fa-file-lines',
+        iconBg: 'bg-amber-100 text-amber-700',
+        border: 'border-amber-300 bg-amber-50/60',
+        title: 'Procedimientos (SKILL.md)',
+        countKey: 'skills',
+        desc: 'Conocimiento procedimental: el manual escrito de cada tarea jurídica.',
+        highlight: true,
+    },
+    {
+        icon: 'fa-list-ol',
+        iconBg: 'bg-emerald-100 text-emerald-600',
+        border: 'border-emerald-200 bg-emerald-50/40',
+        title: 'Pasos del manual',
+        countKey: 'pasos',
+        desc: 'Cada instrucción numerada — la unidad mínima que usted aprueba o ajusta.',
     },
 ];
 
@@ -599,67 +646,146 @@ function populateFilters() {
     });
 }
 
+function skillDisplayName(skill) {
+    if (!skill) return '';
+    const fromInstr = (skill.instruccion || '').replace(/\.$/, '').trim();
+    if (fromInstr) return fromInstr.charAt(0).toUpperCase() + fromInstr.slice(1);
+    return (skill.desc || skill.name || '').replace(/\.$/, '');
+}
+
+function agentSkillExamples(agent, limit = 2) {
+    const byId = Object.fromEntries(catalog.skills.map(s => [s.id, s]));
+    return (agent.skill_ids || []).slice(0, limit).map(sid => {
+        const s = byId[sid];
+        return s ? skillDisplayName(s) : sid.replace(/_/g, ' ');
+    });
+}
+
 function renderGuiaDiagrama() {
     const el = document.getElementById('guia-diagrama');
     if (!el) return;
 
-    const gr = getEffectiveGuardrails().length;
-    const ag = catalog.agentes?.length || 11;
-    const sk = catalog.intro?.skills || catalog.skills?.length || 90;
-    const pas = countEffectivePasos();
+    const counts = {
+        guardrails: getEffectiveGuardrails().length,
+        agentes: catalog.agentes?.length || 11,
+        skills: catalog.intro?.skills || catalog.skills?.length || 90,
+        pasos: countEffectivePasos(),
+    };
 
-    let ejemploHtml = '';
-    const coord = catalog.agentes?.find(a => a.id === 'coordinador_expediente_penal');
-    const skillId = coord?.skill_ids?.[0];
-    const skill = skillId ? catalog.skills?.find(s => s.id === skillId) : null;
-    if (coord && skill) {
-        const steps = getEffectiveSteps(skill).slice(0, 3);
-        const stepsList = steps.map(st => `Paso ${st.displayNum}: ${escapeHtml(st.text.slice(0, 80))}${st.text.length > 80 ? '…' : ''}`).join('<br>');
-        ejemploHtml = `
-            <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-xs">
-                <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-link text-blue-500 mr-1"></i> Ejemplo anclado al catálogo:</p>
-                <p class="text-slate-600 font-mono text-[11px]">${escapeHtml(coord.name)}</p>
-                <p class="text-purple-700 font-mono text-[11px]">→ ${escapeHtml(skill.name)}</p>
-                <p class="text-slate-500 mt-1">${stepsList || 'Sin pasos definidos'}</p>
+    const layers = PROTO_LAYERS.map(layer => {
+        const n = counts[layer.countKey] ?? '—';
+        const hl = layer.highlight
+            ? ' ring-2 ring-amber-300'
+            : '';
+        return `
+            <div class="proto-layer ${layer.border}${hl}">
+                <div class="proto-layer-icon ${layer.iconBg}">
+                    <i class="fa-solid ${layer.icon}"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="font-bold text-slate-900 text-sm">${escapeHtml(layer.title)} <span class="text-slate-400 font-normal">(${n})</span></p>
+                    <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">${escapeHtml(layer.desc)}</p>
+                </div>
             </div>`;
-    }
+    }).join('');
 
     el.innerHTML = `
-        <div class="archi-level archi-level-0 border-slate-300 bg-slate-50 mb-3">
-            <p class="text-xs font-bold uppercase text-slate-500">Sistema</p>
-            <p class="text-sm font-semibold text-slate-800">Penal-víctimas (Colombia · Ley 906)</p>
-        </div>
-        <div class="archi-level archi-level-1">
-            <p class="text-xs font-bold uppercase text-blue-600">Nivel 1 · Reglas Estrictas (${gr})</p>
-            <p class="text-sm text-slate-700">Barreras globales — aplican a <em>toda</em> respuesta</p>
-        </div>
-        <div class="archi-arrow">▼ usan</div>
-        <div class="archi-level archi-level-2">
-            <p class="text-xs font-bold uppercase text-purple-600">Nivel 2 · Agentes (${ag})</p>
-            <p class="text-sm text-slate-700">Roles especializados (coordinador, especialistas, calidad)</p>
-        </div>
-        <div class="archi-arrow">▼ usan</div>
-        <div class="archi-level archi-level-3">
-            <p class="text-xs font-bold uppercase text-amber-600">Nivel 3 · Skills (${sk})</p>
-            <p class="text-sm text-slate-700">Procedimientos / capacidades (compartidos entre agentes)</p>
-        </div>
-        <div class="archi-arrow">▼ descompuestos en</div>
-        <div class="archi-level archi-level-4">
-            <p class="text-xs font-bold uppercase text-emerald-600">Nivel 4 · Pasos (${pas})</p>
-            <p class="text-sm text-slate-700">Unidad mínima que usted aprueba o ajusta</p>
-        </div>
-        ${ejemploHtml}`;
+        <p class="text-xs text-slate-500 mb-3 text-center">De lo general a lo específico — usted audita cada capa</p>
+        ${layers}
+        <p class="text-xs text-center text-slate-400 mt-2">↓ El corazón del sistema son los <strong class="text-amber-700">procedimientos SKILL.md</strong> y sus pasos</p>`;
 }
 
 function renderFlujoLineal() {
     const el = document.getElementById('guia-flujo-lineal');
     if (!el) return;
-    const steps = FLUJO_LINEAL_STEPS.map(s => `
-        <div class="flujo-step">
-            <div class="flujo-step-title border ${s.cls}">${escapeHtml(s.title)}</div>
-            <p class="flujo-step-sub">${escapeHtml(s.sub)}</p>
-        </div>`).join('<div class="flow-arrow self-start mt-3">→</div>');
-    el.innerHTML = `<div class="flex flex-wrap items-start justify-center gap-2 py-3">${steps}</div>`;
+    const items = FLUJO_CONSULTA.map((s, i) => `
+        <div class="proto-timeline-item">
+            <div class="proto-timeline-dot ${s.color}">
+                <i class="fa-solid ${s.icon}"></i>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl px-4 py-3 ml-1">
+                <p class="text-xs font-bold text-slate-400">Paso ${i + 1}</p>
+                <p class="text-sm font-bold text-slate-900">${escapeHtml(s.title)}</p>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">${escapeHtml(s.sub)}</p>
+            </div>
+        </div>`).join('');
+    el.innerHTML = `<div class="proto-timeline max-w-xl mx-auto py-2">${items}</div>`;
+}
+
+function renderGuiaProcedimientoSkill() {
+    const el = document.getElementById('guia-procedimiento-skill');
+    if (!el) return;
+
+    const skill = catalog.skills?.find(s => s.id === 'redactar_memorial_penal')
+        || catalog.skills?.[0];
+    if (!skill) {
+        el.innerHTML = '<p class="text-sm text-slate-500">Catálogo no cargado.</p>';
+        return;
+    }
+
+    const agentName = (skill.agents || [])
+        .map(aid => catalog.agentes?.find(a => a.id === aid || a.name === aid))
+        .filter(Boolean)
+        .map(a => a.nombre_corto)
+        .join(', ') || 'Especialista asignado';
+
+    const steps = getEffectiveSteps(skill);
+    const stepsHtml = steps.slice(0, 5).map(st => `
+        <div class="proto-doc-step">
+            <span class="proto-doc-step-num">${st.displayNum}</span>
+            <span>${escapeHtml(st.text)}</span>
+        </div>`).join('');
+
+    const more = steps.length > 5
+        ? `<p class="text-[10px] text-slate-400 italic">+ ${steps.length - 5} pasos más en el catálogo completo</p>`
+        : '';
+
+    el.innerHTML = `
+        <div class="grid gap-4 lg:grid-cols-5">
+            <div class="lg:col-span-3 proto-doc">
+                <div class="proto-doc-header">
+                    <i class="fa-solid fa-file-lines text-amber-300"></i>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-400">Archivo SKILL.md</p>
+                        <p class="font-bold text-sm">${escapeHtml(skillDisplayName(skill))}</p>
+                    </div>
+                </div>
+                <div class="proto-doc-body">
+                    <div>
+                        <p class="proto-doc-label">Para qué sirve</p>
+                        <p class="text-slate-700">${escapeHtml(skill.desc || skill.instruccion || '—')}</p>
+                    </div>
+                    <div>
+                        <p class="proto-doc-label">Quién lo ejecuta (rol)</p>
+                        <p class="text-purple-700 font-medium">${escapeHtml(agentName)}</p>
+                    </div>
+                    <div>
+                        <p class="proto-doc-label">Pasos del procedimiento — lo que usted enseña a la IA</p>
+                        <div class="space-y-2 mt-1">${stepsHtml || '<p class="text-xs text-slate-400">Sin pasos definidos</p>'}</div>
+                        ${more}
+                    </div>
+                    <div class="pt-2 border-t border-slate-100">
+                        <p class="proto-doc-label">Límites del procedimiento</p>
+                        <p class="text-xs text-slate-500">No inventar hechos ni normas · Requiere revisión humana · Separar hecho de inferencia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-2 flex flex-col justify-center space-y-3">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p class="text-xs font-bold text-amber-800 mb-2"><i class="fa-solid fa-circle-info mr-1"></i> ¿Qué es conocimiento procedimental?</p>
+                    <p class="text-xs text-amber-900/90 leading-relaxed">Es el saber <strong>cómo hacer</strong> algo — no solo qué es la ley, sino en qué orden trabajar, qué preguntar y qué entregar. Cada SKILL.md es un protocolo interno del despacho digital.</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-2">
+                    <p><strong class="text-slate-800">En este portal usted:</strong></p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Verifica que el propósito del procedimiento tenga sentido</li>
+                        <li>Aprueba o ajusta <strong>cada paso</strong> del manual</li>
+                        <li>Puede agregar o quitar pasos si el protocolo está incompleto</li>
+                    </ul>
+                    <a href="#skills" class="inline-block mt-2 font-semibold text-amber-700">Ir a auditar procedimientos →</a>
+                </div>
+            </div>
+        </div>`;
 }
 
 function renderFlujoMapa() {
@@ -673,54 +799,27 @@ function renderFlujoMapa() {
         id !== 'coordinador_expediente_penal' && id !== 'analista_calidad_juridica',
     ).map(id => byId[id]).filter(Boolean);
 
-    const spokeHtml = specs.map(a => `
-        <div class="agente-spoke" title="${escapeHtml(a.desc || '')}">
-            <div class="font-bold">${escapeHtml(a.nombre_corto)}</div>
-            <code class="text-[9px] text-purple-500 block truncate">${escapeHtml(a.name)}</code>
-        </div>`).join('');
-
-    const mobileAccordion = ['coordinacion', 'especialista', 'calidad'].map(grupo => {
-        const agents = grupo === 'especialista' ? specs : catalog.agentes.filter(a => a.grupo === grupo);
-        const items = agents.map(a => `
-            <div class="text-xs py-1 border-b border-slate-100 last:border-0">
-                <strong>${escapeHtml(a.nombre_corto)}</strong>
-                <span class="text-slate-400 block text-[10px]">${escapeHtml(a.desc || '')}</span>
-            </div>`).join('');
-        return `
-            <details class="md:hidden border border-slate-200 rounded-lg mb-2">
-                <summary class="px-3 py-2 font-semibold text-sm cursor-pointer">${escapeHtml(GROUP_LABELS[grupo] || grupo)} (${agents.length})</summary>
-                <div class="px-3 pb-3">${items}</div>
-            </details>`;
+    const specChips = specs.map(a => {
+        const ejemplos = agentSkillExamples(a, 1);
+        const hint = ejemplos[0] ? ` title="${escapeHtml(ejemplos[0])}"` : '';
+        return `<span class="equipo-chip"${hint}>${escapeHtml(a.nombre_corto)}</span>`;
     }).join('');
 
     el.innerHTML = `
-        ${mobileAccordion}
-        <div class="hidden md:block space-y-3 py-4">
-            <div class="text-center">
-                <div class="inline-block bg-slate-100 border border-slate-300 rounded-xl px-6 py-2 text-sm font-semibold text-slate-700">Abogada — consulta</div>
-            </div>
-            <div class="text-center text-slate-400 text-lg">↓</div>
-            <div class="flex justify-center">
-                <div class="agente-hub max-w-md w-full">
-                    <div>COORDINADOR</div>
-                    <code class="text-[10px] font-normal opacity-80">${escapeHtml(coord?.name || 'coordinador_expediente_penal')}</code>
-                </div>
-            </div>
-            <div class="text-center text-slate-400 text-lg">↓</div>
-            <div class="grid grid-cols-3 lg:grid-cols-5 gap-2 max-w-4xl mx-auto">
-                ${spokeHtml}
-            </div>
-            <div class="text-center text-slate-400 text-lg">↓</div>
-            <div class="flex justify-center">
-                <div class="agente-calidad-node max-w-md w-full">
-                    <div>CALIDAD JURÍDICA</div>
-                    <code class="text-[10px] font-normal opacity-80">${escapeHtml(calidad?.name || 'analista_calidad_juridica')}</code>
-                </div>
-            </div>
-            <div class="text-center text-slate-400 text-lg">↓</div>
-            <div class="text-center">
-                <div class="inline-block bg-emerald-100 border border-emerald-300 rounded-xl px-6 py-2 text-sm font-semibold text-emerald-800">Abogada — HITL (aprueba y firma)</div>
-            </div>
+        <div class="equipo-banda border-blue-200 bg-blue-50/50">
+            <p class="text-[10px] font-bold uppercase text-blue-600 mb-1">Recepción · 1 rol</p>
+            <p class="font-bold text-slate-900">${escapeHtml(coord?.nombre_corto || 'Coordinador')}</p>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(coord?.desc || 'Recibe su consulta y elige qué procedimiento (SKILL.md) aplicar.')}</p>
+        </div>
+        <div class="equipo-banda border-purple-200 bg-purple-50/30">
+            <p class="text-[10px] font-bold uppercase text-purple-600 mb-2">Especialistas · 9 áreas de trabajo</p>
+            <p class="text-xs text-slate-500 mb-2">Cada uno ejecuta los procedimientos de su área. Pase el cursor sobre un nombre para ver un ejemplo.</p>
+            <div>${specChips}</div>
+        </div>
+        <div class="equipo-banda border-amber-200 bg-amber-50/40">
+            <p class="text-[10px] font-bold uppercase text-amber-700 mb-1">Control · 1 rol</p>
+            <p class="font-bold text-slate-900">${escapeHtml(calidad?.nombre_corto || 'Calidad jurídica')}</p>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(calidad?.desc || 'Revisa coherencia y riesgos antes de entregarle el borrador.')}</p>
         </div>`;
 }
 
@@ -733,24 +832,25 @@ function renderAgentesDetalle() {
 
     el.innerHTML = ordered.map(a => {
         const badge = GROUP_BADGE_CLASS[a.grupo] || 'guia-badge-spec';
+        const ejemplos = agentSkillExamples(a, 3);
+        const procList = ejemplos.length
+            ? `<p class="text-xs text-amber-800 mt-2"><strong>Procedimientos que usa:</strong> ${ejemplos.map(e => escapeHtml(e)).join(' · ')}</p>`
+            : '';
         return `
             <div class="agente-card-guia">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="${badge}">${escapeHtml(GROUP_LABELS[a.grupo] || a.grupo)}</span>
-                    <code class="text-[10px] text-slate-400">${escapeHtml(a.name)}</code>
-                </div>
-                <h5 class="font-bold text-slate-900 text-sm">${escapeHtml(a.nombre_corto)}</h5>
+                <span class="${badge}">${escapeHtml(GROUP_LABELS[a.grupo] || a.grupo)}</span>
+                <h5 class="font-bold text-slate-900 text-sm mt-2">${escapeHtml(a.nombre_corto)}</h5>
                 <p class="text-xs text-slate-600 mt-1">${escapeHtml(a.desc || '')}</p>
-                <p class="text-xs text-slate-500 mt-2"><strong>Problema:</strong> ${escapeHtml(a.problema || '—')}</p>
-                <p class="text-xs text-slate-500"><strong>No reemplaza:</strong> ${escapeHtml(a.no_reemplaza || '—')}</p>
-                <p class="text-xs text-purple-600 mt-2">${a.skills_count || 0} skills asignados</p>
-                <a href="#agentes" class="inline-block mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800" data-agent-highlight="${escapeHtml(a.id)}">Ir a auditar este agente →</a>
+                ${procList}
+                <p class="text-xs text-slate-500 mt-2"><strong>No reemplaza:</strong> ${escapeHtml(a.no_reemplaza || '—')}</p>
+                <a href="#agentes" class="inline-block mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800">Auditar este rol →</a>
             </div>`;
     }).join('');
 }
 
 function renderGuiaAgentesFlujo() {
     renderFlujoLineal();
+    renderGuiaProcedimientoSkill();
     renderFlujoMapa();
     renderAgentesDetalle();
 }
@@ -767,36 +867,11 @@ function renderGuiaGuardrails() {
         </div>`).join('');
 }
 
-function renderGuiaEjemploSkill() {
-    const el = document.getElementById('guia-ejemplo-skill');
-    if (!el) return;
-    const skill = catalog.skills?.find(s => s.id === 'redactar_memorial_penal')
-        || catalog.skills?.[0];
-    if (!skill) {
-        el.innerHTML = '';
-        return;
-    }
-    const steps = getEffectiveSteps(skill);
-    const preview = steps.slice(0, 2).map(st =>
-        `<li class="text-xs text-slate-600">Paso ${st.displayNum}: ${escapeHtml(st.text.slice(0, 100))}${st.text.length > 100 ? '…' : ''}</li>`,
-    ).join('');
-    el.innerHTML = `
-        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-            <p class="text-xs font-bold uppercase text-slate-400 mb-1">Skill de ejemplo</p>
-            <code class="text-sm font-bold text-slate-800">${escapeHtml(skill.name)}</code>
-            <p class="text-xs text-slate-600 mt-1">${escapeHtml(skill.desc || '')}</p>
-            <p class="text-xs text-amber-700 mt-2"><strong>${steps.length} pasos</strong> en este skill (cantidad variable según catálogo)</p>
-            ${preview ? `<ul class="mt-2 space-y-1 list-disc list-inside">${preview}</ul>` : ''}
-            <a href="#skills" class="inline-block mt-2 text-xs font-semibold text-amber-700">Ver en sección 3 →</a>
-        </div>`;
-}
-
 function renderGuiaCompleta() {
     renderGuiaCategorias();
     renderGuiaDiagrama();
     renderGuiaAgentesFlujo();
     renderGuiaGuardrails();
-    renderGuiaEjemploSkill();
 }
 
 function renderGuiaCategorias() {

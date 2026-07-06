@@ -32,6 +32,22 @@
         .guia-badge-cal { @apply text-[10px] font-bold uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded; }
         .guardrail-guia-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-4; }
         #audit-auth-gate { @apply bg-slate-900 flex items-center justify-center p-4; }
+        /* Guía v2.3 — conocimiento procedimental */
+        .proto-timeline { @apply relative pl-8 space-y-0; }
+        .proto-timeline::before { content: ''; @apply absolute left-[11px] top-3 bottom-3 w-0.5 bg-slate-200; }
+        .proto-timeline-item { @apply relative pb-6 last:pb-0; }
+        .proto-timeline-dot { @apply absolute -left-8 top-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold; }
+        .proto-doc { @apply bg-white border-2 border-slate-300 rounded-xl overflow-hidden font-sans; }
+        .proto-doc-header { @apply bg-slate-800 text-white px-4 py-3 flex items-center gap-2; }
+        .proto-doc-body { @apply p-4 space-y-3 text-sm; }
+        .proto-doc-label { @apply text-[10px] font-bold uppercase tracking-wider text-slate-400; }
+        .proto-doc-step { @apply flex gap-2 text-xs text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2; }
+        .proto-doc-step-num { @apply shrink-0 w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center; }
+        .proto-layer { @apply flex gap-3 items-start p-4 rounded-xl border-2 mb-2; }
+        .proto-layer-icon { @apply w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-lg; }
+        .equipo-banda { @apply rounded-xl border p-4 mb-3; }
+        .equipo-chip { @apply inline-block text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 m-0.5; }
+        .proto-callout { @apply bg-amber-50 border-l-4 border-amber-400 px-4 py-3 text-sm text-amber-900 rounded-r-lg; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] > summary .agent-panel-chevron,
@@ -70,7 +86,7 @@
             <div>
                 <h1 class="text-lg md:text-xl font-bold tracking-tight text-slate-100">
                     Legal Audit Sync
-                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.2</span>
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.3</span>
                     <span id="build-generated-at" class="text-[10px] text-slate-500 ml-1 hidden md:inline" title="Última generación del catálogo"></span>
                 </h1>
                 <p class="text-xs text-slate-400">Sistema Penal-Victimas (Colombia) · Control de Calidad</p>
@@ -142,54 +158,53 @@
                     </div>
                 </div>
 
-                <!-- Bloque B: Diagrama jerárquico -->
+                <!-- Bloque B: Qué conocimiento enseña -->
                 <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-sitemap text-blue-500 mr-2"></i>Cómo está armado el sistema (4 niveles)</h3>
-                    <p class="text-sm text-slate-600 mb-4">Cada nivel es más granular. Usted audita todos, empezando por las barreras globales.</p>
+                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-graduation-cap text-blue-500 mr-2"></i>Qué conocimiento le enseña al asistente</h3>
+                    <p class="text-sm text-slate-600 mb-2">Usted no programa la IA: usted <strong>aprueba el manual de procedimientos</strong> con el que trabajará en casos reales.</p>
+                    <p class="proto-callout mb-4 text-xs"><strong>Conocimiento procedimental</strong> = el «cómo se hace» paso a paso (como un protocolo interno del despacho). En este sistema vive en archivos <code class="bg-amber-100 px-1 rounded text-[11px]">SKILL.md</code> — cada uno es un procedimiento; dentro tiene los pasos que usted audita.</p>
                     <div id="guia-diagrama"></div>
                 </div>
 
-                <!-- Bloque D: Los 11 agentes y el flujo -->
+                <!-- Bloque D: Equipo digital y procedimientos -->
                 <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm space-y-6">
                     <div>
-                        <h3 class="font-bold text-slate-900"><i class="fa-solid fa-diagram-project text-purple-500 mr-2"></i>Los 11 agentes y el flujo</h3>
-                        <p class="text-sm text-slate-600 mt-2">Dos ideas que no se deben mezclar:</p>
-                        <div class="grid gap-3 md:grid-cols-2 mt-3 text-sm">
-                            <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl">
-                                <strong class="text-blue-800">Flujo en el chat</strong>
-                                <p class="text-slate-600 text-xs mt-1">Cómo se atiende su consulta en tiempo real — app del despacho (Render).</p>
-                            </div>
-                            <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
-                                <strong class="text-emerald-800">Auditoría en este portal</strong>
-                                <p class="text-slate-600 text-xs mt-1">Usted aprueba si cada rol, skill y paso están bien definidos — Legal Audit Sync.</p>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-3 italic">«El flujo explica el día a día; la auditoría aprueba el manual de operaciones del despacho digital.»</p>
+                        <h3 class="font-bold text-slate-900"><i class="fa-solid fa-people-group text-purple-500 mr-2"></i>Su equipo digital y los procedimientos (SKILL.md)</h3>
+                        <p class="text-sm text-slate-600 mt-2">Imagine un despacho con <strong>11 roles</strong>. Cuando usted pregunta algo, alguien recibe el caso, abre el <strong>procedimiento correcto</strong> (SKILL.md) y lo ejecuta paso a paso. Usted revisa que esos pasos sean los que haría un abogado humano.</p>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold text-slate-700 mb-3">Gráfica 1 — Flujo lineal (qué pasa cuando pregunta)</h4>
+                        <h4 class="text-sm font-bold text-slate-800 mb-1">1. Qué pasa cuando usted hace una consulta</h4>
+                        <p class="text-xs text-slate-500 mb-3">Recorrido en el chat del despacho (no en este portal de auditoría).</p>
                         <div id="guia-flujo-lineal"></div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold text-slate-700 mb-3">Gráfica 2 — Mapa de enrutamiento (coordinador → especialistas → calidad)</h4>
+                        <h4 class="text-sm font-bold text-slate-800 mb-1">2. Anatomía de un procedimiento — archivo SKILL.md</h4>
+                        <p class="text-xs text-slate-500 mb-3">Esto es lo que usted valida en la sección 3: el «manual de instrucciones» de cada tarea jurídica.</p>
+                        <div id="guia-procedimiento-skill"></div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-800 mb-1">3. Los 11 roles de su equipo</h4>
+                        <p class="text-xs text-slate-500 mb-3">Quién ejecuta cada procedimiento. Sin nombres técnicos — audite el detalle en la sección 2.</p>
                         <div id="guia-flujo-mapa"></div>
                     </div>
 
-                    <div id="guia-ejemplo-flujo" class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-                        <h4 class="text-sm font-bold text-slate-800 mb-2"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Ejemplo narrado (caso ficticio)</h4>
-                        <p class="text-sm text-slate-700 leading-relaxed">
-                            <em>Ejemplo:</em> Usted escribe: «Tengo un caso en indagación, la víctima aportó chats y necesito memorial de impulso.»
-                            → El <strong>coordinador</strong> detecta etapa y faltantes.
-                            → Envía a <strong>cronología</strong> (ordenar hechos) y <strong>redactor</strong> (borrador de memorial).
-                            → <strong>Calidad</strong> revisa tono y citas.
-                            → Usted recibe borrador marcado para revisión y firma.
+                    <div id="guia-ejemplo-flujo" class="proto-callout">
+                        <h4 class="text-sm font-bold mb-2"><i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i>Ejemplo completo (caso ficticio)</h4>
+                        <p class="text-sm leading-relaxed">
+                            Usted escribe: <em>«Caso en indagación, la víctima aportó chats, necesito memorial de impulso.»</em><br>
+                            <strong>1.</strong> El <strong>coordinador</strong> detecta etapa y datos faltantes.<br>
+                            <strong>2.</strong> Abre el procedimiento <strong>«Redactar memorial penal»</strong> (SKILL.md) y lo asigna al <strong>redactor</strong>.<br>
+                            <strong>3.</strong> El redactor sigue los pasos del manual: recopilar hechos → redactar → verificar citas.<br>
+                            <strong>4.</strong> <strong>Calidad</strong> revisa tono y coherencia.<br>
+                            <strong>5.</strong> Usted recibe el borrador para firmar o ajustar.
                         </p>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold text-slate-700 mb-3">Gráfica 3 — Los 11 agentes en detalle</h4>
+                        <h4 class="text-sm font-bold text-slate-800 mb-3">Resumen por rol — qué auditar</h4>
                         <div id="guia-agentes-detalle" class="grid gap-3 md:grid-cols-2"></div>
                     </div>
 
@@ -225,23 +240,22 @@
 
                 <!-- Bloque D2: Agente / Skill / Paso -->
                 <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-cubes text-indigo-500 mr-2"></i>Qué es un Agente, un Skill y un Paso</h3>
-                    <p class="text-sm text-slate-600 mb-4 italic">Los agentes ejecutan skills; los skills se descomponen en pasos.</p>
+                    <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-cubes text-indigo-500 mr-2"></i>Tres piezas que debe entender</h3>
+                    <p class="text-sm text-slate-600 mb-4">Analogía del despacho: <em>quién</em> hace el trabajo, <em>qué manual</em> sigue, y <em>cada instrucción</em> dentro del manual.</p>
                     <div class="grid gap-4 md:grid-cols-3 text-sm">
                         <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl">
-                            <strong class="text-purple-800 text-base">Agente</strong>
-                            <p class="text-slate-600 mt-2 text-xs">Rol del despacho digital (coordinador, especialista o calidad). Audita en <a href="#agentes" class="text-purple-700 underline">sección 2</a>.</p>
+                            <strong class="text-purple-800 text-base"><i class="fa-solid fa-user-tie mr-1"></i> Rol (agente)</strong>
+                            <p class="text-slate-600 mt-2 text-xs">La «persona» del equipo digital: coordinador, cronología, redactor, etc. Audita en <a href="#agentes" class="text-purple-700 underline">sección 2</a>.</p>
                         </div>
                         <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                            <strong class="text-amber-800 text-base">Skill</strong>
-                            <p class="text-slate-600 mt-2 text-xs">Procedimiento compartido («construir cronología», «redactar memorial»). Audita instrucción + pasos en <a href="#skills" class="text-amber-700 underline">sección 3</a> o dentro del agente.</p>
+                            <strong class="text-amber-800 text-base"><i class="fa-solid fa-file-lines mr-1"></i> Procedimiento (SKILL.md)</strong>
+                            <p class="text-slate-600 mt-2 text-xs">El manual de «cómo hacer» una tarea. Contiene propósito, límites y pasos. Audita en <a href="#skills" class="text-amber-700 underline">sección 3</a>.</p>
                         </div>
                         <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                            <strong class="text-emerald-800 text-base">Paso</strong>
-                            <p class="text-slate-600 mt-2 text-xs">Unidad mínima de auditoría (2 a 10 por skill). Apruebe cada ítem con APROBAR / AJUSTAR / RESTABLECER.</p>
+                            <strong class="text-emerald-800 text-base"><i class="fa-solid fa-list-ol mr-1"></i> Paso</strong>
+                            <p class="text-slate-600 mt-2 text-xs">Cada instrucción numerada del manual — la unidad que usted aprueba con APROBAR / AJUSTAR / RESTABLECER.</p>
                         </div>
                     </div>
-                    <div id="guia-ejemplo-skill" class="mt-4"></div>
                 </div>
 
                 <!-- Bloque E: Categorías de skills -->
@@ -415,6 +429,6 @@
 
     <script src="./auth-config.js"></script>
     <script src="./auth-gate.js"></script>
-    <script src="./app.js?v=2.2"></script>
+    <script src="./app.js?v=2.3"></script>
 </body>
 </html>
