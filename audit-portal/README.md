@@ -41,7 +41,7 @@ La auditoría tiene **2 secciones**: reglas estrictas y roles del equipo. Los pr
 - **RESTABLECER** — borra la decisión y vuelve a estado inicial
 - **APROBAR** otra vez sobre un ítem ya aprobado — también revierte a pendiente
 
-Las decisiones se guardan en `localStorage` (`legal-audit-sync-v2`), incluyendo reglas y pasos agregados o eliminados por la abogada. Exporte el `.md` antes de limpiar el navegador.
+Las decisiones se guardan automáticamente en `localStorage` (`legal-audit-sync-v3`), incluyendo reglas y pasos agregados o eliminados. Use **Respaldo JSON** / **Restaurar JSON** en el panel para otro navegador o equipo. Exporte el `.md` para el dictamen formal.
 
 ## Despliegue (GitHub Pages)
 

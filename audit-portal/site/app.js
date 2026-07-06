@@ -1,6 +1,7 @@
 /* Auditoría de Instrucciones — auditoría por paso */
 
-const STORAGE_KEY = 'legal-audit-sync-v2';
+const STORAGE_KEY = 'legal-audit-sync-v3';
+const STORAGE_KEY_LEGACY = 'legal-audit-sync-v2';
 
 const GROUP_LABELS = {
     coordinacion: 'Coordinación',
@@ -27,6 +28,33 @@ const AGENT_ORDER = [
     'evaluador_derechos_fundamentales_tutela',
     'analista_calidad_juridica',
 ];
+
+function agentGlobalNumber(agentId) {
+    const idx = AGENT_ORDER.indexOf(agentId);
+    return idx >= 0 ? idx + 1 : null;
+}
+
+function sortAgentsByOrder(agents) {
+    return [...agents].sort(
+        (a, b) => AGENT_ORDER.indexOf(a.id) - AGENT_ORDER.indexOf(b.id),
+    );
+}
+
+function formatNum2(n) {
+    return String(n).padStart(2, '0');
+}
+
+function agentRefCode(agentNum) {
+    return formatNum2(agentNum);
+}
+
+function skillRefCode(agentNum, skillIdx) {
+    return `${formatNum2(agentNum)}.${formatNum2(skillIdx)}`;
+}
+
+function pasoRefCode(agentNum, skillIdx, pasoNum) {
+    return `${formatNum2(agentNum)}.${formatNum2(skillIdx)}.${formatNum2(pasoNum)}`;
+}
 
 const GUARDRAIL_EJEMPLOS = {
     g1: 'Si no hay auto en expediente, marca [PENDIENTE DE VERIFICAR] en lugar de citar sentencia o artículo.',
@@ -201,20 +229,126 @@ function pasoKey(skillId, num) {
     return `${skillId}::${num}`;
 }
 
-function loadAuditLog() {
+function applyPersistPayload(parsed) {
+    if (!parsed || typeof parsed !== 'object') return false;
+    auditLog.guardrails = parsed.guardrails || {};
+    auditLog.agentes = parsed.agentes || {};
+    auditLog.pasos = parsed.pasos || {};
+    auditLog.custom = parsed.custom || null;
+    ensureCustom();
+    return true;
+}
+
+function buildPersistPayload() {
+    return {
+        version: 3,
+        savedAt: new Date().toISOString(),
+        catalogGeneratedAt: catalog.generated_at || null,
+        guardrails: auditLog.guardrails,
+        agentes: auditLog.agentes,
+        pasos: auditLog.pasos,
+        custom: auditLog.custom,
+    };
+}
+
+function updatePersistStatus() {
+    const el = document.getElementById('audit-persist-status');
+    if (!el) return;
+    let savedAt = null;
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed.guardrails) auditLog.guardrails = parsed.guardrails;
-        if (parsed.agentes) auditLog.agentes = parsed.agentes;
-        if (parsed.pasos) auditLog.pasos = parsed.pasos;
-        if (parsed.custom) auditLog.custom = parsed.custom;
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY_LEGACY);
+        if (raw) savedAt = JSON.parse(raw).savedAt;
     } catch (_) { /* ignore */ }
+    if (savedAt) {
+        const when = new Date(savedAt);
+        const label = Number.isNaN(when.getTime())
+            ? savedAt
+            : when.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+        el.innerHTML = `<i class="fa-solid fa-floppy-disk mr-1 text-emerald-500"></i> Progreso guardado automáticamente · última edición <strong>${escapeHtml(label)}</strong>`;
+    } else {
+        el.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1 text-slate-400"></i> Sin ediciones guardadas aún en este navegador';
+    }
+}
+
+function loadAuditLog() {
+    const keys = [STORAGE_KEY, STORAGE_KEY_LEGACY];
+    for (const key of keys) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) continue;
+            const parsed = JSON.parse(raw);
+            if (applyPersistPayload(parsed)) {
+                if (key === STORAGE_KEY_LEGACY) saveAuditLog();
+                break;
+            }
+        } catch (_) { /* ignore */ }
+    }
 }
 
 function saveAuditLog() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(auditLog));
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistPayload()));
+        updatePersistStatus();
+    } catch (err) {
+        console.error('No se pudo guardar el progreso:', err);
+        const el = document.getElementById('audit-persist-status');
+        if (el) {
+            el.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> No se pudo guardar en este navegador. Exporte un respaldo JSON.';
+        }
+    }
+}
+
+function exportarProgresoJson() {
+    saveAuditLog();
+    const stamp = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([JSON.stringify(buildPersistPayload(), null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `auditoria-progreso-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importarProgresoJson(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const parsed = JSON.parse(reader.result);
+            if (!applyPersistPayload(parsed)) throw new Error('Formato inválido');
+            saveAuditLog();
+            renderAll();
+            alert('Progreso restaurado correctamente.');
+        } catch (err) {
+            console.error(err);
+            alert('No se pudo leer el archivo. Verifique que sea un respaldo JSON del portal.');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function bindPersistUi() {
+    document.getElementById('btn-export-progress')?.addEventListener('click', exportarProgresoJson);
+    const importInput = document.getElementById('audit-import-file');
+    document.getElementById('btn-import-progress')?.addEventListener('click', () => importInput?.click());
+    importInput?.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const ok = confirm(
+            '¿Restaurar el progreso desde este archivo? Se reemplazarán las decisiones actuales en este navegador.',
+        );
+        if (ok) importarProgresoJson(file);
+        e.target.value = '';
+    });
+    window.addEventListener('storage', e => {
+        if (e.key !== STORAGE_KEY || !e.newValue) return;
+        try {
+            if (applyPersistPayload(JSON.parse(e.newValue))) renderAll();
+        } catch (_) { /* ignore */ }
+    });
 }
 
 function defaultDecision() {
@@ -360,7 +494,7 @@ function buildSimpleCard(type, item) {
 }
 
 function buildPasoCardsHtml(skill, options = {}) {
-    const { showAddButton = true } = options;
+    const { showAddButton = true, agentNum = null, skillNum = null } = options;
     const steps = getEffectiveSteps(skill);
 
     const cards = steps.map(st => {
@@ -368,11 +502,17 @@ function buildPasoCardsHtml(skill, options = {}) {
         const customBadge = st.custom
             ? '<span class="audit-badge audit-badge--new ml-1">Nuevo</span>'
             : '';
+        const ref = agentNum && skillNum
+            ? `<span class="audit-ref-code" title="Paso ${st.displayNum} de la guía ${skillRefCode(agentNum, skillNum)}">${pasoRefCode(agentNum, skillNum, st.displayNum)}</span>`
+            : '';
+        const pasoOrdinal = steps.length > 1
+            ? ` <span class="audit-paso-ordinal">(${st.displayNum} de ${steps.length})</span>`
+            : '';
         return `
             <div class="paso-card audit-card p-4 rounded-xl border ${cardBorderClass(d.status)} mt-2" data-paso-id="${escapeHtml(st.key)}" data-skill-id="${escapeHtml(skill.id)}">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
                     <div class="flex-1">
-                        <p class="audit-paso-label">PASO ${st.displayNum}${pasoModoBadge(st.modo)}${customBadge}</p>
+                        <p class="audit-paso-label">${ref} PASO${pasoOrdinal}${pasoModoBadge(st.modo)}${customBadge}</p>
                         <p class="audit-body text-slate-800">${escapeHtml(st.text)}</p>
                     </div>
                     <div class="flex flex-col items-end gap-2 shrink-0 audit-btn-row">
@@ -417,10 +557,13 @@ function buildAgentSkillsPanel(agent, openProcedures = false) {
     const skillIds = agent.skill_ids || [];
     if (!skillIds.length) return '';
 
+    const agentNum = agentGlobalNumber(agent.id);
     const byId = Object.fromEntries(catalog.skills.map(s => [s.id, s]));
     const items = skillIds.map(sid => byId[sid]).filter(Boolean);
 
-    const skillBlocks = items.map(skill => {
+    const skillBlocks = items.map((skill, skillIdx) => {
+        const skillNum = skillIdx + 1;
+        const ref = agentNum ? skillRefCode(agentNum, skillNum) : '';
         const prog = skillStepProgress(skill);
         const displayName = skillDisplayName(skill);
 
@@ -430,7 +573,9 @@ function buildAgentSkillsPanel(agent, openProcedures = false) {
                 data-search="${escapeHtml(procSearchText(skill))}">
                 <summary class="flex flex-wrap items-center gap-2 select-none list-none">
                     <i class="fa-solid fa-chevron-right text-slate-400 agent-skill-chevron transition-transform"></i>
+                    ${ref ? `<span class="audit-ref-code" title="Guía ${skillNum} del agente ${agentNum}">${ref}</span>` : ''}
                     <span class="audit-proc-summary">${escapeHtml(displayName)}</span>
+                    <span class="audit-meta audit-skill-ordinal">Guía ${skillNum} de ${items.length}</span>
                     <span class="${procBadgeClass(prog)}">${prog.reviewed}/${prog.total} pasos</span>
                     <span class="audit-meta">${escapeHtml(skill.category || '')}</span>
                 </summary>
@@ -438,7 +583,7 @@ function buildAgentSkillsPanel(agent, openProcedures = false) {
                     ${buildSkillSpecHtml(skill)}
                     ${skill.desc ? `<p class="audit-body mb-2"><strong>Para qué sirve:</strong> ${escapeHtml(skill.desc)}</p>` : ''}
                     ${skill.instruccion && skill.instruccion !== skill.desc ? `<p class="audit-meta mb-3">${escapeHtml(skill.instruccion)}</p>` : ''}
-                    ${buildPasoCardsHtml(skill)}
+                    ${buildPasoCardsHtml(skill, { agentNum, skillNum })}
                 </div>
             </details>`;
     }).join('');
@@ -465,6 +610,7 @@ function buildAgentSkillsPanel(agent, openProcedures = false) {
 
 function buildAgentCard(agent, openProcedures = false) {
     const current = getDecision('agentes', agent.id);
+    const agentNum = agentGlobalNumber(agent.id);
     const card = document.createElement('div');
     card.className = `audit-card bg-white p-5 md:p-6 rounded-2xl border transition-all ${cardBorderClass(current.status)}`;
     card.dataset.type = 'agentes';
@@ -473,17 +619,23 @@ function buildAgentCard(agent, openProcedures = false) {
     card.dataset.search = agentSearchText(agent);
 
     const procCount = agent.skill_ids?.length || agent.skills_count || 0;
+    const agentBadge = agentNum
+        ? `<span class="audit-num-badge" title="Agente ${agentNum} de ${AGENT_ORDER.length}">${agentRefCode(agentNum)}</span>`
+        : '';
 
     card.innerHTML = `
         <div class="flex flex-col gap-4">
             <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div class="space-y-2 flex-1">
-                    <p class="audit-subtitle audit-title-caps">${escapeHtml(agentDisplayTitle(agent))}</p>
+                    <div class="flex flex-wrap items-center gap-2">
+                        ${agentBadge}
+                        <p class="audit-subtitle audit-title-caps m-0">${escapeHtml(agentDisplayTitle(agent))}</p>
+                    </div>
+                    <p class="audit-meta"><strong>Referencia:</strong> Agente ${agentNum || '—'} de ${AGENT_ORDER.length}${procCount ? ` · ${procCount} guía${procCount === 1 ? '' : 's'} operativa${procCount === 1 ? '' : 's'} (${agentNum ? `${agentRefCode(agentNum)}.01–${skillRefCode(agentNum, procCount)}` : '—'})` : ''}</p>
                     <p class="audit-body">${escapeHtml(agent.desc)}</p>
                     <p class="audit-meta"><strong>Problema que resuelve:</strong> ${escapeHtml(agent.problema || '—')}</p>
                     ${agent.necesidad ? `<p class="audit-meta"><strong>Valor en el caso:</strong> ${escapeHtml(agent.necesidad)}</p>` : ''}
                     <p class="audit-meta"><strong>No reemplaza:</strong> ${escapeHtml(agent.no_reemplaza || '—')}</p>
-                    <p class="audit-meta">${procCount} guía${procCount === 1 ? '' : 's'} operativa${procCount === 1 ? '' : 's'}</p>
                 </div>
                 <div class="audit-btn-row shrink-0">${buildDecisionButtons('agentes', agent.id)}</div>
             </div>
@@ -513,7 +665,7 @@ function renderAgentes() {
     c.innerHTML = '';
     const order = ['coordinacion', 'especialista', 'calidad'];
     order.forEach(grupo => {
-        const agents = catalog.agentes.filter(a => a.grupo === grupo);
+        const agents = sortAgentsByOrder(catalog.agentes.filter(a => a.grupo === grupo));
         if (!agents.length) return;
         const block = document.createElement('div');
         block.className = 'mb-8 space-y-3';
@@ -572,10 +724,11 @@ function populateFilters() {
         o.textContent = cat.name;
         catSel.appendChild(o);
     });
-    catalog.agentes.forEach(a => {
+    sortAgentsByOrder(catalog.agentes).forEach(a => {
+        const num = agentGlobalNumber(a.id);
         const o = document.createElement('option');
         o.value = a.id;
-        o.textContent = agentDisplayTitle(a);
+        o.textContent = num ? `${agentRefCode(num)} · ${agentDisplayTitle(a)}` : agentDisplayTitle(a);
         agentSel.appendChild(o);
     });
 }
@@ -1090,12 +1243,14 @@ function exportarMarkdown() {
     const byId = Object.fromEntries(catalog.skills.map(s => [s.id, s]));
     const order = ['coordinacion', 'especialista', 'calidad'];
     order.forEach(grupo => {
-        const agents = catalog.agentes.filter(a => a.grupo === grupo);
+        const agents = sortAgentsByOrder(catalog.agentes.filter(a => a.grupo === grupo));
         if (!agents.length) return;
         md += `### ${GROUP_LABELS[grupo] || grupo}\n\n`;
         agents.forEach(a => {
+            const agentNum = agentGlobalNumber(a.id);
             const state = getDecision('agentes', a.id);
-            md += `#### ${agentDisplayTitle(a)}\n`;
+            const agentLabel = agentNum ? `Agente ${agentRefCode(agentNum)} — ${agentDisplayTitle(a)}` : agentDisplayTitle(a);
+            md += `#### ${agentLabel}\n`;
             md += `- **Propósito:** ${a.desc}\n`;
             if (a.necesidad) md += `- **Valor en el caso:** ${a.necesidad}\n`;
             md += `- **Problema que resuelve:** ${a.problema || '—'}\n`;
@@ -1104,10 +1259,12 @@ function exportarMarkdown() {
             if (state.reason) md += `- **Defectos:** _${state.reason}_\n- **Instrucción:** _${state.solution}_\n`;
 
             const skillIds = a.skill_ids || [];
-            skillIds.forEach(sid => {
+            skillIds.forEach((sid, skillIdx) => {
                 const s = byId[sid];
                 if (!s) return;
-                md += `\n##### GUÍA OPERATIVA: ${skillDisplayName(s)}\n`;
+                const skillNum = skillIdx + 1;
+                const ref = agentNum ? skillRefCode(agentNum, skillNum) : '';
+                md += `\n##### GUÍA OPERATIVA ${ref ? `${ref} — ` : ''}${skillDisplayName(s)}\n`;
                 md += `- **Entrada:** ${s.inputs || '—'}\n`;
                 md += `- **Salida:** ${s.outputs || '—'}\n`;
                 md += `- **Ejecuta:** ${(s.agentes_ejecutores || []).join(', ') || '—'}\n`;
@@ -1118,7 +1275,8 @@ function exportarMarkdown() {
                     const stState = getDecision('pasos', st.key);
                     const tag = st.custom ? ' *(agregado por el despacho)*' : '';
                     const modo = st.modo === 'paralelo' ? ' [PARALELO]' : '';
-                    md += `###### Paso ${st.displayNum}${modo}${tag}\n`;
+                    const pasoRef = agentNum ? pasoRefCode(agentNum, skillNum, st.displayNum) : `${st.displayNum}`;
+                    md += `###### Paso ${pasoRef}${modo}${tag}\n`;
                     md += `- **Texto:** ${st.text}\n- **Estado:** ${stState.status}\n`;
                     if (stState.reason) md += `- **Razón:** _${stState.reason}_\n- **Ajuste:** _${stState.solution}_\n`;
                 });
@@ -1194,7 +1352,9 @@ async function init() {
     document.getElementById('filter-category').addEventListener('change', applyFilters);
     document.getElementById('filter-agent').addEventListener('change', applyFilters);
 
+    bindPersistUi();
     renderAll();
+    updatePersistStatus();
 }
 
 window.setDecision = setDecision;
@@ -1205,6 +1365,7 @@ window.closeAddModal = closeAddModal;
 window.saveAddModal = saveAddModal;
 window.openAddGuardrailModal = openAddGuardrailModal;
 window.openAddPasoModal = openAddPasoModal;
+window.exportarProgresoJson = exportarProgresoJson;
 window.exportarMarkdown = exportarMarkdown;
 
 document.addEventListener('DOMContentLoaded', init);

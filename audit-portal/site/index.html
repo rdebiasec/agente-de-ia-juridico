@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="guia.css?v=3.2">
-    <link rel="stylesheet" href="audit-portal.css?v=3.2-dev">
+    <link rel="stylesheet" href="audit-portal.css?v=3.3">
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; }
         html { scroll-behavior: smooth; }
@@ -214,7 +214,7 @@
                                 <strong>Aprobar</strong> — conforme con la regla, agente, guía o paso.<br>
                                 <strong>Ajustar</strong> — indique qué cambiar y por qué (obligatorio).<br>
                                 <strong>Restablecer</strong> — deshace su decisión.<br>
-                                Su progreso se guarda en este navegador. Exporte antes de cerrar sesión o limpiar datos.
+                                Su progreso se guarda automáticamente en este navegador. Use <strong>Respaldo JSON</strong> en el panel para continuar en otro equipo o navegador.
                             </p>
                             <p class="guia-caption" id="guia-categorias-note"></p>
                             <a href="#guardrails" class="guia-cta-primary" id="guia-cta-auditoria">
@@ -259,6 +259,27 @@
                     <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> APROBAR</span>
                     <span><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> AJUSTAR</span>
                     <span><span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span> Sin revisar / restablecido</span>
+                </div>
+                <div class="border-t border-slate-100 pt-4 space-y-3">
+                    <p class="text-sm text-slate-600 m-0">
+                        <strong>Numeración:</strong>
+                        <span class="audit-ref-code audit-ref-code--inline">01</span> agente ·
+                        <span class="audit-ref-code audit-ref-code--inline">01.03</span> guía 3 del agente 1 ·
+                        <span class="audit-ref-code audit-ref-code--inline">01.03.02</span> paso 2 de esa guía
+                    </p>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <p id="audit-persist-status" class="text-sm text-slate-500 m-0">Cargando estado de guardado…</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" id="btn-export-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all">
+                                <i class="fa-solid fa-download mr-1"></i> Respaldo JSON
+                            </button>
+                            <button type="button" id="btn-import-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-all">
+                                <i class="fa-solid fa-upload mr-1"></i> Restaurar JSON
+                            </button>
+                            <input type="file" id="audit-import-file" accept=".json,application/json" class="hidden">
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 m-0">El progreso se guarda automáticamente en este navegador. Para continuar en otro equipo o navegador, exporte el respaldo JSON y restáurelo allí.</p>
                 </div>
             </div>
 
@@ -342,6 +363,6 @@
 
     <script src="./auth-config.js?v=3.0.1"></script>
     <script src="./auth-gate.js?v=3.0.1"></script>
-    <script src="./app.js?v=3.2-dev"></script>
+    <script src="./app.js?v=3.3"></script>
 </body>
 </html>
