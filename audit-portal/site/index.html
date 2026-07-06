@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal de auditoria tecnica — Sistema Penal-Victimas DBX Solutions">
+    <title>DBX Solutions - Legal Audit Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal { transition: opacity 0.25s ease; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        html { scroll-behavior: smooth; }
+        .flow-box { @apply bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 text-center; }
+        .flow-arrow { @apply text-slate-400 text-lg flex items-center justify-center; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .agent-panel-chevron,
+        details[open] > summary .agent-skill-chevron { transform: rotate(90deg); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <header class="bg-slate-900 text-white shadow-xl border-b border-slate-700 px-4 md:px-8 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sticky top-0 z-40">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wider text-xl shadow-md">dbx</div>
+            <div>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight text-slate-100">
+                    Legal Audit Sync
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.1</span>
+                    <span id="build-generated-at" class="text-[10px] text-slate-500 ml-1 hidden md:inline" title="Última generación del catálogo"></span>
+                </h1>
+                <p class="text-xs text-slate-400">Sistema Penal-Victimas (Colombia) · Control de Calidad</p>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+            <div id="progress-chip" class="text-xs bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-slate-300">
+                Cargando catálogo…
+            </div>
+            <button type="button" onclick="exportarMarkdown()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center space-x-2 w-full md:w-auto justify-center">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Finalizar y Exportar .MD</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1">
+        <aside class="w-72 bg-slate-900 text-slate-300 border-r border-slate-800 p-5 hidden lg:block sticky top-[88px] h-[calc(100vh-88px)] overflow-y-auto">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Secciones</p>
+            <nav class="space-y-1" id="sidebar-nav">
+                <a href="#guia" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-book-open text-emerald-400"></i>
+                    <span class="text-sm">0. Guía</span>
+                </a>
+                <a href="#guardrails" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                    <span class="text-sm">1. Reglas Estrictas</span>
+                    <span id="badge-guardrails" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
+                </a>
+                <a href="#agentes" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-robot text-purple-400"></i>
+                    <span class="text-sm">2. Agentes IA</span>
+                    <span id="badge-agentes" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
+                </a>
+                <a href="#skills" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span class="text-sm">3. Pasos (Skills)</span>
+                    <span id="badge-pasos" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
+                </a>
+            </nav>
+            <div class="mt-6 pt-5 border-t border-slate-800 text-xs text-slate-500 space-y-2">
+                <p><i class="fa-solid fa-scale-balanced mr-1"></i> <strong>Principio profesional:</strong> La IA propone; la abogada revisa, ajusta y aprueba.</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-10 overflow-y-auto w-full">
+
+            <section id="guia" class="scroll-mt-24 space-y-6">
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 md:p-8 rounded-2xl shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold">Guía para la abogada líder</h2>
+                    <p class="text-slate-300 mt-2 text-sm leading-relaxed" id="guia-intro-text">
+                        Portal de auditoría de configuración del asistente penal-víctimas (Colombia, Ley 906).
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-folder-open text-blue-500 mr-2"></i>Qué es este proyecto</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Sistema de apoyo con IA para la representación de víctimas en materia penal. Este portal le permite validar <strong>reglas estrictas</strong>, <strong>11 agentes</strong> y <strong>cada paso operativo</strong> de los 90 skills antes de usar el asistente en producción. Al finalizar, exporte un dictamen en Markdown para el despacho.</p>
+                    </div>
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-file-lines text-purple-500 mr-2"></i>El documento maestro</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Corresponde al <em>Documento Único de Aprobación</em> del sistema: 11 agentes, 90 skills y 8 reglas estrictas. Esta interfaz es la versión interactiva de esa revisión; sus decisiones quedan en el navegador y en el archivo .md exportado.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-shield-halved text-blue-500 mr-2"></i>Reglas Estrictas (Guardrails)</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-3">Son límites automáticos que la IA <strong>no puede violar</strong>: no inventar hechos ni normas, no revictimizar, exigir revisión humana en salidas sensibles, controlar datos personales, etc. No son sugerencias — son barreras técnicas del sistema.</p>
+                    <p class="text-xs text-slate-500">Distinto del <strong>principio profesional</strong> (sidebar): usted siempre tiene la última palabra sobre estrategia y firma.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900"><i class="fa-solid fa-diagram-project text-purple-500 mr-2"></i>Los 11 agentes y el flujo</h3>
+                    <p class="text-sm text-slate-600">Cada consulta sigue esta ruta: la abogada pregunta → el coordinador enruta → un especialista trabaja → calidad revisa → usted aprueba.</p>
+                    <div class="flex flex-wrap items-center justify-center gap-2 py-3">
+                        <div class="flow-box">Consulta abogada</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box bg-blue-50 border-blue-200">Coordinador</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box bg-purple-50 border-purple-200">Especialista</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box bg-amber-50 border-amber-200">Calidad jurídica</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box bg-emerald-50 border-emerald-200">Usted aprueba</div>
+                    </div>
+                    <div class="grid gap-3 md:grid-cols-3 text-sm">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <strong class="text-blue-700">Coordinación (1)</strong>
+                            <p class="text-slate-600 mt-1 text-xs">Recibe la consulta, pide datos faltantes y envía al especialista correcto.</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <strong class="text-purple-700">Especialistas (9)</strong>
+                            <p class="text-slate-600 mt-1 text-xs">Cronología, tipicidad, ruta 906, víctimas, evidencia, audiencias, redacción, seguimiento y tutela.</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <strong class="text-amber-700">Calidad (1)</strong>
+                            <p class="text-slate-600 mt-1 text-xs">Última revisión técnica antes de que usted vea la salida.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-layer-group text-amber-500 mr-2"></i>Agrupaciones de skills</h3>
+                    <p class="text-sm text-slate-600 mb-4">Los 90 skills se agrupan por <strong>función jurídica</strong> (no por agente), para revisar procedimientos similares juntos. Cada skill muestra <strong>todos sus pasos</strong> (pueden ser varios); apruebe o ajuste <em>cada paso</em>.</p>
+                    <div id="guia-categorias" class="grid gap-2 text-xs"></div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 p-5 rounded-2xl">
+                    <h3 class="font-bold text-amber-900 mb-2"><i class="fa-solid fa-rotate-left mr-2"></i>Cómo auditar y cómo deshacer</h3>
+                    <ul class="text-sm text-amber-900/90 space-y-1 list-disc list-inside">
+                        <li><strong>APROBAR</strong> — conforme con el paso o regla.</li>
+                        <li><strong>AJUSTAR</strong> — requiere razón y solución (obligatorio).</li>
+                        <li><strong>RESTABLECER</strong> — borra su decisión y vuelve al estado inicial.</li>
+                        <li><strong>Agregar / Eliminar</strong> — puede añadir o quitar reglas estrictas y pasos; los cambios se guardan en el navegador y en el export .md.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-slate-900">Panel de auditoría</h2>
+                        <p class="text-slate-500 mt-1 text-sm">Revise reglas, agentes y cada paso de los skills.</p>
+                    </div>
+                    <div class="bg-slate-100 px-4 py-3 rounded-xl text-xs text-slate-600 border border-slate-200">
+                        <strong>Última generación:</strong><br>
+                        <span id="generated-at">—</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input id="search-input" type="search" placeholder="Buscar por nombre o descripción…" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <select id="filter-category" class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white min-w-[180px]">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                    <select id="filter-agent" class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white min-w-[180px]">
+                        <option value="">Todos los agentes</option>
+                    </select>
+                </div>
+                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+                        <input type="checkbox" id="group-by-category" class="rounded border-slate-300 text-blue-600" checked>
+                        Agrupar skills por categoría
+                    </label>
+                    <span class="hidden md:inline">|</span>
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> APROBAR</span>
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> AJUSTAR</span>
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span> Sin revisar / restablecido</span>
+                </div>
+            </div>
+
+            <section id="guardrails" class="space-y-4 scroll-mt-24">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-200">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">1. Reglas Estrictas (Guardrails)</h3>
+                </div>
+                <div class="grid gap-4" id="container-guardrails"></div>
+            </section>
+
+            <section id="agentes" class="space-y-6 scroll-mt-24">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-purple-50 text-purple-600 rounded-xl border border-purple-200">
+                        <i class="fa-solid fa-robot text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">2. Control de Agentes Especializados</h3>
+                </div>
+                <div id="container-agentes"></div>
+            </section>
+
+            <section id="skills" class="space-y-4 scroll-mt-24">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">3. Auditoría de Pasos por Skill</h3>
+                </div>
+                    <p class="text-sm text-slate-500 -mt-2">En la sección de agentes puede desplegar cada skill y revisar sus pasos. Aquí aparecen todos los skills agrupados por categoría.</p>
+                <div id="container-skills"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="rejectModal" class="modal opacity-0 pointer-events-none fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transform scale-95 transition-all duration-200" id="modalBox">
+            <div class="bg-slate-950 px-6 py-4 text-white flex justify-between items-center">
+                <h4 class="font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    <span>Retroalimentación Requerida</span>
+                </h4>
+                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-600">Describa la falencia y la solución sugerida:</p>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Razón Técnica del Ajuste</label>
+                    <textarea id="modalReason" rows="3" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Solución Sugerida / Límite Jurídico</label>
+                    <textarea id="modalSolution" rows="2" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end space-x-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+                <button type="button" onclick="saveModalAdjustment()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl shadow-md">Aplicar Instrucción</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addModal" class="modal opacity-0 pointer-events-none fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transform scale-95 transition-all duration-200" id="addModalBox">
+            <div class="bg-blue-700 px-6 py-4 text-white flex justify-between items-center">
+                <h4 class="font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-plus text-blue-200"></i>
+                    <span id="addModalTitle">Agregar ítem</span>
+                </h4>
+                <button type="button" onclick="closeAddModal()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="addFieldNameWrap">
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Nombre de la regla</label>
+                    <input id="addFieldName" type="text" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej.: Verificar radicado antes de concluir">
+                </div>
+                <div>
+                    <label id="addFieldDescLabel" class="block text-xs font-bold uppercase text-slate-500 mb-1">Descripción</label>
+                    <textarea id="addFieldDesc" rows="4" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Describa el paso o la regla…"></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end space-x-3 border-t border-slate-100">
+                <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+                <button type="button" onclick="saveAddModal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl shadow-md">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js?v=2.1"></script>
+</body>
+</html>

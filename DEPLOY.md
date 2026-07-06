@@ -176,6 +176,45 @@ Resultados esperados:
 
 ---
 
-## GitHub Pages (tu website)
+## GitHub Pages (portal de auditoría)
 
-GitHub Pages **no** corre esta app Python. Tu website estática puede seguir en Pages; el agente vive solo en Render.
+GitHub Pages **no** corre la app Python del agente. El chat sigue en Render; Pages publica solo el portal estático de aprobación.
+
+| Recurso | URL / ubicación |
+|---|---|
+| Agente (chat, HITL) | `https://agente-de-ia-juridico.onrender.com` |
+| Portal Legal Audit Sync | `https://rdebiasec.github.io/agente-de-ia-juridico/` (tras activar Pages → GitHub Actions) |
+
+### Estructura (patrón dbx-solutions-website)
+
+```
+audit-portal/
+  site/     # LOCAL — editas HTML/JS aquí
+  dist/     # NUBE — generado, gitignored, lo sube Actions
+```
+
+### Desarrollo local
+
+```bash
+# Editar fuente
+code audit-portal/site/index.html audit-portal/site/app.js
+
+# Build (JSON + copia site → dist)
+python scripts/generar_audit_portal.py
+
+# Preview (recomendado)
+./scripts/start-audit-portal.sh
+
+# Manual
+python -m http.server 8080 --directory audit-portal/dist
+```
+
+Portal v2.1: audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
+
+### Despliegue a Pages
+
+1. Repo → **Settings → Pages** → Source: **GitHub Actions**
+2. `git push origin main` (cambios en `audit-portal/site/` o skills)
+3. Workflow `.github/workflows/deploy-audit-portal.yml` publica `audit-portal/dist/`
+
+La abogada revisa en la URL pública, exporta `.md` desde el navegador y envía el dictamen al despacho. Las decisiones quedan en `localStorage` del navegador (no en el repo).

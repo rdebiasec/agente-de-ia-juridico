@@ -1,0 +1,57 @@
+name: Deploy Legal Audit Portal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'audit-portal/site/**'
+      - 'scripts/generar_audit_portal.py'
+      - 'scripts/lib/catalogo_aprobacion.py'
+      - 'agente/skills/**'
+      - 'docs/canon/lista-aprobacion-agentes-skills-pasos.md'
+      - '.github/workflows/deploy-audit-portal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build audit portal
+        run: python scripts/generar_audit_portal.py
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: audit-portal/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

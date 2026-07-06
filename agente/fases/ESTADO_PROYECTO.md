@@ -2,7 +2,7 @@
 
 Fuente sagrada: `agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md` y `agente/requisitos/requisitos_asistente.json`.
 
-El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** por el modelo **firma virtual** (`docs/plan-rediseno-firma.md`): todos los agentes activos, supervisión humana (HITL), persistencia Postgres en dev==prod.
+El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** por el modelo **firma virtual** (`docs/canon/plan-rediseno-firma.md`): todos los agentes activos, supervisión humana (HITL), persistencia Postgres en dev==prod.
 
 ## Resumen ejecutivo
 
@@ -74,7 +74,7 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 | `agente/fases/FASE_1.md` | **Obsoleta** (gating); capacidades viven en firma |
 | `agente/fases/FASE_2.md` | Stub roadmap |
 | `agente/fases/FASE_3.md` | Stub roadmap; tutelas/conceptos ya en agentes |
-| `docs/plan-rediseno-firma.md` | Plan maestro técnico |
+| `docs/canon/plan-rediseno-firma.md` | Plan maestro técnico |
 
 ## Criterio de “siguiente entrega” recomendada
 
