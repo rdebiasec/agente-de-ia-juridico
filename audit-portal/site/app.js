@@ -147,15 +147,15 @@ const GUIA_GLOSARIO = [
     },
     {
         term: 'Entrada',
-        desc: 'Datos, documentos o contexto que recibe la guía operativa antes de actuar (expediente, relato, etapa Ley 906, etc.).',
+        desc: 'Lo que la guía necesita para empezar: expediente, hechos, etapa del caso.',
     },
     {
         term: 'Salida',
-        desc: 'Producto estructurado que entrega la guía: borrador, matriz, alerta, cronología o dictamen preliminar.',
+        desc: 'Lo que produce la guía: borrador, matriz, alerta o análisis para revisar.',
     },
     {
         term: 'Destinatario',
-        desc: 'Quién usa la salida: otro agente, el despacho para firma, o control de calidad antes de compartir.',
+        desc: 'Quién recibe ese resultado: otro agente, usted para firma, o control de calidad.',
     },
 ];
 
