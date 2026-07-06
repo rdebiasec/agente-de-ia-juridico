@@ -8,47 +8,65 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .modal { transition: opacity 0.25s ease; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; }
         html { scroll-behavior: smooth; }
-        .flow-box { @apply bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 text-center; }
-        .flow-arrow { @apply text-slate-400 text-lg flex items-center justify-center; }
-        .flujo-step { @apply flex flex-col items-center min-w-[120px] max-w-[160px]; }
-        .flujo-step-title { @apply bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 text-center w-full; }
-        .flujo-step-sub { @apply text-[10px] text-slate-500 text-center mt-1 leading-snug px-1; }
-        .archi-level { @apply border-2 rounded-xl p-4 mb-2 relative; }
-        .archi-level-1 { @apply border-blue-300 bg-blue-50/50; }
-        .archi-level-2 { @apply border-purple-300 bg-purple-50/50 ml-4; }
-        .archi-level-3 { @apply border-amber-300 bg-amber-50/50 ml-8; }
-        .archi-level-4 { @apply border-emerald-300 bg-emerald-50/50 ml-12; }
-        .archi-arrow { @apply text-slate-400 text-center text-xs py-1 ml-6; }
-        .agente-hub { @apply bg-blue-100 border-2 border-blue-400 rounded-xl px-4 py-3 text-center font-bold text-sm text-blue-900; }
-        .agente-spoke { @apply bg-purple-50 border border-purple-300 rounded-lg px-2 py-2 text-center text-[10px] font-semibold text-purple-800 cursor-default; }
-        .agente-spoke:hover { @apply bg-purple-100; }
-        .agente-calidad-node { @apply bg-amber-100 border-2 border-amber-400 rounded-xl px-4 py-3 text-center font-bold text-sm text-amber-900; }
-        .agente-card-guia { @apply bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow; }
-        .guia-badge-coord { @apply text-[10px] font-bold uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded; }
-        .guia-badge-spec { @apply text-[10px] font-bold uppercase bg-purple-100 text-purple-700 px-2 py-0.5 rounded; }
-        .guia-badge-cal { @apply text-[10px] font-bold uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded; }
-        .guardrail-guia-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-4; }
+        /* Guía — sistema tipográfico y layout (solo #guia) */
+        #guia { font-size: 1rem; line-height: 1.65; color: #334155; }
+        #guia .guia-hero { @apply bg-slate-900 text-white rounded-2xl p-8 md:p-10; }
+        #guia .guia-hero h2 { @apply text-2xl md:text-3xl font-bold tracking-tight text-white; }
+        #guia .guia-hero .guia-lead { @apply text-base text-slate-300 mt-3 max-w-2xl leading-relaxed; }
+        #guia .guia-hero .guia-meta { @apply text-sm text-slate-400 mt-4; }
+        #guia .guia-section { @apply bg-white border border-slate-200 rounded-2xl p-6 md:p-8; }
+        #guia .guia-section-title { @apply text-lg font-bold text-slate-900 flex items-center gap-2 mb-1; }
+        #guia .guia-section-desc { @apply text-sm text-slate-600 mb-6 leading-relaxed; }
+        #guia .guia-subtitle { @apply text-base font-semibold text-slate-800 mb-3; }
+        #guia .guia-caption { @apply text-sm text-slate-500; }
+        #guia .guia-label { @apply text-xs font-semibold uppercase tracking-wide text-slate-500; }
+        #guia .guia-body { @apply text-sm text-slate-700 leading-relaxed; }
+        #guia .guia-link { @apply text-sm font-semibold text-blue-700 hover:text-blue-900 inline-flex items-center gap-1 mt-4; }
+        #guia .guia-nav-card { @apply block p-5 rounded-xl border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all text-left; }
+        #guia .guia-nav-card strong { @apply block text-base font-bold text-slate-900; }
+        #guia .guia-nav-card span { @apply block text-sm text-slate-600 mt-1; }
+        #guia .guia-concept-card { @apply p-5 rounded-xl border border-slate-200 bg-slate-50/50 h-full; }
+        #guia .guia-concept-card h4 { @apply text-base font-bold text-slate-900 mb-2; }
+        #guia .guia-concept-card p { @apply text-sm text-slate-600 leading-relaxed; }
+        #guia .guia-stack-item { @apply flex gap-4 items-start p-4 rounded-xl border mb-3 last:mb-0; }
+        #guia .guia-stack-icon { @apply w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-lg; }
+        #guia .guia-stack-item h4 { @apply text-base font-bold text-slate-900; }
+        #guia .guia-stack-item p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
+        #guia .guia-timeline { @apply relative pl-10 space-y-0 max-w-2xl; }
+        #guia .guia-timeline::before { content: ''; @apply absolute left-[15px] top-2 bottom-2 w-0.5 bg-slate-200; }
+        #guia .guia-timeline-item { @apply relative pb-8 last:pb-0; }
+        #guia .guia-timeline-dot { @apply absolute -left-10 top-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm; }
+        #guia .guia-timeline-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-4; }
+        #guia .guia-timeline-card h5 { @apply text-base font-bold text-slate-900; }
+        #guia .guia-timeline-card p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
+        #guia .guia-manual-card { @apply bg-white border border-slate-200 rounded-xl overflow-hidden; }
+        #guia .guia-manual-head { @apply bg-slate-800 text-white px-5 py-4; }
+        #guia .guia-manual-head h4 { @apply text-base font-bold; }
+        #guia .guia-manual-body { @apply p-5 space-y-4; }
+        #guia .guia-manual-step { @apply flex gap-3 text-sm text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100; }
+        #guia .guia-manual-step-num { @apply shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white text-sm font-bold flex items-center justify-center; }
+        #guia .guia-team-band { @apply rounded-xl border p-5 mb-3 last:mb-0; }
+        #guia .guia-team-band h4 { @apply text-base font-bold text-slate-900; }
+        #guia .guia-team-band p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
+        #guia .guia-chip { @apply inline-block text-sm bg-white border border-slate-200 rounded-lg px-3 py-1.5 m-0.5 text-slate-700; }
+        #guia .guia-rule-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-5; }
+        #guia .guia-rule-card h5 { @apply text-base font-bold text-slate-900; }
+        #guia .guia-rule-card p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
+        #guia .guia-steps-list { @apply space-y-3; }
+        #guia .guia-steps-list li { @apply text-sm text-slate-700 leading-relaxed pl-1; }
+        #guia .guia-callout { @apply bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-slate-700 leading-relaxed; }
+        #guia .guia-badge { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded; }
+        .modal { transition: opacity 0.25s ease; }
         #audit-auth-gate { @apply bg-slate-900 flex items-center justify-center p-4; }
-        /* Guía v2.3 — conocimiento procedimental */
-        .proto-timeline { @apply relative pl-8 space-y-0; }
-        .proto-timeline::before { content: ''; @apply absolute left-[11px] top-3 bottom-3 w-0.5 bg-slate-200; }
-        .proto-timeline-item { @apply relative pb-6 last:pb-0; }
-        .proto-timeline-dot { @apply absolute -left-8 top-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold; }
-        .proto-doc { @apply bg-white border-2 border-slate-300 rounded-xl overflow-hidden font-sans; }
-        .proto-doc-header { @apply bg-slate-800 text-white px-4 py-3 flex items-center gap-2; }
-        .proto-doc-body { @apply p-4 space-y-3 text-sm; }
-        .proto-doc-label { @apply text-[10px] font-bold uppercase tracking-wider text-slate-400; }
-        .proto-doc-step { @apply flex gap-2 text-xs text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2; }
-        .proto-doc-step-num { @apply shrink-0 w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center; }
-        .proto-layer { @apply flex gap-3 items-start p-4 rounded-xl border-2 mb-2; }
-        .proto-layer-icon { @apply w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-lg; }
-        .equipo-banda { @apply rounded-xl border p-4 mb-3; }
-        .equipo-chip { @apply inline-block text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 m-0.5; }
-        .proto-callout { @apply bg-amber-50 border-l-4 border-amber-400 px-4 py-3 text-sm text-amber-900 rounded-r-lg; }
+        .guia-badge-coord { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-blue-100 text-blue-800; }
+        .guia-badge-spec { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-purple-100 text-purple-800; }
+        .guia-badge-cal { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800; }
         details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .agent-panel-chevron,
+        details[open] > summary .agent-skill-chevron { transform: rotate(90deg); }
         details > summary::-webkit-details-marker { display: none; }
         details[open] > summary .agent-panel-chevron,
         details[open] > summary .agent-skill-chevron { transform: rotate(90deg); }
@@ -86,7 +104,7 @@
             <div>
                 <h1 class="text-lg md:text-xl font-bold tracking-tight text-slate-100">
                     Legal Audit Sync
-                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.3</span>
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.4</span>
                     <span id="build-generated-at" class="text-[10px] text-slate-500 ml-1 hidden md:inline" title="Última generación del catálogo"></span>
                 </h1>
                 <p class="text-xs text-slate-400">Sistema Penal-Victimas (Colombia) · Control de Calidad</p>
@@ -137,171 +155,124 @@
 
         <main class="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-10 overflow-y-auto w-full">
 
-            <section id="guia" class="scroll-mt-24 space-y-6">
-                <!-- Bloque A: Propósito -->
-                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 md:p-8 rounded-2xl shadow-lg">
-                    <h2 class="text-xl md:text-2xl font-bold">Manual de auditoría para la abogada líder</h2>
-                    <p class="text-slate-300 mt-2 text-sm leading-relaxed" id="guia-intro-text">
-                        Portal de auditoría de configuración del asistente penal-víctimas (Colombia, Ley 906).
-                    </p>
-                    <p class="text-slate-400 mt-3 text-xs italic">La IA propone; la abogada revisa, ajusta y aprueba.</p>
+            <section id="guia" class="scroll-mt-24 space-y-8">
+
+                <div class="guia-hero">
+                    <p class="guia-label text-slate-500 mb-2">Sección 0 · Guía de uso</p>
+                    <h2>Manual de aprobación del asistente penal-víctimas</h2>
+                    <p class="guia-lead" id="guia-intro-text">Revise y apruebe el manual de trabajo del asistente antes de usarlo en casos reales.</p>
+                    <p class="guia-meta"><i class="fa-solid fa-scale-balanced mr-1"></i> La IA propone; usted revisa, ajusta y aprueba.</p>
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-2">
-                    <div class="bg-white border border-emerald-200 p-5 rounded-2xl shadow-sm">
-                        <h3 class="font-bold text-emerald-800 mb-2"><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Para qué sirve este portal</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">Es la <strong>lista de verificación técnico-jurídica</strong> antes de usar el asistente en casos reales. Usted aprueba la «receta» del sistema: reglas, roles y pasos operativos. Al terminar, exporte un <strong>dictamen .md</strong> con sus decisiones para el equipo DBX y el despacho.</p>
-                    </div>
-                    <div class="bg-white border border-red-200 p-5 rounded-2xl shadow-sm">
-                        <h3 class="font-bold text-red-800 mb-2"><i class="fa-solid fa-circle-xmark text-red-400 mr-2"></i>Qué NO es</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed"><strong>No es</strong> el chat del despacho (eso está en Render). <strong>Sí es</strong> donde usted valida la configuración del asistente penal-víctimas antes de producción. El flujo del día a día ocurre en el chat; la auditoría aprueba el manual de operaciones del despacho digital.</p>
+                <div class="grid gap-4 md:grid-cols-3">
+                    <a href="#guardrails" class="guia-nav-card">
+                        <strong>1. Reglas estrictas</strong>
+                        <span>Límites que el asistente debe respetar siempre.</span>
+                    </a>
+                    <a href="#agentes" class="guia-nav-card">
+                        <strong>2. Roles del equipo</strong>
+                        <span>Quién hace qué en el despacho digital.</span>
+                    </a>
+                    <a href="#skills" class="guia-nav-card">
+                        <strong>3. Pasos de cada procedimiento</strong>
+                        <span>Las instrucciones que usted aprueba una a una.</span>
+                    </a>
+                </div>
+
+                <div class="guia-section">
+                    <h3 class="guia-section-title"><i class="fa-solid fa-circle-info text-blue-500"></i> Tres ideas clave</h3>
+                    <p class="guia-section-desc">Todo lo que revisará en este portal se resume así:</p>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="guia-concept-card">
+                            <h4><i class="fa-solid fa-user-tie text-purple-600 mr-1"></i> Rol</h4>
+                            <p>La función dentro del equipo: quien recibe el caso, quien redacta, quien revisa. Usted valida que cada rol tenga sentido para víctimas en penal colombiano.</p>
+                        </div>
+                        <div class="guia-concept-card border-amber-200 bg-amber-50/40">
+                            <h4><i class="fa-solid fa-book text-amber-600 mr-1"></i> Procedimiento</h4>
+                            <p>El manual de una tarea concreta — por ejemplo, redactar un memorial o ordenar una cronología. Indica para qué sirve, quién lo hace y en qué orden.</p>
+                        </div>
+                        <div class="guia-concept-card">
+                            <h4><i class="fa-solid fa-list-check text-emerald-600 mr-1"></i> Paso</h4>
+                            <p>Cada instrucción numerada del manual. Es lo más detallado que usted marca como conforme, pide ajustar o restablece.</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Bloque B: Qué conocimiento enseña -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-graduation-cap text-blue-500 mr-2"></i>Qué conocimiento le enseña al asistente</h3>
-                    <p class="text-sm text-slate-600 mb-2">Usted no programa la IA: usted <strong>aprueba el manual de procedimientos</strong> con el que trabajará en casos reales.</p>
-                    <p class="proto-callout mb-4 text-xs"><strong>Conocimiento procedimental</strong> = el «cómo se hace» paso a paso (como un protocolo interno del despacho). En este sistema vive en archivos <code class="bg-amber-100 px-1 rounded text-[11px]">SKILL.md</code> — cada uno es un procedimiento; dentro tiene los pasos que usted audita.</p>
+                <div class="guia-section">
+                    <h3 class="guia-section-title"><i class="fa-solid fa-layer-group text-slate-600"></i> Qué está aprobando</h3>
+                    <p class="guia-section-desc">De lo general a lo específico. Empiece por las reglas, continúe con los roles y termine en los pasos.</p>
                     <div id="guia-diagrama"></div>
                 </div>
 
-                <!-- Bloque D: Equipo digital y procedimientos -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm space-y-6">
+                <div class="guia-section space-y-8">
                     <div>
-                        <h3 class="font-bold text-slate-900"><i class="fa-solid fa-people-group text-purple-500 mr-2"></i>Su equipo digital y los procedimientos (SKILL.md)</h3>
-                        <p class="text-sm text-slate-600 mt-2">Imagine un despacho con <strong>11 roles</strong>. Cuando usted pregunta algo, alguien recibe el caso, abre el <strong>procedimiento correcto</strong> (SKILL.md) y lo ejecuta paso a paso. Usted revisa que esos pasos sean los que haría un abogado humano.</p>
-                    </div>
-
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-800 mb-1">1. Qué pasa cuando usted hace una consulta</h4>
-                        <p class="text-xs text-slate-500 mb-3">Recorrido en el chat del despacho (no en este portal de auditoría).</p>
+                        <h3 class="guia-section-title"><i class="fa-solid fa-route text-purple-500"></i> Cómo atiende el asistente una consulta</h3>
+                        <p class="guia-section-desc">Esto ocurre en el chat del despacho cuando usted trabaja un caso. Aquí solo revisa que el manual detrás de ese flujo esté bien escrito.</p>
                         <div id="guia-flujo-lineal"></div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold text-slate-800 mb-1">2. Anatomía de un procedimiento — archivo SKILL.md</h4>
-                        <p class="text-xs text-slate-500 mb-3">Esto es lo que usted valida en la sección 3: el «manual de instrucciones» de cada tarea jurídica.</p>
+                        <h3 class="guia-subtitle">Ejemplo de un procedimiento</h3>
+                        <p class="guia-caption mb-4">Así se ve el manual de una tarea — lo mismo que revisará en la sección 3.</p>
                         <div id="guia-procedimiento-skill"></div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-bold text-slate-800 mb-1">3. Los 11 roles de su equipo</h4>
-                        <p class="text-xs text-slate-500 mb-3">Quién ejecuta cada procedimiento. Sin nombres técnicos — audite el detalle en la sección 2.</p>
+                        <h3 class="guia-subtitle">Su equipo digital</h3>
+                        <p class="guia-caption mb-4">Once roles organizados en recepción, especialistas y control de calidad.</p>
                         <div id="guia-flujo-mapa"></div>
                     </div>
 
-                    <div id="guia-ejemplo-flujo" class="proto-callout">
-                        <h4 class="text-sm font-bold mb-2"><i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i>Ejemplo completo (caso ficticio)</h4>
-                        <p class="text-sm leading-relaxed">
-                            Usted escribe: <em>«Caso en indagación, la víctima aportó chats, necesito memorial de impulso.»</em><br>
-                            <strong>1.</strong> El <strong>coordinador</strong> detecta etapa y datos faltantes.<br>
-                            <strong>2.</strong> Abre el procedimiento <strong>«Redactar memorial penal»</strong> (SKILL.md) y lo asigna al <strong>redactor</strong>.<br>
-                            <strong>3.</strong> El redactor sigue los pasos del manual: recopilar hechos → redactar → verificar citas.<br>
-                            <strong>4.</strong> <strong>Calidad</strong> revisa tono y coherencia.<br>
-                            <strong>5.</strong> Usted recibe el borrador para firmar o ajustar.
-                        </p>
+                    <div id="guia-ejemplo-flujo" class="guia-callout">
+                        <p class="font-semibold text-slate-900 mb-2">Ejemplo práctico</p>
+                        <p>Usted necesita un memorial de impulso en indagación. El coordinador ordena el caso, el redactor sigue el manual «Redactar memorial penal» paso a paso, calidad revisa el borrador y usted lo firma o lo devuelve con observaciones.</p>
                     </div>
 
-                    <div>
-                        <h4 class="text-sm font-bold text-slate-800 mb-3">Resumen por rol — qué auditar</h4>
-                        <div id="guia-agentes-detalle" class="grid gap-3 md:grid-cols-2"></div>
-                    </div>
-
-                    <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl">
-                        <h4 class="text-sm font-bold text-purple-900 mb-2">Qué audita en la sección 2</h4>
-                        <ul class="text-sm text-purple-900/90 space-y-1 list-disc list-inside">
-                            <li>¿El <strong>propósito</strong> del agente tiene sentido para víctimas en penal colombiano?</li>
-                            <li>¿El límite <strong>«no reemplaza»</strong> es correcto?</li>
-                            <li>¿Los <strong>skills</strong> asignados cubren el trabajo que espera del rol?</li>
-                            <li>¿Los <strong>pasos</strong> de esos skills son los que haría un abogado humano?</li>
-                        </ul>
-                        <a href="#agentes" class="inline-block mt-3 text-sm font-semibold text-purple-700 hover:text-purple-900">Continúe a la sección 2 — Agentes IA ↓</a>
-                    </div>
+                    <details class="border border-slate-200 rounded-xl overflow-hidden">
+                        <summary class="px-5 py-4 cursor-pointer font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 text-base">
+                            Ver los 11 roles y qué revisar en cada uno
+                        </summary>
+                        <div class="p-5 border-t border-slate-200">
+                            <div id="guia-agentes-detalle" class="grid gap-4 md:grid-cols-2"></div>
+                            <a href="#agentes" class="guia-link">Ir a auditar roles <i class="fa-solid fa-arrow-right text-xs"></i></a>
+                        </div>
+                    </details>
                 </div>
 
-                <!-- Bloque C: Reglas Estrictas ampliadas -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-shield-halved text-blue-500 mr-2"></i>Reglas Estrictas (Guardrails)</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed mb-2">Son <strong>límites técnicos obligatorios</strong> del motor de IA — no son recomendaciones éticas opcionales. Aplican a <em>toda</em> respuesta del sistema.</p>
-                    <div class="grid gap-3 md:grid-cols-2 text-xs mb-4">
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                            <strong class="text-slate-700">Qué NO son</strong>
-                            <p class="text-slate-500 mt-1">No sustituyen su criterio; no son los pasos de un skill; no son normas legales citables.</p>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                            <strong class="text-slate-700">vs. Principio profesional</strong>
-                            <p class="text-slate-500 mt-1">El principio (sidebar) es su última palabra sobre estrategia y firma; las reglas son barreras automáticas del sistema.</p>
-                        </div>
-                    </div>
-                    <div id="guia-guardrails-detalle" class="grid gap-3 md:grid-cols-2"></div>
-                    <a href="#guardrails" class="inline-block mt-4 text-sm font-semibold text-blue-700 hover:text-blue-900">Revíselas y márquelas en la sección 1 ↓</a>
+                <div class="guia-section">
+                    <h3 class="guia-section-title"><i class="fa-solid fa-shield-halved text-blue-500"></i> Las 8 reglas estrictas</h3>
+                    <p class="guia-section-desc">Barreras obligatorias del asistente — no son sugerencias. Aplican en toda respuesta, antes de cualquier procedimiento.</p>
+                    <div id="guia-guardrails-detalle" class="grid gap-4 md:grid-cols-2"></div>
+                    <a href="#guardrails" class="guia-link">Auditar reglas en la sección 1 <i class="fa-solid fa-arrow-right text-xs"></i></a>
                 </div>
 
-                <!-- Bloque D2: Agente / Skill / Paso -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-4"><i class="fa-solid fa-cubes text-indigo-500 mr-2"></i>Tres piezas que debe entender</h3>
-                    <p class="text-sm text-slate-600 mb-4">Analogía del despacho: <em>quién</em> hace el trabajo, <em>qué manual</em> sigue, y <em>cada instrucción</em> dentro del manual.</p>
-                    <div class="grid gap-4 md:grid-cols-3 text-sm">
-                        <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl">
-                            <strong class="text-purple-800 text-base"><i class="fa-solid fa-user-tie mr-1"></i> Rol (agente)</strong>
-                            <p class="text-slate-600 mt-2 text-xs">La «persona» del equipo digital: coordinador, cronología, redactor, etc. Audita en <a href="#agentes" class="text-purple-700 underline">sección 2</a>.</p>
+                <div class="guia-section">
+                    <h3 class="guia-section-title"><i class="fa-solid fa-clipboard-check text-emerald-600"></i> Cómo completar la revisión</h3>
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div>
+                            <p class="guia-subtitle mb-3">Orden recomendado</p>
+                            <ol class="guia-steps-list list-decimal list-inside space-y-2">
+                                <li>Lea esta guía.</li>
+                                <li><a href="#guardrails" class="text-blue-700 underline">Reglas estrictas</a> — apruebe o ajuste las ocho.</li>
+                                <li><a href="#agentes" class="text-blue-700 underline">Roles del equipo</a> — valide cada función.</li>
+                                <li><a href="#skills" class="text-blue-700 underline">Pasos por procedimiento</a> — revise cada instrucción.</li>
+                                <li>Exporte su dictamen y compártalo con el despacho.</li>
+                            </ol>
                         </div>
-                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                            <strong class="text-amber-800 text-base"><i class="fa-solid fa-file-lines mr-1"></i> Procedimiento (SKILL.md)</strong>
-                            <p class="text-slate-600 mt-2 text-xs">El manual de «cómo hacer» una tarea. Contiene propósito, límites y pasos. Audita en <a href="#skills" class="text-amber-700 underline">sección 3</a>.</p>
-                        </div>
-                        <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                            <strong class="text-emerald-800 text-base"><i class="fa-solid fa-list-ol mr-1"></i> Paso</strong>
-                            <p class="text-slate-600 mt-2 text-xs">Cada instrucción numerada del manual — la unidad que usted aprueba con APROBAR / AJUSTAR / RESTABLECER.</p>
+                        <div>
+                            <p class="guia-subtitle mb-3">Botones de decisión</p>
+                            <ul class="guia-steps-list space-y-2">
+                                <li><strong>Aprobar</strong> — conforme con la regla, rol o paso.</li>
+                                <li><strong>Ajustar</strong> — indique qué cambiar y por qué (obligatorio).</li>
+                                <li><strong>Restablecer</strong> — deshace su decisión.</li>
+                            </ul>
+                            <p class="guia-caption mt-4">Su progreso se guarda en este navegador. Exporte antes de cerrar sesión o limpiar datos.</p>
                         </div>
                     </div>
+                    <p class="guia-caption mt-6" id="guia-categorias-note"></p>
+                    <div id="guia-categorias" class="hidden"></div>
                 </div>
 
-                <!-- Bloque E: Categorías de skills -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-2"><i class="fa-solid fa-layer-group text-amber-500 mr-2"></i>Agrupaciones de skills</h3>
-                    <p class="text-sm text-slate-600 mb-4">Los skills se agrupan por <strong>función jurídica</strong> (no por agente), para revisar procedimientos similares juntos.</p>
-                    <div id="guia-categorias" class="grid gap-2 text-xs"></div>
-                </div>
-
-                <!-- Bloque G: Manual paso a paso -->
-                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-slate-900 mb-3"><i class="fa-solid fa-list-ol text-slate-600 mr-2"></i>Manual de uso — 7 pasos</h3>
-                    <ol class="text-sm text-slate-700 space-y-2 list-decimal list-inside">
-                        <li>Lea esta guía (está aquí).</li>
-                        <li><a href="#guardrails" class="text-blue-700 underline">Sección 1 — Reglas Estrictas:</a> apruebe o ajuste las 8 barreras globales.</li>
-                        <li><a href="#agentes" class="text-purple-700 underline">Sección 2 — Agentes:</a> valide cada rol; despliegue skills si quiere ver pasos en contexto.</li>
-                        <li><a href="#skills" class="text-amber-700 underline">Sección 3 — Pasos por skill:</a> recorra por categoría y apruebe cada paso.</li>
-                        <li>Use <strong>AJUSTAR</strong> cuando algo deba cambiarse (obligatorio: razón + solución).</li>
-                        <li>Use <strong>RESTABLECER</strong> si quiere deshacer una decisión.</li>
-                        <li><strong>Exportar .md</strong> y compartir el dictamen con el equipo.</li>
-                    </ol>
-                    <p class="text-xs text-slate-400 mt-3">Progreso: 0 % → reglas → agentes → pasos → exportar</p>
-                </div>
-
-                <!-- Bloque H: Botones y persistencia -->
-                <div class="bg-amber-50 border border-amber-200 p-5 rounded-2xl">
-                    <h3 class="font-bold text-amber-900 mb-2"><i class="fa-solid fa-rotate-left mr-2"></i>Cómo auditar, deshacer y guardar</h3>
-                    <ul class="text-sm text-amber-900/90 space-y-1 list-disc list-inside">
-                        <li><strong>APROBAR</strong> — conforme con el paso o regla.</li>
-                        <li><strong>AJUSTAR</strong> — requiere razón y solución (obligatorio).</li>
-                        <li><strong>RESTABLECER</strong> — borra su decisión y vuelve al estado inicial.</li>
-                        <li><strong>Agregar / Eliminar</strong> — puede añadir o quitar reglas estrictas y pasos.</li>
-                    </ul>
-                    <p class="text-xs text-amber-800/80 mt-3">Las decisiones se guardan en <code class="bg-amber-100 px-1 rounded">localStorage</code> del navegador (no en el servidor). Agregar o eliminar ítems también queda guardado y sale en el export. <strong>Advertencia:</strong> limpiar caché del navegador borra el progreso — exporte antes.</p>
-                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl">
-                        <p class="text-[10px] font-bold uppercase text-slate-400 mb-2">Ejemplo de tarjeta de paso</p>
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <p class="text-xs text-slate-600 flex-1">Paso 1 — Verificar etapa procesal y radicado en expediente.</p>
-                            <div class="flex flex-wrap gap-1">
-                                <span class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-600 text-white">APROBAR</span>
-                                <span class="px-2 py-1 rounded text-[10px] font-bold bg-amber-500 text-white">AJUSTAR</span>
-                                <span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-500 text-white">RESTABLECER</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </section>
 
             <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-sm space-y-4">
@@ -429,6 +400,6 @@
 
     <script src="./auth-config.js"></script>
     <script src="./auth-gate.js"></script>
-    <script src="./app.js?v=2.3"></script>
+    <script src="./app.js?v=2.4"></script>
 </body>
 </html>

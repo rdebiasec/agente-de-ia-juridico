@@ -22,7 +22,7 @@ python scripts/generar_audit_portal.py
 python -m http.server 8080 --directory audit-portal/dist
 ```
 
-Abra `http://localhost:8080` (versión **v2.2** — si no ve cambios, recargue con Cmd+Shift+R).
+Abra `http://localhost:8080` (versión **v2.3** — si no ve cambios, recargue con Cmd+Shift+R).
 
 ## Manual de uso (sección 0)
 
