@@ -20,12 +20,26 @@ from lib.catalogo_aprobacion import (  # noqa: E402
     GUARDRAILS,
     agent_group,
     agent_skills_map,
+    agent_titulo,
     build_skill_steps,
+    infer_destinatario,
     load_skills_catalog,
+    skill_flujo_pasos,
+    skill_titulo_upper,
 )
 
 SITE_DIR = ROOT / "audit-portal" / "site"
 DIST_DIR = ROOT / "audit-portal" / "dist"
+
+# Login del portal: desactivado por defecto (local y GitHub Pages).
+# Para reactivar: AUDIT_PORTAL_AUTH_ENABLED=1 y AUDIT_PORTAL_PASSWORD en el entorno de build.
+def audit_auth_enabled() -> bool:
+    return os.environ.get("AUDIT_PORTAL_AUTH_ENABLED", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 def build_audit_data() -> dict:
@@ -41,14 +55,24 @@ def build_audit_data() -> dict:
             desc = "Skill atomico del sistema penal-victimas."
         steps = build_skill_steps(data.get("steps") or [])
         pasos_total += len(steps)
+        agent_ids = data.get("agents") or []
         skills.append(
             {
                 "id": sid,
                 "name": sid,
+                "titulo": skill_titulo_upper(
+                    (data.get("instruccion") or "").strip(),
+                    desc,
+                ),
                 "category": data.get("category") or "Sin categoria",
                 "desc": desc,
                 "instruccion": (data.get("instruccion") or "").strip(),
-                "agents": data.get("agents") or [],
+                "inputs": (data.get("inputs") or "").strip(),
+                "outputs": (data.get("outputs") or "").strip(),
+                "agents": agent_ids,
+                "agentes_ejecutores": [agent_titulo(aid) for aid in agent_ids],
+                "destinatario": infer_destinatario(agent_ids),
+                "flujo_pasos": skill_flujo_pasos(steps),
                 "step_count": len(steps),
                 "steps": steps,
                 "steps_missing": len(steps) == 0,
@@ -64,9 +88,12 @@ def build_audit_data() -> dict:
                 "id": aid,
                 "name": aid,
                 "nombre_corto": a["nombre_corto"],
+                "titulo_profesional": a.get("titulo_profesional") or a["nombre_corto"].upper(),
                 "desc": a["proposito"],
                 "problema": a["problema"],
+                "necesidad": a.get("necesidad", ""),
                 "no_reemplaza": a["no_reemplaza"],
+                "prompt_simple": a.get("prompt_simple") or [],
                 "grupo": agent_group(aid),
                 "skills_count": len(skill_ids),
                 "skill_ids": skill_ids,
@@ -100,6 +127,7 @@ def build_audit_data() -> dict:
         "intro": {
             "agentes": agentes_n,
             "skills": len(skills),
+            "guias_operativas": len(skills),
             "pasos_total": pasos_total,
             "guardrails": guardrails_n,
             "items_total": items_total,
@@ -119,7 +147,9 @@ def build_audit_data() -> dict:
 
 
 def build_auth_config_js() -> str:
-    """Genera auth-config.js. Login activo si AUDIT_PORTAL_PASSWORD está en el entorno."""
+    """Genera auth-config.js. Login solo si AUDIT_PORTAL_AUTH_ENABLED=1 y hay contraseña."""
+    if not audit_auth_enabled():
+        return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
     password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
     if not password:
         return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
@@ -131,13 +161,29 @@ def build_auth_config_js() -> str:
     return f"window.AUDIT_AUTH_CONFIG={json.dumps(payload, ensure_ascii=False)};\n"
 
 
+def _auth_config_enabled(content: str) -> bool:
+    compact = content.replace(" ", "")
+    return '"enabled":true' in compact or "enabled:true" in compact
+
+
 def write_auth_config() -> None:
     out = DIST_DIR / "auth-config.js"
-    out.write_text(build_auth_config_js(), encoding="utf-8")
-    if os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip():
-        print("  auth: login habilitado (AUDIT_PORTAL_PASSWORD en entorno)")
-    else:
-        print("  auth: sin AUDIT_PORTAL_PASSWORD — login desactivado")
+    if not audit_auth_enabled():
+        out.write_text("window.AUDIT_AUTH_CONFIG={enabled:false};\n", encoding="utf-8")
+        print("  auth: login desactivado (AUDIT_PORTAL_AUTH_ENABLED no está activo)")
+        return
+    password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
+    if password:
+        out.write_text(build_auth_config_js(), encoding="utf-8")
+        print("  auth: login habilitado (AUDIT_PORTAL_AUTH_ENABLED + contraseña)")
+        return
+    if out.is_file():
+        content = out.read_text(encoding="utf-8")
+        if _auth_config_enabled(content):
+            print("  auth: login habilitado (auth-config.js en site/)")
+            return
+    out.write_text("window.AUDIT_AUTH_CONFIG={enabled:false};\n", encoding="utf-8")
+    print("  auth: sin credenciales — login desactivado")
 
 
 def copy_site_to_dist() -> None:

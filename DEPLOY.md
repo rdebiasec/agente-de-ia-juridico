@@ -211,15 +211,17 @@ python -m http.server 8080 --directory audit-portal/dist
 
 Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
 
-### Login del portal (solo GitHub Pages)
+### Login del portal (desactivado temporalmente)
 
-El sitio en Pages es estático; el acceso se protege con un **gate en el navegador** (contraseña hasheada en `auth-config.js`, generado en CI). En `localhost` **nunca** se pide contraseña.
+El gate de contraseña está **apagado** en local y en GitHub Pages. El build solo activa login si `AUDIT_PORTAL_AUTH_ENABLED=1` **y** existe `AUDIT_PORTAL_PASSWORD` en el entorno de CI.
 
-1. En el repo GitHub → **Settings → Secrets and variables → Actions**, cree:
-   - `AUDIT_PORTAL_PASSWORD` — mínimo 12 caracteres (obligatorio para activar login)
+Para reactivar más adelante:
+
+1. GitHub → **Settings → Secrets and variables → Actions**
+   - `AUDIT_PORTAL_PASSWORD` — mínimo 12 caracteres
    - `AUDIT_PORTAL_USERNAME` — opcional (por defecto `auditor`)
-2. `git push origin main` → el workflow regenera `dist/` con login habilitado.
-3. La sesión dura 8 h en `sessionStorage` del navegador.
+2. Variables → `AUDIT_PORTAL_AUTH_ENABLED` = `1` (o exportar en el workflow)
+3. `git push origin main` → el workflow regenera `dist/` con login habilitado.
 
 **Nota:** esto evita acceso casual; no sustituye autenticación de servidor. Los archivos estáticos siguen siendo descargables por quien conozca la URL y evite el JS.
 

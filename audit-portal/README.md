@@ -22,11 +22,11 @@ python scripts/generar_audit_portal.py
 python -m http.server 8080 --directory audit-portal/dist
 ```
 
-Abra `http://localhost:8080` (versión **v3.0** — si no ve cambios, recargue con Cmd+Shift+R).
+Abra `http://localhost:8080` (versión **v3.1-dev** — si no ve cambios, recargue con Cmd+Shift+R).
 
-## Manual de uso (sección 0) — v3.0
+## Manual de uso (sección 0) — v3.1-dev
 
-La sección **0. Guía** usa layout pedagógico de dos columnas (índice fijo + contenido), embudo visual de 4 niveles, un ejemplo narrativo (memorial de impulso), equipo en 3 bandas y CTA hacia el panel de auditoría. Estilos en `site/guia.css`. Las 8 reglas completas solo aparecen en auditoría (sección 1).
+La auditoría tiene **2 secciones**: reglas estrictas y roles del equipo. Los procedimientos y sus pasos solo aparecen **dentro de cada rol** (sin listado plano de skills). Tipografía unificada en `audit-portal.css`.
 
 ## Qué audita la abogada
 
@@ -49,12 +49,14 @@ Push a `main` → workflow `.github/workflows/deploy-audit-portal.yml` publica `
 
 Ver también [`DEPLOY.md`](../DEPLOY.md).
 
-### Login (local y producción idénticos)
+### Login (desactivado temporalmente)
 
 | Entorno | Login |
 |---|---|
-| `localhost` | Sí — si `audit-portal/.env` define `AUDIT_PORTAL_PASSWORD` (ver `.env.example`) |
-| GitHub Pages | Sí — secreto `AUDIT_PORTAL_PASSWORD` en Actions |
+| `localhost` / `127.0.0.1` | No — acceso directo |
+| GitHub Pages | No — acceso directo (hasta reactivar) |
+
+Para reactivar: `AUDIT_PORTAL_AUTH_ENABLED=1` + `AUDIT_PORTAL_PASSWORD` en el build de CI.
 
 Usuario por defecto: `auditor` (o `AUDIT_PORTAL_USERNAME`). Sesión: 8 h en `sessionStorage`.
 

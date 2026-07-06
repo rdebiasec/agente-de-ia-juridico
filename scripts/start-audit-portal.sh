@@ -17,8 +17,12 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 if [[ -z "${AUDIT_PORTAL_PASSWORD:-}" ]]; then
-  echo "⚠️  Sin AUDIT_PORTAL_PASSWORD — login desactivado en este build."
-  echo "   Copie audit-portal/.env.example → audit-portal/.env y defina la contraseña."
+  if [[ -f "$ROOT/audit-portal/site/auth-config.js" ]]; then
+    echo "→ Sin .env: usando auth-config.js de site/ (hash embebido)"
+  else
+    echo "⚠️  Sin AUDIT_PORTAL_PASSWORD ni auth-config.js — login desactivado."
+    echo "   Copie audit-portal/.env.example → audit-portal/.env o defina site/auth-config.js"
+  fi
 fi
 
 echo "→ Generando audit-portal/dist..."
@@ -30,9 +34,17 @@ if lsof -ti ":$PORT" >/dev/null 2>&1; then
   sleep 0.5
 fi
 
-echo "→ Servidor en http://localhost:$PORT (Ctrl+C para detener)"
+echo "→ Servidor en http://127.0.0.1:$PORT (Ctrl+C para detener)"
+echo "→ Local: sin pantalla de login (acceso directo al panel)"
+if [[ -n "${AUDIT_PORTAL_PASSWORD:-}" ]]; then
+  echo "→ GitHub Pages: login activo — usuario: ${AUDIT_PORTAL_USERNAME:-auditor} (contraseña en audit-portal/.env / Secrets)"
+elif [[ -f "$ROOT/audit-portal/site/auth-config.js" ]]; then
+  echo "→ GitHub Pages: login activo — usuario: auditor (hash en site/auth-config.js)"
+else
+  echo "→ GitHub Pages: sin credenciales — login desactivado hasta definir AUDIT_PORTAL_PASSWORD"
+fi
 if [[ "$OPEN_BROWSER" == "1" ]] && command -v open >/dev/null 2>&1; then
-  (sleep 1 && open "http://localhost:$PORT/") &
+  (sleep 1 && open "http://127.0.0.1:$PORT/") &
 fi
 
-exec python3 -m http.server "$PORT" --directory audit-portal/dist
+exec python3 -m http.server "$PORT" --bind 127.0.0.1 --directory audit-portal/dist

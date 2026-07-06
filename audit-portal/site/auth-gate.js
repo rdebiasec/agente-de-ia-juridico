@@ -1,4 +1,4 @@
-/* Legal Audit Sync — login (auth-config.js generado en build) */
+/* Auditoría de Instrucciones — login (auth-config.js generado en build) */
 
 (function () {
     const SESSION_KEY = 'legal-audit-portal-auth';
@@ -8,7 +8,14 @@
         return window.AUDIT_AUTH_CONFIG || { enabled: false };
     }
 
+    /** Sin login en localhost; obligatorio en GitHub Pages si auth-config está activo. */
+    function isLocalEnvironment() {
+        const host = window.location.hostname;
+        return host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+    }
+
     function authRequired() {
+        if (isLocalEnvironment()) return false;
         return authConfig().enabled === true;
     }
 
@@ -129,6 +136,8 @@
 
     window.__auditAuthPromise = new Promise(resolve => {
         if (!authRequired()) {
+            hideGate();
+            document.getElementById('audit-auth-logout')?.classList.add('hidden');
             resolve(true);
             return;
         }

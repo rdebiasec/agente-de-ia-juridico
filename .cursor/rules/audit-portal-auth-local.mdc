@@ -1,0 +1,24 @@
+---
+description: Auditoría de Instrucciones — login desactivado (local y GitHub Pages) hasta nuevo aviso
+alwaysApply: true
+---
+
+# Audit portal — autenticación
+
+**Estado actual:** login **desactivado** en local y en GitHub Pages. Acceso directo al panel en ambos entornos.
+
+## Reactivar login (cuando el despacho lo indique)
+
+1. Build con `AUDIT_PORTAL_AUTH_ENABLED=1` y `AUDIT_PORTAL_PASSWORD` (mín. 12 caracteres).
+2. En GitHub Actions: añadir secreto `AUDIT_PORTAL_AUTH_ENABLED` = `1` (o variable en el workflow) además de `AUDIT_PORTAL_PASSWORD`.
+3. En local: `auth-gate.js` ya omite login en `localhost`; en Pages dependerá de `auth-config.js` generado en CI.
+
+## Implementación
+
+- `scripts/generar_audit_portal.py` → `audit_auth_enabled()` controla `auth-config.js`.
+- `audit-portal/site/auth-gate.js` → bypass adicional en localhost vía `isLocalEnvironment()`.
+
+## Smoke test tras cambios en audit-portal
+
+1. **Local:** `./scripts/start-audit-portal.sh` → `http://127.0.0.1:8080` → sin gate, app carga de inmediato.
+2. **Producción:** GitHub Pages → sin gate, app carga de inmediato (mientras login esté desactivado).
