@@ -211,10 +211,12 @@ python -m http.server 8080 --directory audit-portal/dist
 
 Portal v2.1: audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
 
-### Despliegue a Pages
+### Despliegue a Pages (patrón `dbx-solutions-website`)
 
-1. Repo → **Settings → Pages** → Source: **GitHub Actions**
-2. `git push origin main` (cambios en `audit-portal/site/` o skills)
-3. Workflow `.github/workflows/deploy-audit-portal.yml` publica `audit-portal/dist/`
+1. Repo **público** (requerido para Pages gratuito)
+2. `git push origin main` → workflow publica `audit-portal/dist` en rama **`gh-pages`**
+3. URL: **https://rdebiasec.github.io/agente-de-ia-juridico/**
+
+Para dominio propio (ej. subdominio en DBX), configurar CNAME en Settings → Pages como en `dbx-solutions-website`.
 
 La abogada revisa en la URL pública, exporta `.md` desde el navegador y envía el dictamen al despacho. Las decisiones quedan en `localStorage` del navegador (no en el repo).
