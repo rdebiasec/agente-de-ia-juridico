@@ -22,11 +22,11 @@ python scripts/generar_audit_portal.py
 python -m http.server 8080 --directory audit-portal/dist
 ```
 
-Abra `http://localhost:8080` (versión **v2.4** — si no ve cambios, recargue con Cmd+Shift+R).
+Abra `http://localhost:8080` (versión **v3.0** — si no ve cambios, recargue con Cmd+Shift+R).
 
-## Manual de uso (sección 0)
+## Manual de uso (sección 0) — v3.0
 
-La sección **0. Guía** incluye el manual completo para la abogada líder: jerarquía de 4 niveles, las 8 Reglas Estrictas con ejemplos, el flujo de los 11 agentes (3 gráficas) y el manual de auditoría en 7 pasos. Contenido dinámico desde `audit-data.json`.
+La sección **0. Guía** usa layout pedagógico de dos columnas (índice fijo + contenido), embudo visual de 4 niveles, un ejemplo narrativo (memorial de impulso), equipo en 3 bandas y CTA hacia el panel de auditoría. Estilos en `site/guia.css`. Las 8 reglas completas solo aparecen en auditoría (sección 1).
 
 ## Qué audita la abogada
 

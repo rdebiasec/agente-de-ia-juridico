@@ -52,76 +52,70 @@ const GUARDRAIL_PROTEGE = {
 
 const FLUJO_CONSULTA = [
     {
-        title: 'Usted plantea la necesidad',
-        sub: 'Describe el caso o la tarea, como le escribiría a un practicante del despacho.',
-        color: 'bg-slate-500',
+        title: 'Usted consulta',
+        sub: 'Describe la necesidad del caso, como le escribiría a un practicante.',
+        color: '#64748b',
         icon: 'fa-comment-dots',
     },
     {
-        title: 'Recepción y enfoque',
-        sub: 'El coordinador entiende la urgencia, la etapa procesal y qué manual aplicar.',
-        color: 'bg-blue-500',
-        icon: 'fa-inbox',
+        title: 'El equipo enruta',
+        sub: 'Recepción y especialista eligen el manual correcto.',
+        color: '#2563eb',
+        icon: 'fa-route',
     },
     {
-        title: 'Se abre el manual de la tarea',
-        sub: 'El especialista adecuado toma el procedimiento correspondiente.',
-        color: 'bg-purple-500',
-        icon: 'fa-book-open',
-    },
-    {
-        title: 'Ejecución paso a paso',
-        sub: 'El asistente sigue las instrucciones que usted revisa en este portal.',
-        color: 'bg-amber-500',
+        title: 'Manual paso a paso',
+        sub: 'El asistente sigue las instrucciones que usted aprueba aquí.',
+        color: '#d97706',
         icon: 'fa-list-check',
     },
     {
-        title: 'Control de calidad',
-        sub: 'Revisión interna antes de entregarle el resultado.',
-        color: 'bg-orange-500',
-        icon: 'fa-magnifying-glass',
-    },
-    {
-        title: 'Usted revisa y firma',
+        title: 'Usted firma',
         sub: 'Recibe un borrador. Usted decide si radica, ajusta o rechaza.',
-        color: 'bg-emerald-500',
+        color: '#059669',
         icon: 'fa-signature',
     },
 ];
 
 const PROTO_LAYERS = [
     {
-        icon: 'fa-shield-halved',
-        iconBg: 'bg-blue-100 text-blue-600',
-        border: 'border-blue-200 bg-blue-50/50',
+        funnelClass: 'guia-funnel-layer--rules',
         title: 'Reglas estrictas',
         countKey: 'guardrails',
         desc: 'Límites que el asistente debe respetar en toda respuesta.',
     },
     {
-        icon: 'fa-user-tie',
-        iconBg: 'bg-purple-100 text-purple-600',
-        border: 'border-purple-200 bg-purple-50/50',
+        funnelClass: 'guia-funnel-layer--roles',
         title: 'Roles del equipo',
         countKey: 'agentes',
         desc: 'Once funciones: quien recibe, quien analiza, quien redacta, quien revisa.',
     },
     {
-        icon: 'fa-book',
-        iconBg: 'bg-amber-100 text-amber-700',
-        border: 'border-amber-200 bg-amber-50/70 ring-1 ring-amber-200',
+        funnelClass: 'guia-funnel-layer--procs',
         title: 'Procedimientos',
         countKey: 'skills',
         desc: 'Manuales de cada tarea jurídica — el «cómo hacer» del despacho digital.',
-        highlight: true,
     },
     {
-        icon: 'fa-list-ol',
-        iconBg: 'bg-emerald-100 text-emerald-600',
-        border: 'border-emerald-200 bg-emerald-50/50',
+        funnelClass: 'guia-funnel-layer--steps',
         title: 'Pasos',
         countKey: 'pasos',
         desc: 'Instrucciones numeradas dentro de cada manual. Lo que usted aprueba o ajusta.',
+    },
+];
+
+const GUIA_GLOSARIO = [
+    {
+        term: 'Rol',
+        desc: 'La función dentro del equipo: quien recibe el caso, quien redacta, quien revisa.',
+    },
+    {
+        term: 'Procedimiento',
+        desc: 'El manual de una tarea concreta — por ejemplo, redactar un memorial o ordenar una cronología.',
+    },
+    {
+        term: 'Paso',
+        desc: 'Cada instrucción numerada del manual. Es lo más detallado que usted marca como conforme o pide ajustar.',
     },
 ];
 
@@ -675,97 +669,89 @@ function renderGuiaDiagrama() {
     const layers = PROTO_LAYERS.map(layer => {
         const n = counts[layer.countKey] ?? '—';
         return `
-            <div class="guia-stack-item ${layer.border}">
-                <div class="guia-stack-icon ${layer.iconBg}">
-                    <i class="fa-solid ${layer.icon}"></i>
-                </div>
-                <div class="min-w-0">
-                    <h4>${escapeHtml(layer.title)} <span class="text-slate-400 font-normal">(${n})</span></h4>
-                    <p>${escapeHtml(layer.desc)}</p>
-                </div>
+            <div class="guia-funnel-layer ${layer.funnelClass}">
+                <h4>${escapeHtml(layer.title)} <span class="guia-count">(${n})</span></h4>
+                <p>${escapeHtml(layer.desc)}</p>
             </div>`;
     }).join('');
 
-    el.innerHTML = layers;
+    el.innerHTML = `<div class="guia-funnel">${layers}</div>`;
 }
 
-function renderFlujoLineal() {
-    const el = document.getElementById('guia-flujo-lineal');
+function renderGuiaGlosario() {
+    const el = document.getElementById('guia-glosario');
     if (!el) return;
-    const items = FLUJO_CONSULTA.map(s => `
-        <div class="guia-timeline-item">
-            <div class="guia-timeline-dot ${s.color}">
+    el.innerHTML = GUIA_GLOSARIO.map(g => `
+        <div class="guia-glossary-item">
+            <strong>${escapeHtml(g.term)}</strong>
+            <span>${escapeHtml(g.desc)}</span>
+        </div>`).join('');
+}
+
+function renderGuiaEjemplo() {
+    const el = document.getElementById('guia-ejemplo-completo');
+    if (!el) return;
+
+    const dayFlow = FLUJO_CONSULTA.map(s => `
+        <div class="guia-day-step">
+            <div class="guia-day-step-icon" style="background:${s.color}">
                 <i class="fa-solid ${s.icon}"></i>
             </div>
-            <div class="guia-timeline-card">
-                <h5>${escapeHtml(s.title)}</h5>
-                <p>${escapeHtml(s.sub)}</p>
-            </div>
+            <h5>${escapeHtml(s.title)}</h5>
+            <p>${escapeHtml(s.sub)}</p>
         </div>`).join('');
-    el.innerHTML = `<div class="guia-timeline py-2">${items}</div>`;
-}
-
-function renderGuiaProcedimientoSkill() {
-    const el = document.getElementById('guia-procedimiento-skill');
-    if (!el) return;
 
     const skill = catalog.skills?.find(s => s.id === 'redactar_memorial_penal')
         || catalog.skills?.[0];
-    if (!skill) {
-        el.innerHTML = '<p class="guia-caption">Cargando catálogo…</p>';
-        return;
-    }
 
-    const agentName = (skill.agents || [])
-        .map(aid => catalog.agentes?.find(a => a.id === aid || a.name === aid))
-        .filter(Boolean)
-        .map(a => a.nombre_corto)
-        .join(', ') || 'Especialista asignado';
+    let manualHtml = '<p class="guia-caption">Cargando catálogo…</p>';
+    if (skill) {
+        const agentName = (skill.agents || [])
+            .map(aid => catalog.agentes?.find(a => a.id === aid || a.name === aid))
+            .filter(Boolean)
+            .map(a => a.nombre_corto)
+            .join(', ') || 'Especialista asignado';
 
-    const steps = getEffectiveSteps(skill);
-    const stepsHtml = steps.slice(0, 4).map(st => `
-        <div class="guia-manual-step">
-            <span class="guia-manual-step-num">${st.displayNum}</span>
-            <span>${escapeHtml(st.text)}</span>
-        </div>`).join('');
+        const steps = getEffectiveSteps(skill);
+        const stepsHtml = steps.slice(0, 4).map(st => `
+            <div class="guia-manual-step">
+                <span class="guia-manual-step-num">${st.displayNum}</span>
+                <span>${escapeHtml(st.text)}</span>
+            </div>`).join('');
 
-    const more = steps.length > 4
-        ? `<p class="guia-caption mt-2">Y ${steps.length - 4} pasos adicionales en el catálogo completo.</p>`
-        : '';
+        const more = steps.length > 4
+            ? `<p class="guia-manual-more">Y ${steps.length - 4} pasos adicionales en el catálogo completo.</p>`
+            : '';
 
-    el.innerHTML = `
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div class="lg:col-span-2 guia-manual-card">
+        manualHtml = `
+            <div class="guia-manual">
                 <div class="guia-manual-head">
-                    <p class="guia-label text-slate-400 mb-1">Manual de procedimiento</p>
+                    <p class="guia-label">Manual de procedimiento</p>
                     <h4>${escapeHtml(skillDisplayName(skill))}</h4>
                 </div>
                 <div class="guia-manual-body">
-                    <div>
-                        <p class="guia-label mb-1">Para qué sirve</p>
-                        <p class="guia-body">${escapeHtml(skill.desc || skill.instruccion || '—')}</p>
-                    </div>
-                    <div>
-                        <p class="guia-label mb-1">Quién lo ejecuta</p>
-                        <p class="guia-body text-purple-800 font-medium">${escapeHtml(agentName)}</p>
-                    </div>
-                    <div>
-                        <p class="guia-label mb-2">Instrucciones paso a paso</p>
-                        <div class="space-y-2">${stepsHtml || '<p class="guia-caption">Sin pasos definidos</p>'}</div>
-                        ${more}
-                    </div>
+                    <p class="guia-manual-meta"><strong>Para qué sirve:</strong> ${escapeHtml(skill.desc || skill.instruccion || '—')}</p>
+                    <p class="guia-manual-meta"><strong>Quién lo ejecuta:</strong> ${escapeHtml(agentName)}</p>
+                    ${stepsHtml || '<p class="guia-caption">Sin pasos definidos</p>'}
+                    ${more}
                 </div>
+            </div>`;
+    }
+
+    el.innerHTML = `
+        <div class="guia-day-flow">${dayFlow}</div>
+        <div class="guia-story">
+            <div class="guia-story-intro">
+                <strong>Ejemplo:</strong> Usted necesita un <em>memorial de impulso en indagación</em>.
+                El coordinador ordena el caso, el redactor sigue el manual «Redactar memorial penal» paso a paso,
+                calidad revisa el borrador y usted lo firma o lo devuelve con observaciones.
             </div>
-            <div class="guia-callout self-start">
-                <p class="font-semibold text-slate-900 mb-2">Qué revisa usted</p>
-                <p>Confirme que el propósito del manual tiene sentido, que los pasos reflejan su práctica y que los límites protegen al despacho y a la víctima.</p>
-                <a href="#skills" class="guia-link">Auditar procedimientos <i class="fa-solid fa-arrow-right text-xs"></i></a>
-            </div>
+            ${manualHtml}
         </div>`;
 }
 
-function renderFlujoMapa() {
-    const el = document.getElementById('guia-flujo-mapa');
+function renderGuiaEquipo() {
+    const el = document.getElementById('guia-equipo-bandas');
     if (!el || !catalog.agentes?.length) return;
 
     const byId = Object.fromEntries(catalog.agentes.map(a => [a.id, a]));
@@ -780,69 +766,77 @@ function renderFlujoMapa() {
     ).join('');
 
     el.innerHTML = `
-        <div class="guia-team-band border-blue-200 bg-blue-50/40">
-            <p class="guia-label text-blue-600 mb-1">Recepción</p>
-            <h4>${escapeHtml(coord?.nombre_corto || 'Coordinador del expediente')}</h4>
-            <p>${escapeHtml(coord?.desc || 'Recibe su consulta y dirige el caso al especialista y manual correctos.')}</p>
-        </div>
-        <div class="guia-team-band border-purple-200 bg-purple-50/30">
-            <p class="guia-label text-purple-600 mb-2">Especialistas — 9 áreas</p>
-            <div>${specChips}</div>
-        </div>
-        <div class="guia-team-band border-amber-200 bg-amber-50/40">
-            <p class="guia-label text-amber-700 mb-1">Control de calidad</p>
-            <h4>${escapeHtml(calidad?.nombre_corto || 'Analista de calidad jurídica')}</h4>
-            <p>${escapeHtml(calidad?.desc || 'Revisa coherencia y riesgos antes de entregarle el borrador.')}</p>
+        <div class="guia-team-grid">
+            <div class="guia-team-card guia-team-card--recv">
+                <p class="guia-label" style="color:#2563eb">Recepción</p>
+                <h4>${escapeHtml(coord?.nombre_corto || 'Coordinador del expediente')}</h4>
+                <p>${escapeHtml(coord?.desc || 'Recibe su consulta y dirige el caso al especialista y manual correctos.')}</p>
+            </div>
+            <div class="guia-team-card guia-team-card--spec">
+                <p class="guia-label" style="color:#7c3aed">Especialistas</p>
+                <h4>Nueve áreas jurídicas</h4>
+                <p>Tipicidad, víctimas, evidencia, audiencias, redacción y más.</p>
+                <div class="guia-chips">${specChips}</div>
+            </div>
+            <div class="guia-team-card guia-team-card--qual">
+                <p class="guia-label" style="color:#d97706">Control de calidad</p>
+                <h4>${escapeHtml(calidad?.nombre_corto || 'Analista de calidad jurídica')}</h4>
+                <p>${escapeHtml(calidad?.desc || 'Revisa coherencia y riesgos antes de entregarle el borrador.')}</p>
+            </div>
         </div>`;
 }
 
-function renderAgentesDetalle() {
-    const el = document.getElementById('guia-agentes-detalle');
-    if (!el || !catalog.agentes?.length) return;
+function initGuiaScrollSpy() {
+    const sectionIds = ['guia-inicio', 'guia-modelo', 'guia-ejemplo', 'guia-equipo', 'guia-empezar'];
+    const links = document.querySelectorAll('#guia-toc a[data-guia-section]');
+    if (!links.length) return;
 
-    const byId = Object.fromEntries(catalog.agentes.map(a => [a.id, a]));
-    const ordered = AGENT_ORDER.map(id => byId[id]).filter(Boolean);
+    const sections = sectionIds
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
 
-    el.innerHTML = ordered.map(a => {
-        const badge = GROUP_BADGE_CLASS[a.grupo] || 'guia-badge-spec';
-        const ejemplos = agentSkillExamples(a, 2);
-        const procList = ejemplos.length
-            ? `<p class="guia-caption mt-2">Ejemplos de manuales: ${ejemplos.map(e => escapeHtml(e)).join(' · ')}</p>`
-            : '';
-        return `
-            <div class="border border-slate-200 rounded-xl p-4 bg-white">
-                <span class="${badge}">${escapeHtml(GROUP_LABELS[a.grupo] || a.grupo)}</span>
-                <h5 class="text-base font-bold text-slate-900 mt-2">${escapeHtml(a.nombre_corto)}</h5>
-                <p class="guia-body mt-1">${escapeHtml(a.desc || '')}</p>
-                ${procList}
-                <p class="guia-caption mt-2"><strong>Límite del rol:</strong> ${escapeHtml(a.no_reemplaza || '—')}</p>
-            </div>`;
-    }).join('');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const id = entry.target.id;
+            links.forEach(a => {
+                a.classList.toggle('is-active', a.dataset.guiaSection === id);
+            });
+        });
+    }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+    sections.forEach(sec => observer.observe(sec));
 }
 
-function renderGuiaAgentesFlujo() {
-    renderFlujoLineal();
-    renderGuiaProcedimientoSkill();
-    renderFlujoMapa();
-    renderAgentesDetalle();
-}
+function initGuiaReadProgress() {
+    const guia = document.getElementById('guia');
+    const bar = document.getElementById('guia-read-progress-bar');
+    if (!guia || !bar) return;
 
-function renderGuiaGuardrails() {
-    const el = document.getElementById('guia-guardrails-detalle');
-    if (!el) return;
-    el.innerHTML = catalog.guardrails.map(g => `
-        <div class="guia-rule-card">
-            <h5>${escapeHtml(g.name)}</h5>
-            <p>${escapeHtml(g.desc)}</p>
-            <p class="guia-caption mt-2"><strong>En la práctica:</strong> ${escapeHtml(GUARDRAIL_EJEMPLOS[g.id] || '—')}</p>
-        </div>`).join('');
+    const update = () => {
+        const rect = guia.getBoundingClientRect();
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const guiaTop = scrollTop + rect.top;
+        const guiaHeight = guia.offsetHeight;
+        const viewport = window.innerHeight;
+        const scrolled = scrollTop + viewport - guiaTop;
+        const pct = Math.min(100, Math.max(0, (scrolled / guiaHeight) * 100));
+        bar.style.width = `${pct}%`;
+    };
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
 }
 
 function renderGuiaCompleta() {
     renderGuiaCategorias();
     renderGuiaDiagrama();
-    renderGuiaAgentesFlujo();
-    renderGuiaGuardrails();
+    renderGuiaGlosario();
+    renderGuiaEjemplo();
+    renderGuiaEquipo();
+    initGuiaScrollSpy();
+    initGuiaReadProgress();
 }
 
 function renderGuiaCategorias() {
@@ -858,8 +852,6 @@ function renderGuiaCategorias() {
         const n = catalog.intro?.skills || catalog.skills?.length || 0;
         note.textContent = `Los ${n} procedimientos se agrupan por área jurídica en la sección 3 para facilitar la revisión.`;
     }
-    const el = document.getElementById('guia-categorias');
-    if (el) el.innerHTML = '';
 }
 
 function updateProgress() {

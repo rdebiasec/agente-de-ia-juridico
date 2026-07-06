@@ -7,59 +7,12 @@
     <title>DBX Solutions - Legal Audit Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="guia.css?v=3.0">
     <style>
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; }
         html { scroll-behavior: smooth; }
-        /* Guía — sistema tipográfico y layout (solo #guia) */
-        #guia { font-size: 1rem; line-height: 1.65; color: #334155; }
-        #guia .guia-hero { @apply bg-slate-900 text-white rounded-2xl p-8 md:p-10; }
-        #guia .guia-hero h2 { @apply text-2xl md:text-3xl font-bold tracking-tight text-white; }
-        #guia .guia-hero .guia-lead { @apply text-base text-slate-300 mt-3 max-w-2xl leading-relaxed; }
-        #guia .guia-hero .guia-meta { @apply text-sm text-slate-400 mt-4; }
-        #guia .guia-section { @apply bg-white border border-slate-200 rounded-2xl p-6 md:p-8; }
-        #guia .guia-section-title { @apply text-lg font-bold text-slate-900 flex items-center gap-2 mb-1; }
-        #guia .guia-section-desc { @apply text-sm text-slate-600 mb-6 leading-relaxed; }
-        #guia .guia-subtitle { @apply text-base font-semibold text-slate-800 mb-3; }
-        #guia .guia-caption { @apply text-sm text-slate-500; }
-        #guia .guia-label { @apply text-xs font-semibold uppercase tracking-wide text-slate-500; }
-        #guia .guia-body { @apply text-sm text-slate-700 leading-relaxed; }
-        #guia .guia-link { @apply text-sm font-semibold text-blue-700 hover:text-blue-900 inline-flex items-center gap-1 mt-4; }
-        #guia .guia-nav-card { @apply block p-5 rounded-xl border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all text-left; }
-        #guia .guia-nav-card strong { @apply block text-base font-bold text-slate-900; }
-        #guia .guia-nav-card span { @apply block text-sm text-slate-600 mt-1; }
-        #guia .guia-concept-card { @apply p-5 rounded-xl border border-slate-200 bg-slate-50/50 h-full; }
-        #guia .guia-concept-card h4 { @apply text-base font-bold text-slate-900 mb-2; }
-        #guia .guia-concept-card p { @apply text-sm text-slate-600 leading-relaxed; }
-        #guia .guia-stack-item { @apply flex gap-4 items-start p-4 rounded-xl border mb-3 last:mb-0; }
-        #guia .guia-stack-icon { @apply w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-lg; }
-        #guia .guia-stack-item h4 { @apply text-base font-bold text-slate-900; }
-        #guia .guia-stack-item p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
-        #guia .guia-timeline { @apply relative pl-10 space-y-0 max-w-2xl; }
-        #guia .guia-timeline::before { content: ''; @apply absolute left-[15px] top-2 bottom-2 w-0.5 bg-slate-200; }
-        #guia .guia-timeline-item { @apply relative pb-8 last:pb-0; }
-        #guia .guia-timeline-dot { @apply absolute -left-10 top-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm; }
-        #guia .guia-timeline-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-4; }
-        #guia .guia-timeline-card h5 { @apply text-base font-bold text-slate-900; }
-        #guia .guia-timeline-card p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
-        #guia .guia-manual-card { @apply bg-white border border-slate-200 rounded-xl overflow-hidden; }
-        #guia .guia-manual-head { @apply bg-slate-800 text-white px-5 py-4; }
-        #guia .guia-manual-head h4 { @apply text-base font-bold; }
-        #guia .guia-manual-body { @apply p-5 space-y-4; }
-        #guia .guia-manual-step { @apply flex gap-3 text-sm text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100; }
-        #guia .guia-manual-step-num { @apply shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white text-sm font-bold flex items-center justify-center; }
-        #guia .guia-team-band { @apply rounded-xl border p-5 mb-3 last:mb-0; }
-        #guia .guia-team-band h4 { @apply text-base font-bold text-slate-900; }
-        #guia .guia-team-band p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
-        #guia .guia-chip { @apply inline-block text-sm bg-white border border-slate-200 rounded-lg px-3 py-1.5 m-0.5 text-slate-700; }
-        #guia .guia-rule-card { @apply bg-slate-50 border border-slate-200 rounded-xl p-5; }
-        #guia .guia-rule-card h5 { @apply text-base font-bold text-slate-900; }
-        #guia .guia-rule-card p { @apply text-sm text-slate-600 mt-1 leading-relaxed; }
-        #guia .guia-steps-list { @apply space-y-3; }
-        #guia .guia-steps-list li { @apply text-sm text-slate-700 leading-relaxed pl-1; }
-        #guia .guia-callout { @apply bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-slate-700 leading-relaxed; }
-        #guia .guia-badge { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded; }
         .modal { transition: opacity 0.25s ease; }
-        #audit-auth-gate { @apply bg-slate-900 flex items-center justify-center p-4; }
+        #audit-auth-gate { display: flex; align-items: center; justify-content: center; padding: 1rem; background: #0f172a; }
         .guia-badge-coord { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-blue-100 text-blue-800; }
         .guia-badge-spec { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-purple-100 text-purple-800; }
         .guia-badge-cal { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800; }
@@ -104,7 +57,7 @@
             <div>
                 <h1 class="text-lg md:text-xl font-bold tracking-tight text-slate-100">
                     Legal Audit Sync
-                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v2.4</span>
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v3.0</span>
                     <span id="build-generated-at" class="text-[10px] text-slate-500 ml-1 hidden md:inline" title="Última generación del catálogo"></span>
                 </h1>
                 <p class="text-xs text-slate-400">Sistema Penal-Victimas (Colombia) · Control de Calidad</p>
@@ -139,12 +92,12 @@
                 </a>
                 <a href="#agentes" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
                     <i class="fa-solid fa-robot text-purple-400"></i>
-                    <span class="text-sm">2. Agentes IA</span>
+                    <span class="text-sm">2. Roles del equipo</span>
                     <span id="badge-agentes" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
                 </a>
                 <a href="#skills" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
                     <i class="fa-solid fa-bolt text-amber-400"></i>
-                    <span class="text-sm">3. Pasos por Skill</span>
+                    <span class="text-sm">3. Pasos por procedimiento</span>
                     <span id="badge-pasos" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
                 </a>
             </nav>
@@ -155,122 +108,89 @@
 
         <main class="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-10 overflow-y-auto w-full">
 
-            <section id="guia" class="scroll-mt-24 space-y-8">
+            <section id="guia" class="scroll-mt-24">
 
                 <div class="guia-hero">
-                    <p class="guia-label text-slate-500 mb-2">Sección 0 · Guía de uso</p>
-                    <h2>Manual de aprobación del asistente penal-víctimas</h2>
-                    <p class="guia-lead" id="guia-intro-text">Revise y apruebe el manual de trabajo del asistente antes de usarlo en casos reales.</p>
-                    <p class="guia-meta"><i class="fa-solid fa-scale-balanced mr-1"></i> La IA propone; usted revisa, ajusta y aprueba.</p>
-                </div>
-
-                <div class="grid gap-4 md:grid-cols-3">
-                    <a href="#guardrails" class="guia-nav-card">
-                        <strong>1. Reglas estrictas</strong>
-                        <span>Límites que el asistente debe respetar siempre.</span>
-                    </a>
-                    <a href="#agentes" class="guia-nav-card">
-                        <strong>2. Roles del equipo</strong>
-                        <span>Quién hace qué en el despacho digital.</span>
-                    </a>
-                    <a href="#skills" class="guia-nav-card">
-                        <strong>3. Pasos de cada procedimiento</strong>
-                        <span>Las instrucciones que usted aprueba una a una.</span>
-                    </a>
-                </div>
-
-                <div class="guia-section">
-                    <h3 class="guia-section-title"><i class="fa-solid fa-circle-info text-blue-500"></i> Tres ideas clave</h3>
-                    <p class="guia-section-desc">Todo lo que revisará en este portal se resume así:</p>
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div class="guia-concept-card">
-                            <h4><i class="fa-solid fa-user-tie text-purple-600 mr-1"></i> Rol</h4>
-                            <p>La función dentro del equipo: quien recibe el caso, quien redacta, quien revisa. Usted valida que cada rol tenga sentido para víctimas en penal colombiano.</p>
-                        </div>
-                        <div class="guia-concept-card border-amber-200 bg-amber-50/40">
-                            <h4><i class="fa-solid fa-book text-amber-600 mr-1"></i> Procedimiento</h4>
-                            <p>El manual de una tarea concreta — por ejemplo, redactar un memorial o ordenar una cronología. Indica para qué sirve, quién lo hace y en qué orden.</p>
-                        </div>
-                        <div class="guia-concept-card">
-                            <h4><i class="fa-solid fa-list-check text-emerald-600 mr-1"></i> Paso</h4>
-                            <p>Cada instrucción numerada del manual. Es lo más detallado que usted marca como conforme, pide ajustar o restablece.</p>
-                        </div>
+                    <span class="guia-time-badge"><i class="fa-regular fa-clock mr-1"></i> Lectura: ~5 min</span>
+                    <h2>Apruebe el manual de trabajo del asistente antes de usarlo en casos reales</h2>
+                    <p class="guia-hero-lead" id="guia-intro-text">Revise y apruebe el manual de trabajo del asistente antes de usarlo en casos reales.</p>
+                    <p class="guia-hero-meta"><i class="fa-solid fa-scale-balanced mr-1"></i> La IA propone; usted revisa, ajusta y aprueba.</p>
+                    <div class="guia-read-progress" aria-hidden="true">
+                        <div class="guia-read-progress-bar" id="guia-read-progress-bar"></div>
                     </div>
                 </div>
 
-                <div class="guia-section">
-                    <h3 class="guia-section-title"><i class="fa-solid fa-layer-group text-slate-600"></i> Qué está aprobando</h3>
-                    <p class="guia-section-desc">De lo general a lo específico. Empiece por las reglas, continúe con los roles y termine en los pasos.</p>
-                    <div id="guia-diagrama"></div>
-                </div>
+                <div class="guia-layout">
+                    <nav class="guia-toc-wrap" aria-label="En esta guía">
+                        <p class="guia-toc-title">En esta guía</p>
+                        <ul class="guia-toc" id="guia-toc">
+                            <li><a href="#guia-inicio" data-guia-section="guia-inicio">1. Inicio</a></li>
+                            <li><a href="#guia-modelo" data-guia-section="guia-modelo">2. Qué aprueba</a></li>
+                            <li><a href="#guia-ejemplo" data-guia-section="guia-ejemplo">3. Ejemplo</a></li>
+                            <li><a href="#guia-equipo" data-guia-section="guia-equipo">4. Equipo</a></li>
+                            <li><a href="#guia-empezar" data-guia-section="guia-empezar">5. Empezar</a></li>
+                        </ul>
+                    </nav>
 
-                <div class="guia-section space-y-8">
-                    <div>
-                        <h3 class="guia-section-title"><i class="fa-solid fa-route text-purple-500"></i> Cómo atiende el asistente una consulta</h3>
-                        <p class="guia-section-desc">Esto ocurre en el chat del despacho cuando usted trabaja un caso. Aquí solo revisa que el manual detrás de ese flujo esté bien escrito.</p>
-                        <div id="guia-flujo-lineal"></div>
-                    </div>
+                    <div class="guia-content">
 
-                    <div>
-                        <h3 class="guia-subtitle">Ejemplo de un procedimiento</h3>
-                        <p class="guia-caption mb-4">Así se ve el manual de una tarea — lo mismo que revisará en la sección 3.</p>
-                        <div id="guia-procedimiento-skill"></div>
-                    </div>
+                        <article id="guia-inicio" class="guia-section">
+                            <h3>Bienvenida</h3>
+                            <p class="guia-section-desc">Este portal le permite validar, antes de usar el asistente en un caso real, las reglas, los roles y los procedimientos que seguirá el equipo digital del despacho.</p>
+                            <p class="guia-section-desc">No necesita conocimientos técnicos: lea esta guía, luego marque sus decisiones en el panel de auditoría que aparece más abajo.</p>
+                        </article>
 
-                    <div>
-                        <h3 class="guia-subtitle">Su equipo digital</h3>
-                        <p class="guia-caption mb-4">Once roles organizados en recepción, especialistas y control de calidad.</p>
-                        <div id="guia-flujo-mapa"></div>
-                    </div>
+                        <article id="guia-modelo" class="guia-section">
+                            <h3>Qué está aprobando</h3>
+                            <p class="guia-section-desc">De lo general a lo específico: primero las reglas, luego los roles, después los procedimientos y, al final, cada paso de cada manual.</p>
+                            <div id="guia-diagrama"></div>
+                            <div class="guia-glossary" id="guia-glosario"></div>
+                            <div class="guia-rules-teaser mt-6">
+                                <p class="m-0">El asistente respeta <strong>ocho reglas estrictas</strong> que aplican en toda respuesta, antes de cualquier procedimiento. <a href="#guardrails">Ver y auditar las 8 reglas →</a></p>
+                            </div>
+                        </article>
 
-                    <div id="guia-ejemplo-flujo" class="guia-callout">
-                        <p class="font-semibold text-slate-900 mb-2">Ejemplo práctico</p>
-                        <p>Usted necesita un memorial de impulso en indagación. El coordinador ordena el caso, el redactor sigue el manual «Redactar memorial penal» paso a paso, calidad revisa el borrador y usted lo firma o lo devuelve con observaciones.</p>
-                    </div>
+                        <article id="guia-ejemplo" class="guia-section">
+                            <h3>Un día en el despacho</h3>
+                            <p class="guia-section-desc">Así se conecta su consulta con el manual que usted aprueba en este portal.</p>
+                            <div id="guia-ejemplo-completo"></div>
+                        </article>
 
-                    <details class="border border-slate-200 rounded-xl overflow-hidden">
-                        <summary class="px-5 py-4 cursor-pointer font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 text-base">
-                            Ver los 11 roles y qué revisar en cada uno
-                        </summary>
-                        <div class="p-5 border-t border-slate-200">
-                            <div id="guia-agentes-detalle" class="grid gap-4 md:grid-cols-2"></div>
-                            <a href="#agentes" class="guia-link">Ir a auditar roles <i class="fa-solid fa-arrow-right text-xs"></i></a>
-                        </div>
-                    </details>
-                </div>
+                        <article id="guia-equipo" class="guia-section">
+                            <h3>Su equipo digital</h3>
+                            <p class="guia-section-desc">Once roles organizados en tres bandas. El detalle de cada rol lo revisa en la sección 2 del panel de auditoría.</p>
+                            <div id="guia-equipo-bandas"></div>
+                            <p class="guia-caption"><a href="#agentes" class="text-blue-700 font-semibold hover:underline">Ir a auditar roles del equipo →</a></p>
+                        </article>
 
-                <div class="guia-section">
-                    <h3 class="guia-section-title"><i class="fa-solid fa-shield-halved text-blue-500"></i> Las 8 reglas estrictas</h3>
-                    <p class="guia-section-desc">Barreras obligatorias del asistente — no son sugerencias. Aplican en toda respuesta, antes de cualquier procedimiento.</p>
-                    <div id="guia-guardrails-detalle" class="grid gap-4 md:grid-cols-2"></div>
-                    <a href="#guardrails" class="guia-link">Auditar reglas en la sección 1 <i class="fa-solid fa-arrow-right text-xs"></i></a>
-                </div>
-
-                <div class="guia-section">
-                    <h3 class="guia-section-title"><i class="fa-solid fa-clipboard-check text-emerald-600"></i> Cómo completar la revisión</h3>
-                    <div class="grid gap-6 md:grid-cols-2">
-                        <div>
-                            <p class="guia-subtitle mb-3">Orden recomendado</p>
-                            <ol class="guia-steps-list list-decimal list-inside space-y-2">
-                                <li>Lea esta guía.</li>
-                                <li><a href="#guardrails" class="text-blue-700 underline">Reglas estrictas</a> — apruebe o ajuste las ocho.</li>
-                                <li><a href="#agentes" class="text-blue-700 underline">Roles del equipo</a> — valide cada función.</li>
-                                <li><a href="#skills" class="text-blue-700 underline">Pasos por procedimiento</a> — revise cada instrucción.</li>
+                        <article id="guia-empezar" class="guia-section">
+                            <h3>Empezar auditoría</h3>
+                            <p class="guia-section-desc">Cuando termine de leer, siga estos pasos en el panel de abajo.</p>
+                            <ol class="guia-checklist">
+                                <li>Lea esta guía (ya casi termina).</li>
+                                <li><a href="#guardrails">Reglas estrictas</a> — apruebe o ajuste las ocho.</li>
+                                <li><a href="#agentes">Roles del equipo</a> — valide cada función.</li>
+                                <li><a href="#skills">Pasos por procedimiento</a> — revise cada instrucción.</li>
                                 <li>Exporte su dictamen y compártalo con el despacho.</li>
                             </ol>
-                        </div>
-                        <div>
-                            <p class="guia-subtitle mb-3">Botones de decisión</p>
-                            <ul class="guia-steps-list space-y-2">
-                                <li><strong>Aprobar</strong> — conforme con la regla, rol o paso.</li>
-                                <li><strong>Ajustar</strong> — indique qué cambiar y por qué (obligatorio).</li>
-                                <li><strong>Restablecer</strong> — deshace su decisión.</li>
-                            </ul>
-                            <p class="guia-caption mt-4">Su progreso se guarda en este navegador. Exporte antes de cerrar sesión o limpiar datos.</p>
-                        </div>
+                            <p class="guia-buttons-help">
+                                <strong>Aprobar</strong> — conforme con la regla, rol o paso.<br>
+                                <strong>Ajustar</strong> — indique qué cambiar y por qué (obligatorio).<br>
+                                <strong>Restablecer</strong> — deshace su decisión.<br>
+                                Su progreso se guarda en este navegador. Exporte antes de cerrar sesión o limpiar datos.
+                            </p>
+                            <p class="guia-caption" id="guia-categorias-note"></p>
+                            <a href="#guardrails" class="guia-cta-primary" id="guia-cta-auditoria">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                                Ir al panel de auditoría
+                            </a>
+                        </article>
+
                     </div>
-                    <p class="guia-caption mt-6" id="guia-categorias-note"></p>
-                    <div id="guia-categorias" class="hidden"></div>
+                </div>
+
+                <div class="guia-transition-band">
+                    Cuando termine de leer, continúe abajo para marcar sus decisiones en el panel de auditoría.
                 </div>
 
             </section>
@@ -400,6 +320,6 @@
 
     <script src="./auth-config.js"></script>
     <script src="./auth-gate.js"></script>
-    <script src="./app.js?v=2.4"></script>
+    <script src="./app.js?v=3.0"></script>
 </body>
 </html>
