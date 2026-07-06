@@ -6,6 +6,20 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 PORT="${AUDIT_PORTAL_PORT:-8080}"
 OPEN_BROWSER="${OPEN_BROWSER:-1}"
+ENV_FILE="$ROOT/audit-portal/.env"
+
+if [[ -f "$ENV_FILE" ]]; then
+  echo "→ Cargando credenciales desde audit-portal/.env"
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+if [[ -z "${AUDIT_PORTAL_PASSWORD:-}" ]]; then
+  echo "⚠️  Sin AUDIT_PORTAL_PASSWORD — login desactivado en este build."
+  echo "   Copie audit-portal/.env.example → audit-portal/.env y defina la contraseña."
+fi
 
 echo "→ Generando audit-portal/dist..."
 python3 scripts/generar_audit_portal.py

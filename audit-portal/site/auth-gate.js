@@ -1,21 +1,15 @@
-/* Legal Audit Sync — login solo en GitHub Pages (auth-config.js generado en CI) */
+/* Legal Audit Sync — login (auth-config.js generado en build) */
 
 (function () {
     const SESSION_KEY = 'legal-audit-portal-auth';
     const SESSION_HOURS = 8;
-
-    function isProductionHost() {
-        const h = location.hostname;
-        return h.endsWith('.github.io') || h.endsWith('.githubusercontent.com');
-    }
 
     function authConfig() {
         return window.AUDIT_AUTH_CONFIG || { enabled: false };
     }
 
     function authRequired() {
-        const cfg = authConfig();
-        return cfg.enabled === true && isProductionHost();
+        return authConfig().enabled === true;
     }
 
     async function sha256Hex(text) {
@@ -52,16 +46,16 @@
     function showGate() {
         const gate = document.getElementById('audit-auth-gate');
         const app = document.getElementById('audit-app-root');
-        if (gate) gate.classList.remove('hidden');
-        if (app) app.classList.add('hidden');
+        if (gate) gate.classList.remove('gate-hidden');
+        if (app) app.classList.add('app-gated');
         document.body.classList.add('overflow-hidden');
     }
 
     function hideGate() {
         const gate = document.getElementById('audit-auth-gate');
         const app = document.getElementById('audit-app-root');
-        if (gate) gate.classList.add('hidden');
-        if (app) app.classList.remove('hidden');
+        if (gate) gate.classList.add('gate-hidden');
+        if (app) app.classList.remove('app-gated');
         document.body.classList.remove('overflow-hidden');
         const logoutBtn = document.getElementById('audit-auth-logout');
         if (logoutBtn) logoutBtn.classList.remove('hidden');

@@ -49,14 +49,20 @@ Push a `main` → workflow `.github/workflows/deploy-audit-portal.yml` publica `
 
 Ver también [`DEPLOY.md`](../DEPLOY.md).
 
-### Login (solo GitHub Pages)
+### Login (local y producción idénticos)
 
 | Entorno | Login |
 |---|---|
-| `localhost` | No — `auth-config.js` con `enabled: false` |
-| GitHub Pages | Sí — si existe el secreto `AUDIT_PORTAL_PASSWORD` en Actions |
+| `localhost` | Sí — si `audit-portal/.env` define `AUDIT_PORTAL_PASSWORD` (ver `.env.example`) |
+| GitHub Pages | Sí — secreto `AUDIT_PORTAL_PASSWORD` en Actions |
 
-Secreto opcional: `AUDIT_PORTAL_USERNAME` (por defecto `auditor`). Sesión: 8 h en `sessionStorage`.
+Usuario por defecto: `auditor` (o `AUDIT_PORTAL_USERNAME`). Sesión: 8 h en `sessionStorage`.
+
+```bash
+cp audit-portal/.env.example audit-portal/.env
+# Edite la contraseña (mín. 12 caracteres, igual que en GitHub Secrets)
+./scripts/start-audit-portal.sh
+```
 
 ## Fuente de datos
 

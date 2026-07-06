@@ -119,7 +119,7 @@ def build_audit_data() -> dict:
 
 
 def build_auth_config_js() -> str:
-    """Genera auth-config.js. Login activo solo si AUDIT_PORTAL_PASSWORD está en el entorno (CI)."""
+    """Genera auth-config.js. Login activo si AUDIT_PORTAL_PASSWORD está en el entorno."""
     password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
     if not password:
         return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
@@ -135,9 +135,9 @@ def write_auth_config() -> None:
     out = DIST_DIR / "auth-config.js"
     out.write_text(build_auth_config_js(), encoding="utf-8")
     if os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip():
-        print("  auth: login habilitado en build de producción (GitHub Pages)")
+        print("  auth: login habilitado (AUDIT_PORTAL_PASSWORD en entorno)")
     else:
-        print("  auth: sin contraseña en entorno — login desactivado (desarrollo local)")
+        print("  auth: sin AUDIT_PORTAL_PASSWORD — login desactivado")
 
 
 def copy_site_to_dist() -> None:
