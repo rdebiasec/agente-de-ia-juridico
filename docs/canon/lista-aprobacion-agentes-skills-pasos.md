@@ -223,9 +223,10 @@
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
 - `evaluar_procedencia_tutela`
   - Instrucción tipo: Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-  - Pasos:
+  - Pasos (paralelo entre sí):
     1. Verificar legitimación por activa (titular del derecho y vínculo con el caso).
     2. Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).
+  - Pasos (serie):
     3. Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.
     4. Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.
     5. Evaluar inmediatez del perjuicio y necesidad de medida urgente.
@@ -323,12 +324,14 @@
   - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
 - `preparar_guion_intervencion_oral`
   - Instrucción tipo: Estructurar intervencion oral clara y breve.
-  - Pasos:
+  - Pasos (serie):
     1. Definir objetivo jurídico y táctico de la intervención en audiencia.
     2. Ubicar etapa procesal y norma Ley 906 que habilita la intervención.
+  - Pasos (paralelo entre sí):
     3. Estructurar apertura breve con postura de la víctima.
     4. Desarrollar núcleo argumentativo solo con hechos soportados.
     5. Anticipar réplicas a defensa y Fiscalía en puntos críticos.
+  - Pasos (serie):
     6. Revisar lenguaje para evitar revictimización y filtración de estrategia.
     7. Cerrar con peticiones concretas alineadas al objetivo de audiencia.
     8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
@@ -459,10 +462,12 @@
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`
 - `construir_matriz_hecho_prueba`
   - Instrucción tipo: Relacionar hechos con pruebas existentes y faltantes.
-  - Pasos:
+  - Pasos (serie):
     1. Listar hechos relevantes para la teoría del caso.
+  - Pasos (paralelo entre sí):
     2. Vincular cada hecho con prueba existente, faltante o en trámite.
     3. Priorizar brechas que afecten tipicidad o audiencia.
+  - Pasos (serie):
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`, `source_reference_validator`
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_tipicidad_y_responsabilidad_penal`, `preparador_estrategico_audiencias_penales`
@@ -551,11 +556,13 @@
   - Agentes que lo usan: `coordinador_expediente_penal`
 - `construir_cronologia_penal`
   - Instrucción tipo: Ordenar hechos en linea de tiempo.
-  - Pasos:
+  - Pasos (serie):
     1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
+  - Pasos (paralelo entre sí):
     2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
-    3. Marcar inconsistencias entre versiones.
-    4. Profundizar análisis de «Ordenar hechos en linea de tiempo» con referencia al expediente y norma aplicable.
+    3. Marcar inconsistencias entre versiones de fuentes.
+  - Pasos (serie):
+    4. Consolidar cronología con hechos confirmados, narrados e inferidos separados.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `date_extractor`, `entity_extractor`, `case_state_writer`
   - Agentes que lo usan: `analista_cronologia_hechos_penales`, `preparador_estrategico_audiencias_penales`
@@ -652,12 +659,14 @@
   - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
 - `redactar_memorial_penal`
   - Instrucción tipo: Crear borrador de memorial penal.
-  - Pasos:
+  - Pasos (serie):
     1. Recopilar hechos soportados y pretensiones de la víctima.
-    2. Redactar memorial con estructura hechos-fundamentos-peticiones.
-    3. Verificar citas y marcar pendientes antes de firma humana.
-    4. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
-    5. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
+  - Pasos (paralelo entre sí):
+    2. Verificar citas normativas aplicables al memorial.
+    3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
+  - Pasos (serie):
+    4. Redactar memorial integrando hechos, fundamentos y peticiones.
+    5. Marcar pendientes de verificación antes de firma humana.
     6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_plantillas_search`, `rag_normativo_search`, `rag_expediente_search`, `document_version_create`
   - Agentes que lo usan: `redactor_documentos_juridicos_penales`
