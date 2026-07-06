@@ -176,61 +176,85 @@ Resultados esperados:
 
 ---
 
-## GitHub Pages (portal de auditoría)
+## Portal de auditoría (Auditoría de Instrucciones)
 
-GitHub Pages **no** corre la app Python del agente. El chat sigue en Render; Pages publica solo el portal estático de aprobación.
+El progreso de aprobación se persiste en **PostgreSQL** por correo electrónico (misma base que el agente).
 
-| Recurso | URL / ubicación |
+| Recurso | URL |
 |---|---|
 | Agente (chat, HITL) | `https://agente-de-ia-juridico.onrender.com` |
-| Portal Legal Audit Sync | `https://rdebiasec.github.io/agente-de-ia-juridico/` (tras activar Pages → GitHub Actions) |
+| Portal (recomendado, mismo origen) | `https://agente-de-ia-juridico.onrender.com/auditoria/` |
+| Portal espejo (GitHub Pages) | `https://rdebiasec.github.io/agente-de-ia-juridico/` |
 
-### Estructura (patrón dbx-solutions-website)
+### Login
 
-```
-audit-portal/
-  site/     # LOCAL — editas HTML/JS aquí
-  dist/     # NUBE — generado, gitignored, lo sube Actions
-```
+- **Correo** — identifica el progreso guardado (normalizado a minúsculas).
+- **Contraseña** — misma `SITE_PASSWORD` que el chat del despacho.
+
+### API (`/api/audit`)
+
+| Método | Ruta | Función |
+|---|---|---|
+| POST | `/api/audit/login` | `{ email, password }` → cookie `audit_session` |
+| GET | `/api/audit/session` | `{ authenticated, email }` |
+| GET/PUT/DELETE | `/api/audit/progress` | Cargar / guardar / borrar progreso del correo autenticado |
+
+Migración: `migrations/versions/0003_audit_portal_progress.py` (aplicada al arrancar con Postgres).
 
 ### Desarrollo local
 
 ```bash
-# Editar fuente
-code audit-portal/site/index.html audit-portal/site/app.js
+# App + Postgres
+./scripts/start-local.sh
 
-# Build (JSON + copia site → dist)
-python scripts/generar_audit_portal.py
+# Build portal (mismo origen en :8000/auditoria)
+AUDIT_API_BASE="" python scripts/generar_audit_portal.py
 
-# Preview (recomendado)
-./scripts/start-audit-portal.sh
-
-# Manual
-python -m http.server 8080 --directory audit-portal/dist
+# Abrir http://127.0.0.1:8000/auditoria/
 ```
 
-Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos). Revertir con **RESTABLECER**. Agregar o eliminar reglas y pasos desde el portal (persisten en `localStorage`).
+Preview estático en `:8080` (API en `:8000`):
 
-### Login del portal (desactivado temporalmente)
+```bash
+AUDIT_API_BASE=http://127.0.0.1:8000 ./scripts/start-audit-portal.sh
+```
 
-El gate de contraseña está **apagado** en local y en GitHub Pages. El build solo activa login si `AUDIT_PORTAL_AUTH_ENABLED=1` **y** existe `AUDIT_PORTAL_PASSWORD` en el entorno de CI.
+### Estructura
 
-Para reactivar más adelante:
+```
+audit-portal/
+  site/     # Fuente HTML/JS
+  dist/     # Generado (gitignored); Docker y /auditoria en Render
+```
 
-1. GitHub → **Settings → Secrets and variables → Actions**
-   - `AUDIT_PORTAL_PASSWORD` — mínimo 12 caracteres
-   - `AUDIT_PORTAL_USERNAME` — opcional (por defecto `auditor`)
-2. Variables → `AUDIT_PORTAL_AUTH_ENABLED` = `1` (o exportar en el workflow)
-3. `git push origin main` → el workflow regenera `dist/` con login habilitado.
+```bash
+python scripts/generar_audit_portal.py
+```
 
-**Nota:** esto evita acceso casual; no sustituye autenticación de servidor. Los archivos estáticos siguen siendo descargables por quien conozca la URL y evite el JS.
+Variables de build:
 
-### Despliegue a Pages (patrón `dbx-solutions-website`)
+- `AUDIT_API_BASE=""` — mismo origen (Render `/auditoria`).
+- `AUDIT_API_BASE=https://agente-de-ia-juridico.onrender.com` — GitHub Pages u otro host estático.
 
-1. Repo **público** (requerido para Pages gratuito)
-2. `git push origin main` → workflow publica `audit-portal/dist` en rama **`gh-pages`**
-3. URL: **https://rdebiasec.github.io/agente-de-ia-juridico/**
+CORS (solo si el portal no está en el mismo dominio): `AUDIT_CORS_ORIGINS` (por defecto incluye GitHub Pages y `localhost:8080`).
 
-Para dominio propio (ej. subdominio en DBX), configurar CNAME en Settings → Pages como en `dbx-solutions-website`.
+### GitHub Pages (espejo opcional)
 
-La abogada revisa en la URL pública, exporta `.md` desde el navegador y envía el dictamen al despacho. Las decisiones quedan en `localStorage` del navegador (no en el repo).
+GitHub Pages **no** corre la app Python. El workflow `deploy-audit-portal.yml` publica `audit-portal/dist` con `AUDIT_API_BASE` apuntando a Render.
+
+1. Repo **público** (Pages gratuito).
+2. `git push origin main` → rama `gh-pages`.
+3. La abogada puede usar Pages o `/auditoria` en Render; el progreso es el mismo si usa el mismo correo.
+
+El export `.md` sigue siendo el dictamen formal al despacho. Respaldo JSON es copia de seguridad adicional.
+
+---
+
+## GitHub Pages (legacy — ver sección anterior)
+
+<details>
+<summary>Notas históricas del portal estático</summary>
+
+Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos).
+
+</details>

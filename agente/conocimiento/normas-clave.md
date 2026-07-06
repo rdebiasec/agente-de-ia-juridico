@@ -1,21 +1,25 @@
-# Normas clave — Código Civil y Comercio (REQ-011)
+# Normas clave penal-víctimas (REQ-011)
 
-**Última revisión:** 2026-06-19
+**Última revisión:** 2026-07-01
 
-## Código Civil (Ley 57 de 1887)
+## Marco normativo principal
 
-- Personas, bienes, obligaciones, contratos, sucesiones, familia
-- Aplica a relaciones civiles no mercantiles
+- Ley 906 de 2004 (Código de Procedimiento Penal).
+- Ley 599 de 2000 (Código Penal), según el tipo penal investigado.
+- Constitución Política: debido proceso, acceso a la justicia y derechos de las víctimas.
 
-## Código de Comercio (Decreto 410 de 1971)
+## Derechos de las víctimas
 
-- Comerciantes, actos de comercio, sociedades, títulos valores, contratos mercantiles
+- Información clara y oportuna sobre el avance del proceso.
+- Participación en actuaciones relevantes según Ley 906.
+- Protección frente a riesgos de revictimización y amenazas.
+- Reparación integral cuando legalmente proceda.
 
-## Principio de aplicación
+## Criterio operativo del despacho
 
-- Hecho mercantil → Código de Comercio (supletorio Código Civil)
-- Hecho puramente civil → Código Civil
+- Priorizar seguridad, dignidad y enfoque diferencial de la víctima.
+- Sustentar cada recomendación en etapa procesal, evidencia disponible y riesgo.
 
 ## Advertencia
 
-Verificar vigencia y modificaciones. No citar artículos específicos sin confirmar en fuente oficial.
+Verificar vigencia y modificaciones antes de citar artículos concretos en escritos.

@@ -20,8 +20,11 @@ COPY migrations ./migrations
 COPY agente ./agente
 COPY scripts ./scripts
 COPY static ./static
+COPY audit-portal ./audit-portal
 
 RUN pip install --no-cache-dir .
+
+RUN AUDIT_API_BASE="" python scripts/generar_audit_portal.py
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8000

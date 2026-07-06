@@ -12,7 +12,7 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-MATERIAS = {"civil", "penal", "familia", "societario", "comercial", "laboral", "consumidor"}
+MATERIAS = {"penal"}
 
 
 @dataclass
@@ -43,7 +43,7 @@ class Expediente:
         if self.etapa_actual:
             partes.append(f"- Etapa actual: {self.etapa_actual}")
         if len(partes) == 1:
-            return "Expediente sin datos aún; solicite materia, partes, radicado y etapa."
+            return "Expediente sin datos aún; solicite rol de la víctima, partes, radicado y etapa."
         return "\n".join(partes)
 
     def to_dict(self) -> dict:
@@ -77,10 +77,10 @@ class Draft:
 
     id: str = field(default_factory=_new_id)
     session_id: str = ""
-    tipo: str = "documento"  # memorial, tutela, concepto, contrato, correo, estrategia...
+    tipo: str = "documento"  # memorial, tutela, concepto, correo, estrategia...
     titulo: str = ""
     contenido: str = ""
-    materia: str | None = None  # civil | penal | familia | laboral...
+    materia: str | None = None  # penal
     estado: str = ESTADO_PROPUESTO
     revisor: str | None = None
     comentario: str | None = None
@@ -119,7 +119,7 @@ class DocumentChunk:
     id: str = field(default_factory=_new_id)
     scope: str = SCOPE_KB  # kb (firma) | expediente (caso)
     expediente_id: str | None = None
-    fuente: str = ""  # p.ej. 'proceso-civil-cgp.md' o 'demanda.pdf'
+    fuente: str = ""  # p.ej. 'proceso-penal-906.md' o 'informe_pericial.pdf'
     chunk_text: str = ""
     embedding: list[float] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
@@ -216,3 +216,21 @@ class SessionTrace:
         out["record_id"] = self.id
         out["created_at"] = self.created_at.isoformat()
         return out
+
+
+@dataclass
+class AuditPortalProgress:
+    """Progreso de auditoría del portal (decisiones por correo de la abogada)."""
+
+    email: str
+    payload: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "email": self.email,
+            "payload": self.payload,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

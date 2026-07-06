@@ -1,53 +1,31 @@
-/* Auditoría de Instrucciones — login (auth-config.js generado en build) */
+/* Auditoría de Instrucciones — login correo + contraseña vía API */
 
 (function () {
-    const SESSION_KEY = 'legal-audit-portal-auth';
-    const SESSION_HOURS = 8;
+    let sessionEmail = null;
 
-    function authConfig() {
-        return window.AUDIT_AUTH_CONFIG || { enabled: false };
+    function apiConfig() {
+        return window.AUDIT_API_CONFIG || { base: '' };
     }
 
-    /** Sin login en localhost; obligatorio en GitHub Pages si auth-config está activo. */
-    function isLocalEnvironment() {
-        const host = window.location.hostname;
-        return host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+    function apiBase() {
+        return String(apiConfig().base || '').replace(/\/$/, '');
     }
 
-    function authRequired() {
-        if (isLocalEnvironment()) return false;
-        return authConfig().enabled === true;
+    function auditApiUrl(path) {
+        const base = apiBase();
+        return base ? `${base}${path}` : path;
     }
 
-    async function sha256Hex(text) {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-        return Array.from(new Uint8Array(buf))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
-    }
-
-    function readSession(cfg) {
-        try {
-            const raw = sessionStorage.getItem(SESSION_KEY);
-            if (!raw) return false;
-            const data = JSON.parse(raw);
-            if (!data.exp || Date.now() > data.exp) return false;
-            return data.v === (cfg.passwordHash || '').slice(0, 16);
-        } catch (_) {
-            return false;
+    async function fetchAuditApi(path, options = {}) {
+        const headers = { ...(options.headers || {}) };
+        if (options.body && !headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json';
         }
-    }
-
-    function writeSession(cfg) {
-        const payload = {
-            exp: Date.now() + SESSION_HOURS * 3600000,
-            v: (cfg.passwordHash || '').slice(0, 16),
-        };
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload));
-    }
-
-    function clearSession() {
-        sessionStorage.removeItem(SESSION_KEY);
+        return fetch(auditApiUrl(path), {
+            credentials: 'include',
+            ...options,
+            headers,
+        });
     }
 
     function showGate() {
@@ -80,12 +58,54 @@
         if (el) el.classList.add('hidden');
     }
 
-    async function verifyLogin(username, password) {
-        const cfg = authConfig();
-        const expectedUser = (cfg.username || 'auditor').trim();
-        if (username.trim() !== expectedUser) return false;
-        const hash = await sha256Hex(password);
-        return hash === cfg.passwordHash;
+    function setSessionEmail(email) {
+        sessionEmail = email || null;
+        window.dispatchEvent(
+            new CustomEvent('audit-session-ready', { detail: { email: sessionEmail } }),
+        );
+    }
+
+    window.getAuditSessionEmail = () => sessionEmail;
+
+    async function checkSession() {
+        const res = await fetchAuditApi('/api/audit/session');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.auth_enabled) {
+            throw new Error('Auditoría no disponible: configure SITE_PASSWORD en el servidor.');
+        }
+        if (data.authenticated && data.email) {
+            setSessionEmail(data.email);
+            return true;
+        }
+        setSessionEmail(null);
+        return false;
+    }
+
+    async function login(email, password) {
+        const res = await fetchAuditApi('/api/audit/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+        if (res.status === 401) return false;
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || `Error ${res.status}`);
+        }
+        const data = await res.json();
+        setSessionEmail(data.email || email);
+        return true;
+    }
+
+    async function logout() {
+        try {
+            await fetchAuditApi('/api/audit/logout', { method: 'POST' });
+        } catch (_) {
+            /* ignore */
+        }
+        setSessionEmail(null);
+        showGate();
+        location.reload();
     }
 
     function bindGateForm(resolve) {
@@ -97,10 +117,14 @@
         form.addEventListener('submit', async e => {
             e.preventDefault();
             hideError();
-            const user = document.getElementById('audit-auth-username')?.value || '';
+            const email = document.getElementById('audit-auth-email')?.value || '';
             const pass = document.getElementById('audit-auth-password')?.value || '';
+            if (!email.trim()) {
+                showError('Ingrese su correo electrónico.');
+                return;
+            }
             if (!pass) {
-                showError('Ingrese la contraseña.');
+                showError('Ingrese la contraseña del despacho.');
                 return;
             }
             const btn = document.getElementById('audit-auth-submit');
@@ -109,16 +133,15 @@
                 btn.textContent = 'Verificando…';
             }
             try {
-                const ok = await verifyLogin(user, pass);
+                const ok = await login(email, pass);
                 if (!ok) {
-                    showError('Usuario o contraseña incorrectos.');
+                    showError('Correo o contraseña incorrectos.');
                     return;
                 }
-                writeSession(authConfig());
                 hideGate();
                 resolve(true);
-            } catch (_) {
-                showError('No se pudo verificar. Intente de nuevo.');
+            } catch (err) {
+                showError(err.message || 'No se pudo conectar con el servidor. Verifique que la API esté activa.');
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -127,30 +150,26 @@
             }
         });
 
-        document.getElementById('audit-auth-logout')?.addEventListener('click', () => {
-            clearSession();
-            showGate();
-            location.reload();
-        });
+        document.getElementById('audit-auth-logout')?.addEventListener('click', () => logout());
     }
 
     window.__auditAuthPromise = new Promise(resolve => {
-        if (!authRequired()) {
-            hideGate();
-            document.getElementById('audit-auth-logout')?.classList.add('hidden');
-            resolve(true);
-            return;
-        }
-        const cfg = authConfig();
-        if (readSession(cfg)) {
-            hideGate();
-            const logoutBtn = document.getElementById('audit-auth-logout');
-            if (logoutBtn) logoutBtn.classList.remove('hidden');
-            resolve(true);
-            return;
-        }
-        showGate();
-        bindGateForm(resolve);
+        (async () => {
+            try {
+                const active = await checkSession();
+                if (active) {
+                    hideGate();
+                    resolve(true);
+                    return;
+                }
+                showGate();
+                bindGateForm(resolve);
+            } catch (err) {
+                showGate();
+                showError(err.message || 'No se pudo verificar la sesión.');
+                bindGateForm(resolve);
+            }
+        })();
     });
 
     window.waitForAuditAuth = () => window.__auditAuthPromise;

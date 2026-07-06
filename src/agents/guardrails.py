@@ -23,12 +23,13 @@ _PHASE_DRAFT_RE = re.compile(r"\n*\s*Fase\s*\d+\s*·\s*Borrador\s*", re.IGNORECA
 # Intenciones accionables que deben quedar pendientes de aprobación del abogado.
 DRAFT_REVIEW_INTENT = re.compile(
     r"\b("
-    r"redact|proyect|contrato|escrito|recurso|solicitud|excepci[oó]n|correo|mensaje profesional|"
-    r"demanda|contestaci[oó]n|memorial|tutela|concepto|estrategia|riesgo|teor[ií]a del caso|"
+    r"redact|proyect|escrito|recurso|solicitud|correo|mensaje profesional|"
+    r"memorial|tutela|concepto|estrategia|riesgo|teor[ií]a del caso|"
     r"seguimiento|informe|radicaci[oó]n|audiencia|interrogatorio|entrevista"
     r")\w*",
     re.IGNORECASE,
 )
+_OUT_OF_SCOPE_RE = re.compile(r"fuera de alcance penal[- ]v[íi]ctimas", re.IGNORECASE)
 
 
 def check_input(text: str) -> tuple[bool, str | None]:
@@ -56,6 +57,9 @@ def apply_output_guardrails(text: str, channel: str = "web") -> str:
 def needs_human_review(text: str, channel: str, user_message: str = "") -> bool:
     """Determina cuándo la salida debe quedar pendiente de revisión humana."""
     from src.config import get_settings
+
+    if _OUT_OF_SCOPE_RE.search(text or ""):
+        return False
 
     settings = get_settings()
     if settings.require_human_review_web:

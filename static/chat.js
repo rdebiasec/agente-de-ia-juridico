@@ -6,7 +6,7 @@ const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
 const ENABLE_SERVER_RUBRIC = true;
 
 const WELCOME_MESSAGE =
-  "Bienvenida. Soy el asistente jurídico del despacho. Puedo apoyarla en intake, estrategia, redacción de documentos, conceptos, tutelas y seguimiento de procesos civiles y penales.\n\n¿En qué puedo ayudarla hoy?";
+  "Bienvenida. Soy la firma virtual penal-víctimas del despacho. Puedo apoyarla en cronología de hechos, tipicidad, ruta Ley 906, evidencia, audiencias, redacción penal, seguimiento procesal y tutela.\n\n¿En qué punto del caso penal necesita apoyo hoy?";
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
@@ -383,17 +383,27 @@ function buildMessageMeta(role, options = {}) {
 
 function formatAgentRoute(agent) {
   if (!agent) return "";
-  if (agent === "orquestador") return "Orquestador (firma)";
-  if (agent === "conocimiento_areas") return "Especialista (Conocimiento)";
-  if (agent === "intake") return "Especialista (Intake)";
-  if (agent === "estratega") return "Especialista (Estrategia)";
-  if (agent === "comunicacion_clientes") return "Especialista (Comunicación)";
-  if (agent === "litigante_civil") return "Litigante Civil (CGP)";
-  if (agent === "litigante_penal") return "Litigante Penal (Ley 906)";
-  if (agent === "redaccion_documental") return "Especialista (Redacción)";
-  if (agent === "conceptos_juridicos") return "Especialista (Conceptos)";
-  if (agent === "tutela_constitucional") return "Especialista (Tutela)";
-  if (agent === "dependiente_judicial") return "Dependiente judicial";
+  if (agent === "coordinador_expediente_penal") return "Coordinador de expediente penal";
+  if (agent === "analista_cronologia_hechos_penales") return "Analista de cronología penal";
+  if (agent === "analista_tipicidad_y_responsabilidad_penal") return "Analista de tipicidad y responsabilidad penal";
+  if (agent === "analista_ruta_procesal_ley906") return "Analista de ruta procesal Ley 906";
+  if (agent === "analista_representacion_victimas") return "Analista de representación de víctimas";
+  if (agent === "gestor_evidencia_y_soporte_probatorio") return "Gestor de evidencia y soporte probatorio";
+  if (agent === "preparador_estrategico_audiencias_penales") return "Preparador estratégico de audiencias penales";
+  if (agent === "redactor_documentos_juridicos_penales") return "Redactor de documentos jurídicos penales";
+  if (agent === "gestor_seguimiento_procesal_penal") return "Gestor de seguimiento procesal penal";
+  if (agent === "evaluador_derechos_fundamentales_tutela") return "Evaluador de derechos fundamentales y tutela";
+  if (agent === "analista_calidad_juridica") return "Analista de calidad jurídica";
+  // Compatibilidad con trazas legacy previas al rediseño penal.
+  if (agent === "orquestador") return "Orquestador (legacy)";
+  if (agent === "intake") return "Especialista intake (legacy)";
+  if (agent === "estratega") return "Especialista estrategia (legacy)";
+  if (agent === "comunicacion_clientes") return "Especialista comunicación (legacy)";
+  if (agent === "litigante_penal") return "Litigante penal (legacy)";
+  if (agent === "redaccion_documental") return "Especialista redacción (legacy)";
+  if (agent === "conceptos_juridicos") return "Especialista conceptos (legacy)";
+  if (agent === "tutela_constitucional") return "Especialista tutela (legacy)";
+  if (agent === "dependiente_judicial") return "Dependiente judicial (legacy)";
   if (agent === "fallback") return "Modo respaldo";
   if (agent === "guardrail") return "Bloqueo de seguridad";
   if (agent === "error") return "Ruta de error controlado";
@@ -410,7 +420,7 @@ function inferTrace(options = {}, text = "") {
     trace_id: "local-inferido",
     session_id: null,
     route: options.agent || "unknown",
-    received_by_agent: "orquestador",
+    received_by_agent: "coordinador_expediente_penal",
     sent_to_agent: options.agent || "none",
     skill_kan: "KAN-N/A",
     skill_reason: "Inferido localmente por falta de metadata backend.",
@@ -580,7 +590,7 @@ async function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
-  const receiver = trace.received_by_agent || "orquestador";
+  const receiver = trace.received_by_agent || "coordinador_expediente_penal";
   const destination = trace.sent_to_agent || trace.selected_agent || "none";
   const skill = trace.skill_kan || "KAN-N/A";
   const completion = trace.completion || { available: false, calls: [], summary: null, note: "Sin datos." };

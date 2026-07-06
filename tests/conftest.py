@@ -7,7 +7,9 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def disable_web_auth_by_default(monkeypatch, request):
-    if request.module.__name__.endswith("test_auth"):
+    if request.module.__name__.endswith("test_auth") or request.module.__name__.endswith(
+        "test_audit_portal_api"
+    ):
         yield
         return
 

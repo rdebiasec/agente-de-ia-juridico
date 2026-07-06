@@ -20,9 +20,9 @@ async def test_trace_allowed_drafting_sets_pending_review():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
-    assert trace.get("received_by_agent") == "orquestador"
-    assert trace.get("sent_to_agent") in {"comunicacion_clientes", "redaccion_documental"}
-    assert trace.get("skill_kan") in {"KAN-11", "KAN-13"}
+    assert trace.get("received_by_agent") == "coordinador_expediente_penal"
+    assert trace.get("sent_to_agent") in {"redactor_documentos_juridicos_penales", "coordinador_expediente_penal"}
+    assert trace.get("skill_kan") in {"PEN-REDACCION", "PEN-COORD"}
     assert isinstance(trace.get("actions"), list)
     assert isinstance(trace.get("completion"), dict)
     assert "summary" in trace.get("completion", {})
@@ -43,8 +43,8 @@ async def test_trace_followup_capability_is_active():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
-    assert trace.get("sent_to_agent") == "dependiente_judicial"
-    assert trace.get("skill_kan") == "KAN-14"
+    assert trace.get("sent_to_agent") == "gestor_seguimiento_procesal_penal"
+    assert trace.get("skill_kan") == "PEN-SEGUIMIENTO"
     assert isinstance(trace.get("completion"), dict)
     assert any(step.get("step") == "Enruté al especialista" and step.get("status") == "done" for step in trace.get("steps", []))
 

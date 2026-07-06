@@ -146,19 +146,29 @@ def build_audit_data() -> dict:
     }
 
 
+def audit_api_base() -> str:
+    return os.environ.get("AUDIT_API_BASE", "").strip().rstrip("/")
+
+
+def build_audit_api_config_js() -> str:
+    base = audit_api_base()
+    payload = {"base": base}
+    return f"window.AUDIT_API_CONFIG={json.dumps(payload, ensure_ascii=False)};\n"
+
+
+def write_audit_api_config() -> None:
+    out = DIST_DIR / "audit-api-config.js"
+    out.write_text(build_audit_api_config_js(), encoding="utf-8")
+    base = audit_api_base()
+    if base:
+        print(f"  api: AUDIT_API_BASE={base}")
+    else:
+        print("  api: mismo origen (AUDIT_API_BASE vacío → /api/audit en el servidor)")
+
+
 def build_auth_config_js() -> str:
-    """Genera auth-config.js. Login solo si AUDIT_PORTAL_AUTH_ENABLED=1 y hay contraseña."""
-    if not audit_auth_enabled():
-        return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
-    password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
-    if not password:
-        return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
-    if len(password) < 12:
-        raise SystemExit("AUDIT_PORTAL_PASSWORD debe tener al menos 12 caracteres.")
-    username = os.environ.get("AUDIT_PORTAL_USERNAME", "auditor").strip() or "auditor"
-    digest = hashlib.sha256(password.encode("utf-8")).hexdigest()
-    payload = {"enabled": True, "username": username, "passwordHash": digest}
-    return f"window.AUDIT_AUTH_CONFIG={json.dumps(payload, ensure_ascii=False)};\n"
+    """Genera auth-config.js. Login legacy desactivado — auth vía API /api/audit/login."""
+    return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
 
 
 def _auth_config_enabled(content: str) -> bool:
@@ -168,22 +178,8 @@ def _auth_config_enabled(content: str) -> bool:
 
 def write_auth_config() -> None:
     out = DIST_DIR / "auth-config.js"
-    if not audit_auth_enabled():
-        out.write_text("window.AUDIT_AUTH_CONFIG={enabled:false};\n", encoding="utf-8")
-        print("  auth: login desactivado (AUDIT_PORTAL_AUTH_ENABLED no está activo)")
-        return
-    password = os.environ.get("AUDIT_PORTAL_PASSWORD", "").strip()
-    if password:
-        out.write_text(build_auth_config_js(), encoding="utf-8")
-        print("  auth: login habilitado (AUDIT_PORTAL_AUTH_ENABLED + contraseña)")
-        return
-    if out.is_file():
-        content = out.read_text(encoding="utf-8")
-        if _auth_config_enabled(content):
-            print("  auth: login habilitado (auth-config.js en site/)")
-            return
-    out.write_text("window.AUDIT_AUTH_CONFIG={enabled:false};\n", encoding="utf-8")
-    print("  auth: sin credenciales — login desactivado")
+    out.write_text(build_auth_config_js(), encoding="utf-8")
+    print("  auth: login vía API /api/audit (auth-config.js legacy desactivado)")
 
 
 def copy_site_to_dist() -> None:
@@ -203,6 +199,7 @@ def main() -> None:
     out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     write_auth_config()
+    write_audit_api_config()
 
     step_sum = sum(s["step_count"] for s in data["skills"])
     totals = data["totals"]

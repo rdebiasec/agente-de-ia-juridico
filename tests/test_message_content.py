@@ -14,7 +14,7 @@ def test_normalize_legacy_python_dict_string():
 def test_strip_rag_from_user_message():
     raw = (
         "[Base de conocimiento — fragmentos relevantes]\n"
-        "[Fuente 1: civil.md]\n"
+        "[Fuente 1: proceso-penal-906.md]\n"
         "fragmento\n\n"
         "Verificación browser Postgres"
     )

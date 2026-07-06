@@ -3,7 +3,7 @@
 Definen los campos obligatorios de cada tipo de documento para reducir la
 alucinación de estructura y permitir validación. Los agentes de redacción
 se instruyen para completar estos campos; los modelos también sirven como
-contrato validable (y, en una fase posterior, como output_type del SDK).
+estructura validable (y, en una fase posterior, como output_type del SDK).
 """
 
 from __future__ import annotations
@@ -21,21 +21,6 @@ def _no_vacio(valor: str, campo: str) -> str:
     if not valor or not valor.strip():
         raise ValueError(f"El campo '{campo}' es obligatorio y no puede estar vacío.")
     return valor.strip()
-
-
-class Contrato(BaseModel):
-    """Borrador de contrato (REQ-024 a REQ-028)."""
-
-    tipo: str = Field(..., description="Tipo de contrato (prestación de servicios, inversión, etc.).")
-    partes: list[Parte] = Field(..., min_length=2, description="Partes del contrato.")
-    objeto: str = Field(..., description="Objeto del contrato.")
-    clausulas: list[str] = Field(default_factory=list, description="Cláusulas propuestas.")
-    clausulas_blindaje: list[str] = Field(default_factory=list, description="Cláusulas de protección del cliente.")
-
-    @field_validator("tipo", "objeto")
-    @classmethod
-    def _validar(cls, v: str, info):
-        return _no_vacio(v, info.field_name)
 
 
 class ConceptoJuridico(BaseModel):

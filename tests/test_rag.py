@@ -29,31 +29,31 @@ def test_embedding_local_determinista_y_dimension():
 
 def test_ingesta_y_busqueda_recupera_fragmento_exacto():
     repo = InMemoryRepository()
-    rag.ingestar("La caducidad de la acción contractual es de diez años.",
-                 scope=SCOPE_KB, fuente="civil.md", repo=repo)
+    rag.ingestar("La audiencia preparatoria en Ley 906 exige descubrimiento probatorio para la víctima.",
+                 scope=SCOPE_KB, fuente="proceso-penal-906.md", repo=repo)
     rag.ingestar("La imputación se realiza ante el juez de control de garantías.",
                  scope=SCOPE_KB, fuente="penal.md", repo=repo)
 
     resultados = rag.buscar(
-        "La caducidad de la acción contractual es de diez años.", incluir_kb=True, k=2, repo=repo
+        "La audiencia preparatoria en Ley 906 exige descubrimiento probatorio para la víctima.", incluir_kb=True, k=2, repo=repo
     )
     assert resultados
-    assert resultados[0].fuente == "civil.md"
+    assert resultados[0].fuente == "proceso-penal-906.md"
     assert resultados[0].score == pytest.approx(1.0, abs=1e-6)
 
 
 def test_busqueda_expediente_respeta_alcance():
     repo = InMemoryRepository()
     rag.ingestar_expediente(
-        "El demandado confiesa la deuda en el documento adjunto.",
-        expediente_id="EXP-1", fuente="contestacion.pdf", repo=repo,
+        "El imputado reconoce los hechos en la entrevista adjunta.",
+        expediente_id="EXP-1", fuente="entrevista.pdf", repo=repo,
     )
     # Con expediente: se encuentra.
-    con_exp = rag.buscar("confiesa la deuda", expediente_id="EXP-1", incluir_kb=False, k=5, repo=repo)
+    con_exp = rag.buscar("reconoce los hechos", expediente_id="EXP-1", incluir_kb=False, k=5, repo=repo)
     assert len(con_exp) == 1
     assert con_exp[0].scope == SCOPE_EXPEDIENTE
     # Sin expediente y solo KB: el chunk del expediente no aparece.
-    solo_kb = rag.buscar("confiesa la deuda", expediente_id=None, incluir_kb=True, k=5, repo=repo)
+    solo_kb = rag.buscar("reconoce los hechos", expediente_id=None, incluir_kb=True, k=5, repo=repo)
     assert solo_kb == []
 
 
@@ -82,6 +82,6 @@ async def test_endpoints_rag_ingest_y_search():
         body = ing.json()
         assert "total_fragmentos" in body
 
-        sr = await client.post("/rag/search", json={"consulta": "proceso civil", "k": 3})
+        sr = await client.post("/rag/search", json={"consulta": "proceso penal", "k": 3})
         assert sr.status_code == 200
         assert "resultados" in sr.json()

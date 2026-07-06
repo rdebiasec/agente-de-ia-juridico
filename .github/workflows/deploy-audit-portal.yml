@@ -34,6 +34,7 @@ jobs:
 
       - name: Build audit portal
         env:
+          AUDIT_API_BASE: https://agente-de-ia-juridico.onrender.com
           AUDIT_PORTAL_AUTH_ENABLED: ${{ vars.AUDIT_PORTAL_AUTH_ENABLED }}
           AUDIT_PORTAL_PASSWORD: ${{ secrets.AUDIT_PORTAL_PASSWORD }}
           AUDIT_PORTAL_USERNAME: ${{ secrets.AUDIT_PORTAL_USERNAME }}

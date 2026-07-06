@@ -119,7 +119,7 @@ def run_pre_validations(
     expediente_resumen: str | None,
     trace: dict,
 ) -> tuple[bool, str | None]:
-    """Validaciones encadenadas antes de llamar al orquestador."""
+    """Validaciones encadenadas antes de llamar al coordinador penal."""
     if not message or not message.strip():
         _span(trace, "Validación: mensaje vacío", "blocked", "La consulta llegó sin contenido.")
         return False, "Escriba su consulta para continuar la conversación."
@@ -144,7 +144,7 @@ def run_pre_validations(
             trace,
             "Validación: expediente",
             "pending",
-            "Expediente aún sin datos estructurados; el agente debe solicitar materia, etapa y radicado.",
+            "Expediente aún sin datos estructurados; el agente debe solicitar rol de víctima, etapa y radicado.",
             kind="context",
         )
 
@@ -153,7 +153,7 @@ def run_pre_validations(
             trace,
             "Validación: diálogo multi-turno",
             "done",
-            "La conversación continúa; se inyectará historial al orquestador.",
+            "La conversación continúa; se inyectará historial al coordinador penal.",
             kind="session",
         )
 
@@ -165,7 +165,10 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
     lower_msg = message.lower()
     missing: list[str] = []
 
-    if "tutela" in lower_msg or trace.get("sent_to_agent") == "tutela_constitucional":
+    if "tutela" in lower_msg or trace.get("sent_to_agent") in {
+        "evaluador_derechos_fundamentales_tutela",
+        "tutela_constitucional",  # compatibilidad con trazas legacy
+    }:
         combined = f"{message}\n{text}"
         for label, pattern in _TUTELA_FIELDS:
             if not pattern.search(combined):

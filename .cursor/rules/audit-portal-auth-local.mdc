@@ -1,24 +1,30 @@
 ---
-description: Auditoría de Instrucciones — login desactivado (local y GitHub Pages) hasta nuevo aviso
+description: Portal Auditoría de Instrucciones — login correo + SITE_PASSWORD y persistencia en Postgres
 alwaysApply: true
 ---
 
-# Audit portal — autenticación
+# Audit portal — autenticación y persistencia
 
-**Estado actual:** login **desactivado** en local y en GitHub Pages. Acceso directo al panel en ambos entornos.
+## Modelo actual
 
-## Reactivar login (cuando el despacho lo indique)
+- **Login:** correo electrónico + contraseña del despacho (`SITE_PASSWORD`, misma que el chat).
+- **API:** `/api/audit/login`, `/api/audit/session`, `/api/audit/progress` (GET/PUT/DELETE).
+- **Persistencia:** PostgreSQL tabla `audit_portal_progress` (una fila por correo normalizado).
+- **Hosting recomendado:** `https://agente-de-ia-juridico.onrender.com/auditoria` (mismo origen, sin CORS).
+- **GitHub Pages (espejo):** build con `AUDIT_API_BASE=https://agente-de-ia-juridico.onrender.com`.
 
-1. Build con `AUDIT_PORTAL_AUTH_ENABLED=1` y `AUDIT_PORTAL_PASSWORD` (mín. 12 caracteres).
-2. En GitHub Actions: añadir secreto `AUDIT_PORTAL_AUTH_ENABLED` = `1` (o variable en el workflow) además de `AUDIT_PORTAL_PASSWORD`.
-3. En local: `auth-gate.js` ya omite login en `localhost`; en Pages dependerá de `auth-config.js` generado en CI.
+## Build
 
-## Implementación
+```bash
+# Mismo origen (Render / local en :8000/auditoria)
+AUDIT_API_BASE="" python scripts/generar_audit_portal.py
 
-- `scripts/generar_audit_portal.py` → `audit_auth_enabled()` controla `auth-config.js`.
-- `audit-portal/site/auth-gate.js` → bypass adicional en localhost vía `isLocalEnvironment()`.
+# GitHub Pages o preview estático en :8080
+AUDIT_API_BASE="http://127.0.0.1:8000" python scripts/generar_audit_portal.py
+```
 
 ## Smoke test tras cambios en audit-portal
 
-1. **Local:** `./scripts/start-audit-portal.sh` → `http://127.0.0.1:8080` → sin gate, app carga de inmediato.
-2. **Producción:** GitHub Pages → sin gate, app carga de inmediato (mientras login esté desactivado).
+1. **Local (recomendado):** `./scripts/start-local.sh` → `http://127.0.0.1:8000/auditoria/` — login correo + `SITE_PASSWORD`, gate se oculta, progreso sincroniza.
+2. **Preview estático:** FastAPI en :8000 + `AUDIT_API_BASE=http://127.0.0.1:8000 ./scripts/start-audit-portal.sh` → :8080.
+3. **Producción:** Render `/auditoria` y/o GitHub Pages con API en Render — mismo login, progreso visible desde otro navegador con el mismo correo.

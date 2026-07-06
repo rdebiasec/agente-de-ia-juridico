@@ -35,20 +35,24 @@ def _collect_text(message: str, history: list[dict]) -> str:
 
 def _detect_materia(text: str) -> str | None:
     lower = text.lower()
-    if "tutela" in lower or "derecho fundamental" in lower or "acción de tutela" in lower:
-        return "constitucional"
-    if any(w in lower for w in ("penal", "fiscalía", "imputación", "ley 906")):
+    if any(
+        w in lower
+        for w in (
+            "penal",
+            "fiscalía",
+            "fiscalia",
+            "imputación",
+            "imputacion",
+            "ley 906",
+            "víctima",
+            "victima",
+            "acción penal",
+            "accion penal",
+            "tutela",
+            "derecho fundamental",
+        )
+    ):
         return "penal"
-    if any(w in lower for w in ("familia", "custodia", "alimentos", "divorcio")):
-        return "familia"
-    if any(w in lower for w in ("laboral", "despido", "contrato de trabajo")):
-        return "laboral"
-    if any(w in lower for w in ("consumidor", "superintendencia", "reclamación")):
-        return "consumidor"
-    if any(w in lower for w in ("comercial", "sociedad", "societario")):
-        return "comercial"
-    if any(w in lower for w in ("civil", "demanda", "contrato", "memorial")):
-        return "civil"
     return None
 
 
@@ -80,11 +84,10 @@ def sync_expediente_from_chat(
     cambios: list[str] = []
 
     materia = _detect_materia(text)
-    if materia and materia in MATERIAS.union({"constitucional"}):
-        mapped = "civil" if materia == "constitucional" else materia
-        if exp.materia != mapped:
-            exp.materia = mapped
-            cambios.append(f"materia={mapped}")
+    if materia and materia in MATERIAS:
+        if exp.materia != materia:
+            exp.materia = materia
+            cambios.append(f"materia={materia}")
         if "tutela" in text.lower() and exp.tipo_proceso != "tutela":
             exp.tipo_proceso = "tutela"
             cambios.append("tipo_proceso=tutela")

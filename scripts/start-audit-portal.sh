@@ -26,6 +26,7 @@ if [[ -z "${AUDIT_PORTAL_PASSWORD:-}" ]]; then
 fi
 
 echo "→ Generando audit-portal/dist..."
+export AUDIT_API_BASE="${AUDIT_API_BASE:-http://127.0.0.1:8000}"
 python3 scripts/generar_audit_portal.py
 
 if lsof -ti ":$PORT" >/dev/null 2>&1; then
@@ -35,14 +36,8 @@ if lsof -ti ":$PORT" >/dev/null 2>&1; then
 fi
 
 echo "→ Servidor en http://127.0.0.1:$PORT (Ctrl+C para detener)"
-echo "→ Local: sin pantalla de login (acceso directo al panel)"
-if [[ -n "${AUDIT_PORTAL_PASSWORD:-}" ]]; then
-  echo "→ GitHub Pages: login activo — usuario: ${AUDIT_PORTAL_USERNAME:-auditor} (contraseña en audit-portal/.env / Secrets)"
-elif [[ -f "$ROOT/audit-portal/site/auth-config.js" ]]; then
-  echo "→ GitHub Pages: login activo — usuario: auditor (hash en site/auth-config.js)"
-else
-  echo "→ GitHub Pages: sin credenciales — login desactivado hasta definir AUDIT_PORTAL_PASSWORD"
-fi
+echo "→ API: $AUDIT_API_BASE — inicie FastAPI con ./scripts/start-local.sh si no está activo"
+echo "→ Login: correo + SITE_PASSWORD del despacho"
 if [[ "$OPEN_BROWSER" == "1" ]] && command -v open >/dev/null 2>&1; then
   (sleep 1 && open "http://127.0.0.1:$PORT/") &
 fi

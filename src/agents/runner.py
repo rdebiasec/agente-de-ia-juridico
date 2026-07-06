@@ -28,30 +28,44 @@ from src.storage import get_repository
 
 logger = logging.getLogger(__name__)
 
-_COMMUNICATION_RE = re.compile(r"\b(correo|mensaje|cliente|comunicaci[oó]n)\b", re.IGNORECASE)
-_ANALYSIS_RE = re.compile(r"\b(riesgo|estrategia|teor[ií]a|prueba|debilidad)\b", re.IGNORECASE)
-_TUTELA_RE = re.compile(r"\btutela\b", re.IGNORECASE)
-_CONCEPT_RE = re.compile(r"\bconcepto\b", re.IGNORECASE)
-_MEMORIAL_RE = re.compile(r"\b(memorial|radicado|impulso procesal|expediente|audiencia)\b", re.IGNORECASE)
-_CIVIL_RE = re.compile(r"\b(demanda|contestaci[oó]n|excepci[oó]n|civil)\b", re.IGNORECASE)
-_PENAL_RE = re.compile(r"\b(penal|fiscal[ií]a|imputaci[oó]n|interrogatorio)\b", re.IGNORECASE)
-_DRAFTING_RE = re.compile(r"\b(contrato|redact|escrito|recurso|solicitud)\b", re.IGNORECASE)
-_FOLLOWUP_RE = re.compile(r"\b(seguimiento|informe|radicaci[oó]n|estado)\b", re.IGNORECASE)
-_KNOWLEDGE_RE = re.compile(r"\b([áa]rea|derecho|cubre|maneja)\b", re.IGNORECASE)
+_TUTELA_RE = re.compile(r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b", re.IGNORECASE)
+_SEGUIMIENTO_RE = re.compile(r"\b(seguimiento|radicado|actuaci[oó]n|vencimiento|t[eé]rmino|inactividad)\b", re.IGNORECASE)
+_AUDIENCIA_RE = re.compile(r"\b(audiencia|interrogatorio|contrainterrogatorio|juicio|alegato)\b", re.IGNORECASE)
+_EVIDENCIA_RE = re.compile(r"\b(evidencia|prueba|cadena de custodia|perit[oa]|testig)\b", re.IGNORECASE)
+_TIPICIDAD_RE = re.compile(
+    r"\b(tipicidad|tipo penal|autor[ií]a|participaci[oó]n|dolo|culpa|agravante|atenuante|conducta punible|delito)\b",
+    re.IGNORECASE,
+)
+_RUTA906_RE = re.compile(
+    r"\b(ley 906|imputaci[oó]n|acusaci[oó]n|preparatoria|control de garant[ií]as|etapa procesal|oportunidad procesal|fiscal[ií]a)\b",
+    re.IGNORECASE,
+)
+_VICTIMAS_RE = re.compile(
+    r"\b(v[ií]ctima|revictimizaci[oó]n|reparaci[oó]n integral|enfoque diferencial|derechos de la v[ií]ctima)\b",
+    re.IGNORECASE,
+)
+_CRONOLOGIA_RE = re.compile(r"\b(cronolog[ií]a|linea de tiempo|hechos|narrativa factual|relato)\b", re.IGNORECASE)
+_REDACCION_RE = re.compile(r"\b(memorial|solicitud|recurso|derecho de petici[oó]n|redact|escrito|borrador)\b", re.IGNORECASE)
+_CALIDAD_RE = re.compile(r"\b(calidad|verificar|auditar|alucinaci[oó]n|coherencia|confidencialidad)\b", re.IGNORECASE)
+_OUT_OF_SCOPE_RE = re.compile(
+    r"\b(civil|familia|societari[oa]|comercial|laboral|consumidor|contractual|contrato|divorcio|custodia|alimentos|arrendamiento)\b",
+    re.IGNORECASE,
+)
+_KNOWLEDGE_RE = re.compile(r"\b(ley 906|proceso penal|despacho penal|rutas penales)\b", re.IGNORECASE)
 _PROFILE_RE = re.compile(r"\b(perfil|experiencia|qu[ií]en eres|quien eres)\b", re.IGNORECASE)
 
 _AGENT_SKILL_MAP = {
-    "orquestador": "KAN-4",
-    "conocimiento_areas": "KAN-10",
-    "intake": "KAN-11",
-    "comunicacion_clientes": "KAN-11",
-    "estratega": "KAN-12",
-    "litigante_civil": "KAN-13",
-    "litigante_penal": "KAN-13",
-    "redaccion_documental": "KAN-13",
-    "conceptos_juridicos": "KAN-17",
-    "tutela_constitucional": "KAN-19",
-    "dependiente_judicial": "KAN-14",
+    "coordinador_expediente_penal": "PEN-COORD",
+    "analista_cronologia_hechos_penales": "PEN-HECHOS",
+    "analista_tipicidad_y_responsabilidad_penal": "PEN-TIPICIDAD",
+    "analista_ruta_procesal_ley906": "PEN-RUTA906",
+    "analista_representacion_victimas": "PEN-VICTIMAS",
+    "gestor_evidencia_y_soporte_probatorio": "PEN-EVIDENCIA",
+    "preparador_estrategico_audiencias_penales": "PEN-AUDIENCIAS",
+    "redactor_documentos_juridicos_penales": "PEN-REDACCION",
+    "gestor_seguimiento_procesal_penal": "PEN-SEGUIMIENTO",
+    "evaluador_derechos_fundamentales_tutela": "PEN-TUTELA",
+    "analista_calidad_juridica": "PEN-CALIDAD",
     "fallback": "KAN-FALLBACK",
     "guardrail": "KAN-GUARDRAIL",
     "error": "KAN-ERROR",
@@ -160,7 +174,7 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             self.trace,
             action_type="handoff",
             status="done",
-            actor=getattr(from_agent, "name", "orquestador"),
+            actor=getattr(from_agent, "name", "coordinador_expediente_penal"),
             detail=f"Handoff hacia {getattr(to_agent, 'name', 'especialista')}.",
         )
 
@@ -234,19 +248,42 @@ def _kan_for_agent(agent_name: str | None) -> str:
 
 
 _AGENT_DRAFT_TIPO = {
-    "tutela_constitucional": "tutela",
-    "conceptos_juridicos": "concepto",
-    "redaccion_documental": "documento",
-    "comunicacion_clientes": "correo",
-    "estratega": "estrategia",
-    "litigante_civil": "memorial",
-    "litigante_penal": "memorial",
-    "dependiente_judicial": "seguimiento",
+    "evaluador_derechos_fundamentales_tutela": "tutela",
+    "redactor_documentos_juridicos_penales": "documento",
+    "preparador_estrategico_audiencias_penales": "audiencia",
+    "gestor_seguimiento_procesal_penal": "seguimiento",
+    "analista_tipicidad_y_responsabilidad_penal": "analisis_penal",
+    "analista_ruta_procesal_ley906": "ruta_procesal",
+    "analista_representacion_victimas": "estrategia_victima",
+    "gestor_evidencia_y_soporte_probatorio": "plan_probatorio",
+    "analista_calidad_juridica": "control_calidad",
+    "analista_cronologia_hechos_penales": "cronologia",
 }
 
 
 def _draft_tipo(destination_agent: str) -> str:
     return _AGENT_DRAFT_TIPO.get(destination_agent, "documento")
+
+
+_PENAL_CONTEXT_PATTERNS = (
+    _TUTELA_RE,
+    _SEGUIMIENTO_RE,
+    _AUDIENCIA_RE,
+    _EVIDENCIA_RE,
+    _TIPICIDAD_RE,
+    _RUTA906_RE,
+    _VICTIMAS_RE,
+    _CRONOLOGIA_RE,
+    _KNOWLEDGE_RE,
+)
+
+
+def _has_penal_context(message: str) -> bool:
+    return any(pattern.search(message) for pattern in _PENAL_CONTEXT_PATTERNS)
+
+
+def _is_non_penal_scope_request(message: str) -> bool:
+    return bool(_OUT_OF_SCOPE_RE.search(message)) and not _has_penal_context(message)
 
 
 def _maybe_create_draft(
@@ -285,29 +322,33 @@ def _maybe_create_draft(
 
 
 def _infer_destination_agent(message: str) -> str:
+    if _is_non_penal_scope_request(message):
+        return "coordinador_expediente_penal"
+    if _CALIDAD_RE.search(message):
+        return "analista_calidad_juridica"
     if _TUTELA_RE.search(message):
-        return "tutela_constitucional"
-    if _FOLLOWUP_RE.search(message):
-        return "dependiente_judicial"
-    if _CONCEPT_RE.search(message):
-        return "conceptos_juridicos"
-    if _MEMORIAL_RE.search(message):
-        return "redaccion_documental"
-    if _PENAL_RE.search(message):
-        return "litigante_penal"
-    if _CIVIL_RE.search(message):
-        return "litigante_civil"
-    if _DRAFTING_RE.search(message):
-        return "redaccion_documental"
-    if _COMMUNICATION_RE.search(message):
-        return "comunicacion_clientes"
-    if _ANALYSIS_RE.search(message):
-        return "estratega"
+        return "evaluador_derechos_fundamentales_tutela"
+    if _SEGUIMIENTO_RE.search(message):
+        return "gestor_seguimiento_procesal_penal"
+    if _AUDIENCIA_RE.search(message):
+        return "preparador_estrategico_audiencias_penales"
+    if _EVIDENCIA_RE.search(message):
+        return "gestor_evidencia_y_soporte_probatorio"
+    if _TIPICIDAD_RE.search(message):
+        return "analista_tipicidad_y_responsabilidad_penal"
+    if _RUTA906_RE.search(message):
+        return "analista_ruta_procesal_ley906"
+    if _VICTIMAS_RE.search(message):
+        return "analista_representacion_victimas"
+    if _CRONOLOGIA_RE.search(message):
+        return "analista_cronologia_hechos_penales"
+    if _REDACCION_RE.search(message):
+        return "redactor_documentos_juridicos_penales"
     if _PROFILE_RE.search(message):
-        return "intake"
+        return "coordinador_expediente_penal"
     if _KNOWLEDGE_RE.search(message):
-        return "conocimiento_areas"
-    return "conocimiento_areas"
+        return "analista_ruta_procesal_ley906"
+    return "coordinador_expediente_penal"
 
 
 def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> dict[str, str]:
@@ -315,7 +356,7 @@ def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> 
 
 
 def _base_trace(session_id: str, channel: str, message: str) -> dict:
-    receiver = "orquestador"
+    receiver = "coordinador_expediente_penal"
     return {
         "trace_version": "4.0",
         "trace_id": _trace_id(session_id, message),
@@ -402,66 +443,69 @@ def _finalize_trace(trace: dict, text: str) -> dict:
 
 def _fallback_response(message: str) -> str:
     """Respuesta offline determinista cuando no hay OPENAI_API_KEY."""
-    from src.mcp.tools import _list_areas
-
     lower = message.lower()
     if _TUTELA_RE.search(lower):
         body = (
-            "Puedo preparar un borrador de acción de tutela. Compárteme datos completos del "
-            "accionante y accionado, el derecho fundamental presuntamente vulnerado y los hechos. "
-            "Recuerda que el término de fallo (10 días hábiles) debe vigilarse."
+            "Puedo evaluar la procedencia preliminar de tutela en un contexto penal. "
+            "Compárteme accionante, accionado, hechos, derecho fundamental vulnerado y por qué "
+            "las vías ordinarias no son suficientes en este caso."
         )
-    elif _MEMORIAL_RE.search(lower):
+    elif _SEGUIMIENTO_RE.search(lower):
         body = (
-            "Puedo preparar un borrador de memorial. Indícame el tipo (solicitud de expediente, "
-            "impulso procesal, solicitud de audiencia), el nombre del proceso, las partes y el radicado."
+            "Puedo estructurar el seguimiento procesal penal: estado del radicado, últimas actuaciones, "
+            "audiencias próximas y alertas operativas de términos."
         )
-    elif _CONCEPT_RE.search(lower):
+    elif _AUDIENCIA_RE.search(lower):
         body = (
-            "Puedo proyectar un concepto jurídico. Compárteme el nombre del cliente y el problema "
-            "jurídico; fundamentaré con las normas de la base de conocimiento y daré una recomendación."
+            "Puedo preparar la audiencia penal: objetivo de intervención, guion, solicitudes, "
+            "preguntas clave y riesgos tácticos para representación de víctimas."
         )
-    elif _FOLLOWUP_RE.search(lower):
+    elif _EVIDENCIA_RE.search(lower):
         body = (
-            "Puedo estructurar el seguimiento del proceso y un informe de novedades para el cliente. "
-            "Compárteme el radicado, el estado actual y las últimas actuaciones."
+            "Puedo construir el plan probatorio: inventario de evidencia, matriz hecho-prueba, "
+            "brechas y plan de recaudo sin comprometer cadena de custodia."
         )
-    elif _PENAL_RE.search(lower):
+    elif _TIPICIDAD_RE.search(lower):
         body = (
-            "Puedo apoyar el asunto penal según la etapa (Ley 906). Indícame la etapa procesal y la "
-            "postura del despacho (defensa o representación de víctima)."
+            "Puedo hacer análisis preliminar de tipicidad y responsabilidad penal. "
+            "Compárteme hechos cronológicos, actores y soportes para mapear elementos del tipo."
         )
-    elif _CIVIL_RE.search(lower):
+    elif _RUTA906_RE.search(lower):
         body = (
-            "Puedo apoyar el asunto civil según la etapa (CGP). Indícame si actuamos como demandante o "
-            "demandado y la etapa actual del proceso."
+            "Puedo analizar ruta procesal Ley 906: etapa, actuaciones posibles para la víctima, "
+            "riesgos procesales y próximos pasos."
         )
-    elif any(w in lower for w in ("correo", "mensaje", "cliente")):
+    elif _VICTIMAS_RE.search(lower):
         body = (
-            "Puedo proponer un borrador de comunicación profesional para el cliente. "
-            "Compárteme destinatario, objetivo y tono deseado."
+            "Puedo estructurar la estrategia de representación de víctimas: intereses, derechos, "
+            "riesgos de revictimización y enfoque diferencial."
         )
-    elif _ANALYSIS_RE.search(lower):
+    elif _CRONOLOGIA_RE.search(lower):
         body = (
-            "Puedo hacer un análisis preliminar de riesgos y estrategia. "
-            "Compárteme los hechos clave, el estado del caso y el objetivo del despacho."
+            "Puedo ordenar la cronología penal del caso, identificar contradicciones y vacíos de información "
+            "para fortalecer el análisis posterior."
         )
-    elif _DRAFTING_RE.search(lower):
+    elif _is_non_penal_scope_request(lower):
         body = (
-            "Puedo redactar un borrador base (contrato, recurso, solicitud o excepción). "
-            "Indica el tipo de documento, las partes, los hechos y la petición principal."
+            "Esta solicitud está fuera de alcance penal-víctimas. Solo atiendo representación de víctimas "
+            "en contexto penal colombiano. Si existe componente penal, compárteme hechos, etapa Ley 906 "
+            "y objetivo procesal para continuar."
         )
-    elif any(w in lower for w in ("área", "area", "derecho", "cubre", "maneja")):
-        body = _list_areas()
+    elif _REDACCION_RE.search(lower):
+        body = (
+            "Puedo redactar un borrador penal revisable (memorial, solicitud, recurso preliminar, "
+            "derecho de petición o pieza de tutela preliminar). Comparte radicado, hechos y petición."
+        )
     elif any(w in lower for w in ("perfil", "experiencia", "quien eres", "quién eres")):
         body = (
-            "Soy el asistente jurídico del despacho, con perfil equivalente a ~5 años de experiencia "
-            "en derecho colombiano (civil y penal). Apoyo al abogado; no lo reemplazo."
+            "Soy la firma virtual penal-víctimas del despacho. Coordino especialistas en cronología, "
+            "tipicidad, ruta Ley 906, evidencia, audiencias, redacción, seguimiento, tutela y calidad."
         )
     else:
         body = (
-            "Puedo apoyar atención al cliente, análisis de riesgos y estrategia, redacción de contratos "
-            "y escritos, conceptos, memoriales, tutelas y seguimiento de procesos. ¿Qué necesita?"
+            "Puedo apoyar estrategia penal de víctimas de extremo a extremo: hechos, tipicidad, "
+            "ruta 906, evidencia, audiencias, redacción, seguimiento y control de calidad. "
+            "¿Qué parte del caso necesitas trabajar primero?"
         )
     return apply_output_guardrails(body)
 
@@ -472,7 +516,7 @@ async def run_agent(
     session_id: str = "default",
     user_id: str = "",
 ) -> dict:
-    """Ejecuta el orquestador con sesión multi-turno, validaciones encadenadas y traza enriquecida."""
+    """Ejecuta el coordinador penal con sesión multi-turno, validaciones encadenadas y traza enriquecida."""
     ok, err = check_input(message)
     settings = get_settings()
     trace = _base_trace(session_id=session_id, channel=channel, message=message)
@@ -643,7 +687,7 @@ async def run_agent(
             destination_agent = _infer_destination_agent(message)
         trace["sent_to_agent"] = destination_agent
         trace["skill_kan"] = _kan_for_agent(destination_agent)
-        trace["skill_reason"] = f"Handoff/resultado final del orquestador hacia {destination_agent}."
+        trace["skill_reason"] = f"Handoff/resultado final del coordinador penal hacia {destination_agent}."
         _append_action(
             trace,
             action_type="routing_decision",

@@ -32,7 +32,11 @@ def test_attach_session_continuity_enriches_trace():
             session_id="web:u1",
             trace_id="tr-prev",
             turn_index=1,
-            payload={"input_summary": "Quiero una tutela", "sent_to_agent": "tutela_constitucional", "spans": [{}]},
+            payload={
+                "input_summary": "Quiero una tutela",
+                "sent_to_agent": "evaluador_derechos_fundamentales_tutela",
+                "spans": [{}],
+            },
         )
     ]
     trace = {"timestamp": 1, "spans": [], "steps": []}
@@ -64,7 +68,7 @@ def test_expediente_sync_from_tutela_message():
 
 
 def test_post_validations_pide_datos_tutela():
-    trace = {"timestamp": 1, "sent_to_agent": "tutela_constitucional"}
+    trace = {"timestamp": 1, "sent_to_agent": "evaluador_derechos_fundamentales_tutela"}
     text = run_post_validations("Redacte una tutela", "Borrador preliminar.", trace)
     assert "accionante" in text.lower() or trace.get("conversation_continues")
 

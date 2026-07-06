@@ -12,7 +12,16 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, Date, DateTime, Float, String, Text, create_engine, delete, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, EMBED_DIM, Expediente, SessionTrace
+from src.storage.models import (
+    AuditPortalProgress,
+    ChatSession,
+    Deadline,
+    DocumentChunk,
+    Draft,
+    EMBED_DIM,
+    Expediente,
+    SessionTrace,
+)
 
 
 def normalize_database_url(url: str) -> str:
@@ -109,6 +118,15 @@ class SessionTraceRow(Base):
     turn_index: Mapped[int] = mapped_column(default=0)
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AuditPortalProgressRow(Base):
+    __tablename__ = "audit_portal_progress"
+
+    email: Mapped[str] = mapped_column(Text, primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 def _to_draft(row: DraftRow) -> Draft:
@@ -501,3 +519,49 @@ class SqlRepository:
             result = s.execute(stmt)
             s.commit()
             return int(result.rowcount or 0)
+
+    # --- Portal de auditoría ---
+    def get_audit_portal_progress(self, email: str) -> AuditPortalProgress | None:
+        with self._session() as s:
+            row = s.get(AuditPortalProgressRow, email)
+            if row is None:
+                return None
+            return AuditPortalProgress(
+                email=row.email,
+                payload=row.payload or {},
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+
+    def save_audit_portal_progress(self, email: str, payload: dict) -> AuditPortalProgress:
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            row = s.get(AuditPortalProgressRow, email)
+            if row is None:
+                row = AuditPortalProgressRow(
+                    email=email,
+                    payload=payload,
+                    created_at=now,
+                    updated_at=now,
+                )
+                s.add(row)
+            else:
+                row.payload = payload
+                row.updated_at = now
+            s.commit()
+            s.refresh(row)
+            return AuditPortalProgress(
+                email=row.email,
+                payload=row.payload or {},
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+
+    def delete_audit_portal_progress(self, email: str) -> bool:
+        with self._session() as s:
+            row = s.get(AuditPortalProgressRow, email)
+            if row is None:
+                return False
+            s.delete(row)
+            s.commit()
+            return True

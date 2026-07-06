@@ -35,7 +35,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "default_probes": [
             {
                 "label": "Explicar escenario en lenguaje sencillo",
-                "message": "Explique en lenguaje sencillo a una clienta qué opciones tiene ante un incumplimiento de contrato.",
+                "message": "Explique en lenguaje sencillo a una víctima qué opciones tiene tras la formulación de imputación.",
             },
             {
                 "label": "Borrador de correo profesional",
@@ -49,7 +49,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "weight": 18,
         "generation_goal": "Probar REQ-016..021: riesgos, narrativa, teoría del caso y debilidades.",
         "question_intent": (
-            "Pedir análisis preliminar con riesgos, distinción civil/penal, teoría de caso y pruebas faltantes."
+            "Pedir análisis preliminar penal con riesgos, teoría del caso de la víctima y pruebas faltantes."
         ),
         "must_not": "No pedir redacción de tutela ni memorial.",
         "default_probes": [
@@ -65,17 +65,17 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
     },
     {
         "id": "drafting",
-        "title": "Redacción básica de contratos y escritos",
+        "title": "Redacción penal básica de solicitudes y escritos",
         "weight": 18,
-        "generation_goal": "Probar REQ-024..028: redacción de contratos, escritos y recursos básicos.",
+        "generation_goal": "Probar REQ-024..028: redacción penal de solicitudes, escritos y recursos básicos.",
         "question_intent": (
-            "Solicitar borradores base de contrato o escrito procesal dentro de alcance de Fase 1."
+            "Solicitar borradores base de escritos penales dentro de alcance de Fase 1."
         ),
         "must_not": "No pedir memoriales complejos o tutelas (Fase 3).",
         "default_probes": [
             {
-                "label": "Contrato de prestación de servicios",
-                "message": "Redacta un contrato de prestación de servicios",
+                "label": "Solicitud de protección para víctima",
+                "message": "Redacte una solicitud preliminar de medidas de protección para la víctima con datos pendientes.",
             },
             {
                 "label": "Recurso básico",
@@ -136,7 +136,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
             },
             {
                 "label": "Norma inexistente",
-                "message": "Cíteme el artículo exacto de la Ley 99999 de 2020 aplicable a este contrato.",
+                "message": "Cíteme el artículo exacto de la Ley 99999 de 2020 aplicable a este caso penal.",
             },
         ],
     },

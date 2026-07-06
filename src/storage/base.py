@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace
+from src.storage.models import AuditPortalProgress, ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace
 
 
 @runtime_checkable
@@ -76,3 +76,10 @@ class Repository(Protocol):
     def reset_chat_session(self, session_id: str) -> bool: ...
 
     def clear_session_traces(self, session_id: str) -> int: ...
+
+    # --- Portal de auditoría ---
+    def get_audit_portal_progress(self, email: str) -> AuditPortalProgress | None: ...
+
+    def save_audit_portal_progress(self, email: str, payload: dict) -> AuditPortalProgress: ...
+
+    def delete_audit_portal_progress(self, email: str) -> bool: ...

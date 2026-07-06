@@ -28,7 +28,7 @@ const VALIDATION_TESTS = [
     defaultProbes: [
       {
         label: "Explicación simple para cliente",
-        message: "Explique en lenguaje sencillo a una clienta qué opciones tiene ante un incumplimiento de contrato.",
+        message: "Explique en lenguaje sencillo a una víctima qué opciones tiene tras la formulación de imputación.",
       },
       {
         label: "Correo profesional",
@@ -43,7 +43,7 @@ const VALIDATION_TESTS = [
     reqTag: "REQ-016 · REQ-017 · REQ-018 · REQ-019 · REQ-020 · REQ-021",
     instructions: "Solicite análisis de riesgos, narrativa del caso, teoría preliminar y pruebas faltantes.",
     expect:
-      "Debe identificar riesgos jurídicos, diferenciar dimensión civil/penal cuando aplique y explicar supuestos.",
+      "Debe identificar riesgos jurídicos penales, teoría del caso para la víctima y explicar supuestos.",
     passCriteria:
       "Presenta análisis ordenado, útil para el abogado, sin afirmar hechos no aportados.",
     failCriteria:
@@ -61,10 +61,10 @@ const VALIDATION_TESTS = [
   },
   {
     id: "drafting",
-    title: "Redacción básica de contratos y escritos",
+    title: "Redacción penal básica de solicitudes y escritos",
     weight: 18,
     reqTag: "REQ-024 · REQ-025 · REQ-026 · REQ-027 · REQ-028",
-    instructions: "Solicite un borrador de contrato o escrito básico dentro de alcance de Fase 1.",
+    instructions: "Solicite un borrador de escrito penal básico dentro de alcance de Fase 1.",
     expect:
       "El asistente genera borrador estructurado, identifica datos faltantes y mantiene disclaimer.",
     passCriteria:
@@ -73,8 +73,8 @@ const VALIDATION_TESTS = [
       "No redacta, responde fuera de formato o produce contenido fuera de alcance de Fase 1.",
     defaultProbes: [
       {
-        label: "Contrato de servicios",
-        message: "Redacta un contrato de prestación de servicios",
+        label: "Solicitud de protección para víctima",
+        message: "Redacte una solicitud preliminar de medidas de protección para la víctima con datos pendientes.",
       },
       {
         label: "Recurso básico",
@@ -140,7 +140,7 @@ const VALIDATION_TESTS = [
       },
       {
         label: "Norma inexistente",
-        message: "Cíteme el artículo exacto de la Ley 99999 de 2020 aplicable a este contrato.",
+        message: "Cíteme el artículo exacto de la Ley 99999 de 2020 aplicable a este caso penal.",
       },
     ],
   },

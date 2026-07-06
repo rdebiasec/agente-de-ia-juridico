@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -152,6 +153,28 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
 
 
+def _audit_cors_origins() -> list[str]:
+    import os
+
+    raw = os.environ.get("AUDIT_CORS_ORIGINS", "").strip()
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return [
+        "https://rdebiasec.github.io",
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+    ]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_audit_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     response = await call_next(request)
@@ -209,10 +232,12 @@ async def debug_request_middleware(request: Request, call_next):
     return response
 
 
+from src.gateway.audit_portal_api import router as audit_portal_router
 from src.gateway.firma_api import router as firma_router
 from src.gateway.slack_interactivity import router as slack_router
 from src.gateway.support_api import router as support_router
 
+app.include_router(audit_portal_router)
 app.include_router(firma_router)
 app.include_router(slack_router)
 app.include_router(support_router)
@@ -220,6 +245,14 @@ app.include_router(support_router)
 _static_dir = get_settings().project_root / "static"
 if _static_dir.is_dir():
     app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+_audit_portal_dir = get_settings().project_root / "audit-portal" / "dist"
+if _audit_portal_dir.is_dir():
+    app.mount(
+        "/auditoria",
+        StaticFiles(directory=_audit_portal_dir, html=True),
+        name="auditoria",
+    )
 
 
 def _auth_redirect_if_needed(request: Request, settings: Settings) -> RedirectResponse | None:

@@ -10,9 +10,9 @@ from src.gateway.expediente import ExpedienteStore
 def test_memorial_requiere_radicado():
     with pytest.raises(ValidationError):
         Memorial(
-            destinatario="Juzgado 1 Civil",
+            destinatario="Juzgado Penal del Circuito",
             nombre_proceso="Proceso X",
-            partes=[Parte(nombre="Cliente", rol="demandante")],
+            partes=[Parte(nombre="Cliente", rol="victima")],
             radicado="   ",
             tipo_memorial="impulso procesal",
             peticion="Solicito impulso.",
@@ -32,25 +32,25 @@ def test_tutela_requiere_derecho_vulnerado():
 def test_concepto_valido():
     concepto = ConceptoJuridico(
         cliente="ACME S.A.S.",
-        problema_juridico="Validez de cláusula de exclusividad.",
-        normas_aplicables=["Código de Comercio"],
-        conclusion="La cláusula es válida con límites.",
-        recomendacion="Ajustar duración y alcance.",
+        problema_juridico="Riesgos de revictimización en audiencia preliminar.",
+        normas_aplicables=["Ley 906 de 2004"],
+        conclusion="Se requieren medidas de protección reforzadas para la víctima.",
+        recomendacion="Solicitar medidas de protección y plan de acompañamiento.",
     )
     assert concepto.cliente == "ACME S.A.S."
 
 
 def test_expediente_store_actualiza_por_sesion():
     store = ExpedienteStore()
-    exp = store.update("web:abc", materia="civil", etapa_actual="contestación")
-    assert exp.materia == "civil"
-    assert exp.etapa_actual == "contestación"
-    assert "civil" in store.get("web:abc").resumen().lower()
+    exp = store.update("web:abc", materia="penal", etapa_actual="imputación")
+    assert exp.materia == "penal"
+    assert exp.etapa_actual == "imputación"
+    assert "penal" in store.get("web:abc").resumen().lower()
 
 
 def test_orquestador_tiene_roster_completo():
     from src.agents.orchestrator import build_orchestrator
 
     orquestador = build_orchestrator()
-    assert orquestador.name == "orquestador"
+    assert orquestador.name == "coordinador_expediente_penal"
     assert len(orquestador.handoffs) == 10

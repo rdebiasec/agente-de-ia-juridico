@@ -51,8 +51,8 @@
             <form id="audit-auth-form" class="p-6 space-y-4" autocomplete="on">
                 <p id="audit-auth-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert"></p>
                 <div>
-                    <label for="audit-auth-username" class="block text-xs font-bold uppercase text-slate-500 mb-1">Usuario</label>
-                    <input id="audit-auth-username" name="username" type="text" autocomplete="username" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value="auditor">
+                    <label for="audit-auth-email" class="block text-xs font-bold uppercase text-slate-500 mb-1">Correo electrónico</label>
+                    <input id="audit-auth-email" name="email" type="email" autocomplete="email" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="abogada@despacho.com" required>
                 </div>
                 <div>
                     <label for="audit-auth-password" class="block text-xs font-bold uppercase text-slate-500 mb-1">Contraseña</label>
@@ -276,10 +276,13 @@
                             <button type="button" id="btn-import-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-all">
                                 <i class="fa-solid fa-upload mr-1"></i> Restaurar JSON
                             </button>
+                            <button type="button" id="btn-delete-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-red-300 bg-red-50 text-red-800 hover:bg-red-100 transition-all">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Borrar mi progreso
+                            </button>
                             <input type="file" id="audit-import-file" accept=".json,application/json" class="hidden">
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500 m-0">El progreso se guarda automáticamente en este navegador. Para continuar en otro equipo o navegador, exporte el respaldo JSON y restáurelo allí.</p>
+                    <p class="text-xs text-slate-500 m-0">El progreso se guarda en el servidor asociado a su correo (caché local en este navegador). Use respaldo JSON solo como copia de seguridad adicional.</p>
                 </div>
             </div>
 
@@ -361,8 +364,9 @@
 
     </div><!-- /audit-app-root -->
 
+    <script src="./audit-api-config.js?v=3.4"></script>
     <script src="./auth-config.js?v=3.0.1"></script>
-    <script src="./auth-gate.js?v=3.0.1"></script>
-    <script src="./app.js?v=3.3"></script>
+    <script src="./auth-gate.js?v=3.4"></script>
+    <script src="./app.js?v=3.4"></script>
 </body>
 </html>

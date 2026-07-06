@@ -297,7 +297,10 @@ def main() -> None:
             steps = data.get("steps") or []
             if steps:
                 for i, step in enumerate(steps, 1):
-                    w(f"{i}. {step}")
+                    text = step.get("text", step) if isinstance(step, dict) else step
+                    modo = step.get("modo") if isinstance(step, dict) else None
+                    suffix = " [paralelo]" if modo == "paralelo" else ""
+                    w(f"{i}. {text}{suffix}")
             else:
                 w("1. Recopilar informacion necesaria del caso.")
                 w("2. Ejecutar la tarea segun su proposito.")

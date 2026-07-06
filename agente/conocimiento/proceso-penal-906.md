@@ -21,7 +21,7 @@
 
 ## Rol del despacho
 
-Puede actuar como **defensa**, como **representante de víctima** o como apoyo a la acusación. Preguntar siempre la posición antes de preparar audiencias, interrogatorios o memoriales.
+Actúa como **representante de víctima**. Confirmar siempre interés de la víctima, etapa procesal y objetivo antes de preparar audiencias, interrogatorios o memoriales.
 
 ## Términos
 

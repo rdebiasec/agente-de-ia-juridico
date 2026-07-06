@@ -6,7 +6,7 @@ import math
 import threading
 from datetime import datetime, timezone
 
-from src.storage.models import ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace, SCOPE_KB
+from src.storage.models import AuditPortalProgress, ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace, SCOPE_KB
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -28,6 +28,7 @@ class InMemoryRepository:
         self._expedientes: dict[str, Expediente] = {}
         self._chat_sessions: dict[str, ChatSession] = {}
         self._session_traces: dict[str, list[SessionTrace]] = {}
+        self._audit_progress: dict[str, AuditPortalProgress] = {}
         self._lock = threading.Lock()
 
     # --- Borradores ---
@@ -226,3 +227,23 @@ class InMemoryRepository:
         with self._lock:
             traces = self._session_traces.pop(session_id, [])
             return len(traces)
+
+    # --- Portal de auditoría ---
+    def get_audit_portal_progress(self, email: str) -> AuditPortalProgress | None:
+        return self._audit_progress.get(email)
+
+    def save_audit_portal_progress(self, email: str, payload: dict) -> AuditPortalProgress:
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            existing = self._audit_progress.get(email)
+            if existing:
+                existing.payload = payload
+                existing.updated_at = now
+                return existing
+            row = AuditPortalProgress(email=email, payload=payload, created_at=now, updated_at=now)
+            self._audit_progress[email] = row
+            return row
+
+    def delete_audit_portal_progress(self, email: str) -> bool:
+        with self._lock:
+            return self._audit_progress.pop(email, None) is not None

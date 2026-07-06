@@ -16,15 +16,8 @@ HITL = ROOT / "src" / "hitl"
 SERVICES = ROOT / "src" / "services"
 
 KB_EXPECTED = [
-    "civil.md",
-    "familia.md",
-    "societario.md",
     "penal.md",
-    "consumidor.md",
-    "comercial.md",
-    "laboral.md",
     "normas-clave.md",
-    "proceso-civil-cgp.md",
     "proceso-penal-906.md",
 ]
 

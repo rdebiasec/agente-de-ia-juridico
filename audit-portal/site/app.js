@@ -2,6 +2,11 @@
 
 const STORAGE_KEY = 'legal-audit-sync-v3';
 const STORAGE_KEY_LEGACY = 'legal-audit-sync-v2';
+const SAVE_DEBOUNCE_MS = 800;
+
+let serverUpdatedAt = null;
+let saveDebounceTimer = null;
+let serverSyncEnabled = true;
 
 const GROUP_LABELS = {
     coordinacion: 'Coordinación',
@@ -225,6 +230,151 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
+function apiBase() {
+    const cfg = window.AUDIT_API_CONFIG || {};
+    return String(cfg.base || '').replace(/\/$/, '');
+}
+
+function auditApiUrl(path) {
+    const base = apiBase();
+    return base ? `${base}${path}` : path;
+}
+
+async function fetchAuditApi(path, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+    }
+    return fetch(auditApiUrl(path), {
+        credentials: 'include',
+        ...options,
+        headers,
+    });
+}
+
+function hasPersistedDecisions() {
+    const types = ['guardrails', 'agentes', 'pasos'];
+    for (const type of types) {
+        const bucket = auditLog[type] || {};
+        for (const id of Object.keys(bucket)) {
+            const st = bucket[id];
+            if (st && (st.status === 'APROBADO' || st.status === 'AJUSTAR')) return true;
+        }
+    }
+    const custom = auditLog.custom;
+    if (!custom) return false;
+    return Boolean(
+        (custom.guardrailsAdded && custom.guardrailsAdded.length) ||
+            (custom.pasosAdded && Object.keys(custom.pasosAdded).length) ||
+            (custom.guardrailsRemoved && custom.guardrailsRemoved.length) ||
+            (custom.pasosRemoved && custom.pasosRemoved.length),
+    );
+}
+
+function saveAuditLogLocalOnly() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistPayload()));
+    } catch (err) {
+        console.error('No se pudo guardar caché local:', err);
+    }
+}
+
+async function pushProgressToServer() {
+    if (!serverSyncEnabled) return;
+    try {
+        const res = await fetchAuditApi('/api/audit/progress', {
+            method: 'PUT',
+            body: JSON.stringify(buildPersistPayload()),
+        });
+        if (!res.ok) {
+            console.warn('No se pudo guardar en servidor:', res.status);
+            updatePersistStatus({ serverError: true });
+            return;
+        }
+        const data = await res.json();
+        serverUpdatedAt = data.updated_at || new Date().toISOString();
+        updatePersistStatus();
+    } catch (err) {
+        console.warn('Error al sincronizar con servidor:', err);
+        updatePersistStatus({ serverError: true });
+    }
+}
+
+function scheduleServerSave() {
+    if (!serverSyncEnabled) return;
+    if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+    saveDebounceTimer = setTimeout(() => {
+        saveDebounceTimer = null;
+        pushProgressToServer();
+    }, SAVE_DEBOUNCE_MS);
+}
+
+async function syncProgressFromServer() {
+    loadAuditLog();
+    if (!serverSyncEnabled) {
+        updatePersistStatus();
+        return;
+    }
+    try {
+        const res = await fetchAuditApi('/api/audit/progress');
+        if (res.status === 404) {
+            if (hasPersistedDecisions()) {
+                await pushProgressToServer();
+            }
+            updatePersistStatus();
+            return;
+        }
+        if (!res.ok) {
+            updatePersistStatus({ serverError: true });
+            return;
+        }
+        const payload = await res.json();
+        if (applyPersistPayload(payload)) {
+            saveAuditLogLocalOnly();
+        }
+        serverUpdatedAt = payload.savedAt || null;
+        updatePersistStatus();
+    } catch (err) {
+        console.warn('No se pudo cargar progreso del servidor:', err);
+        updatePersistStatus({ serverError: true });
+    }
+}
+
+async function deleteServerProgress() {
+    const email =
+        typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+    const label = email ? ` (${email})` : '';
+    const ok = confirm(
+        `¿Borrar todo su progreso en el servidor${label}? Esta acción no se puede deshacer.`,
+    );
+    if (!ok) return;
+    try {
+        const res = await fetchAuditApi('/api/audit/progress', { method: 'DELETE' });
+        if (res.status !== 404 && !res.ok) {
+            alert('No se pudo borrar el progreso en el servidor.');
+            return;
+        }
+        auditLog.guardrails = {};
+        auditLog.agentes = {};
+        auditLog.pasos = {};
+        auditLog.custom = null;
+        ensureCustom();
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_KEY_LEGACY);
+        serverUpdatedAt = null;
+        renderAll();
+        updatePersistStatus();
+        alert('Progreso borrado correctamente.');
+    } catch (err) {
+        console.error(err);
+        alert('No se pudo conectar con el servidor.');
+    }
+}
+    const d = document.createElement('div');
+    d.textContent = text ?? '';
+    return d.innerHTML;
+}
+
 function pasoKey(skillId, num) {
     return `${skillId}::${num}`;
 }
@@ -251,22 +401,38 @@ function buildPersistPayload() {
     };
 }
 
-function updatePersistStatus() {
+function updatePersistStatus(opts = {}) {
     const el = document.getElementById('audit-persist-status');
     if (!el) return;
-    let savedAt = null;
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY_LEGACY);
-        if (raw) savedAt = JSON.parse(raw).savedAt;
-    } catch (_) { /* ignore */ }
-    if (savedAt) {
+    const email =
+        typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+    let savedAt = serverUpdatedAt;
+    if (!savedAt) {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY_LEGACY);
+            if (raw) savedAt = JSON.parse(raw).savedAt;
+        } catch (_) { /* ignore */ }
+    }
+    if (opts.serverError) {
+        el.innerHTML =
+            '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> Sin conexión al servidor — progreso solo en caché local';
+        return;
+    }
+    if (email && savedAt) {
         const when = new Date(savedAt);
         const label = Number.isNaN(when.getTime())
             ? savedAt
             : when.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
-        el.innerHTML = `<i class="fa-solid fa-floppy-disk mr-1 text-emerald-500"></i> Progreso guardado automáticamente · última edición <strong>${escapeHtml(label)}</strong>`;
+        el.innerHTML = `<i class="fa-solid fa-cloud mr-1 text-emerald-500"></i> Guardado en servidor · <strong>${escapeHtml(email)}</strong> · última edición <strong>${escapeHtml(label)}</strong>`;
+    } else if (savedAt) {
+        const when = new Date(savedAt);
+        const label = Number.isNaN(when.getTime())
+            ? savedAt
+            : when.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+        el.innerHTML = `<i class="fa-solid fa-floppy-disk mr-1 text-emerald-500"></i> Progreso guardado · última edición <strong>${escapeHtml(label)}</strong>`;
     } else {
-        el.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1 text-slate-400"></i> Sin ediciones guardadas aún en este navegador';
+        el.innerHTML =
+            '<i class="fa-solid fa-floppy-disk mr-1 text-slate-400"></i> Sin ediciones guardadas aún';
     }
 }
 
@@ -287,8 +453,9 @@ function loadAuditLog() {
 
 function saveAuditLog() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistPayload()));
+        saveAuditLogLocalOnly();
         updatePersistStatus();
+        scheduleServerSave();
     } catch (err) {
         console.error('No se pudo guardar el progreso:', err);
         const el = document.getElementById('audit-persist-status');
@@ -332,6 +499,7 @@ function importarProgresoJson(file) {
 
 function bindPersistUi() {
     document.getElementById('btn-export-progress')?.addEventListener('click', exportarProgresoJson);
+    document.getElementById('btn-delete-progress')?.addEventListener('click', deleteServerProgress);
     const importInput = document.getElementById('audit-import-file');
     document.getElementById('btn-import-progress')?.addEventListener('click', () => importInput?.click());
     importInput?.addEventListener('change', e => {
@@ -1327,7 +1495,6 @@ async function init() {
         const ok = await window.waitForAuditAuth();
         if (!ok) return;
     }
-    loadAuditLog();
     ensureCustom();
     try {
         const res = await fetch('./audit-data.json');
@@ -1338,6 +1505,8 @@ async function init() {
         console.error(err);
         return;
     }
+
+    await syncProgressFromServer();
 
     document.getElementById('generated-at').textContent = catalog.generated_at || '—';
     const buildEl = document.getElementById('build-generated-at');

@@ -37,16 +37,17 @@ async def test_health():
 
 
 @pytest.mark.asyncio
-async def test_chat_areas_derecho_fallback():
+async def test_chat_penal_scope_fallback():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
             "/chat",
-            json={"message": "¿Qué áreas del derecho maneja el despacho?", "user_id": "test"},
+            json={"message": "¿Cómo apoyan la representación de víctimas en este caso penal?", "user_id": "test"},
         )
     assert r.status_code == 200
     data = r.json()
-    assert "civil" in data["text"].lower() or "familia" in data["text"].lower()
+    lowered = data["text"].lower()
+    assert "penal" in lowered or "víctima" in lowered or "victima" in lowered
     assert "revisión" in data["text"].lower() or "aprobación" in data["text"].lower()
     assert isinstance(data.get("trace"), dict)
     assert data["trace"].get("route")
@@ -54,18 +55,19 @@ async def test_chat_areas_derecho_fallback():
 
 
 @pytest.mark.asyncio
-async def test_chat_fase1_contract_allowed():
+async def test_chat_non_penal_request_is_out_of_scope():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
             "/chat",
-            json={"message": "Redacta un contrato de prestación de servicios", "user_id": "test"},
+            json={"message": "Necesito asesoría sobre un arrendamiento habitacional.", "user_id": "test"},
         )
     assert r.status_code == 200
     data = r.json()
-    assert "no está activa" not in data["text"].lower()
-    assert "revisión" in data["text"].lower() or "aprobación" in data["text"].lower()
-    assert data["pending_review"] is True
+    lowered = data["text"].lower()
+    assert "fuera de alcance penal-víctimas" in lowered
+    assert data["pending_review"] is False
+    assert data["trace"].get("sent_to_agent") == "coordinador_expediente_penal"
 
 
 @pytest.mark.asyncio
@@ -83,17 +85,19 @@ async def test_chat_fase1_strategy_allowed():
 
 
 @pytest.mark.asyncio
-async def test_chat_mixed_scope_is_allowed_in_fase1():
+async def test_chat_mixed_scope_reconduces_to_penal():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
             "/chat",
-            json={"message": "¿Qué áreas manejan y me redactas un contrato?", "user_id": "test"},
+            json={"message": "Tengo un conflicto de arrendamiento y además un caso penal por lesiones. ¿Cómo seguimos?", "user_id": "test"},
         )
     assert r.status_code == 200
     data = r.json()
-    assert "no está activa" not in data["text"].lower()
-    assert data["pending_review"] is True
+    lowered = data["text"].lower()
+    assert "fuera de alcance penal-víctimas" not in lowered
+    assert "penal" in lowered or "víctima" in lowered or "victima" in lowered
+    assert data["trace"].get("sent_to_agent") in {"coordinador_expediente_penal", "analista_ruta_procesal_ley906"}
 
 
 @pytest.mark.asyncio
@@ -109,7 +113,7 @@ async def test_chat_seguimiento_capability_is_active():
     lowered = data["text"].lower()
     assert "no está activa" not in lowered
     assert data["pending_review"] is True
-    assert data["trace"].get("sent_to_agent") == "dependiente_judicial"
+    assert data["trace"].get("sent_to_agent") == "gestor_seguimiento_procesal_penal"
 
 
 @pytest.mark.asyncio
@@ -125,7 +129,7 @@ async def test_chat_tutela_capability_is_active():
     lowered = data["text"].lower()
     assert "no está activa" not in lowered
     assert data["pending_review"] is True
-    assert data["trace"].get("sent_to_agent") == "tutela_constitucional"
+    assert data["trace"].get("sent_to_agent") == "evaluador_derechos_fundamentales_tutela"
 
 
 @pytest.mark.asyncio

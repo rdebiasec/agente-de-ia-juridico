@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
+KB_ALLOWED_FILES = {"penal.md", "proceso-penal-906.md", "normas-clave.md"}
 
 
 def _repo(repo: Repository | None) -> Repository:
@@ -152,7 +153,7 @@ def buscar(
 
 
 def ingestar_kb_directorio(*, reindexar: bool = False, repo: Repository | None = None) -> dict[str, int]:
-    """Ingesta todos los .md de agente/conocimiento/ en la KB (RAG).
+    """Ingesta solo la KB penal-víctimas habilitada para runtime.
 
     Por defecto omite archivos ya indexados (dedup por fuente). Con
     `reindexar=True` se vuelven a ingestar (no elimina los previos).
@@ -164,6 +165,8 @@ def ingestar_kb_directorio(*, reindexar: bool = False, repo: Repository | None =
         return resultados
     for archivo in sorted(base.glob("*.md")):
         fuente = archivo.name
+        if fuente not in KB_ALLOWED_FILES:
+            continue
         if not reindexar and repository.contar_chunks(scope=SCOPE_KB, fuente=fuente) > 0:
             resultados[fuente] = 0
             continue
