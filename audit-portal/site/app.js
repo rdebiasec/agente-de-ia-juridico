@@ -370,10 +370,6 @@ async function deleteServerProgress() {
         alert('No se pudo conectar con el servidor.');
     }
 }
-    const d = document.createElement('div');
-    d.textContent = text ?? '';
-    return d.innerHTML;
-}
 
 function pasoKey(skillId, num) {
     return `${skillId}::${num}`;
@@ -1490,6 +1486,228 @@ function exportarMarkdown() {
     URL.revokeObjectURL(url);
 }
 
+const EXEC_TEMPLATE_LABELS = {
+    cronologia: 'Cronología y hechos',
+    tutela: 'Acción de tutela',
+    audiencia: 'Preparación de audiencia',
+    generico: 'Consulta general',
+};
+
+const EXEC_STATUS_LABELS = {
+    pending_approval: 'Pendiente de aprobación',
+    approved: 'Aprobado',
+    executing: 'En ejecución',
+    done: 'Completado',
+    failed: 'Fallido',
+    rejected: 'Rechazado',
+    draft: 'Borrador',
+};
+
+function execStatusBadge(status) {
+    const labels = {
+        pending_approval: 'bg-amber-100 text-amber-900',
+        approved: 'bg-blue-100 text-blue-900',
+        executing: 'bg-indigo-100 text-indigo-900',
+        done: 'bg-emerald-100 text-emerald-900',
+        failed: 'bg-red-100 text-red-900',
+        rejected: 'bg-slate-200 text-slate-700',
+    };
+    const cls = labels[status] || 'bg-slate-100 text-slate-700';
+    const text = EXEC_STATUS_LABELS[status] || status;
+    return `<span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${cls}">${escapeHtml(text)}</span>`;
+}
+
+function formatExecDate(iso) {
+    if (!iso) return '—';
+    try {
+        return new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+    } catch {
+        return String(iso).slice(0, 16);
+    }
+}
+
+async function loadExecutionDashboard() {
+    const kpiEl = document.getElementById('execution-dashboard-kpis');
+    const tableEl = document.getElementById('execution-dashboard-table');
+    const statusEl = document.getElementById('execution-dashboard-by-status');
+    const templateEl = document.getElementById('execution-dashboard-by-template');
+    const generatedEl = document.getElementById('execution-dashboard-generated');
+    if (!kpiEl || !tableEl) return;
+
+    kpiEl.innerHTML = '<p class="text-sm text-slate-500 col-span-full">Cargando planes…</p>';
+    tableEl.innerHTML = '';
+    if (statusEl) statusEl.innerHTML = '';
+    if (templateEl) templateEl.innerHTML = '';
+
+    try {
+        const res = await fetchAuditApi('/api/audit/execution-plans/dashboard');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (generatedEl) {
+            generatedEl.textContent = data.generated_at
+                ? `Actualizado: ${formatExecDate(data.generated_at)}`
+                : '';
+        }
+
+        const cards = [
+            ['Total', data.total || 0, 'slate'],
+            ['Pendientes', data.pending_approval || 0, 'amber'],
+            ['Aprobados', data.approved || 0, 'blue'],
+            ['En ejecución', data.executing || 0, 'indigo'],
+            ['Completados', data.done || 0, 'emerald'],
+            ['Fallidos / rechazados', (data.failed || 0) + (data.rejected || 0), 'red'],
+        ];
+        kpiEl.innerHTML = cards
+            .map(
+                ([label, value, tone]) => `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <p class="text-xs uppercase tracking-wide text-slate-500 m-0">${escapeHtml(label)}</p>
+                <p class="text-2xl font-bold text-${tone}-700 m-0 mt-1">${value}</p>
+            </div>`,
+            )
+            .join('');
+
+        if (statusEl && data.by_status) {
+            const rows = Object.entries(data.by_status)
+                .sort((a, b) => b[1] - a[1])
+                .map(
+                    ([st, n]) =>
+                        `<li class="flex justify-between text-sm py-1 border-b border-slate-50 last:border-0">
+                            <span>${execStatusBadge(st)}</span>
+                            <span class="font-semibold text-slate-700">${n}</span>
+                        </li>`,
+                )
+                .join('');
+            statusEl.innerHTML = `<p class="text-xs font-bold uppercase text-slate-500 mb-2">Por estado</p><ul class="m-0 p-0 list-none">${rows || '<li class="text-sm text-slate-500">Sin datos</li>'}</ul>`;
+        }
+
+        if (templateEl && data.by_template) {
+            const rows = Object.entries(data.by_template)
+                .sort((a, b) => b[1] - a[1])
+                .map(
+                    ([kind, n]) =>
+                        `<li class="flex justify-between text-sm py-1 border-b border-slate-50 last:border-0">
+                            <span>${escapeHtml(EXEC_TEMPLATE_LABELS[kind] || kind)}</span>
+                            <span class="font-semibold text-slate-700">${n}</span>
+                        </li>`,
+                )
+                .join('');
+            templateEl.innerHTML = `<p class="text-xs font-bold uppercase text-slate-500 mb-2">Por plantilla</p><ul class="m-0 p-0 list-none">${rows || '<li class="text-sm text-slate-500">Sin datos</li>'}</ul>`;
+        }
+
+        const rows = data.recent || [];
+        if (!rows.length) {
+            tableEl.innerHTML =
+                '<p class="text-sm text-slate-500 p-4 m-0">Aún no hay planes registrados. Use el chat en <a href="/abogado" class="text-blue-600 underline">/abogado</a> para generar el primero.</p>';
+            return;
+        }
+
+        const body = rows
+            .map((row) => {
+                const kind = EXEC_TEMPLATE_LABELS[row.template_kind] || row.template_kind || '—';
+                const exportUrl = auditApiUrl(
+                    `/api/audit/execution-plans/${encodeURIComponent(row.plan_id)}/export.md`,
+                );
+                const flags = [
+                    row.pattern_reused ? 'patrón reutilizado' : '',
+                    row.has_result ? 'con resultado' : '',
+                    row.stream_events_count ? `${row.stream_events_count} eventos SSE` : '',
+                ]
+                    .filter(Boolean)
+                    .join(' · ');
+                return `<tr class="border-t border-slate-100 hover:bg-slate-50/80">
+                    <td class="px-3 py-3 text-xs font-mono align-top">${escapeHtml(row.plan_id)}</td>
+                    <td class="px-3 py-3 align-top">${execStatusBadge(row.status)}</td>
+                    <td class="px-3 py-3 text-sm align-top">${escapeHtml(kind)}</td>
+                    <td class="px-3 py-3 text-sm text-slate-700 align-top max-w-xs">
+                        <div class="font-medium line-clamp-2">${escapeHtml(row.objective || '—')}</div>
+                        <div class="text-xs text-slate-500 mt-1 line-clamp-1" title="${escapeHtml(row.user_message_preview || '')}">Consulta: ${escapeHtml(row.user_message_preview || '—')}</div>
+                    </td>
+                    <td class="px-3 py-3 text-xs text-slate-600 align-top">
+                        ${row.steps_count || 0} pasos · ${row.agents_count || 0} agentes<br>
+                        <span class="text-slate-400">${escapeHtml(row.channel || 'web')}</span>
+                    </td>
+                    <td class="px-3 py-3 text-xs text-slate-500 align-top whitespace-nowrap">${formatExecDate(row.updated_at)}</td>
+                    <td class="px-3 py-3 text-xs align-top">
+                        ${flags ? `<span class="text-slate-500">${escapeHtml(flags)}</span><br>` : ''}
+                        <a class="text-emerald-700 hover:underline font-semibold" href="${exportUrl}" download>Exportar .md</a>
+                    </td>
+                </tr>`;
+            })
+            .join('');
+
+        tableEl.innerHTML = `<div class="overflow-x-auto"><table class="min-w-full text-left">
+            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-3 py-3">Plan ID</th>
+                    <th class="px-3 py-3">Estado</th>
+                    <th class="px-3 py-3">Plantilla</th>
+                    <th class="px-3 py-3">Objetivo / consulta</th>
+                    <th class="px-3 py-3">Alcance</th>
+                    <th class="px-3 py-3">Actualizado</th>
+                    <th class="px-3 py-3">Detalle</th>
+                </tr>
+            </thead>
+            <tbody>${body}</tbody>
+        </table></div>`;
+    } catch (err) {
+        console.warn('Dashboard de planes no disponible:', err);
+        kpiEl.innerHTML =
+            '<p class="text-sm text-amber-700 col-span-full">No se pudo cargar el dashboard. Inicie sesión en el portal y verifique que el agente esté en ejecución.</p>';
+        tableEl.innerHTML = '';
+    }
+}
+
+function bindExecutionDashboardRefresh() {
+    const btn = document.getElementById('execution-dashboard-refresh');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+        btn.disabled = true;
+        loadExecutionDashboard().finally(() => {
+            btn.disabled = false;
+        });
+    });
+}
+
+function bindExecutionDashboardReset() {
+    const btn = document.getElementById('execution-dashboard-reset');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async () => {
+        const ok = window.confirm(
+            '¿Reiniciar el historial de planes de ejecución?\n\n' +
+                'Se borrarán todos los registros del dashboard (contadores y tabla). ' +
+                'No afecta su progreso de auditoría de instrucciones ni el chat en curso, ' +
+                'pero ya no podrá exportar .md de planes anteriores.\n\n' +
+                'Esta acción no se puede deshacer.',
+        );
+        if (!ok) return;
+        btn.disabled = true;
+        try {
+            const res = await fetchAuditApi('/api/audit/execution-plans', { method: 'DELETE' });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                window.alert(err.detail || 'No se pudo reiniciar el historial de planes.');
+                return;
+            }
+            const data = await res.json();
+            await loadExecutionDashboard();
+            window.alert(
+                data.deleted
+                    ? `Historial reiniciado: se eliminaron ${data.deleted} registro(s).`
+                    : 'El historial ya estaba vacío.',
+            );
+        } catch (err) {
+            console.warn(err);
+            window.alert('Error de conexión al reiniciar planes.');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+}
+
 async function init() {
     if (typeof window.waitForAuditAuth === 'function') {
         const ok = await window.waitForAuditAuth();
@@ -1524,6 +1742,9 @@ async function init() {
     bindPersistUi();
     renderAll();
     updatePersistStatus();
+    bindExecutionDashboardRefresh();
+    bindExecutionDashboardReset();
+    void loadExecutionDashboard();
 }
 
 window.setDecision = setDecision;
