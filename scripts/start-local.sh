@@ -22,6 +22,11 @@ if [[ -f "$ROOT/.env" ]] && grep -qE '^DATABASE_URL=.+' "$ROOT/.env"; then
   fi
 fi
 
+echo "→ Generando portal de auditoría (mismo origen que prod: /auditoria)..."
+AUDIT_API_BASE="" "$ROOT/.venv/bin/python" scripts/generar_audit_portal.py
+
 echo "Iniciando asistente jurídico en http://localhost:8000"
-echo "Abra esa URL en el navegador para chatear. Ctrl+C para detener."
+echo "Chat: http://localhost:8000/abogado"
+echo "Auditoría: http://localhost:8000/auditoria/ (login: correo + SITE_PASSWORD del .env)"
+echo "Ctrl+C para detener."
 exec "$ROOT/.venv/bin/python" -m src.main

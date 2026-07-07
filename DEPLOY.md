@@ -199,6 +199,21 @@ El progreso de aprobación se persiste en **PostgreSQL** por correo electrónico
 | GET | `/api/audit/session` | `{ authenticated, email }` |
 | GET/PUT/DELETE | `/api/audit/progress` | Cargar / guardar / borrar progreso del correo autenticado |
 
+### Paridad dev ↔ prod
+
+| Aspecto | Local (`./scripts/start-local.sh`) | Producción (Render) |
+|---|---|---|
+| URL portal | `http://127.0.0.1:8000/auditoria/` | `https://agente-de-ia-juridico.onrender.com/auditoria/` |
+| `AUDIT_API_BASE` en build | `""` (mismo origen) | `""` (mismo origen, en Dockerfile) |
+| Login auditoría | correo + `SITE_PASSWORD` | correo + `SITE_PASSWORD` |
+| Persistencia | Postgres si `DATABASE_URL` en `.env` | Postgres (`agente-db`) |
+| Chat auto-login | `DEV_AUTO_LOGIN=true` en `.env` | `false` en `render.yaml` |
+| Cookie segura | `SESSION_COOKIE_SECURE=false` | `true` |
+
+**Espejo GitHub Pages** (`AUDIT_API_BASE` → Render): mismo login y datos si usan el mismo correo; requiere CORS (ya configurado).
+
+**Preview :8080** (`./scripts/start-audit-portal.sh`): solo para probar cross-origin; no es paridad 1:1 con prod.
+
 Migración: `migrations/versions/0003_audit_portal_progress.py` (aplicada al arrancar con Postgres).
 
 ### Desarrollo local

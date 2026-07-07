@@ -25,6 +25,9 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
+      - name: Verify Docker build (paridad prod)
+        run: docker build -f deploy/Dockerfile -t agente-juridico-ci .
+
       - name: Dependency audit
         run: |
           pip install pip-audit
