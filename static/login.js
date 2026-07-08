@@ -67,4 +67,25 @@
   }
 
   document.addEventListener("DOMContentLoaded", bootstrap);
+
+  document.getElementById("login-form")?.addEventListener("submit", async e => {
+    const privacy = document.getElementById("auth-accept-privacy");
+    const cases = document.getElementById("auth-accept-cases");
+    const username = document.getElementById("auth-username")?.value?.trim() || "";
+    if (!privacy?.checked || !cases?.checked || !username) return;
+    try {
+      await fetch("/api/compliance/web-consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          username,
+          accept_privacy: true,
+          accept_sensitive_data: true,
+        }),
+      });
+    } catch {
+      /* no bloquear login si falla registro; servidor puede reintentar */
+    }
+  });
 })();

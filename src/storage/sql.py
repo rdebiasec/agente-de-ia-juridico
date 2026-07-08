@@ -13,12 +13,16 @@ from sqlalchemy import JSON, Date, DateTime, Float, String, Text, create_engine,
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from src.storage.models import (
+    AuditPortalAccessLog,
     AuditPortalProgress,
+    AuditPortalUser,
     ChatSession,
+    ComplianceConsent,
     Deadline,
     DocumentChunk,
     Draft,
     EMBED_DIM,
+    ExecutionPlanRecord,
     Expediente,
     SessionTrace,
 )
@@ -127,6 +131,78 @@ class AuditPortalProgressRow(Base):
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AuditPortalUserRow(Base):
+    __tablename__ = "audit_portal_user"
+
+    email: Mapped[str] = mapped_column(Text, primary_key=True)
+    pin_hash: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ComplianceConsentRow(Base):
+    __tablename__ = "compliance_consent"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    subject_key: Mapped[str] = mapped_column(Text, index=True)
+    context: Mapped[str] = mapped_column(Text)
+    policy_version: Mapped[str] = mapped_column(Text)
+    privacy_accepted: Mapped[bool] = mapped_column(default=True)
+    sensitive_data_ack: Mapped[bool] = mapped_column(default=False)
+    ip_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AuditPortalAccessLogRow(Base):
+    __tablename__ = "audit_portal_access_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str | None] = mapped_column(Text, index=True, nullable=True)
+    action: Mapped[str] = mapped_column(Text)
+    ip_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AuditPortalProgressHistoryRow(Base):
+    __tablename__ = "audit_portal_progress_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(Text, index=True)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ExecutionPlanRow(Base):
+    __tablename__ = "execution_plans"
+
+    plan_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    session_id: Mapped[str] = mapped_column(Text, index=True)
+    initiator_user_id: Mapped[str] = mapped_column(Text)
+    channel: Mapped[str] = mapped_column(Text, default="web")
+    user_message: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+def _to_execution_plan(row: ExecutionPlanRow) -> ExecutionPlanRecord:
+    return ExecutionPlanRecord(
+        plan_id=row.plan_id,
+        session_id=row.session_id,
+        initiator_user_id=row.initiator_user_id,
+        channel=row.channel,
+        user_message=row.user_message,
+        status=row.status,
+        payload=row.payload or {},
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
 
 
 def _to_draft(row: DraftRow) -> Draft:
@@ -565,3 +641,185 @@ class SqlRepository:
             s.delete(row)
             s.commit()
             return True
+
+    def get_audit_portal_user(self, email: str) -> AuditPortalUser | None:
+        with self._session() as s:
+            row = s.get(AuditPortalUserRow, email)
+            if row is None:
+                return None
+            return AuditPortalUser(
+                email=row.email,
+                pin_hash=row.pin_hash,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+
+    def save_audit_portal_user(self, user: AuditPortalUser) -> AuditPortalUser:
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            row = s.get(AuditPortalUserRow, user.email)
+            if row is None:
+                row = AuditPortalUserRow(
+                    email=user.email,
+                    pin_hash=user.pin_hash,
+                    created_at=user.created_at or now,
+                    updated_at=now,
+                )
+                s.add(row)
+            else:
+                row.pin_hash = user.pin_hash
+                row.updated_at = now
+            s.commit()
+            s.refresh(row)
+            return AuditPortalUser(
+                email=row.email,
+                pin_hash=row.pin_hash,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+
+    def record_compliance_consent(self, consent: ComplianceConsent) -> ComplianceConsent:
+        with self._session() as s:
+            row = ComplianceConsentRow(
+                subject_key=consent.subject_key,
+                context=consent.context,
+                policy_version=consent.policy_version,
+                privacy_accepted=consent.privacy_accepted,
+                sensitive_data_ack=consent.sensitive_data_ack,
+                ip_address=consent.ip_address,
+                user_agent=consent.user_agent,
+                created_at=consent.created_at,
+            )
+            s.add(row)
+            s.commit()
+            s.refresh(row)
+            return ComplianceConsent(
+                id=row.id,
+                subject_key=row.subject_key,
+                context=row.context,
+                policy_version=row.policy_version,
+                privacy_accepted=row.privacy_accepted,
+                sensitive_data_ack=row.sensitive_data_ack,
+                ip_address=row.ip_address,
+                user_agent=row.user_agent,
+                created_at=row.created_at,
+            )
+
+    def has_valid_compliance_consent(
+        self, subject_key: str, *, context: str, policy_version: str
+    ) -> bool:
+        with self._session() as s:
+            stmt = (
+                select(ComplianceConsentRow)
+                .where(
+                    ComplianceConsentRow.subject_key == subject_key,
+                    ComplianceConsentRow.context == context,
+                    ComplianceConsentRow.policy_version == policy_version,
+                    ComplianceConsentRow.privacy_accepted.is_(True),
+                    ComplianceConsentRow.sensitive_data_ack.is_(True),
+                )
+                .order_by(ComplianceConsentRow.created_at.desc())
+                .limit(1)
+            )
+            return s.scalars(stmt).first() is not None
+
+    def log_audit_portal_access(self, entry: AuditPortalAccessLog) -> AuditPortalAccessLog:
+        with self._session() as s:
+            row = AuditPortalAccessLogRow(
+                email=entry.email,
+                action=entry.action,
+                ip_address=entry.ip_address,
+                user_agent=entry.user_agent,
+                detail=entry.detail,
+                created_at=entry.created_at,
+            )
+            s.add(row)
+            s.commit()
+            s.refresh(row)
+            return AuditPortalAccessLog(
+                id=row.id,
+                email=row.email,
+                action=row.action,
+                ip_address=row.ip_address,
+                user_agent=row.user_agent,
+                detail=row.detail,
+                created_at=row.created_at,
+            )
+
+    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 30) -> None:
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            s.add(
+                AuditPortalProgressHistoryRow(
+                    email=email,
+                    payload=payload,
+                    created_at=now,
+                )
+            )
+            stmt = (
+                select(AuditPortalProgressHistoryRow.id)
+                .where(AuditPortalProgressHistoryRow.email == email)
+                .order_by(AuditPortalProgressHistoryRow.created_at.desc())
+                .offset(keep_last)
+            )
+            stale_ids = [row_id for (row_id,) in s.execute(stmt).all()]
+            if stale_ids:
+                s.execute(
+                    delete(AuditPortalProgressHistoryRow).where(
+                        AuditPortalProgressHistoryRow.id.in_(stale_ids)
+                    )
+                )
+            s.commit()
+
+    def get_execution_plan(self, plan_id: str) -> ExecutionPlanRecord | None:
+        with self._session() as s:
+            row = s.get(ExecutionPlanRow, plan_id)
+            return _to_execution_plan(row) if row else None
+
+    def save_execution_plan(self, record: ExecutionPlanRecord) -> ExecutionPlanRecord:
+        now = datetime.now(timezone.utc)
+        with self._session() as s:
+            row = s.get(ExecutionPlanRow, record.plan_id)
+            if row is None:
+                row = ExecutionPlanRow(plan_id=record.plan_id)
+                s.add(row)
+            row.session_id = record.session_id
+            row.initiator_user_id = record.initiator_user_id
+            row.channel = record.channel
+            row.user_message = record.user_message
+            row.status = record.status
+            row.payload = record.payload
+            row.updated_at = now
+            if row.created_at is None:
+                row.created_at = record.created_at or now
+            s.commit()
+            s.refresh(row)
+            return _to_execution_plan(row)
+
+    def list_execution_plans(self, *, limit: int = 50) -> list[ExecutionPlanRecord]:
+        from sqlalchemy import select
+
+        with self._session() as s:
+            rows = s.scalars(
+                select(ExecutionPlanRow).order_by(ExecutionPlanRow.updated_at.desc()).limit(limit)
+            ).all()
+            return [_to_execution_plan(row) for row in rows]
+
+    def execution_plan_stats(self) -> dict:
+        from sqlalchemy import select
+
+        from src.storage.models import aggregate_execution_plan_stats
+
+        with self._session() as s:
+            rows = s.scalars(select(ExecutionPlanRow)).all()
+            records = [_to_execution_plan(row) for row in rows]
+            return aggregate_execution_plan_stats(records)
+
+    def clear_all_execution_plans(self) -> int:
+        from sqlalchemy import delete, func, select
+
+        with self._session() as s:
+            count = s.scalar(select(func.count()).select_from(ExecutionPlanRow)) or 0
+            s.execute(delete(ExecutionPlanRow))
+            s.commit()
+            return int(count)

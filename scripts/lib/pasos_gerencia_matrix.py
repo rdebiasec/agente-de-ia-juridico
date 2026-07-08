@@ -36,7 +36,7 @@ _RAW: dict = {
       "Contrastar teoría del caso con etapa procesal y prueba disponible.",
       "Detectar desalineaciones entre ruta 906 y plan probatorio.",
       "Proponer ajustes coordinados para representación de la víctima.",
-      "Profundizar análisis de «Alinear teoria de victima con ruta procesal y plan probatorio» con referencia al expediente y norma aplicable.",
+      "Priorizar ajustes por plazos procesales y objetivos de la víctima.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Alinear teoria de victima con ruta procesal y plan probatorio.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -97,7 +97,7 @@ _RAW: dict = {
       "Identificar actuación o audiencia específica y marco Ley 906.",
       "Determinar formas de intervención de la víctima procedentes.",
       "Proponer contenido y momento de la intervención.",
-      "Profundizar análisis de «Definir intervencion posible de la victima en una actuacion o audiencia» con referencia al expediente y norma aplicable.",
+      "Documentar riesgos procesales si la intervención no es oportuna.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Definir intervencion posible de la victima en una actuacion o audiencia.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -110,7 +110,7 @@ _RAW: dict = {
       "Identificar el perjuicio alegado y su carácter actual o inminente.",
       "Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.",
       "Contrastar con mecanismos ordinarios y plazos procesales vigentes.",
-      "Profundizar análisis de «Identificar urgencia constitucional» con referencia al expediente y norma aplicable.",
+      "Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Identificar urgencia constitucional.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -172,7 +172,7 @@ _RAW: dict = {
       "Extraer hechos con fecha, hora y actores de fuentes verificadas.",
       "Ordenar línea de tiempo y señalar eventos sin fecha exacta.",
       "Marcar inconsistencias entre versiones.",
-      "Profundizar análisis de «Ordenar hechos en linea de tiempo» con referencia al expediente y norma aplicable.",
+      "Validar coherencia temporal con matriz hecho-fuente y marcar huecos.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Ordenar hechos en linea de tiempo.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -324,7 +324,7 @@ _RAW: dict = {
       "Listar hechos verificables y narrados relevantes para la vulneración alegada.",
       "Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.",
       "Señalar vacíos probatorios y norma constitucional de soporte preliminar.",
-      "Profundizar análisis de «Relacionar hechos con derechos afectados» con referencia al expediente y norma aplicable.",
+      "Ordenar filas por relevancia para pretensiones de tutela.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Relacionar hechos con derechos afectados.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -349,7 +349,7 @@ _RAW: dict = {
       "Listar pruebas faltantes críticas según matriz hecho-prueba.",
       "Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).",
       "Ordenar por impacto procesal y urgencia.",
-      "Profundizar análisis de «Proponer plan para obtener pruebas faltantes» con referencia al expediente y norma aplicable.",
+      "Señalar dependencias (custodia antes de peritaje, etc.).",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Proponer plan para obtener pruebas faltantes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -386,7 +386,7 @@ _RAW: dict = {
       "Sintetizar etapa actual y actuaciones pendientes.",
       "Proponer secuencia de próximos pasos con responsables y plazos.",
       "Incluir riesgos procesales de la ruta propuesta.",
-      "Profundizar análisis de «Crear plan de proximos pasos procesales para revision del abogado» con referencia al expediente y norma aplicable.",
+      "Entregar ruta numerada con responsable y plazo por paso.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Crear plan de proximos pasos procesales para revision del abogado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -399,12 +399,11 @@ _RAW: dict = {
       "Seleccionar tipos penales hipotéticos aplicables.",
       "Descomponer conducta, resultado, nexo y elementos normativos.",
       "Documentar dudas de tipicidad.",
-      "Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.",
-      "Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.",
+      "Registrar dudas de tipicidad por elemento sin concluir culpabilidad.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Dividir un posible delito en elementos juridicos verificables.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
+    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
   "detectar_agravantes_atenuantes": {
@@ -524,7 +523,7 @@ _RAW: dict = {
       "Revisar oportunidad, legitimación, competencia e improcedencia.",
       "Documentar riesgos de pérdida de derechos o extemporaneidad.",
       "Priorizar riesgos críticos para decisión inmediata.",
-      "Profundizar análisis de «Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos» con referencia al expediente y norma aplicable.",
+      "Recomendar actuación inmediata para riesgos críticos extemporáneos.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -537,7 +536,7 @@ _RAW: dict = {
       "Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).",
       "Clasificar nivel de urgencia y necesidad de atención humana inmediata.",
       "Escalar con notificación si aplica.",
-      "Profundizar análisis de «Identificar si el caso requiere atencion humana inmediata» con referencia al expediente y norma aplicable.",
+      "Documentar motivo de escalamiento y agente destino.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Identificar si el caso requiere atencion humana inmediata.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -586,7 +585,7 @@ _RAW: dict = {
       "Verificar existencia de petición previa, destinatario y objeto solicitado.",
       "Constatar plazo de respuesta y silencio administrativo si aplica.",
       "Determinar si procede derecho de petición, tutela u otra vía según el caso.",
-      "Profundizar análisis de «Revisar si existe derecho de peticion incumplido» con referencia al expediente y norma aplicable.",
+      "Documentar requisitos faltantes para interponer nueva petición o tutela.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Revisar si existe derecho de peticion incumplido.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -643,7 +642,7 @@ _RAW: dict = {
       "Evaluar fuerza preliminar del soporte (directo, indirecto, circunstancial).",
       "Identificar elementos del tipo penal con soporte débil o ausente.",
       "Conclusión preliminar de suficiencia sin afirmar certeza judicial.",
-      "Profundizar análisis de «Evaluar preliminarmente fuerza de soporte probatorio» con referencia al expediente y norma aplicable.",
+      "Relacionar debilidades probatorias con plan de recaudo sugerido.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Evaluar preliminarmente fuerza de soporte probatorio.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -762,12 +761,11 @@ _RAW: dict = {
       "Revisar actuaciones y estado del radicado.",
       "Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).",
       "Señalar incertidumbres si el expediente es incompleto.",
-      "Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.",
-      "Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.",
+      "Señalar actuaciones habilitadas en la etapa identificada.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Determinar etapa del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
+    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
   "identificar_intereses_victima": {
@@ -788,7 +786,7 @@ _RAW: dict = {
       "Precisar tipo de audiencia y marco normativo Ley 906 aplicable.",
       "Definir objetivo jurídico y táctico para la representación de la víctima.",
       "Alinear objetivo con teoría del caso y prueba disponible.",
-      "Profundizar análisis de «Definir objetivo juridico y tactico de la audiencia para la victima» con referencia al expediente y norma aplicable.",
+      "Documentar peticiones orientativas y riesgos si no se logra el objetivo.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Definir objetivo juridico y tactico de la audiencia para la victima.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -825,7 +823,7 @@ _RAW: dict = {
       "Relacionar cada elemento del tipo con hechos y pruebas.",
       "Visualizar fortalezas y debilidades por elemento.",
       "Proponer recaudo orientado a elementos débiles.",
-      "Profundizar análisis de «Relacionar elementos del tipo con hechos y pruebas» con referencia al expediente y norma aplicable.",
+      "Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Relacionar elementos del tipo con hechos y pruebas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -858,7 +856,7 @@ _RAW: dict = {
       "Consolidar hechos, derechos afectados y pretensiones con fuentes.",
       "Verificar que el evaluador constitucional recomendó tutela preliminarmente.",
       "Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.",
-      "Profundizar análisis de «Preparar insumos para borrador de tutela» con referencia al expediente y norma aplicable.",
+      "Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Preparar insumos para borrador de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -998,10 +996,10 @@ _RAW: dict = {
     "tier": "estrategico",
     "pasos": [
       "Recopilar hechos soportados y pretensiones de la víctima.",
-      "Redactar memorial con estructura hechos-fundamentos-peticiones.",
-      "Verificar citas y marcar pendientes antes de firma humana.",
-      "Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.",
-      "Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.",
+      "Verificar citas normativas aplicables al memorial.",
+      "Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.",
+      "Redactar memorial integrando hechos, fundamentos y peticiones.",
+      "Marcar pendientes de verificación antes de firma humana.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Crear borrador de memorial penal.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -1078,7 +1076,7 @@ _RAW: dict = {
       "Identificar recursos y actuaciones ordinarias en el proceso penal vigente.",
       "Verificar si están pendientes de interponer o ya agotados.",
       "Determinar si la tutela es subsidiaria respecto de dichos mecanismos.",
-      "Profundizar análisis de «Verificar si hay vias ordinarias antes de tutela» con referencia al expediente y norma aplicable.",
+      "Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Verificar si hay vias ordinarias antes de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
@@ -1103,7 +1101,7 @@ _RAW: dict = {
       "Plantear escenarios favorable, intermedio y adverso probables.",
       "Definir respuesta táctica para cada escenario.",
       "Listar señales en audiencia que indiquen cambio de escenario.",
-      "Profundizar análisis de «Plantear escenarios probables y preparacion del abogado» con referencia al expediente y norma aplicable.",
+      "Cruzar escenario adverso con plan de contingencia procesal.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Plantear escenarios probables y preparacion del abogado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",

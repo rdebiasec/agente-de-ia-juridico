@@ -234,3 +234,116 @@ class AuditPortalProgress:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+
+
+@dataclass
+class AuditPortalUser:
+    email: str
+    pin_hash: str
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+
+
+@dataclass
+class ComplianceConsent:
+    subject_key: str
+    context: str
+    policy_version: str
+    privacy_accepted: bool
+    sensitive_data_ack: bool
+    ip_address: str | None = None
+    user_agent: str | None = None
+    created_at: datetime = field(default_factory=_now)
+    id: int | None = None
+
+
+@dataclass
+class AuditPortalAccessLog:
+    action: str
+    email: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    detail: str | None = None
+    created_at: datetime = field(default_factory=_now)
+    id: int | None = None
+
+
+@dataclass
+class ExecutionPlanRecord:
+    """Plan de ejecución aprobado por el abogado antes de correr skills."""
+
+    plan_id: str
+    session_id: str
+    initiator_user_id: str
+    channel: str = "web"
+    user_message: str = ""
+    status: str = "pending_approval"
+    payload: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "plan_id": self.plan_id,
+            "session_id": self.session_id,
+            "initiator_user_id": self.initiator_user_id,
+            "channel": self.channel,
+            "user_message": self.user_message,
+            "status": self.status,
+            "payload": self.payload,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+def execution_plan_dashboard_row(record: ExecutionPlanRecord) -> dict:
+    """Resumen de un plan para el dashboard del portal de auditoría."""
+    payload = record.payload or {}
+    steps = payload.get("steps") or []
+    agents = payload.get("agents_involved") or []
+    stream = payload.get("stream_events") or []
+    return {
+        "plan_id": record.plan_id,
+        "status": record.status,
+        "template_kind": payload.get("template_kind") or "generico",
+        "objective": (payload.get("objective") or "")[:160],
+        "user_message_preview": (record.user_message or "")[:100],
+        "session_id": record.session_id,
+        "channel": record.channel,
+        "steps_count": len(steps),
+        "agents_count": len(agents),
+        "agents_involved": agents[:4],
+        "pattern_reused": bool(payload.get("pattern_reused")),
+        "has_result": bool(payload.get("result")),
+        "stream_events_count": len(stream),
+        "created_at": record.created_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+
+
+def aggregate_execution_plan_stats(records: list[ExecutionPlanRecord]) -> dict:
+    by_status: dict[str, int] = {}
+    by_template: dict[str, int] = {}
+    for record in records:
+        by_status[record.status] = by_status.get(record.status, 0) + 1
+        payload = record.payload or {}
+        kind = str(payload.get("template_kind") or "generico")
+        by_template[kind] = by_template.get(kind, 0) + 1
+    recent = [
+        execution_plan_dashboard_row(r)
+        for r in sorted(records, key=lambda r: r.updated_at, reverse=True)[:25]
+    ]
+    return {
+        "total": len(records),
+        "by_status": by_status,
+        "by_template": by_template,
+        "pending_approval": by_status.get("pending_approval", 0),
+        "approved": by_status.get("approved", 0),
+        "executing": by_status.get("executing", 0),
+        "done": by_status.get("done", 0),
+        "failed": by_status.get("failed", 0),
+        "rejected": by_status.get("rejected", 0),
+        "executed": by_status.get("done", 0) + by_status.get("failed", 0),
+        "recent": recent,
+        "generated_at": _now().isoformat(),
+    }

@@ -68,21 +68,28 @@ async def test_debug_trace_returns_session_history(monkeypatch):
         cookie = login.cookies.get("agente_session")
         assert cookie
 
+        status = await client.get("/auth/status", cookies={"agente_session": cookie})
+        subject_id = status.json().get("subject_id")
+        assert subject_id
+
         for message in (
             "Prepare un mensaje breve al cliente.",
             "Explique riesgos preliminares del caso.",
         ):
             chat = await client.post(
                 "/chat",
-                json={"message": message, "channel": "web", "user_id": "trace-session"},
+                json={"message": message, "channel": "web", "user_id": "ignored"},
                 cookies={"agente_session": cookie},
             )
             assert chat.status_code == 200
 
-        trace_res = await client.get("/debug/trace/web:trace-session?limit=5", cookies={"agente_session": cookie})
+        trace_res = await client.get(
+            f"/debug/trace/web:{subject_id}?limit=5",
+            cookies={"agente_session": cookie},
+        )
         assert trace_res.status_code == 200
         payload = trace_res.json()
-        assert payload["session_id"] == "web:trace-session"
+        assert payload["session_id"] == f"web:{subject_id}"
         assert len(payload["traces"]) >= 2
         assert all("steps" in trace for trace in payload["traces"])
         assert all("received_by_agent" in trace for trace in payload["traces"])

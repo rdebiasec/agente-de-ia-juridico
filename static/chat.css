@@ -1713,6 +1713,138 @@ body {
   color: rgba(238, 241, 255, 0.45);
 }
 
+/* Plan de ejecución (Fase 1) */
+.plan-card-message .plan-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: rgba(12, 16, 28, 0.85);
+  margin-top: 0.35rem;
+}
+
+.plan-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.plan-objective,
+.plan-agents,
+.plan-note,
+.plan-muted {
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+  color: rgba(238, 241, 255, 0.88);
+}
+
+.plan-steps {
+  margin: 0.75rem 0;
+  padding-left: 1.2rem;
+}
+
+.plan-step {
+  margin-bottom: 0.75rem;
+}
+
+.plan-step-agent {
+  display: block;
+  font-size: 0.82rem;
+  color: rgba(238, 241, 255, 0.62);
+  margin: 0.15rem 0;
+}
+
+.plan-io {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: rgba(238, 241, 255, 0.72);
+}
+
+.plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.btn-plan-approve,
+.btn-plan-reject {
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  border: 1px solid var(--line);
+}
+
+.btn-plan-approve {
+  background: rgba(56, 189, 120, 0.18);
+  color: #b7f5d8;
+}
+
+.btn-plan-reject {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+}
+
+.plan-status {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(238, 241, 255, 0.75);
+}
+
+.plan-run-card .plan-run-icon {
+  display: inline-block;
+  width: 1.1rem;
+  margin-right: 0.35rem;
+  color: rgba(125, 211, 252, 0.9);
+}
+
+.plan-run-step[data-status="in_progress"] {
+  border-left: 2px solid rgba(56, 189, 248, 0.7);
+  padding-left: 0.5rem;
+}
+
+.plan-run-step[data-status="done"] .plan-run-icon {
+  color: #86efac;
+}
+
+.plan-run-step[data-status="blocked"] .plan-run-icon {
+  color: #fca5a5;
+}
+
+.plan-step-live {
+  font-size: 0.82rem;
+  color: rgba(238, 241, 255, 0.65);
+  margin: 0.25rem 0 0;
+}
+
+.plan-step-io {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: rgba(238, 241, 255, 0.7);
+}
+
+.plan-step-io summary {
+  cursor: pointer;
+  color: rgba(125, 211, 252, 0.85);
+}
+
+.plan-io-block {
+  margin-top: 0.35rem;
+}
+
+.plan-io-block ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.plan-io-kind {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(148, 163, 184, 0.9);
+  margin-right: 0.35rem;
+}
+
 .composer textarea:focus {
   outline: 2px solid rgba(79, 209, 197, 0.45);
   outline-offset: 2px;

@@ -1,7 +1,8 @@
-/* Auditoría de Instrucciones — login correo + contraseña vía API */
+/* Auditoría de Instrucciones — login con consentimiento, PIN y API */
 
 (function () {
     let sessionEmail = null;
+    let preloginState = null;
 
     function apiConfig() {
         return window.AUDIT_API_CONFIG || { base: '' };
@@ -29,21 +30,16 @@
     }
 
     function showGate() {
-        const gate = document.getElementById('audit-auth-gate');
-        const app = document.getElementById('audit-app-root');
-        if (gate) gate.classList.remove('gate-hidden');
-        if (app) app.classList.add('app-gated');
+        document.getElementById('audit-auth-gate')?.classList.remove('gate-hidden');
+        document.getElementById('audit-app-root')?.classList.add('app-gated');
         document.body.classList.add('overflow-hidden');
     }
 
     function hideGate() {
-        const gate = document.getElementById('audit-auth-gate');
-        const app = document.getElementById('audit-app-root');
-        if (gate) gate.classList.add('gate-hidden');
-        if (app) app.classList.remove('app-gated');
+        document.getElementById('audit-auth-gate')?.classList.add('gate-hidden');
+        document.getElementById('audit-app-root')?.classList.remove('app-gated');
         document.body.classList.remove('overflow-hidden');
-        const logoutBtn = document.getElementById('audit-auth-logout');
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
+        document.getElementById('audit-auth-logout')?.classList.remove('hidden');
     }
 
     function showError(msg) {
@@ -54,8 +50,7 @@
     }
 
     function hideError() {
-        const el = document.getElementById('audit-auth-error');
-        if (el) el.classList.add('hidden');
+        document.getElementById('audit-auth-error')?.classList.add('hidden');
     }
 
     function setSessionEmail(email) {
@@ -66,6 +61,30 @@
     }
 
     window.getAuditSessionEmail = () => sessionEmail;
+
+    function updateExtraFields(state) {
+        const pinBlock = document.getElementById('audit-auth-pin-block');
+        const newPinBlock = document.getElementById('audit-auth-new-pin-block');
+        const consentBlock = document.getElementById('audit-auth-consent-block');
+        if (!pinBlock || !newPinBlock || !consentBlock) return;
+        const showConsent = state?.needs_consent !== false;
+        consentBlock.classList.toggle('hidden', !showConsent);
+        newPinBlock.classList.toggle('hidden', !state?.needs_pin_setup);
+        pinBlock.classList.toggle('hidden', !state?.needs_pin);
+    }
+
+    async function runPrelogin(email, password) {
+        const res = await fetchAuditApi('/api/audit/prelogin', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 429) throw new Error(data.detail || 'Demasiados intentos. Espere unos minutos.');
+        if (!res.ok) throw new Error(data.detail || 'Correo o contraseña incorrectos.');
+        preloginState = data;
+        updateExtraFields(data);
+        return data;
+    }
 
     async function checkSession() {
         const res = await fetchAuditApi('/api/audit/session');
@@ -82,32 +101,6 @@
         return false;
     }
 
-    async function login(email, password) {
-        const res = await fetchAuditApi('/api/audit/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password }),
-        });
-        if (res.status === 401) return false;
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.detail || `Error ${res.status}`);
-        }
-        const data = await res.json();
-        setSessionEmail(data.email || email);
-        return true;
-    }
-
-    async function logout() {
-        try {
-            await fetchAuditApi('/api/audit/logout', { method: 'POST' });
-        } catch (_) {
-            /* ignore */
-        }
-        setSessionEmail(null);
-        showGate();
-        location.reload();
-    }
-
     function bindGateForm(resolve) {
         const form = document.getElementById('audit-auth-form');
         if (!form) {
@@ -119,29 +112,61 @@
             hideError();
             const email = document.getElementById('audit-auth-email')?.value || '';
             const pass = document.getElementById('audit-auth-password')?.value || '';
-            if (!email.trim()) {
-                showError('Ingrese su correo electrónico.');
-                return;
-            }
-            if (!pass) {
-                showError('Ingrese la contraseña del despacho.');
-                return;
-            }
+            const pin = document.getElementById('audit-auth-pin')?.value || '';
+            const newPin = document.getElementById('audit-auth-new-pin')?.value || '';
+            const acceptPrivacy = document.getElementById('audit-accept-privacy')?.checked;
+            const acceptCases = document.getElementById('audit-accept-cases')?.checked;
             const btn = document.getElementById('audit-auth-submit');
+            if (!email.trim() || !pass) {
+                showError('Ingrese correo y contraseña del despacho.');
+                return;
+            }
             if (btn) {
                 btn.disabled = true;
                 btn.textContent = 'Verificando…';
             }
             try {
-                const ok = await login(email, pass);
-                if (!ok) {
-                    showError('Correo o contraseña incorrectos.');
+                if (!preloginState) {
+                    await runPrelogin(email, pass);
+                }
+                const state = preloginState || {};
+                if (state.needs_consent && (!acceptPrivacy || !acceptCases)) {
+                    showError('Debe aceptar privacidad y autorización de datos de casos.');
                     return;
                 }
+                if (state.needs_pin_setup && !newPin) {
+                    showError('Defina un PIN personal de 6 a 8 dígitos (primera vez).');
+                    return;
+                }
+                if (state.needs_pin && !pin) {
+                    showError('Ingrese su PIN personal.');
+                    return;
+                }
+                const res = await fetchAuditApi('/api/audit/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email,
+                        password: pass,
+                        pin: pin || null,
+                        new_pin: newPin || null,
+                        accept_privacy: !!acceptPrivacy,
+                        accept_sensitive_data: !!acceptCases,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.status === 428) {
+                    preloginState = { ...state, needs_consent: true, needs_pin_setup: true };
+                    updateExtraFields(preloginState);
+                    showError(data.detail || 'Complete consentimiento y PIN.');
+                    return;
+                }
+                if (!res.ok) throw new Error(data.detail || 'No se pudo iniciar sesión.');
+                setSessionEmail(data.email || email);
+                preloginState = null;
                 hideGate();
                 resolve(true);
             } catch (err) {
-                showError(err.message || 'No se pudo conectar con el servidor. Verifique que la API esté activa.');
+                showError(err.message || 'No se pudo conectar con el servidor.');
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -150,7 +175,15 @@
             }
         });
 
-        document.getElementById('audit-auth-logout')?.addEventListener('click', () => logout());
+        document.getElementById('audit-auth-logout')?.addEventListener('click', async () => {
+            try {
+                await fetchAuditApi('/api/audit/logout', { method: 'POST' });
+            } catch (_) { /* ignore */ }
+            setSessionEmail(null);
+            preloginState = null;
+            showGate();
+            location.reload();
+        });
     }
 
     window.__auditAuthPromise = new Promise(resolve => {

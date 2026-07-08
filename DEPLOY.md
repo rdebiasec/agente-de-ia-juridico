@@ -30,6 +30,10 @@ cp .env.example .env   # editar con tus claves
 .venv/bin/python -m pytest tests/ -v
 .venv/bin/python -m src.main
 
+# Validación extensa (skills + gates + pytest + runtime + smoke HTTP local):
+./scripts/validacion_sistema_completa.sh
+# Reporte: docs/auditoria/validacion-sistema-completa-reporte.md
+
 # otra terminal:
 curl http://localhost:8000/health
 ```
@@ -115,7 +119,49 @@ La app **falla al arrancar** en Render si detecta secretos débiles, `DEV_AUTO_L
 Endpoints de depuración (`POST /debug/client-log`, middleware de telemetría) quedan
 **desactivados** en producción. `/debug/trace/{session_id}` sigue protegido por login web.
 
-Headers de seguridad (HSTS, X-Frame-Options, nosniff) se aplican automáticamente en Render.
+Headers de seguridad (HSTS, X-Frame-Options, nosniff, **Content-Security-Policy**) se aplican automáticamente en Render.
+
+### Postgres local (Docker)
+
+El servicio `db` en `deploy/docker-compose.yml` publica el puerto **solo en localhost** (`127.0.0.1:5432`). Las credenciales `agente:agente` son **solo para desarrollo**; no las reutilice en staging ni producción.
+
+### Rate limiting y workers
+
+Los límites de intentos (login web, portal de auditoría, creación/ejecución de planes) viven **en memoria del proceso**. En Render use **un worker por instancia** (configuración actual). Si despliega varias instancias o workers, los límites no se comparten — requerirá Redis u otro almacén compartido (futuro).
+
+Límites actuales (por defecto):
+
+| Ruta | Política |
+|---|---|
+| `POST /auth/login` | 12 intentos / 15 min por IP |
+| `POST /chat/plan` | 20 solicitudes / 15 min por sesión (`subject_id`) |
+| `POST /chat/plan/{id}/execute` | 20 ejecuciones / 15 min por sesión |
+
+### CORS (portal GitHub Pages)
+
+Orígenes permitidos por defecto: GitHub Pages (`rdebiasec.github.io`), `localhost:8080`, y la URL pública de Render (`RENDER_EXTERNAL_URL`).
+
+Para añadir orígenes: variable `AUDIT_CORS_ORIGINS` (lista separada por comas). Ejemplo:
+
+```bash
+AUDIT_CORS_ORIGINS=https://mi-org.github.io,https://agente-de-ia-juridico.onrender.com
+```
+
+Headers permitidos: `Content-Type`, `Authorization`, `Last-Event-ID`.
+
+### Política de rotación de secretos
+
+| Secreto | Cuándo rotar | Efecto |
+|---|---|---|
+| `SITE_PASSWORD` | Cada 3–6 meses o si hubo filtración | Invalida login del despacho hasta actualizar `.env`/Render |
+| `SESSION_SECRET` | Cada 3–6 meses o ante sospecha de compromiso | **Revoca todas las sesiones** web y auditoría |
+| `OPENAI_API_KEY` | Si se expuso en logs o commits | Revocar en OpenAI y actualizar Render |
+
+Buenas prácticas:
+
+- No reutilice valores de ejemplo (`Kx9mP2vL8nQw4RsT`, `changeme`, etc.).
+- Use `SITE_PASSWORD` de **≥16 caracteres** (recomendado); la app advierte en producción si es más corto.
+- Tras rotar `SESSION_SECRET`, todos los usuarios deben volver a iniciar sesión.
 
 **Nunca** suba `.env` a GitHub — solo `.env.example` con placeholders.
 
@@ -176,6 +222,30 @@ Resultados esperados:
 
 ---
 
+## Plan de ejecución (Fase 1 + Fase 2 SSE)
+
+El chat web usa **plan obligatorio** antes de ejecutar agentes:
+
+| Endpoint | Uso |
+|---|---|
+| `POST /chat/plan` | Genera plan (`pending_approval`) |
+| `POST /chat/plan/{id}/approve` | Aprueba plan |
+| `POST /chat/plan/{id}/reject` | Rechaza con motivo |
+| `POST /chat/plan/{id}/execute` | Inicia ejecución async (`202`) |
+| `GET /chat/plan/{id}/events` | SSE — avances en vivo |
+| `GET /chat/plan/{id}/result` | Resultado final persistido |
+| `POST /chat/plan/{id}/approve-and-execute` | Legacy síncrono (tests/compat) |
+
+Persistencia: tabla `execution_plans` (migración Alembic `0005`). Tras deploy, verificar `alembic upgrade head`.
+
+**SSE en Render:** el endpoint envía `heartbeat` cada ~5 s durante pasos largos. Un solo worker por instancia (broker in-process). Multi-instancia requeriría Redis (futuro).
+
+**Slack:** el bot publica el plan en hilo; el usuario responde `EJECUTAR` o `CAMBIOS: motivo`.
+
+**Fase 3:** plantillas de plan, dashboard en `/auditoria/`, export `.md` — ver `docs/canon/plan-fase-3-producto-auditoria.md`.
+
+---
+
 ## Portal de auditoría (Auditoría de Instrucciones)
 
 El progreso de aprobación se persiste en **PostgreSQL** por correo electrónico (misma base que el agente).
@@ -198,6 +268,18 @@ El progreso de aprobación se persiste en **PostgreSQL** por correo electrónico
 | POST | `/api/audit/login` | `{ email, password }` → cookie `audit_session` |
 | GET | `/api/audit/session` | `{ authenticated, email }` |
 | GET/PUT/DELETE | `/api/audit/progress` | Cargar / guardar / borrar progreso del correo autenticado |
+
+### Cumplimiento y datos de casos (Ley 1581 / US safeguards)
+
+**Sí puede ingresar información de casos** si cumple:
+
+1. Acepta el [aviso de privacidad](/legal/privacidad) y la [autorización de datos de casos](/legal/tratamiento-datos-casos) en el login.
+2. Usa **PIN personal** (6–8 dígitos) en el portal de auditoría, además de `SITE_PASSWORD`.
+3. Aplica **minimización**: solo datos necesarios para la tarea.
+
+Controles técnicos: consentimiento registrado en Postgres, logs de acceso, historial de versiones del progreso, rate limiting en login, ARCO vía `privacidad@dbxsolutions.com` o «Borrar mi progreso».
+
+Páginas legales públicas: `/legal/privacidad`, `/legal/tratamiento-datos-casos`.
 
 ### Paridad dev ↔ prod
 

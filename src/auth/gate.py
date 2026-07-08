@@ -15,8 +15,22 @@ def _serializer(secret: str) -> URLSafeTimedSerializer:
     return URLSafeTimedSerializer(secret, salt="agente-web-gate-v1")
 
 
-def create_session_token(secret: str, username: str | None = None) -> str:
-    payload: dict[str, Any] = {"last_activity": time.time(), "v": 1}
+def new_subject_id() -> str:
+    """Identificador estable del despacho en este navegador (SEC-01)."""
+    return f"web-{secrets.token_hex(4)}"
+
+
+def create_session_token(
+    secret: str,
+    username: str | None = None,
+    *,
+    subject_id: str | None = None,
+) -> str:
+    payload: dict[str, Any] = {
+        "last_activity": time.time(),
+        "v": 2,
+        "subject_id": subject_id or new_subject_id(),
+    }
     if username:
         payload["username"] = username
     return _serializer(secret).dumps(payload)
@@ -27,6 +41,16 @@ def parse_session_token(secret: str, token: str, *, absolute_max_age: int = 8640
         return _serializer(secret).loads(token, max_age=absolute_max_age)
     except (BadSignature, SignatureExpired):
         return None
+
+
+def subject_id_from_token(secret: str, token: str | None, *, absolute_max_age: int = 86400) -> str | None:
+    if not token:
+        return None
+    data = parse_session_token(secret, token, absolute_max_age=absolute_max_age)
+    if not data:
+        return None
+    sid = str(data.get("subject_id") or "").strip()
+    return sid or None
 
 
 def is_session_active(
@@ -55,8 +79,11 @@ def refresh_session_token(
     if not is_session_active(secret, token, idle_seconds=idle_seconds, absolute_max_age=absolute_max_age):
         return None
     data = parse_session_token(secret, token, absolute_max_age=absolute_max_age)
+    if not data:
+        return None
     username = str(data.get("username", "")) if data else None
-    return create_session_token(secret, username=username or None)
+    subject_id = str(data.get("subject_id") or "").strip() or new_subject_id()
+    return create_session_token(secret, username=username or None, subject_id=subject_id)
 
 
 def verify_password(expected: str, provided: str) -> bool:

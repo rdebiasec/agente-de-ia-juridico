@@ -1,6 +1,6 @@
 # Legal Audit Sync v2
 
-Portal web para que la abogada líder audite el sistema penal-víctimas: **8 reglas estrictas**, **11 agentes** y **cada paso** de los 90 skills.
+Portal web para que la abogada líder audite el sistema penal-víctimas: **10 reglas estrictas**, **11 agentes** y **cada paso** de los 90 skills.
 
 ## Carpetas
 

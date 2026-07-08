@@ -195,6 +195,21 @@ function getUserId() {
   return id;
 }
 
+async function syncSubjectIdFromAuth() {
+  try {
+    const res = await fetch("/auth/status", { credentials: "include" });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.subject_id) {
+      localStorage.setItem(STORAGE_KEY, data.subject_id);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+void syncSubjectIdFromAuth();
+
 window.getChatUserId = getUserId;
 
 function getWebSessionId() {
@@ -773,6 +788,481 @@ function showTyping() {
 
 function hideTyping() {
   document.getElementById("typing-indicator")?.remove();
+}
+
+function agentLabel(agentId) {
+  const labels = {
+    coordinador_expediente_penal: "Coordinador del expediente",
+    analista_cronologia_hechos_penales: "Cronología y hechos",
+    analista_tipicidad_y_responsabilidad_penal: "Tipicidad y responsabilidad",
+    analista_ruta_procesal_ley906: "Ruta procesal Ley 906",
+    analista_representacion_victimas: "Representación de víctimas",
+    gestor_evidencia_y_soporte_probatorio: "Evidencia y prueba",
+    preparador_estrategico_audiencias_penales: "Audiencias penales",
+    redactor_documentos_juridicos_penales: "Redacción penal",
+    gestor_seguimiento_procesal_penal: "Seguimiento procesal",
+    evaluador_derechos_fundamentales_tutela: "Tutela y derechos fundamentales",
+    analista_calidad_juridica: "Control de calidad jurídica",
+  };
+  return labels[agentId] || agentId;
+}
+
+function renderPlanStepsHtml(steps) {
+  if (!Array.isArray(steps) || !steps.length) {
+    return "<p class=\"plan-muted\">Sin pasos definidos.</p>";
+  }
+  return `<ol class="plan-steps">${steps
+    .map((step) => {
+      const risk = step.estimated_risk === "alto" ? " · alto riesgo" : "";
+      const hitl = step.requires_hitl_output ? " · revisión humana en salida" : "";
+      return `
+        <li class="plan-step plan-step--${escapeHtml(step.estimated_risk || "medio")}" data-step-id="${escapeHtml(step.step_id || "")}">
+          <strong>${escapeHtml(String(step.order))}. ${escapeHtml(step.title || "")}</strong>
+          <span class="plan-step-agent">${escapeHtml(agentLabel(step.agent_id || ""))}${escapeHtml(risk)}${escapeHtml(hitl)}</span>
+          <p>${escapeHtml(step.user_summary || "")}</p>
+          <div class="plan-io">
+            <span><strong>Entrada:</strong> ${escapeHtml((step.inputs_expected || []).join("; ") || "—")}</span>
+            <span><strong>Salida:</strong> ${escapeHtml((step.outputs_promised || []).join("; ") || "—")}</span>
+          </div>
+        </li>`;
+    })
+    .join("")}</ol>`;
+}
+
+function showPlanCard(plan, userEntryId, epochAtSend) {
+  const planId = plan?.plan_id;
+  if (!planId) return;
+
+  const templateLabels = {
+    cronologia: "Cronología y hechos",
+    tutela: "Acción de tutela",
+    audiencia: "Preparación de audiencia",
+    generico: "Consulta general",
+  };
+  const kind = plan.template_kind || "generico";
+  const templateLine =
+    kind !== "generico" || plan.pattern_reused
+      ? `<p class="plan-template"><strong>Plantilla:</strong> ${escapeHtml(templateLabels[kind] || kind)}${
+          plan.pattern_reused ? " · patrón reutilizado de la sesión" : ""
+        }</p>`
+      : "";
+
+  const el = document.createElement("div");
+  el.className = "message assistant plan-card-message";
+  el.dataset.planId = planId;
+  el.innerHTML = `
+    <span class="message-meta">Plan de ejecución · pendiente de su aprobación</span>
+    <article class="plan-card" data-plan-id="${escapeHtml(planId)}">
+      <h3 class="plan-title">Plan propuesto</h3>
+      ${templateLine}
+      <p class="plan-objective"><strong>Objetivo:</strong> ${escapeHtml(plan.objective || "")}</p>
+      <p class="plan-agents"><strong>Agentes:</strong> ${escapeHtml((plan.agents_involved || []).map(agentLabel).join(" → "))}</p>
+      ${renderPlanStepsHtml(plan.steps)}
+      <p class="plan-note">La IA no ejecutará ningún paso hasta que usted apruebe este plan.</p>
+      <label class="plan-remember">
+        <input type="checkbox" class="plan-remember-pattern" />
+        Recordar este patrón para la sesión
+      </label>
+      <div class="plan-actions">
+        <button type="button" class="btn-plan-approve">Aprobar y ejecutar</button>
+        <button type="button" class="btn-plan-reject">Solicitar cambios</button>
+      </div>
+      <p class="plan-status" aria-live="polite"></p>
+    </article>
+  `;
+
+  el.querySelector(".btn-plan-approve")?.addEventListener("click", () => {
+    void approvePlanAndExecute(planId, userEntryId, epochAtSend, el);
+  });
+  el.querySelector(".btn-plan-reject")?.addEventListener("click", () => {
+    const reason = window.prompt("Indique qué debe cambiar en el plan (opcional):") || "";
+    void rejectPlan(planId, el, reason);
+  });
+
+  messagesEl.appendChild(el);
+  scrollToBottom();
+}
+
+async function rejectPlan(planId, cardMessageEl, reason) {
+  try {
+    const res = await authFetch(`/chat/plan/${encodeURIComponent(planId)}/reject`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: getUserId(), reason }),
+    });
+    const statusEl = cardMessageEl.querySelector(".plan-status");
+    if (res.ok) {
+      cardMessageEl.querySelector(".plan-actions")?.remove();
+      if (statusEl) {
+        statusEl.textContent =
+          "Plan rechazado. Puede reformular su consulta y el sistema generará un nuevo plan.";
+      }
+    } else if (statusEl) {
+      statusEl.textContent = "No se pudo rechazar el plan. Intente de nuevo.";
+    }
+  } catch {
+    const statusEl = cardMessageEl.querySelector(".plan-status");
+    if (statusEl) statusEl.textContent = "Error de conexión al rechazar el plan.";
+  }
+}
+
+function prepareRunCard(cardMessageEl) {
+  cardMessageEl.classList.add("plan-run-card");
+  const article = cardMessageEl.querySelector(".plan-card");
+  if (article) {
+    article.classList.add("plan-run-card-inner");
+    const title = article.querySelector(".plan-title");
+    if (title) title.textContent = "Ejecutando plan aprobado";
+  }
+  cardMessageEl.querySelectorAll(".plan-step").forEach((li) => {
+    li.classList.add("plan-run-step");
+    li.dataset.status = "pending";
+    if (!li.querySelector(".plan-run-icon")) {
+      li.insertAdjacentHTML("afterbegin", '<span class="plan-run-icon" aria-hidden="true">○</span>');
+    }
+  });
+}
+
+function updateRunStep(cardMessageEl, stepId, status, userUpdate = "") {
+  const li = cardMessageEl.querySelector(`.plan-run-step[data-step-id="${stepId}"]`)
+    || [...cardMessageEl.querySelectorAll(".plan-run-step")].find(
+      (el) => el.dataset.stepId === stepId
+    );
+  if (!li) return;
+  li.dataset.status = status;
+  const icon = li.querySelector(".plan-run-icon");
+  if (icon) {
+    icon.textContent = status === "in_progress" ? "◐" : status === "done" ? "✓" : status === "blocked" ? "✕" : "○";
+  }
+  if (userUpdate) {
+    let live = li.querySelector(".plan-step-live");
+    if (!live) {
+      live = document.createElement("p");
+      live.className = "plan-step-live";
+      live.setAttribute("aria-live", "polite");
+      li.appendChild(live);
+    }
+    live.textContent = userUpdate;
+  }
+}
+
+function updateRunStepIO(cardMessageEl, stepId, payload = {}) {
+  const li = cardMessageEl.querySelector(`.plan-run-step[data-step-id="${stepId}"]`)
+    || [...cardMessageEl.querySelectorAll(".plan-run-step")].find(
+      (el) => el.dataset.stepId === stepId
+    );
+  if (!li) return;
+
+  const inputs = payload.inputs || [];
+  const outputs = payload.outputs || [];
+  if (!inputs.length && !outputs.length) return;
+
+  let panel = li.querySelector(".plan-step-io");
+  if (!panel) {
+    panel = document.createElement("details");
+    panel.className = "plan-step-io";
+    const summary = document.createElement("summary");
+    summary.textContent = "Entrada / Salida del paso";
+    panel.appendChild(summary);
+    li.appendChild(panel);
+  }
+
+  const renderList = (label, items) => {
+    if (!items.length) return "";
+    const rows = items
+      .map((item) => `<li><span class="plan-io-kind">${item.kind || "dato"}</span> ${escapeHtml(item.preview || "")}</li>`)
+      .join("");
+    return `<div class="plan-io-block"><strong>${label}</strong><ul>${rows}</ul></div>`;
+  };
+
+  panel.innerHTML = `<summary>Entrada / Salida del paso</summary>${renderList("Entrada", inputs)}${renderList("Salida", outputs)}`;
+}
+
+function connectPlanEventStream(planId, onEvent, options = {}) {
+  const { onRecover } = options;
+  let es = null;
+  let closed = false;
+  let retryMs = 1000;
+  let lastSeq = 0;
+
+  const connect = () => {
+    if (closed) return;
+    const params = new URLSearchParams({
+      user_id: getUserId(),
+    });
+    if (lastSeq > 0) {
+      params.set("last_event_id", String(lastSeq));
+    }
+    const url = `/chat/plan/${encodeURIComponent(planId)}/events?${params.toString()}`;
+    es = new EventSource(url);
+    es.onmessage = (ev) => {
+      retryMs = 1000;
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.seq) lastSeq = Math.max(lastSeq, Number(data.seq) || 0);
+        onEvent(data);
+        if (data.event === "plan_done" || data.event === "plan_failed") {
+          closed = true;
+          es?.close();
+        }
+      } catch {
+        /* ignore malformed */
+      }
+    };
+    es.onerror = () => {
+      es?.close();
+      if (closed) return;
+      if (retryMs >= 8000 && typeof onRecover === "function") {
+        void onRecover()
+          .then((recovered) => {
+            if (recovered && !closed) {
+              closed = true;
+              onEvent(recovered);
+              return;
+            }
+            if (!closed) {
+              setTimeout(connect, retryMs);
+            }
+          })
+          .catch(() => {
+            if (!closed) setTimeout(connect, retryMs);
+          });
+        return;
+      }
+      setTimeout(connect, retryMs);
+      retryMs = Math.min(retryMs * 2, 8000);
+    };
+  };
+
+  connect();
+  return () => {
+    closed = true;
+    es?.close();
+  };
+}
+
+async function finalizePlanExecution({
+  planId,
+  userEntryId,
+  epochAtSend,
+  data,
+}) {
+  const assistantText = data.text || "No hubo respuesta del asistente.";
+  const assistantAgent = data.agent || "coordinador_expediente_penal";
+  const assistantPendingReview = Boolean(data.pending_review);
+  const assistantTrace = data.trace || null;
+  const assistantDraftId = data.draft_id || null;
+
+  if (epochAtSend !== chatEpoch) return;
+
+  const latencyMs = pendingChatMeta?.startedAt ? Date.now() - pendingChatMeta.startedAt : null;
+  const assistantEntry = appendChatLogEntry({
+    role: "assistant",
+    text: assistantText,
+    replyTo: userEntryId,
+    latencyMs,
+    agent: assistantAgent,
+    pendingReview: assistantPendingReview,
+    trace: assistantTrace || inferTrace(
+      { agent: assistantAgent, pendingReview: assistantPendingReview },
+      assistantText
+    ),
+    planId,
+  });
+  addMessageToUI("assistant", assistantText, "", {
+    msgId: assistantEntry.id,
+    latencyMs,
+    agent: assistantAgent,
+    pendingReview: assistantPendingReview,
+    trace: assistantEntry.trace,
+  });
+  setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
+  saveSessionState();
+  pendingChatMeta = null;
+
+  if (assistantDraftId) {
+    document.dispatchEvent(
+      new CustomEvent("draft-created", { detail: { draftId: assistantDraftId } })
+    );
+    window.Workspace?.updateBandejaBadge?.(
+      ((await window.FirmaPanel?.fetchPendingDrafts?.()) || []).length
+    );
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("Borrador enviado a la bandeja del abogado para aprobación.", "info");
+    }
+  }
+
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+function showPlanRetryButton(cardMessageEl, planId, userEntryId, epochAtSend) {
+  let retryWrap = cardMessageEl.querySelector(".plan-retry-actions");
+  if (retryWrap) return;
+  retryWrap = document.createElement("div");
+  retryWrap.className = "plan-retry-actions plan-actions";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn-plan-approve";
+  btn.textContent = "Reintentar ejecución";
+  btn.addEventListener("click", () => {
+    btn.disabled = true;
+    void retryPlanExecution(planId, userEntryId, epochAtSend, cardMessageEl);
+  });
+  retryWrap.appendChild(btn);
+  cardMessageEl.querySelector(".plan-card")?.appendChild(retryWrap);
+}
+
+async function retryPlanExecution(planId, userEntryId, epochAtSend, cardMessageEl) {
+  cardMessageEl.querySelector(".plan-retry-actions")?.remove();
+  await approvePlanAndExecute(planId, userEntryId, epochAtSend, cardMessageEl, { skipApprove: true });
+}
+
+function showPlanExportLink(cardMessageEl, planId) {
+  const article = cardMessageEl.querySelector(".plan-card");
+  if (!article || article.querySelector(".plan-export-link")) return;
+  const link = document.createElement("a");
+  link.className = "plan-export-link";
+  link.href = `/chat/plan/${encodeURIComponent(planId)}/export.md`;
+  link.textContent = "Descargar trazabilidad (.md)";
+  link.setAttribute("download", "");
+  article.appendChild(link);
+}
+
+async function approvePlanAndExecute(planId, userEntryId, epochAtSend, cardMessageEl, options = {}) {
+  const { skipApprove = false } = options;
+  if (epochAtSend !== chatEpoch) return;
+
+  const actions = cardMessageEl.querySelector(".plan-actions");
+  const statusEl = cardMessageEl.querySelector(".plan-status");
+  if (!skipApprove) {
+    actions?.querySelectorAll("button").forEach((btn) => {
+      btn.disabled = true;
+    });
+  } else {
+    cardMessageEl.querySelector(".plan-retry-actions")?.remove();
+  }
+
+  sendBtn.disabled = true;
+
+  let closeStream = null;
+
+  try {
+    if (!skipApprove) {
+      const rememberPattern = Boolean(
+        cardMessageEl.querySelector(".plan-remember-pattern")?.checked
+      );
+      const approveRes = await authFetch(`/chat/plan/${encodeURIComponent(planId)}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: getUserId(), remember_pattern: rememberPattern }),
+      });
+
+      if (epochAtSend !== chatEpoch) return;
+      if (!approveRes.ok) {
+        if (statusEl) statusEl.textContent = "No se pudo aprobar el plan.";
+        sendBtn.disabled = false;
+        return;
+      }
+
+      actions?.remove();
+    }
+
+    prepareRunCard(cardMessageEl);
+    if (statusEl) statusEl.textContent = "Conectando seguimiento en vivo…";
+
+    cardMessageEl.querySelectorAll(".plan-step").forEach((li, idx) => {
+      const stepId = li.dataset.stepId || `s${String(idx + 1).padStart(2, "0")}`;
+      li.dataset.stepId = stepId;
+    });
+
+    let finished = false;
+    closeStream = connectPlanEventStream(
+      planId,
+      (data) => {
+      if (data.event === "execution_started" && statusEl) {
+        statusEl.textContent = "Ejecutando plan aprobado…";
+      }
+      if (data.event === "step_started" && data.step_id) {
+        updateRunStep(cardMessageEl, data.step_id, "in_progress", data.payload?.user_summary || "");
+      }
+      if (data.event === "step_io" && data.step_id) {
+        updateRunStepIO(cardMessageEl, data.step_id, data.payload || {});
+      }
+      if (data.event === "step_done" && data.step_id) {
+        updateRunStep(
+          cardMessageEl,
+          data.step_id,
+          data.payload?.status || "done",
+          data.payload?.user_update || ""
+        );
+      }
+      if (data.event === "plan_failed") {
+        finished = true;
+        if (statusEl) {
+          statusEl.textContent = data.payload?.error || "La ejecución del plan falló.";
+        }
+        showPlanRetryButton(cardMessageEl, planId, userEntryId, epochAtSend);
+        sendBtn.disabled = false;
+        closeStream?.();
+      }
+      if (data.event === "plan_done" && !finished) {
+        finished = true;
+        if (statusEl) statusEl.textContent = "Plan ejecutado.";
+        showPlanExportLink(cardMessageEl, planId);
+        void finalizePlanExecution({
+          planId,
+          userEntryId,
+          epochAtSend,
+          data: data.payload || {},
+        });
+        closeStream?.();
+      }
+    },
+      {
+        onRecover: async () => {
+          const res = await authFetch(
+            `/chat/plan/${encodeURIComponent(planId)}/result?user_id=${encodeURIComponent(getUserId())}`
+          );
+          if (!res.ok) return null;
+          const body = await res.json();
+          if (body.ok && body.result) {
+            return { event: "plan_done", payload: body.result };
+          }
+          if (body.status === "failed" || body.status === "error") {
+            return { event: "plan_failed", payload: { error: body.error || "Ejecución fallida." } };
+          }
+          return null;
+        },
+      }
+    );
+
+    const execRes = await authFetch(`/chat/plan/${encodeURIComponent(planId)}/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: getUserId() }),
+    });
+
+    if (epochAtSend !== chatEpoch) {
+      closeStream?.();
+      sendBtn.disabled = false;
+      return;
+    }
+
+    if (!execRes.ok && statusEl) {
+      statusEl.textContent = "No se pudo iniciar la ejecución del plan.";
+      showPlanRetryButton(cardMessageEl, planId, userEntryId, epochAtSend);
+      closeStream?.();
+      sendBtn.disabled = false;
+      return;
+    }
+  } catch {
+    if (epochAtSend !== chatEpoch) return;
+    if (statusEl) statusEl.textContent = "Error de conexión durante la ejecución.";
+    showPlanRetryButton(cardMessageEl, planId, userEntryId, epochAtSend);
+    closeStream?.();
+    sendBtn.disabled = false;
+  }
 }
 
 function scrollToChat() {
@@ -1530,8 +2020,36 @@ async function sendMessage(text) {
   sendBtn.disabled = true;
   showTyping();
 
+  try {
+    const res = await authFetch("/chat/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: trimmed,
+        channel: "web",
+        user_id: getUserId(),
+      }),
+    });
+
+    if (abortIfStale()) return;
+
+    hideTyping();
+
+    if (res.ok) {
+      const data = await res.json();
+      showPlanCard(data.plan || { plan_id: data.plan_id, ...data }, userEntry.id, epochAtSend);
+      pendingChatMeta = null;
+      sendBtn.disabled = false;
+      inputEl.focus();
+      return;
+    }
+  } catch {
+    if (abortIfStale()) return;
+    hideTyping();
+  }
+
   let assistantText =
-    "No pude procesar la consulta en este momento. Intente de nuevo en unos segundos.";
+    "No pude generar el plan de ejecución. Intente de nuevo en unos segundos.";
   let assistantAgent = "error";
   let assistantPendingReview = false;
   let assistantTrace = null;

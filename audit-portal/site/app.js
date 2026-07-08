@@ -1,7 +1,8 @@
 /* Auditoría de Instrucciones — auditoría por paso */
 
-const STORAGE_KEY = 'legal-audit-sync-v3';
-const STORAGE_KEY_LEGACY = 'legal-audit-sync-v2';
+const STORAGE_KEY = 'legal-audit-sync-v4';
+const STORAGE_KEY_LEGACY = 'legal-audit-sync-v3';
+const STORAGE_KEY_LEGACY_V2 = 'legal-audit-sync-v2';
 const SAVE_DEBOUNCE_MS = 800;
 
 let serverUpdatedAt = null;
@@ -63,48 +64,52 @@ function pasoRefCode(agentNum, skillIdx, pasoNum) {
 
 const GUARDRAIL_EJEMPLOS = {
     g1: 'Si no hay auto en expediente, marca [PENDIENTE DE VERIFICAR] en lugar de citar sentencia o artículo.',
-    g2: 'Si falta etapa procesal o radicado, pregunta antes de recomendar tutela o memorial.',
+    g2: 'Si falta etapa, radicado o plazo Ley 906, pregunta antes de recomendar tutela, recurso o memorial.',
     g3: 'Distingue relato de víctima (narrado) de conclusión típica (inferida).',
     g4: 'Memorial, tutela o reporte a cliente siempre como borrador para su revisión y firma.',
     g5: 'Evita lenguaje que culpe a la víctima o exponga datos innecesarios del caso.',
     g6: 'No repite cédula, dirección o datos de salud sin necesidad probatoria.',
     g7: 'Consulta civil o laboral se declara fuera de alcance penal-víctimas.',
     g8: 'Cierra con aviso de que la salida requiere revisión profesional.',
+    g9: 'Sin fecha de notificación o plazo verificado, no certifica oportunidad procesal.',
+    g10: 'No sugiere descartar evidencia sin revisar custodia y preservación digital.',
 };
 
 const GUARDRAIL_PROTEGE = {
     g1: 'Integridad factual y normativa',
-    g2: 'Oportunidad procesal',
+    g2: 'Oportunidad y datos procesales',
     g3: 'Trazabilidad probatoria',
     g4: 'HITL / firma profesional',
     g5: 'Dignidad de la víctima',
     g6: 'Datos sensibles',
     g7: 'Especialización del sistema',
     g8: 'Transparencia al despacho',
+    g9: 'Términos Ley 906',
+    g10: 'Cadena probatoria',
 };
 
 const FLUJO_CONSULTA = [
     {
-        title: 'USTED CONSULTA',
-        sub: 'Describe la necesidad del caso, como le escribiría a un practicante del despacho.',
+        title: '1. Usted escribe',
+        sub: 'Describe lo que necesita, como a un practicante del despacho.',
         color: '#64748b',
         icon: 'fa-comment-dots',
     },
     {
-        title: 'EL EQUIPO ENRUTA',
-        sub: 'Coordinación y agente especializado eligen la guía operativa correcta.',
+        title: '2. El equipo enruta',
+        sub: 'El coordinador envía la consulta al especialista correcto.',
         color: '#2563eb',
         icon: 'fa-route',
     },
     {
-        title: 'GUÍA OPERATIVA PASO A PASO',
-        sub: 'El asistente sigue las instrucciones en serie o en paralelo que usted aprueba aquí.',
+        title: '3. Se ejecuta la tarea',
+        sub: 'El agente sigue la guía y los pasos que usted aprueba en este portal.',
         color: '#d97706',
         icon: 'fa-list-check',
     },
     {
-        title: 'USTED REVISA Y FIRMA',
-        sub: 'Recibe un borrador con entrada y salida trazables. Usted decide si radica, ajusta o rechaza.',
+        title: '4. Usted revisa',
+        sub: 'Recibe un borrador. Usted decide si lo firma, lo corrige o lo rechaza.',
         color: '#059669',
         icon: 'fa-signature',
     },
@@ -115,52 +120,60 @@ const PROTO_LAYERS = [
         funnelClass: 'guia-funnel-layer--rules',
         title: 'REGLAS ESTRICTAS',
         countKey: 'guardrails',
-        desc: 'Límites que el asistente debe respetar en toda respuesta, antes de cualquier guía operativa.',
+        desc: '10 límites obligatorios en toda respuesta (no inventar normas, plazos 906, custodia probatoria, etc.).',
     },
     {
         funnelClass: 'guia-funnel-layer--roles',
         title: 'AGENTES',
         countKey: 'agentes',
-        desc: 'Once agentes especializados: quien coordina, quien analiza, quien redacta y quien controla calidad.',
+        desc: '11 especialistas: coordinador, cronología, redacción, tutela, calidad, etc.',
     },
     {
         funnelClass: 'guia-funnel-layer--procs',
-        title: 'GUÍA OPERATIVA',
+        title: 'TAREAS (GUÍAS)',
         countKey: 'skills',
-        desc: 'Instrucciones atómicas del «cómo hacer» cada tarea jurídica penal-víctimas en Colombia.',
+        desc: '90 instrucciones concretas: cronología, memorial, audiencia, tutela…',
     },
     {
         funnelClass: 'guia-funnel-layer--steps',
         title: 'PASOS',
         countKey: 'pasos',
-        desc: 'Instrucciones en serie o en paralelo dentro de cada guía. Lo más detallado que usted aprueba o ajusta.',
+        desc: 'El detalle paso a paso dentro de cada tarea.',
     },
 ];
 
 const GUIA_GLOSARIO = [
     {
-        term: 'Agente',
-        desc: 'Especialista del equipo digital penal-víctimas: recibe la consulta, analiza, redacta, prepara audiencias o controla calidad antes de entregarle el borrador.',
+        term: 'Regla estricta',
+        desc: 'Límite global que aplica a todo el asistente (son 10). Van primero en la revisión.',
     },
     {
-        term: 'Guía operativa',
-        desc: 'Instrucción atómica con entrada, pasos y salida — por ejemplo, redactar un memorial o construir una cronología.',
+        term: 'Agente',
+        desc: 'Un especialista del equipo digital: recibe, analiza, redacta o revisa calidad.',
+    },
+    {
+        term: 'Tarea / guía',
+        desc: 'Una instrucción concreta, por ejemplo «armar cronología» o «redactar memorial».',
     },
     {
         term: 'Paso',
-        desc: 'Cada instrucción numerada. En serie se ejecuta en orden; en paralelo puede correr al mismo tiempo si no hay dependencia.',
+        desc: 'Cada punto numerado dentro de una tarea. Van en orden (serie) o a la vez (paralelo) según el caso.',
     },
     {
         term: 'Entrada',
-        desc: 'Lo que la guía necesita para empezar: expediente, hechos, etapa del caso.',
+        desc: 'Datos que la tarea necesita para empezar: expediente, hechos, etapa del proceso.',
     },
     {
         term: 'Salida',
-        desc: 'Lo que produce la guía: borrador, matriz, alerta o análisis para revisar.',
+        desc: 'Lo que produce la tarea: borrador, matriz, alerta o análisis para su revisión.',
     },
     {
-        term: 'Destinatario',
-        desc: 'Quién recibe ese resultado: otro agente, usted para firma, o control de calidad.',
+        term: 'Instrucción',
+        desc: 'Texto que define el objetivo de la tarea (qué debe lograr el asistente).',
+    },
+    {
+        term: 'Reglas de la guía',
+        desc: 'Límites solo para esa tarea (distintos de las 10 reglas estrictas globales).',
     },
 ];
 
@@ -168,9 +181,10 @@ let catalog = {
     guardrails: [], agentes: [], skills: [], categorias: [],
     generated_at: '', totals: {}, intro: {},
 };
-let auditLog = { guardrails: {}, agentes: {}, pasos: {}, custom: null };
+let auditLog = { guardrails: {}, agentes: {}, guias: {}, pasos: {}, custom: null };
 let currentModalTarget = null;
 let currentAddTarget = null;
+let detailsOpenState = { panels: [], skills: [] };
 
 function ensureCustom() {
     if (!auditLog.custom) {
@@ -220,14 +234,61 @@ function countEffectivePasos() {
     return n;
 }
 
+const GUIA_CONTEXT_PARTS = ['instruccion', 'tools', 'guardrails'];
+
+function guiaContextKey(skillId, part) {
+    return `${skillId}::${part}`;
+}
+
+function getSkillContextKeys(skill) {
+    const keys = skill.audit_keys || {};
+    return GUIA_CONTEXT_PARTS.map(part => keys[part] || guiaContextKey(skill.id, part));
+}
+
+function countEffectiveGuiasContext() {
+    return (catalog.skills?.length || 0) * GUIA_CONTEXT_PARTS.length;
+}
+
 function countEffectiveItems() {
-    return getEffectiveGuardrails().length + catalog.agentes.length + countEffectivePasos();
+    return (
+        getEffectiveGuardrails().length
+        + catalog.agentes.length
+        + countEffectiveGuiasContext()
+        + countEffectivePasos()
+    );
 }
 
 function escapeHtml(text) {
     const d = document.createElement('div');
     d.textContent = text ?? '';
     return d.innerHTML;
+}
+
+/** Convierte marcado inline seguro a HTML (negrita, cursiva, código). */
+function renderRichHtml(text) {
+    if (text == null || text === '') return '';
+    let s = escapeHtml(String(text));
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/`([^`]+)`/g, '<code class="text-xs bg-slate-100 px-1 rounded">$1</code>');
+    s = s.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
+    s = s.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+    return s;
+}
+
+function renderRichBlock(text) {
+    if (!text || !String(text).trim()) {
+        return '<p class="audit-meta m-0 text-slate-500">—</p>';
+    }
+    const raw = String(text).trim();
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    const listLike = lines.length > 0 && lines.every(l => /^[-*•]\s/.test(l) || /^\d+\.\s/.test(l));
+    if (listLike) {
+        return `<ul class="audit-guia-list m-0 pl-5">${lines.map(l => {
+            const cleaned = l.replace(/^[-*•]\s+/, '').replace(/^\d+\.\s+/, '');
+            return `<li>${renderRichHtml(cleaned)}</li>`;
+        }).join('')}</ul>`;
+    }
+    return `<p class="audit-body m-0 text-slate-800">${renderRichHtml(raw).replace(/\n/g, '<br>')}</p>`;
 }
 
 function apiBase() {
@@ -253,7 +314,7 @@ async function fetchAuditApi(path, options = {}) {
 }
 
 function hasPersistedDecisions() {
-    const types = ['guardrails', 'agentes', 'pasos'];
+    const types = ['guardrails', 'agentes', 'guias', 'pasos'];
     for (const type of types) {
         const bucket = auditLog[type] || {};
         for (const id of Object.keys(bucket)) {
@@ -281,6 +342,8 @@ function saveAuditLogLocalOnly() {
 
 async function pushProgressToServer() {
     if (!serverSyncEnabled) return;
+    const email = typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+    if (!email) return;
     try {
         const res = await fetchAuditApi('/api/audit/progress', {
             method: 'PUT',
@@ -356,11 +419,13 @@ async function deleteServerProgress() {
         }
         auditLog.guardrails = {};
         auditLog.agentes = {};
+        auditLog.guias = {};
         auditLog.pasos = {};
         auditLog.custom = null;
         ensureCustom();
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STORAGE_KEY_LEGACY);
+        localStorage.removeItem(STORAGE_KEY_LEGACY_V2);
         serverUpdatedAt = null;
         renderAll();
         updatePersistStatus();
@@ -379,6 +444,7 @@ function applyPersistPayload(parsed) {
     if (!parsed || typeof parsed !== 'object') return false;
     auditLog.guardrails = parsed.guardrails || {};
     auditLog.agentes = parsed.agentes || {};
+    auditLog.guias = parsed.guias || {};
     auditLog.pasos = parsed.pasos || {};
     auditLog.custom = parsed.custom || null;
     ensureCustom();
@@ -387,11 +453,12 @@ function applyPersistPayload(parsed) {
 
 function buildPersistPayload() {
     return {
-        version: 3,
+        version: 4,
         savedAt: new Date().toISOString(),
         catalogGeneratedAt: catalog.generated_at || null,
         guardrails: auditLog.guardrails,
         agentes: auditLog.agentes,
+        guias: auditLog.guias,
         pasos: auditLog.pasos,
         custom: auditLog.custom,
     };
@@ -433,14 +500,14 @@ function updatePersistStatus(opts = {}) {
 }
 
 function loadAuditLog() {
-    const keys = [STORAGE_KEY, STORAGE_KEY_LEGACY];
+    const keys = [STORAGE_KEY, STORAGE_KEY_LEGACY, STORAGE_KEY_LEGACY_V2];
     for (const key of keys) {
         try {
             const raw = localStorage.getItem(key);
             if (!raw) continue;
             const parsed = JSON.parse(raw);
             if (applyPersistPayload(parsed)) {
-                if (key === STORAGE_KEY_LEGACY) saveAuditLog();
+                if (key !== STORAGE_KEY) saveAuditLogLocalOnly();
                 break;
             }
         } catch (_) { /* ignore */ }
@@ -495,6 +562,7 @@ function importarProgresoJson(file) {
 
 function bindPersistUi() {
     document.getElementById('btn-export-progress')?.addEventListener('click', exportarProgresoJson);
+    document.getElementById('btn-publish-config')?.addEventListener('click', () => publicarConfiguracion());
     document.getElementById('btn-delete-progress')?.addEventListener('click', deleteServerProgress);
     const importInput = document.getElementById('audit-import-file');
     document.getElementById('btn-import-progress')?.addEventListener('click', () => importInput?.click());
@@ -508,7 +576,7 @@ function bindPersistUi() {
         e.target.value = '';
     });
     window.addEventListener('storage', e => {
-        if (e.key !== STORAGE_KEY || !e.newValue) return;
+        if ((e.key !== STORAGE_KEY && e.key !== STORAGE_KEY_LEGACY) || !e.newValue) return;
         try {
             if (applyPersistPayload(JSON.parse(e.newValue))) renderAll();
         } catch (_) { /* ignore */ }
@@ -548,8 +616,8 @@ function renderAdjustmentBlock(reason, solution) {
     return `
         <div class="audit-adjustment mt-3 p-3 bg-red-50/60 rounded-xl border border-red-100 text-red-800 space-y-1">
             <p class="font-semibold text-red-600"><i class="fa-solid fa-gavel mr-1"></i> Dictamen de ajuste</p>
-            <p><strong>Razón:</strong> ${escapeHtml(reason)}</p>
-            <p><strong>Solución:</strong> ${escapeHtml(solution)}</p>
+            <p><strong>Razón:</strong> ${renderRichHtml(reason)}</p>
+            <p><strong>Solución:</strong> ${renderRichHtml(solution)}</p>
         </div>`;
 }
 
@@ -576,9 +644,114 @@ function agentSearchText(agent) {
 }
 
 function procSearchText(skill) {
-    const parts = [skillDisplayName(skill), skill.desc, skill.instruccion, skill.category, skill.name];
+    const parts = [
+        skillDisplayName(skill),
+        skill.desc,
+        skill.instruccion,
+        skill.category,
+        skill.name,
+        skill.tools_text,
+        ...(skill.guardrails || []),
+    ];
     getEffectiveSteps(skill).forEach(st => parts.push(st.text));
     return parts.filter(Boolean).join(' ').toLowerCase();
+}
+
+function guiaContextLabel(part) {
+    const labels = {
+        instruccion: 'Instrucción tipo',
+        tools: 'Herramientas de la guía',
+        guardrails: 'Guardrails de esta guía',
+    };
+    return labels[part] || part;
+}
+
+function guiaContextBody(skill, part) {
+    if (part === 'instruccion') {
+        return renderRichBlock(skill.instruccion || skill.desc || '—');
+    }
+    if (part === 'tools') {
+        const tools = skill.tools || [];
+        if (tools.length) {
+            return `<ul class="audit-guia-list m-0 pl-5">${tools.map(t => `<li>${renderRichHtml(t)}</li>`).join('')}</ul>`;
+        }
+        return `<p class="audit-meta m-0">${renderRichHtml(skill.tools_text || 'Sin herramientas obligatorias declaradas.')}</p>`;
+    }
+    if (part === 'guardrails') {
+        const items = skill.guardrails || [];
+        if (!items.length) return '<p class="audit-meta m-0">Sin guardrails específicos declarados en SKILL.md.</p>';
+        return `<ul class="audit-guia-list m-0 pl-5">${items.map(g => `<li>${renderRichHtml(g)}</li>`).join('')}</ul>`;
+    }
+    return '—';
+}
+
+function buildGuiaContextCard(skill, part, options = {}) {
+    const { agentNum = null, skillNum = null } = options;
+    const key = (skill.audit_keys && skill.audit_keys[part]) || guiaContextKey(skill.id, part);
+    const d = getDecision('guias', key);
+    const refSuffix = { instruccion: 'I', tools: 'T', guardrails: 'G' }[part] || part[0].toUpperCase();
+    const ref = agentNum && skillNum
+        ? `<span class="audit-ref-code" title="Contexto ${guiaContextLabel(part)}">${skillRefCode(agentNum, skillNum)}.${refSuffix}</span>`
+        : '';
+    return `
+        <div class="audit-guia-context-card audit-card p-4 rounded-xl border ${cardBorderClass(d.status)} mt-2"
+            data-guia-key="${escapeHtml(key)}" data-skill-id="${escapeHtml(skill.id)}">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                <div class="flex-1">
+                    <p class="audit-paso-label">${ref} ${escapeHtml(guiaContextLabel(part).toUpperCase())}</p>
+                    <div class="audit-body text-slate-800">${guiaContextBody(skill, part)}</div>
+                </div>
+                <div class="shrink-0 audit-btn-row">${buildDecisionButtons('guias', key)}</div>
+            </div>
+            ${renderAdjustmentBlock(d.reason, d.solution)}
+        </div>`;
+}
+
+function buildSkillContextSection(skill, options = {}) {
+    const cards = GUIA_CONTEXT_PARTS.map(part => buildGuiaContextCard(skill, part, options)).join('');
+    const source = skill.source_path
+        ? `<p class="audit-meta mt-3 mb-0"><strong>Fuente canónica:</strong> <code class="text-xs bg-slate-100 px-1 rounded">${escapeHtml(skill.source_path)}</code></p>`
+        : '';
+    return `
+        <div class="audit-guia-context-section space-y-0">
+            <p class="audit-spec-heading mt-0 mb-2">REVISAR EN ESTA TAREA</p>
+            ${cards}
+            ${source}
+        </div>`;
+}
+
+function bindGuiaContextCardsIn(container) {
+    container.querySelectorAll('.audit-guia-context-card').forEach(card => {
+        bindDecisionButtons(card, 'guias', card.dataset.guiaKey);
+    });
+}
+
+function captureDetailsOpenState() {
+    detailsOpenState = {
+        panels: [...document.querySelectorAll('.agent-skills-details')].map((el, i) => ({
+            agentId: el.closest('.audit-card[data-type="agentes"]')?.dataset.id || `idx-${i}`,
+            open: el.open,
+        })),
+        skills: [...document.querySelectorAll('.agent-proc-details')].map(el => ({
+            skillId: el.dataset.skillId || '',
+            open: el.open,
+        })),
+    };
+}
+
+function restoreDetailsOpenState() {
+    const panels = document.querySelectorAll('.agent-skills-details');
+    detailsOpenState.panels.forEach((saved, i) => {
+        const el = [...panels].find(
+            p => p.closest('.audit-card[data-type="agentes"]')?.dataset.id === saved.agentId,
+        ) || panels[i];
+        if (el && saved.open) el.open = true;
+    });
+    detailsOpenState.skills.forEach(saved => {
+        if (!saved.skillId) return;
+        const el = document.querySelector(`.agent-proc-details[data-skill-id="${CSS.escape(saved.skillId)}"]`);
+        if (el && saved.open) el.open = true;
+    });
 }
 
 function bindDecisionButtons(container, type, id) {
@@ -616,7 +789,7 @@ function buildGuardrailCard(item) {
                     <h4 class="audit-title">${escapeHtml(item.name)}</h4>
                     ${customBadge}
                 </div>
-                <p class="audit-body">${escapeHtml(item.desc)}</p>
+                <p class="audit-body">${renderRichHtml(item.desc)}</p>
             </div>
             <div class="flex flex-col items-end gap-2 shrink-0 audit-btn-row">
                 ${buildDecisionButtons('guardrails', item.id)}
@@ -647,7 +820,7 @@ function buildSimpleCard(type, item) {
             <div class="space-y-1 flex-1 min-w-0">
                 <h4 class="font-bold text-slate-950 text-sm md:text-base">${escapeHtml(item.name)}</h4>
                 ${item.nombre_corto ? `<p class="text-xs text-slate-500">${escapeHtml(item.nombre_corto)}</p>` : ''}
-                <p class="text-sm text-slate-600">${escapeHtml(item.desc)}</p>
+                <p class="text-sm text-slate-600">${renderRichHtml(item.desc)}</p>
             </div>
             ${buildDecisionButtons(type, item.id)}
         </div>
@@ -677,7 +850,7 @@ function buildPasoCardsHtml(skill, options = {}) {
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
                     <div class="flex-1">
                         <p class="audit-paso-label">${ref} PASO${pasoOrdinal}${pasoModoBadge(st.modo)}${customBadge}</p>
-                        <p class="audit-body text-slate-800">${escapeHtml(st.text)}</p>
+                        <p class="audit-body text-slate-800">${renderRichHtml(st.text)}</p>
                     </div>
                     <div class="flex flex-col items-end gap-2 shrink-0 audit-btn-row">
                         ${buildDecisionButtons('pasos', st.key)}
@@ -732,24 +905,24 @@ function buildAgentSkillsPanel(agent, openProcedures = false) {
         const displayName = skillDisplayName(skill);
 
         return `
-            <details class="agent-proc-details audit-proc-details bg-white border border-slate-200 rounded-xl overflow-hidden"
+            <div class="agent-proc-details audit-proc-card bg-white border border-slate-200 rounded-xl overflow-hidden mb-3"
+                data-skill-id="${escapeHtml(skill.id)}"
                 data-category="${escapeHtml(skill.category || '')}"
                 data-search="${escapeHtml(procSearchText(skill))}">
-                <summary class="flex flex-wrap items-center gap-2 select-none list-none">
-                    <i class="fa-solid fa-chevron-right text-slate-400 agent-skill-chevron transition-transform"></i>
+                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80 flex flex-wrap items-center gap-2">
                     ${ref ? `<span class="audit-ref-code" title="Guía ${skillNum} del agente ${agentNum}">${ref}</span>` : ''}
-                    <span class="audit-proc-summary">${escapeHtml(displayName)}</span>
+                    <span class="audit-proc-summary font-semibold text-slate-900">${escapeHtml(displayName)}</span>
                     <span class="audit-meta audit-skill-ordinal">Guía ${skillNum} de ${items.length}</span>
-                    <span class="${procBadgeClass(prog)}">${prog.reviewed}/${prog.total} pasos</span>
+                    <span class="${procBadgeClass(prog)}">${prog.reviewed}/${prog.total} ítems</span>
                     <span class="audit-meta">${escapeHtml(skill.category || '')}</span>
-                </summary>
-                <div class="px-4 pb-4 border-t border-slate-100 pt-3">
-                    ${buildSkillSpecHtml(skill)}
-                    ${skill.desc ? `<p class="audit-body mb-2"><strong>Para qué sirve:</strong> ${escapeHtml(skill.desc)}</p>` : ''}
-                    ${skill.instruccion && skill.instruccion !== skill.desc ? `<p class="audit-meta mb-3">${escapeHtml(skill.instruccion)}</p>` : ''}
+                </div>
+                <div class="px-4 pb-4 pt-3">
+                    ${buildSkillFullContentHtml(skill)}
+                    ${buildSkillContextSection(skill, { agentNum, skillNum })}
+                    <p class="audit-spec-heading mt-4 mb-2">PASOS OPERATIVOS</p>
                     ${buildPasoCardsHtml(skill, { agentNum, skillNum })}
                 </div>
-            </details>`;
+            </div>`;
     }).join('');
 
     const missing = skillIds.filter(sid => !byId[sid]);
@@ -796,10 +969,10 @@ function buildAgentCard(agent, openProcedures = false) {
                         <p class="audit-subtitle audit-title-caps m-0">${escapeHtml(agentDisplayTitle(agent))}</p>
                     </div>
                     <p class="audit-meta"><strong>Referencia:</strong> Agente ${agentNum || '—'} de ${AGENT_ORDER.length}${procCount ? ` · ${procCount} guía${procCount === 1 ? '' : 's'} operativa${procCount === 1 ? '' : 's'} (${agentNum ? `${agentRefCode(agentNum)}.01–${skillRefCode(agentNum, procCount)}` : '—'})` : ''}</p>
-                    <p class="audit-body">${escapeHtml(agent.desc)}</p>
-                    <p class="audit-meta"><strong>Problema que resuelve:</strong> ${escapeHtml(agent.problema || '—')}</p>
-                    ${agent.necesidad ? `<p class="audit-meta"><strong>Valor en el caso:</strong> ${escapeHtml(agent.necesidad)}</p>` : ''}
-                    <p class="audit-meta"><strong>No reemplaza:</strong> ${escapeHtml(agent.no_reemplaza || '—')}</p>
+                    <p class="audit-body">${renderRichHtml(agent.desc)}</p>
+                    <p class="audit-meta"><strong>Problema que resuelve:</strong> ${renderRichHtml(agent.problema || '—')}</p>
+                    ${agent.necesidad ? `<p class="audit-meta"><strong>Valor en el caso:</strong> ${renderRichHtml(agent.necesidad)}</p>` : ''}
+                    <p class="audit-meta"><strong>No reemplaza:</strong> ${renderRichHtml(agent.no_reemplaza || '—')}</p>
                 </div>
                 <div class="audit-btn-row shrink-0">${buildDecisionButtons('agentes', agent.id)}</div>
             </div>
@@ -808,20 +981,27 @@ function buildAgentCard(agent, openProcedures = false) {
         </div>`;
 
     bindDecisionButtons(card, 'agentes', agent.id);
+    bindGuiaContextCardsIn(card);
     bindPasoCardsIn(card);
     return card;
 }
 
 function skillStepProgress(skill) {
     const steps = getEffectiveSteps(skill);
+    const contextKeys = getSkillContextKeys(skill);
     let reviewed = 0;
     let adjust = 0;
+    contextKeys.forEach(key => {
+        const d = getDecision('guias', key);
+        if (isReviewed(d)) reviewed += 1;
+        if (d.status === 'AJUSTAR') adjust += 1;
+    });
     steps.forEach(st => {
         const d = getDecision('pasos', st.key);
         if (isReviewed(d)) reviewed += 1;
         if (d.status === 'AJUSTAR') adjust += 1;
     });
-    return { total: steps.length, reviewed, adjust };
+    return { total: contextKeys.length + steps.length, reviewed, adjust };
 }
 
 function renderAgentes() {
@@ -928,17 +1108,44 @@ function skillFlujoLabel(skill) {
     return 'SERIE';
 }
 
-function buildSkillSpecHtml(skill) {
+function formatSkillFieldHtml(text) {
+    return renderRichBlock(text);
+}
+
+function buildSkillFieldRow(label, html) {
+    return `<div class="audit-skill-field"><p class="audit-paso-label mb-1">${escapeHtml(label)}</p>${html}</div>`;
+}
+
+function buildSkillFullContentHtml(skill) {
     const ejecutores = (skill.agentes_ejecutores || []).join(', ') || '—';
+    const tierBadge = skill.tier
+        ? `<span class="audit-badge ml-2 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded bg-slate-200 text-slate-700">${escapeHtml(skill.tier)}</span>`
+        : '';
+    const fields = [
+        buildSkillFieldRow('PROPÓSITO', formatSkillFieldHtml(skill.purpose || skill.desc)),
+        buildSkillFieldRow('INSTRUCCIÓN TIPO (lista de aprobación)', formatSkillFieldHtml(skill.instruccion)),
+        buildSkillFieldRow('ENTRADAS', formatSkillFieldHtml(skill.inputs)),
+        buildSkillFieldRow('SALIDAS', formatSkillFieldHtml(skill.outputs)),
+    ];
+    if (skill.rol) fields.push(buildSkillFieldRow('ROL EN EL AGENTE', formatSkillFieldHtml(skill.rol)));
+    if (skill.no_duplicar) fields.push(buildSkillFieldRow('NO DUPLICAR', formatSkillFieldHtml(skill.no_duplicar)));
+    if (skill.handoff) fields.push(buildSkillFieldRow('HANDOFF', formatSkillFieldHtml(skill.handoff)));
+    if (skill.riesgo) fields.push(buildSkillFieldRow('RIESGO SI SE OMITE', formatSkillFieldHtml(skill.riesgo)));
+
     return `
-        <div class="audit-spec-block mb-3">
-            <p class="audit-spec-heading">ESPECIFICACIÓN</p>
-            <p class="audit-meta"><strong>Entrada que recibe:</strong> ${escapeHtml(skill.inputs || '—')}</p>
-            <p class="audit-meta"><strong>Salida que produce:</strong> ${escapeHtml(skill.outputs || '—')}</p>
-            <p class="audit-meta"><strong>Quién la ejecuta:</strong> ${escapeHtml(ejecutores)}</p>
-            <p class="audit-meta"><strong>Destinatario de la salida:</strong> ${escapeHtml(skill.destinatario || '—')}</p>
-            <p class="audit-meta"><strong>Flujo de pasos:</strong> ${skillFlujoLabel(skill)}</p>
+        <div class="audit-skill-full border border-slate-200 rounded-xl p-4 mb-4 bg-white">
+            <p class="audit-spec-heading mt-0 mb-3">CONTENIDO DEL SKILL (SKILL.md)</p>
+            <p class="audit-meta mb-3">
+                <strong>Quién la ejecuta:</strong> ${escapeHtml(ejecutores)}${tierBadge}
+                · <strong>Destinatario:</strong> ${escapeHtml(skill.destinatario || '—')}
+                · <strong>Flujo:</strong> ${skillFlujoLabel(skill)}
+            </p>
+            <div class="audit-skill-fields space-y-3">${fields.join('')}</div>
         </div>`;
+}
+
+function buildSkillSpecHtml(skill) {
+    return buildSkillFullContentHtml(skill);
 }
 
 function pasoModoBadge(modo) {
@@ -1046,10 +1253,9 @@ function renderGuiaEjemplo() {
         <div class="guia-day-flow">${dayFlow}</div>
         <div class="guia-story">
             <div class="guia-story-intro">
-                <strong>Ejemplo:</strong> Usted necesita un <em>memorial de impulso en indagación</em>.
-                El agente de coordinación enruta al redactor de escritos; este sigue la guía operativa
-                «Crear borrador de memorial penal» paso a paso; calidad revisa el borrador y usted
-                lo firma o lo devuelve con observaciones.
+                <strong>Ejemplo:</strong> Usted pide un <em>memorial de impulso</em>.
+                El coordinador lo envía al redactor de escritos; este sigue la tarea «redactar memorial penal» paso a paso;
+                calidad revisa el borrador y se lo entrega para que usted lo firme o lo devuelva con correcciones.
             </div>
             ${manualHtml}
         </div>`;
@@ -1077,15 +1283,15 @@ function renderGuiaEquipo() {
                 <h4 class="audit-title-caps">${escapeHtml(agentDisplayTitle(coord) || 'COORDINACIÓN Y ENRUTAMIENTO DEL CASO PENAL')}</h4>
                 <p>${escapeHtml(coord?.desc || 'Recibe su consulta y dirige el caso al agente y guía operativa correctos.')}</p>
                 <ul class="guia-value-list guia-team-value">
-                    <li><strong>Primer contacto:</strong> entiende qué necesita el despacho — memorial, cronología, audiencia, tutela — sin respuestas genéricas.</li>
-                    <li><strong>Enrutamiento correcto:</strong> envía el caso al especialista y la guía operativa adecuados según etapa Ley 906 y prioridad legal.</li>
-                    <li><strong>Orden del trabajo:</strong> pide datos faltantes antes de concluir y evita perder tiempo en análisis mal enfocados.</li>
+                    <li><strong>Primer contacto:</strong> entiende qué pide el despacho (memorial, cronología, tutela, etc.).</li>
+                    <li><strong>Envío correcto:</strong> manda el caso al especialista y la tarea adecuados.</li>
+                    <li><strong>Pide lo que falta:</strong> no concluye si faltan datos importantes.</li>
                 </ul>
             </div>
             <div class="guia-team-card guia-team-card--spec">
                 <p class="guia-label" style="color:#7c3aed">ESPECIALISTAS</p>
                 <h4 class="audit-title-caps">NUEVE ÁREAS JURÍDICAS</h4>
-                <p>Nueve especialistas ejecutan el análisis y la redacción: tipicidad, víctimas, evidencia, audiencias, escritos, seguimiento y tutela bajo la Ley 906.</p>
+                <p>Nueve especialistas hacen el trabajo jurídico: hechos, tipicidad, víctimas, prueba, audiencias, escritos, seguimiento y tutela.</p>
                 <div class="guia-chips">${specChips}</div>
             </div>
             <div class="guia-team-card guia-team-card--qual">
@@ -1093,9 +1299,9 @@ function renderGuiaEquipo() {
                 <h4 class="audit-title-caps">${escapeHtml(agentDisplayTitle(calidad) || 'REVISIÓN DE CALIDAD Y CONTROL DE RIESGOS JURÍDICOS')}</h4>
                 <p>${escapeHtml(calidad?.desc || 'Revisa coherencia y riesgos antes de entregarle el borrador.')}</p>
                 <ul class="guia-value-list guia-team-value">
-                    <li><strong>Último filtro:</strong> revisa toda salida antes de que llegue a usted para firma o radicación.</li>
-                    <li><strong>Riesgos jurídicos:</strong> detecta alucinaciones normativas, incoherencia estratégica y contradicciones factuales.</li>
-                    <li><strong>Protección de la víctima:</strong> controla confidencialidad, no revictimización y tono adecuado en documentos sensibles.</li>
+                    <li><strong>Última revisión:</strong> nada llega a usted sin pasar por calidad.</li>
+                    <li><strong>Detecta errores:</strong> citas inventadas, incoherencias y riesgos procesales.</li>
+                    <li><strong>Protege a la víctima:</strong> confidencialidad, tono adecuado y no revictimización.</li>
                 </ul>
             </div>
         </div>`;
@@ -1158,16 +1364,13 @@ function renderGuiaCategorias() {
     const intro = document.getElementById('guia-intro-text');
     const note = document.getElementById('guia-categorias-note');
     if (intro && catalog.intro) {
-        const gr = getEffectiveGuardrails().length;
-        const pas = countEffectivePasos();
         const total = countEffectiveItems();
-        const guias = catalog.intro?.guias_operativas || catalog.intro?.skills || 0;
-        const base = intro.textContent.split(' Catálogo:')[0].trim();
-        intro.textContent = `${base} Catálogo: ${total} elementos (${gr} reglas, ${catalog.intro.agentes} agentes, ${guias} guías operativas, ${pas} pasos).`;
+        const base = intro.textContent.split(' El contador')[0].split(' Catálogo:')[0].trim();
+        intro.textContent = `${base} El contador superior muestra cuántos de los ${total} ítems lleva revisados.`;
     }
     if (note && catalog.categorias?.length) {
         const n = catalog.intro?.guias_operativas || catalog.intro?.skills || catalog.skills?.length || 0;
-        note.textContent = `Las ${n} guías operativas se revisan dentro de cada agente en el panel de abajo.`;
+        note.textContent = `Las ${n} tareas se revisan dentro de cada agente, en el panel de abajo.`;
     }
 }
 
@@ -1182,6 +1385,9 @@ function updateProgress() {
         if (isReviewed(getDecision('agentes', a.id))) reviewed += 1;
     });
     catalog.skills.forEach(s => {
+        getSkillContextKeys(s).forEach(key => {
+            if (isReviewed(getDecision('guias', key))) reviewed += 1;
+        });
         getEffectiveSteps(s).forEach(st => {
             if (isReviewed(getDecision('pasos', st.key))) reviewed += 1;
         });
@@ -1199,7 +1405,11 @@ function updateProgress() {
     const ag = countSection('agentes', catalog.agentes, x => x.id);
 
     let pasosPending = 0;
+    let guiasCtxPending = 0;
     catalog.skills.forEach(s => {
+        getSkillContextKeys(s).forEach(key => {
+            if (!isReviewed(getDecision('guias', key))) guiasCtxPending += 1;
+        });
         getEffectiveSteps(s).forEach(st => {
             if (!isReviewed(getDecision('pasos', st.key))) pasosPending += 1;
         });
@@ -1215,19 +1425,25 @@ function updateProgress() {
     setBadge('badge-agentes', ag.pending);
     const pasosBadge = document.getElementById('badge-pasos');
     if (pasosBadge) {
-        pasosBadge.textContent = pasosPending ? `${pasosPending} pasos` : '';
-        pasosBadge.className = `text-[10px] px-1.5 py-0.5 rounded ${pasosPending ? 'bg-amber-900/50 text-amber-300' : 'hidden'}`;
+        const pendingItems = guiasCtxPending + pasosPending;
+        const parts = [];
+        if (guiasCtxPending) parts.push(`${guiasCtxPending} ctx.`);
+        if (pasosPending) parts.push(`${pasosPending} pasos`);
+        pasosBadge.textContent = pendingItems ? parts.join(' · ') : '';
+        pasosBadge.className = `text-[10px] px-1.5 py-0.5 rounded ${pendingItems ? 'bg-amber-900/50 text-amber-300' : 'hidden'}`;
     }
 
     const chip = document.getElementById('progress-chip');
     if (chip) {
-        chip.innerHTML = `<i class="fa-solid fa-chart-pie mr-1 text-blue-400"></i> <strong>${reviewed}</strong> / ${total} revisados`;
+        chip.innerHTML = `<i class="fa-solid fa-chart-pie mr-1 text-blue-400"></i> <strong>${reviewed}</strong> de ${total} revisados`;
     }
 }
 
 function renderAll() {
+    captureDetailsOpenState();
     renderGuardrails();
     renderAgentes();
+    restoreDetailsOpenState();
     applyFilters();
     updateProgress();
     saveAuditLog();
@@ -1330,7 +1546,11 @@ function setDecision(type, id, status) {
         if (current.status === 'APROBADO') {
             auditLog[type][id] = defaultDecision();
         } else {
-            auditLog[type][id] = { status: 'APROBADO', reason: '', solution: '' };
+            auditLog[type][id] = {
+                status: 'APROBADO',
+                reason: current.reason || '',
+                solution: current.solution || '',
+            };
         }
     }
     renderAll();
@@ -1366,6 +1586,17 @@ function saveModalAdjustment() {
     }
 }
 
+function countGuiasContextByStatus() {
+    const counts = { APROBADO: 0, AJUSTAR: 0, PENDIENTE: 0 };
+    catalog.skills.forEach(s => {
+        getSkillContextKeys(s).forEach(key => {
+            const stt = getDecision('guias', key).status;
+            counts[stt] = (counts[stt] || 0) + 1;
+        });
+    });
+    return counts;
+}
+
 function countPasosByStatus() {
     const counts = { APROBADO: 0, AJUSTAR: 0, PENDIENTE: 0 };
     catalog.skills.forEach(s => {
@@ -1387,12 +1618,83 @@ function countByStatus(type, items, idFn) {
 }
 
 function exportarMarkdown() {
+    publicarConfiguracion({ silent: false, thenExportMd: true });
+}
+
+let configPublishedMeta = null;
+
+async function loadConfigStatus() {
+    try {
+        const res = await fetchAuditApi('/api/audit/config/status');
+        if (res.ok) configPublishedMeta = await res.json();
+    } catch (_) {
+        configPublishedMeta = null;
+    }
+    updateConfigStatusBanner();
+}
+
+function updateConfigStatusBanner() {
+    const el = document.getElementById('config-status-chip');
+    if (!el) return;
+    const meta = configPublishedMeta;
+    if (!meta?.published) {
+        el.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i> Sin config publicada';
+        el.className = 'text-xs bg-amber-950/50 border border-amber-800 px-3 py-2 rounded-lg text-amber-200 hidden md:block';
+        return;
+    }
+    el.innerHTML = `<i class="fa-solid fa-shield-check mr-1 text-emerald-400"></i> Config v<strong>${meta.version}</strong> · ${escapeHtml(meta.published_at || '')}`;
+    el.className = 'text-xs bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-slate-300 hidden md:block';
+}
+
+async function publicarConfiguracion({ silent = false, thenExportMd = false } = {}) {
+    if (!silent && !thenExportMd) {
+        const ok = confirm(
+            'Publicar fija la configuración aprobada para el servicio (local y producción).\n\n'
+            + 'Todos los ítems deben estar en APROBADO. ¿Continuar?',
+        );
+        if (!ok) return { ok: false, cancelled: true };
+    }
+
+    await pushProgressToServer();
+    const res = await fetchAuditApi('/api/audit/config/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPersistPayload()),
+    });
+    let data = {};
+    try {
+        data = await res.json();
+    } catch (_) { /* ignore */ }
+
+    if (!res.ok) {
+        const msg = data.detail || 'No se pudo publicar. Revise que todos los ítems estén APROBADO.';
+        if (!silent) alert(msg);
+        return { ok: false, error: msg };
+    }
+
+    await loadCatalog();
+    await loadConfigStatus();
+    renderAll();
+
+    if (thenExportMd) {
+        exportarMarkdownFile();
+        if (!silent) {
+            alert(`Configuración publicada (v${data.published?.version}). Se descargó el reporte .md.`);
+        }
+    } else if (!silent) {
+        alert(`Configuración publicada (v${data.published?.version}). El servicio ya usa esta versión.`);
+    }
+    return { ok: true, data };
+}
+
+function exportarMarkdownFile() {
     const genAt = catalog.generated_at || new Date().toISOString();
     let md = `# Reporte Consolidado de Aprobación Técnico-Legal\n\n`;
     md += `**Generado en:** ${genAt} (Auditoría de Instrucciones)\n`;
     md += `**Principio profesional:** La IA propone; usted revisa, ajusta y aprueba.\n\n`;
     const guiasN = catalog.intro?.guias_operativas || catalog.intro?.skills || 90;
-    md += `Sistema penal-víctimas Colombia — ${catalog.intro?.agentes || 11} agentes, ${guiasN} guías operativas, ${countEffectivePasos()} pasos auditable.\n\n---\n\n`;
+    const ctxN = countEffectiveGuiasContext();
+    md += `Sistema penal-víctimas Colombia — ${catalog.intro?.agentes || 11} agentes, ${guiasN} guías operativas, ${ctxN} contextos auditables de guía, ${countEffectivePasos()} pasos.\n\n---\n\n`;
 
     md += `## Validación de Reglas Estrictas\n\n`;
     getEffectiveGuardrails().forEach(g => {
@@ -1435,6 +1737,18 @@ function exportarMarkdown() {
                 md += `- **Destinatario:** ${s.destinatario || '—'}\n`;
                 md += `- **Flujo:** ${skillFlujoLabel(s)}\n`;
                 md += `- **Para qué sirve:** ${s.desc || s.instruccion || '—'}\n`;
+                if (s.source_path) md += `- **Fuente canónica:** \`${s.source_path}\`\n`;
+                GUIA_CONTEXT_PARTS.forEach(part => {
+                    const key = (s.audit_keys && s.audit_keys[part]) || guiaContextKey(s.id, part);
+                    const ctxState = getDecision('guias', key);
+                    let body = '';
+                    if (part === 'instruccion') body = s.instruccion || s.desc || '—';
+                    else if (part === 'tools') body = s.tools_text || (s.tools || []).join(', ') || '—';
+                    else body = (s.guardrails || []).join(' · ') || '—';
+                    md += `###### Contexto — ${guiaContextLabel(part)}\n`;
+                    md += `- **Contenido:** ${body}\n- **Estado:** ${ctxState.status}\n`;
+                    if (ctxState.reason) md += `- **Razón:** _${ctxState.reason}_\n- **Ajuste:** _${ctxState.solution}_\n`;
+                });
                 getEffectiveSteps(s).forEach(st => {
                     const stState = getDecision('pasos', st.key);
                     const tag = st.custom ? ' *(agregado por el despacho)*' : '';
@@ -1451,11 +1765,13 @@ function exportarMarkdown() {
 
     const g = countByStatus('guardrails', getEffectiveGuardrails(), x => x.id);
     const ag = countByStatus('agentes', catalog.agentes, x => x.id);
+    const gx = countGuiasContextByStatus();
     const ps = countPasosByStatus();
     md += `---\n\n## Resumen Ejecutivo\n\n`;
     md += `| Sección | APROBADO | AJUSTAR | PENDIENTE |\n|---|---|---|---|\n`;
     md += `| Reglas estrictas | ${g.APROBADO} | ${g.AJUSTAR} | ${g.PENDIENTE} |\n`;
     md += `| Agentes del equipo | ${ag.APROBADO} | ${ag.AJUSTAR} | ${ag.PENDIENTE} |\n`;
+    md += `| Contexto de guías | ${gx.APROBADO} | ${gx.AJUSTAR} | ${gx.PENDIENTE} |\n`;
     md += `| Pasos | ${ps.APROBADO} | ${ps.AJUSTAR} | ${ps.PENDIENTE} |\n`;
     md += `\n**Total ítems:** ${countEffectiveItems()}\n`;
 
@@ -1708,24 +2024,37 @@ function bindExecutionDashboardReset() {
     });
 }
 
-async function init() {
-    if (typeof window.waitForAuditAuth === 'function') {
-        const ok = await window.waitForAuditAuth();
-        if (!ok) return;
+async function loadCatalog() {
+    const sources = [
+        { url: auditApiUrl('/api/audit/catalog'), label: 'API' },
+        { url: './audit-data.json', label: 'estático' },
+    ];
+    let lastErr = null;
+    for (const { url } of sources) {
+        try {
+            const res = await fetch(url, { credentials: 'include' });
+            if (!res.ok) {
+                lastErr = new Error(`${url}: HTTP ${res.status}`);
+                continue;
+            }
+            const data = await res.json();
+            if (!data?.skills?.length) {
+                lastErr = new Error(`${url}: catálogo vacío`);
+                continue;
+            }
+            catalog = data;
+            return true;
+        } catch (err) {
+            lastErr = err;
+        }
     }
-    ensureCustom();
-    try {
-        const res = await fetch('./audit-data.json');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        catalog = await res.json();
-    } catch (err) {
-        document.getElementById('progress-chip').textContent = 'Error al cargar audit-data.json';
-        console.error(err);
-        return;
-    }
+    const chip = document.getElementById('progress-chip');
+    if (chip) chip.textContent = 'Error al cargar catálogo de auditoría';
+    console.error(lastErr);
+    return false;
+}
 
-    await syncProgressFromServer();
-
+function bindCatalogUi() {
     document.getElementById('generated-at').textContent = catalog.generated_at || '—';
     const buildEl = document.getElementById('build-generated-at');
     if (buildEl && catalog.generated_at) {
@@ -1734,18 +2063,37 @@ async function init() {
     }
     renderGuiaCompleta();
     populateFilters();
-
-    document.getElementById('search-input').addEventListener('input', applyFilters);
-    document.getElementById('filter-category').addEventListener('change', applyFilters);
-    document.getElementById('filter-agent').addEventListener('change', applyFilters);
-
+    document.getElementById('search-input')?.addEventListener('input', applyFilters);
+    document.getElementById('filter-category')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-agent')?.addEventListener('change', applyFilters);
     bindPersistUi();
-    renderAll();
-    updatePersistStatus();
     bindExecutionDashboardRefresh();
     bindExecutionDashboardReset();
+}
+
+async function init() {
+    ensureCustom();
+    const catalogOk = await loadCatalog();
+    if (!catalogOk) return;
+
+    bindCatalogUi();
+    renderAll();
+    updatePersistStatus();
+    void loadConfigStatus();
+
+    const authOk = typeof window.waitForAuditAuth === 'function'
+        ? await window.waitForAuditAuth()
+        : true;
+    if (!authOk) return;
+
+    await syncProgressFromServer();
+    renderAll();
+    updatePersistStatus();
+    await loadConfigStatus();
     void loadExecutionDashboard();
 }
+
+window.publicarConfiguracion = publicarConfiguracion;
 
 window.setDecision = setDecision;
 window.triggerAdjustment = triggerAdjustment;

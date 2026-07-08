@@ -6,9 +6,20 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def reset_rate_limits_between_tests():
+    from src.middleware.rate_limit import reset_all_rate_limits
+
+    reset_all_rate_limits()
+    yield
+    reset_all_rate_limits()
+
+
+@pytest.fixture(autouse=True)
 def disable_web_auth_by_default(monkeypatch, request):
     if request.module.__name__.endswith("test_auth") or request.module.__name__.endswith(
         "test_audit_portal_api"
+    ) or request.module.__name__.endswith("test_compliance") or request.module.__name__.endswith(
+        "test_access_control"
     ):
         yield
         return

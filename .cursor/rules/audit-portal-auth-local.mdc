@@ -7,11 +7,11 @@ alwaysApply: true
 
 ## Modelo actual
 
-- **Login:** correo electrónico + contraseña del despacho (`SITE_PASSWORD`, misma que el chat).
-- **API:** `/api/audit/login`, `/api/audit/session`, `/api/audit/progress` (GET/PUT/DELETE).
-- **Persistencia:** PostgreSQL tabla `audit_portal_progress` (una fila por correo normalizado).
-- **Hosting recomendado:** `https://agente-de-ia-juridico.onrender.com/auditoria` (mismo origen, sin CORS).
-- **GitHub Pages (espejo):** build con `AUDIT_API_BASE=https://agente-de-ia-juridico.onrender.com`.
+- **Login:** correo + `SITE_PASSWORD` + **PIN personal** (6–8 dígitos, primera vez).
+- **Consentimiento obligatorio:** aviso de privacidad + autorización de **datos de casos** (Ley 1581).
+- **API:** `/api/audit/login`, `/api/audit/prelogin`, `/api/audit/policy`, progreso con historial y logs.
+- **Datos de casos:** permitidos con autorización expresa; ver `/legal/tratamiento-datos-casos`.
+- **ARCO:** `privacidad@dbxsolutions.com` o «Borrar mi progreso».
 
 ## Build
 

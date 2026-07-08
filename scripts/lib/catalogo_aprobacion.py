@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILLS_DIR = ROOT / "agente" / "skills"
+SKILLS_DIR = ROOT / ".cursor" / "skills"
 LISTA = ROOT / "docs" / "canon" / "lista-aprobacion-agentes-skills-pasos.md"
 
 GUARDRAILS = [
@@ -18,7 +18,7 @@ GUARDRAILS = [
     {
         "id": "g2",
         "name": "Pedir datos faltantes",
-        "desc": "Si faltan hechos, etapa o radicado, el sistema pregunta antes de concluir.",
+        "desc": "Si faltan hechos, etapa, radicado o plazos Ley 906, el sistema pregunta antes de concluir.",
     },
     {
         "id": "g3",
@@ -49,6 +49,16 @@ GUARDRAILS = [
         "id": "g8",
         "name": "Aviso de borrador",
         "desc": "Toda respuesta termina con aviso de revision profesional.",
+    },
+    {
+        "id": "g9",
+        "name": "Oportunidad y terminos Ley 906",
+        "desc": "No recomendar actuacion sin verificar plazos, notificaciones y etapa; extemporaneidad marcada pendiente hasta confirmacion del abogado.",
+    },
+    {
+        "id": "g10",
+        "name": "Integridad probatoria",
+        "desc": "No alterar ni suprimir evidencia; cadena de custodia y preservacion digital antes de descartar prueba en estrategia.",
     },
 ]
 
@@ -249,7 +259,7 @@ def parse_skill_md(path: Path) -> dict:
     body = text.split("---", 2)[-1] if text.startswith("---") else text
 
     def section(name: str) -> str:
-        m = re.search(rf"## {re.escape(name)}\n(.*?)(?=\n## |\Z)", body, re.S)
+        m = re.search(rf"## {re.escape(name)}[^\n]*\n(.*?)(?=\n## |\Z)", body, re.S)
         return m.group(1).strip() if m else ""
 
     agents_raw = section("Used By Agents")
@@ -260,6 +270,19 @@ def parse_skill_md(path: Path) -> dict:
     cm = re.search(r"Category:\s*`([^`]+)`", body)
     if cm:
         category = cm.group(1)
+    tier = ""
+    tm = re.search(r"Tier:\s*`(\w+)`", body)
+    if tm:
+        tier = tm.group(1)
+
+    steps_md: list[dict] = []
+    for line in section("Steps").splitlines():
+        sm = re.match(r"^\s*\d+\.\s+(.+)$", line.strip())
+        if sm:
+            steps_md.append({"text": sm.group(1).strip(), "modo": "serial"})
+
+    rol_blocks = re.findall(r"## Rol en [^\n]+\n(.*?)(?=\n## |\Z)", body, re.S)
+    rol = "\n\n".join(b.strip() for b in rol_blocks if b.strip())
 
     return {
         "purpose": section("Purpose"),
@@ -269,29 +292,29 @@ def parse_skill_md(path: Path) -> dict:
         "tools": tools,
         "guardrails": guardrails,
         "category": category,
+        "tier": tier,
+        "rol": rol,
+        "no_duplicar": section("No duplicar"),
+        "handoff": section("Handoff"),
+        "riesgo": section("Riesgo si se omite"),
+        "steps_md": steps_md,
     }
 
 
 def parse_steps_from_content(content: str) -> list[dict]:
     """Extrae pasos con modo serial o paralelo desde bloque de skill en lista-aprobacion."""
     steps: list[dict] = []
-    serie = re.search(
-        r"Pasos \(serie\):\s*\n((?:[ \t]+\d+\..+(?:\n|$))+)",
-        content,
-        re.I,
+    block_re = re.compile(
+        r"  - Pasos(?: \((serie|paralelo[^)]*)\))?:\s*\n((?:[ \t]+\d+\..+(?:\n|$))+)",
+        re.I | re.M,
     )
-    paralelo = re.search(
-        r"Pasos \(paralelo[^)]*\):\s*\n((?:[ \t]+\d+\..+(?:\n|$))+)",
-        content,
-        re.I,
-    )
-    if serie or paralelo:
-        if serie:
-            for m in re.finditer(r"^\s*\d+\.\s+(.+)$", serie.group(1), re.M):
-                steps.append({"text": m.group(1).strip(), "modo": "serial"})
-        if paralelo:
-            for m in re.finditer(r"^\s*\d+\.\s+(.+)$", paralelo.group(1), re.M):
-                steps.append({"text": m.group(1).strip(), "modo": "paralelo"})
+    blocks = list(block_re.finditer(content))
+    if blocks:
+        for m in blocks:
+            label = (m.group(1) or "").lower()
+            modo = "paralelo" if label.startswith("paralelo") else "serial"
+            for sm in re.finditer(r"^\s*\d+\.\s+(.+)$", m.group(2), re.M):
+                steps.append({"text": sm.group(1).strip(), "modo": modo})
         return steps
     plain = re.search(
         r"Pasos:\s*\n((?:[ \t]+\d+\..+(?:\n|$))+)",
@@ -334,13 +357,20 @@ def load_skills_catalog() -> dict[str, dict]:
     for p in sorted(SKILLS_DIR.glob("*/SKILL.md")):
         sid = p.parent.name
         data = parse_skill_md(p)
-        data["path"] = f"agente/skills/{sid}/SKILL.md"
+        data["path"] = f".cursor/skills/{sid}/SKILL.md"
         extra = lista.get(sid, {})
         data["instruccion"] = extra.get("instruccion", "")
-        data["steps"] = extra.get("steps", [])
+        lista_steps = extra.get("steps", [])
+        data["steps"] = lista_steps if lista_steps else data.get("steps_md", [])
         if extra.get("tools_lista") and not data.get("tools"):
             data["tools_lista"] = extra["tools_lista"]
         skills[sid] = data
+    try:
+        from lib.approved_skill_config import apply_approved_to_skills_raw
+
+        skills = apply_approved_to_skills_raw(skills)
+    except Exception:
+        pass
     return skills
 
 
@@ -428,3 +458,34 @@ def skill_flujo_pasos(steps: list[dict]) -> str:
 def skill_titulo_upper(instruccion: str, purpose: str = "") -> str:
     base = (instruccion or purpose or "").strip().rstrip(".")
     return base.upper() if base else ""
+
+
+def _normalize_tool_name(value: str) -> str:
+    return str(value).strip().strip("`").strip()
+
+
+def skill_tools_list(data: dict) -> list[str]:
+    """Herramientas del skill: SKILL.md Tools o fallback lista-aprobacion."""
+    tools = [_normalize_tool_name(t) for t in (data.get("tools") or []) if _normalize_tool_name(t)]
+    if tools:
+        return tools
+    lista = (data.get("tools_lista") or "").strip()
+    if not lista or lista.lower() in ("sin_herramientas_obligatorias", "sin herramientas obligatorias"):
+        return []
+    parts = [p.strip() for p in lista.replace(",", " ").split() if p.strip()]
+    return [_normalize_tool_name(p) for p in parts if _normalize_tool_name(p)]
+
+
+def skill_tools_display(data: dict) -> str:
+    tools = skill_tools_list(data)
+    if tools:
+        return ", ".join(f"`{t}`" for t in tools)
+    return "Sin herramientas obligatorias declaradas."
+
+
+def skill_guardrails_list(data: dict) -> list[str]:
+    return [g.strip() for g in (data.get("guardrails") or []) if str(g).strip()]
+
+
+def guia_audit_key(skill_id: str, part: str) -> str:
+    return f"{skill_id}::{part}"

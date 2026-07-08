@@ -6,7 +6,20 @@ import math
 import threading
 from datetime import datetime, timezone
 
-from src.storage.models import AuditPortalProgress, ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace, SCOPE_KB
+from src.storage.models import (
+    AuditPortalAccessLog,
+    AuditPortalProgress,
+    AuditPortalUser,
+    ChatSession,
+    ComplianceConsent,
+    Deadline,
+    DocumentChunk,
+    Draft,
+    ExecutionPlanRecord,
+    Expediente,
+    SessionTrace,
+    SCOPE_KB,
+)
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -29,6 +42,11 @@ class InMemoryRepository:
         self._chat_sessions: dict[str, ChatSession] = {}
         self._session_traces: dict[str, list[SessionTrace]] = {}
         self._audit_progress: dict[str, AuditPortalProgress] = {}
+        self._audit_users: dict[str, AuditPortalUser] = {}
+        self._compliance_consents: list[ComplianceConsent] = []
+        self._execution_plans: dict[str, ExecutionPlanRecord] = {}
+        self._audit_access_logs: list[AuditPortalAccessLog] = []
+        self._audit_progress_history: list[tuple[str, dict, datetime]] = []
         self._lock = threading.Lock()
 
     # --- Borradores ---
@@ -247,3 +265,88 @@ class InMemoryRepository:
     def delete_audit_portal_progress(self, email: str) -> bool:
         with self._lock:
             return self._audit_progress.pop(email, None) is not None
+
+    def get_audit_portal_user(self, email: str) -> AuditPortalUser | None:
+        return self._audit_users.get(email)
+
+    def save_audit_portal_user(self, user: AuditPortalUser) -> AuditPortalUser:
+        with self._lock:
+            self._audit_users[user.email] = user
+            return user
+
+    def record_compliance_consent(self, consent: ComplianceConsent) -> ComplianceConsent:
+        with self._lock:
+            self._compliance_consents.append(consent)
+            return consent
+
+    def has_valid_compliance_consent(
+        self, subject_key: str, *, context: str, policy_version: str
+    ) -> bool:
+        for row in reversed(self._compliance_consents):
+            if (
+                row.subject_key == subject_key
+                and row.context == context
+                and row.policy_version == policy_version
+                and row.privacy_accepted
+                and row.sensitive_data_ack
+            ):
+                return True
+        return False
+
+    def log_audit_portal_access(self, entry: AuditPortalAccessLog) -> AuditPortalAccessLog:
+        with self._lock:
+            self._audit_access_logs.append(entry)
+            return entry
+
+    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 30) -> None:
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            self._audit_progress_history.append((email, payload, now))
+            per_email = [(i, e, p, t) for i, (e, p, t) in enumerate(self._audit_progress_history) if e == email]
+            if len(per_email) > keep_last:
+                drop = {i for i, *_ in per_email[:-keep_last]}
+                self._audit_progress_history = [
+                    item for idx, item in enumerate(self._audit_progress_history) if idx not in drop
+                ]
+
+    def get_execution_plan(self, plan_id: str) -> ExecutionPlanRecord | None:
+        return self._execution_plans.get(plan_id)
+
+    def save_execution_plan(self, record: ExecutionPlanRecord) -> ExecutionPlanRecord:
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            existing = self._execution_plans.get(record.plan_id)
+            if existing:
+                existing.session_id = record.session_id
+                existing.initiator_user_id = record.initiator_user_id
+                existing.channel = record.channel
+                existing.user_message = record.user_message
+                existing.status = record.status
+                existing.payload = record.payload
+                existing.updated_at = now
+                return existing
+            record.created_at = now
+            record.updated_at = now
+            self._execution_plans[record.plan_id] = record
+            return record
+
+    def list_execution_plans(self, *, limit: int = 50) -> list[ExecutionPlanRecord]:
+        with self._lock:
+            items = sorted(
+                self._execution_plans.values(),
+                key=lambda r: r.updated_at,
+                reverse=True,
+            )
+            return items[:limit]
+
+    def execution_plan_stats(self) -> dict:
+        from src.storage.models import aggregate_execution_plan_stats
+
+        with self._lock:
+            return aggregate_execution_plan_stats(list(self._execution_plans.values()))
+
+    def clear_all_execution_plans(self) -> int:
+        with self._lock:
+            count = len(self._execution_plans)
+            self._execution_plans.clear()
+            return count

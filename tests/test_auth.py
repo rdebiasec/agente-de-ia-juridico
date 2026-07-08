@@ -255,25 +255,63 @@ async def test_debug_trace_requires_auth_and_scope(monkeypatch):
 
         chat = await client.post(
             "/chat",
-            json={"message": "hola", "channel": "web", "user_id": "trace-user"},
+            json={"message": "hola", "channel": "web", "user_id": "ignored"},
             cookies={"agente_session": cookie},
         )
         assert chat.status_code == 200
 
+        status = await client.get("/auth/status", cookies={"agente_session": cookie})
+        assert status.status_code == 200
+        subject_id = status.json().get("subject_id")
+        assert subject_id
+
         scoped = await client.get(
-            "/debug/trace/web:trace-user",
+            f"/debug/trace/web:{subject_id}",
             cookies={"agente_session": cookie},
         )
         assert scoped.status_code == 200
         payload = scoped.json()
-        assert payload["session_id"] == "web:trace-user"
+        assert payload["session_id"] == f"web:{subject_id}"
         assert isinstance(payload["traces"], list)
         assert payload["traces"]
+
+        other = await client.get(
+            f"/debug/trace/web:other-subject",
+            cookies={"agente_session": cookie},
+        )
+        assert other.status_code == 403
 
         forbidden = await client.get(
             "/debug/trace/whatsapp:trace-user",
             cookies={"agente_session": cookie},
         )
         assert forbidden.status_code == 403
+
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_login_rate_limited_after_many_failures(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        for _ in range(12):
+            bad = await client.post(
+                "/auth/login",
+                json={"username": "despacho", "password": "wrong"},
+            )
+            assert bad.status_code == 401
+
+        blocked = await client.post(
+            "/auth/login",
+            json={"username": "despacho", "password": "wrong"},
+        )
+        assert blocked.status_code == 429
 
     get_settings.cache_clear()

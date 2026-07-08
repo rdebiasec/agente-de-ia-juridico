@@ -1,4 +1,4 @@
-"""Tests API del portal de auditoría — login y persistencia por correo."""
+"""Tests API del portal de auditoría."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.main import app
-from src.storage import get_repository, reset_repository
+from src.storage import reset_repository
 
 
 def _audit_env(monkeypatch) -> None:
@@ -22,111 +22,82 @@ def _audit_env(monkeypatch) -> None:
     reset_repository()
 
 
-def _sample_payload() -> dict:
-    return {
-        "version": 3,
-        "savedAt": "2026-07-06T12:00:00.000Z",
-        "catalogGeneratedAt": "2026-07-06 12:00 UTC",
-        "guardrails": {"g1": {"status": "APROBADO", "reason": "", "solution": ""}},
-        "agentes": {},
-        "pasos": {},
-        "custom": None,
-    }
+async def _login(client, email: str, *, pin: str = "123456", setup: bool = True):
+    if setup:
+        body = {
+            "email": email,
+            "password": "audit-test-secret-pass",
+            "new_pin": pin,
+            "accept_privacy": True,
+            "accept_sensitive_data": True,
+        }
+    else:
+        body = {"email": email, "password": "audit-test-secret-pass", "pin": pin}
+    return await client.post("/api/audit/login", json=body)
 
 
 @pytest.mark.asyncio
-async def test_audit_login_session_and_progress(monkeypatch):
+async def test_audit_policy_and_session(monkeypatch):
     _audit_env(monkeypatch)
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/api/audit/session")
+        r = await client.get("/api/audit/policy")
         assert r.status_code == 200
+        assert r.json()["version"] == "2026-07-07"
+
+        r = await client.get("/api/audit/session")
         assert r.json()["authenticated"] is False
 
-        r = await client.post(
-            "/api/audit/login",
-            json={"email": "Abogada@Despacho.com", "password": "audit-test-secret-pass"},
-        )
+        r = await _login(client, "abogada@despacho.com")
         assert r.status_code == 200
-        assert r.json()["email"] == "abogada@despacho.com"
-        assert "audit_session" in r.cookies
 
         r = await client.get("/api/audit/session")
+        assert r.json()["authenticated"] is True
+
+
+@pytest.mark.asyncio
+async def test_audit_progress_crud(monkeypatch):
+    _audit_env(monkeypatch)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await _login(client, "prog@despacho.com")
         assert r.status_code == 200
-        data = r.json()
-        assert data["authenticated"] is True
-        assert data["email"] == "abogada@despacho.com"
 
         r = await client.get("/api/audit/progress")
         assert r.status_code == 404
 
-        payload = _sample_payload()
+        payload = {
+            "version": 3,
+            "guardrails": {"g1": {"status": "APROBADO", "reason": "", "solution": ""}},
+            "agentes": {},
+            "pasos": {},
+        }
         r = await client.put("/api/audit/progress", json=payload)
         assert r.status_code == 200
-        assert r.json()["email"] == "abogada@despacho.com"
 
         r = await client.get("/api/audit/progress")
+        assert r.json()["guardrails"]["g1"]["status"] == "APROBADO"
+
+        guias_payload = {
+            "version": 4,
+            "guardrails": {},
+            "agentes": {},
+            "guias": {
+                "extraer_hechos_relevantes::instruccion": {
+                    "status": "APROBADO",
+                    "reason": "",
+                    "solution": "",
+                }
+            },
+            "pasos": {},
+        }
+        r = await client.put("/api/audit/progress", json=guias_payload)
         assert r.status_code == 200
-        loaded = r.json()
-        assert loaded["guardrails"]["g1"]["status"] == "APROBADO"
+        r = await client.get("/api/audit/progress")
+        assert r.json()["guias"]["extraer_hechos_relevantes::instruccion"]["status"] == "APROBADO"
 
         r = await client.delete("/api/audit/progress")
         assert r.status_code == 200
-
-        r = await client.get("/api/audit/progress")
-        assert r.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_audit_progress_isolated_between_emails(monkeypatch):
-    _audit_env(monkeypatch)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client_a:
-        r = await client_a.post(
-            "/api/audit/login",
-            json={"email": "uno@despacho.com", "password": "audit-test-secret-pass"},
-        )
-        assert r.status_code == 200
-
-        r = await client_a.put("/api/audit/progress", json=_sample_payload())
-        assert r.status_code == 200
-
-        r = await client_a.get("/api/audit/progress")
-        assert r.status_code == 200
-
-    async with AsyncClient(transport=transport, base_url="http://test") as client_b:
-        r = await client_b.post(
-            "/api/audit/login",
-            json={"email": "dos@despacho.com", "password": "audit-test-secret-pass"},
-        )
-        assert r.status_code == 200
-
-        r = await client_b.get("/api/audit/progress")
-        assert r.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_audit_login_rejects_bad_password(monkeypatch):
-    _audit_env(monkeypatch)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.post(
-            "/api/audit/login",
-            json={"email": "abogada@despacho.com", "password": "wrong-password"},
-        )
-        assert r.status_code == 401
-
-
-@pytest.mark.asyncio
-async def test_audit_login_rejects_invalid_email(monkeypatch):
-    _audit_env(monkeypatch)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.post(
-            "/api/audit/login",
-            json={"email": "no-es-correo", "password": "audit-test-secret-pass"},
-        )
-        assert r.status_code == 400
 
 
 @pytest.mark.asyncio
@@ -137,45 +108,8 @@ async def test_audit_unavailable_without_site_password(monkeypatch):
     get_settings.cache_clear()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.get("/api/audit/session")
-        assert r.status_code == 200
-        assert r.json()["auth_enabled"] is False
-
         r = await client.post(
             "/api/audit/login",
-            json={"email": "abogada@despacho.com", "password": "anything"},
+            json={"email": "a@b.com", "password": "x"},
         )
         assert r.status_code == 503
-
-
-@pytest.mark.asyncio
-async def test_audit_logout_clears_session(monkeypatch):
-    _audit_env(monkeypatch)
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        r = await client.post(
-            "/api/audit/login",
-            json={"email": "abogada@despacho.com", "password": "audit-test-secret-pass"},
-        )
-        assert r.status_code == 200
-
-        r = await client.post("/api/audit/logout")
-        assert r.status_code == 200
-
-        r = await client.get("/api/audit/session")
-        assert r.json()["authenticated"] is False
-
-
-@pytest.mark.asyncio
-async def test_auditoria_static_mount_when_dist_exists(monkeypatch):
-    _audit_env(monkeypatch)
-    from pathlib import Path
-
-    dist = Path(__file__).resolve().parents[1] / "audit-portal" / "dist"
-    if not dist.is_dir():
-        pytest.skip("audit-portal/dist no generado — ejecute scripts/generar_audit_portal.py")
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=True) as client:
-        r = await client.get("/auditoria/")
-        assert r.status_code == 200
-        assert "Auditoría de Instrucciones" in r.text

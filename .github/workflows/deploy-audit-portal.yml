@@ -8,7 +8,10 @@ on:
       - 'audit-portal/site/**'
       - 'scripts/generar_audit_portal.py'
       - 'scripts/lib/catalogo_aprobacion.py'
+      - 'scripts/lib/audit_data.py'
+      - 'scripts/lib/catalogo_aprobacion.py'
       - 'agente/skills/**'
+      - '.cursor/skills/**'
       - 'docs/canon/lista-aprobacion-agentes-skills-pasos.md'
       - '.github/workflows/deploy-audit-portal.yml'
   workflow_dispatch:

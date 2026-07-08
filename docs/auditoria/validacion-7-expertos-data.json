@@ -1,0 +1,830 @@
+{
+  "metrics": {
+    "with_steps": 90,
+    "with_guardrails": 90,
+    "with_rol": 89,
+    "with_boundary": 84,
+    "total": 90,
+    "generic_io": 0,
+    "generic_risk": 0,
+    "profundizar": 0,
+    "multi_no_boundary": 0,
+    "mono_sin_rol": 0
+  },
+  "skills": {
+    "actualizar_tareas_responsable": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "alinear_estrategia_prueba_proceso": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "analizar_autoria_y_participacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "analizar_derechos_victima": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "analizar_dolo_culpa_elemento_subjetivo": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "analizar_enfoque_diferencial": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "analizar_intervencion_victima": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "analizar_perjuicio_irremediable": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "clasificar_aprobacion_juridica": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "clasificar_fuente_factual": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "clasificar_tarea_y_etapa": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "clasificar_tipo_prueba": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "construir_cronologia_penal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "construir_matriz_hecho_prueba": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "construir_teoria_caso_victima": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_audiencias": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_cadena_custodia_preliminar": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_confidencialidad_datos_sensibles": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_no_revictimizacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "controlar_separacion_hecho_inferencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_terminos_procesales_preliminares": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_tono_juridico_documento": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "controlar_tono_riesgo_reputacional": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_checklist_previo_audiencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_matriz_hecho_derecho_fundamental": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_matriz_hecho_fuente": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_plan_recaudo_probatorio": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "crear_reporte_estado_caso": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_resumen_ejecutivo_litigante": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "crear_ruta_procesal_recomendada": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "descomponer_elementos_tipo_penal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_agravantes_atenuantes": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_alucinaciones_legales": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_brechas_probatorias": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_contradicciones_factuales": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_inactividad_procesal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_riesgo_improcedencia_tutela": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_riesgo_revictimizacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_riesgos_atipicidad": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_riesgos_audiencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_riesgos_procesales": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "detectar_urgencia_penal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "detectar_vacios_factuales": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "estructurar_hechos_fundamentos_solicitudes": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_dano_y_afectacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_derecho_peticion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_oportunidad_procesal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_procedencia_tutela": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_solicitud_fiscalia_juez": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "evaluar_suficiencia_probatoria": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "extraer_hechos_relevantes": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "generar_alertas_terminos_vencimientos": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "generar_preguntas_aclaracion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "generar_preguntas_testigos_peritos": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "generar_preguntas_tipicidad": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E2"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Regla HITL despacho"
+      ]
+    },
+    "gestionar_faltantes_expediente": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_actores_y_roles": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_conductas_punibles_preliminares": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_derecho_fundamental_afectado": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_etapa_procesal_ley906": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_intereses_victima": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "identificar_objetivo_audiencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "inventariar_evidencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "mapear_actuaciones_posibles_victima": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "mapear_tipo_penal_hecho_prueba": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Skill tipicidad sin advertencia anti-culpabilidad/certeza"
+      ]
+    },
+    "marcar_pendientes_verificacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "monitorear_radicado": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preparar_borrador_tutela_preliminar": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "preparar_contraargumentos": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preparar_guion_intervencion_oral": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preparar_preguntas_audiencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preparar_resumen_operativo_cliente": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preparar_solicitudes_orales": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "preservar_evidencia_digital": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "priorizar_objetivos_representacion": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "recomendar_via_constitucional_o_alternativa": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "redactar_ampliacion_denuncia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "redactar_derecho_peticion_penal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "redactar_memorial_penal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "redactar_recurso_o_intervencion_preliminar": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "redactar_solicitud_impulso_procesal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "redactar_tutela_penal_preliminar": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "registrar_actuacion_procesal": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "revisar_coherencia_estrategica": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
+      "action": "ninguna",
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
+    },
+    "revisar_mecanismos_ordinarios": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "seguimiento_documentos_radicados": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "simular_escenarios_audiencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "verificar_citas_normativas": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "verificar_hechos_soportados": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    },
+    "verificar_jurisprudencia": {
+      "veredicto": "APROBADO",
+      "fail_experts": [],
+      "cond_experts": [],
+      "pass_score": 56,
+      "action": "ninguna",
+      "hallazgos": []
+    }
+  },
+  "chains": [
+    {
+      "chain": "tutela",
+      "skills": [
+        "recomendar_via_constitucional_o_alternativa",
+        "revisar_mecanismos_ordinarios",
+        "evaluar_procedencia_tutela",
+        "preparar_borrador_tutela_preliminar",
+        "redactar_tutela_penal_preliminar",
+        "clasificar_aprobacion_juridica"
+      ],
+      "status": "OK",
+      "issues": []
+    },
+    {
+      "chain": "recursos_906",
+      "skills": [
+        "evaluar_oportunidad_procesal",
+        "redactar_recurso_o_intervencion_preliminar",
+        "redactar_memorial_penal"
+      ],
+      "status": "OK",
+      "issues": []
+    },
+    {
+      "chain": "calidad_salida",
+      "skills": [
+        "detectar_alucinaciones_legales",
+        "controlar_no_revictimizacion",
+        "clasificar_aprobacion_juridica"
+      ],
+      "status": "OK",
+      "issues": []
+    },
+    {
+      "chain": "cliente",
+      "skills": [
+        "preparar_resumen_operativo_cliente",
+        "clasificar_aprobacion_juridica"
+      ],
+      "status": "OK",
+      "issues": []
+    },
+    {
+      "chain": "evidencia_digital",
+      "skills": [
+        "preservar_evidencia_digital",
+        "controlar_cadena_custodia_preliminar",
+        "inventariar_evidencia"
+      ],
+      "status": "OK",
+      "issues": []
+    }
+  ]
+}

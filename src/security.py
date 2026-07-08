@@ -54,6 +54,10 @@ def validate_production_settings(settings: Settings) -> None:
 
     if not settings.site_password or len(settings.site_password) < 12:
         errors.append("SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) configurado en Render.")
+    elif len(settings.site_password) < 16:
+        logger.warning(
+            "SITE_PASSWORD tiene menos de 16 caracteres; considere rotarlo por uno más largo."
+        )
     elif settings.site_password in _WEAK_SECRETS:
         logger.critical(
             "SITE_PASSWORD coincide con un valor de ejemplo conocido; rote el secreto en Render cuando pueda."
@@ -88,4 +92,14 @@ def security_headers() -> dict[str, str]:
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Content-Security-Policy": (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'"
+        ),
     }

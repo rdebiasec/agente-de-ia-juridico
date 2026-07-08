@@ -187,3 +187,22 @@
 .audit-paso-label .audit-ref-code {
   margin-right: 0.35rem;
 }
+
+.audit-guia-context-card {
+  border-left: 3px solid #c7d2fe;
+}
+
+.audit-guia-context-section {
+  margin-bottom: 0.5rem;
+}
+
+.audit-guia-list {
+  list-style: disc;
+  color: #475569;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.audit-guia-list li + li {
+  margin-top: 0.35rem;
+}

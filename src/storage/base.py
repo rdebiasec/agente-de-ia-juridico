@@ -8,7 +8,19 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from src.storage.models import AuditPortalProgress, ChatSession, Deadline, DocumentChunk, Draft, Expediente, SessionTrace
+from src.storage.models import (
+    AuditPortalAccessLog,
+    AuditPortalProgress,
+    AuditPortalUser,
+    ChatSession,
+    ComplianceConsent,
+    Deadline,
+    DocumentChunk,
+    Draft,
+    ExecutionPlanRecord,
+    Expediente,
+    SessionTrace,
+)
 
 
 @runtime_checkable
@@ -83,3 +95,28 @@ class Repository(Protocol):
     def save_audit_portal_progress(self, email: str, payload: dict) -> AuditPortalProgress: ...
 
     def delete_audit_portal_progress(self, email: str) -> bool: ...
+
+    def get_audit_portal_user(self, email: str) -> AuditPortalUser | None: ...
+
+    def save_audit_portal_user(self, user: AuditPortalUser) -> AuditPortalUser: ...
+
+    def record_compliance_consent(self, consent: ComplianceConsent) -> ComplianceConsent: ...
+
+    def has_valid_compliance_consent(
+        self, subject_key: str, *, context: str, policy_version: str
+    ) -> bool: ...
+
+    def log_audit_portal_access(self, entry: AuditPortalAccessLog) -> AuditPortalAccessLog: ...
+
+    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 30) -> None: ...
+
+    # --- Planes de ejecución (Fase 1) ---
+    def get_execution_plan(self, plan_id: str) -> ExecutionPlanRecord | None: ...
+
+    def save_execution_plan(self, record: ExecutionPlanRecord) -> ExecutionPlanRecord: ...
+
+    def list_execution_plans(self, *, limit: int = 50) -> list[ExecutionPlanRecord]: ...
+
+    def execution_plan_stats(self) -> dict: ...
+
+    def clear_all_execution_plans(self) -> int: ...

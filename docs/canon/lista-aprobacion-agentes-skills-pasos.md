@@ -184,7 +184,7 @@
     1. Identificar el perjuicio alegado y su carácter actual o inminente.
     2. Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.
     3. Contrastar con mecanismos ordinarios y plazos procesales vigentes.
-    4. Profundizar análisis de «Identificar urgencia constitucional» con referencia al expediente y norma aplicable.
+    4. Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_corte_constitucional_search`, `rag_expediente_search`
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
@@ -194,7 +194,7 @@
     1. Listar hechos verificables y narrados relevantes para la vulneración alegada.
     2. Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.
     3. Señalar vacíos probatorios y norma constitucional de soporte preliminar.
-    4. Profundizar análisis de «Relacionar hechos con derechos afectados» con referencia al expediente y norma aplicable.
+    4. Ordenar filas por relevancia para pretensiones de tutela.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`, `rag_constitucion_search`
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
@@ -217,16 +217,15 @@
     1. Verificar existencia de petición previa, destinatario y objeto solicitado.
     2. Constatar plazo de respuesta y silencio administrativo si aplica.
     3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-    4. Profundizar análisis de «Revisar si existe derecho de peticion incumplido» con referencia al expediente y norma aplicable.
+    4. Documentar requisitos faltantes para interponer nueva petición o tutela.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `calendar_terms_calculator`, `rag_constitucional_search`
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
 - `evaluar_procedencia_tutela`
   - Instrucción tipo: Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-  - Pasos (paralelo entre sí):
+  - Pasos:
     1. Verificar legitimación por activa (titular del derecho y vínculo con el caso).
     2. Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).
-  - Pasos (serie):
     3. Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.
     4. Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.
     5. Evaluar inmediatez del perjuicio y necesidad de medida urgente.
@@ -251,7 +250,7 @@
     1. Consolidar hechos, derechos afectados y pretensiones con fuentes.
     2. Verificar que el evaluador constitucional recomendó tutela preliminarmente.
     3. Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.
-    4. Profundizar análisis de «Preparar insumos para borrador de tutela» con referencia al expediente y norma aplicable.
+    4. Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_plantillas_search`, `rag_corte_constitucional_search`
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
@@ -270,7 +269,7 @@
     1. Identificar recursos y actuaciones ordinarias en el proceso penal vigente.
     2. Verificar si están pendientes de interponer o ya agotados.
     3. Determinar si la tutela es subsidiaria respecto de dichos mecanismos.
-    4. Profundizar análisis de «Verificar si hay vias ordinarias antes de tutela» con referencia al expediente y norma aplicable.
+    4. Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_ley906_search`, `rag_corte_constitucional_search`
   - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
@@ -309,7 +308,7 @@
     1. Precisar tipo de audiencia y marco normativo Ley 906 aplicable.
     2. Definir objetivo jurídico y táctico para la representación de la víctima.
     3. Alinear objetivo con teoría del caso y prueba disponible.
-    4. Profundizar análisis de «Definir objetivo juridico y tactico de la audiencia para la victima» con referencia al expediente y norma aplicable.
+    4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_ley906_search`, `calendar_event_reader`
   - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
@@ -324,14 +323,12 @@
   - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
 - `preparar_guion_intervencion_oral`
   - Instrucción tipo: Estructurar intervencion oral clara y breve.
-  - Pasos (serie):
+  - Pasos:
     1. Definir objetivo jurídico y táctico de la intervención en audiencia.
     2. Ubicar etapa procesal y norma Ley 906 que habilita la intervención.
-  - Pasos (paralelo entre sí):
     3. Estructurar apertura breve con postura de la víctima.
     4. Desarrollar núcleo argumentativo solo con hechos soportados.
     5. Anticipar réplicas a defensa y Fiscalía en puntos críticos.
-  - Pasos (serie):
     6. Revisar lenguaje para evitar revictimización y filtración de estrategia.
     7. Cerrar con peticiones concretas alineadas al objetivo de audiencia.
     8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
@@ -364,7 +361,7 @@
     1. Plantear escenarios favorable, intermedio y adverso probables.
     2. Definir respuesta táctica para cada escenario.
     3. Listar señales en audiencia que indiquen cambio de escenario.
-    4. Profundizar análisis de «Plantear escenarios probables y preparacion del abogado» con referencia al expediente y norma aplicable.
+    4. Cruzar escenario adverso con plan de contingencia procesal.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`
   - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
@@ -462,12 +459,10 @@
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`
 - `construir_matriz_hecho_prueba`
   - Instrucción tipo: Relacionar hechos con pruebas existentes y faltantes.
-  - Pasos (serie):
+  - Pasos:
     1. Listar hechos relevantes para la teoría del caso.
-  - Pasos (paralelo entre sí):
     2. Vincular cada hecho con prueba existente, faltante o en trámite.
     3. Priorizar brechas que afecten tipicidad o audiencia.
-  - Pasos (serie):
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`, `source_reference_validator`
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_tipicidad_y_responsabilidad_penal`, `preparador_estrategico_audiencias_penales`
@@ -489,7 +484,7 @@
     1. Listar pruebas faltantes críticas según matriz hecho-prueba.
     2. Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).
     3. Ordenar por impacto procesal y urgencia.
-    4. Profundizar análisis de «Proponer plan para obtener pruebas faltantes» con referencia al expediente y norma aplicable.
+    4. Señalar dependencias (custodia antes de peritaje, etc.).
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `task_manager_create`, `rag_expediente_search`
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
@@ -508,7 +503,7 @@
     1. Evaluar fuerza preliminar del soporte (directo, indirecto, circunstancial).
     2. Identificar elementos del tipo penal con soporte débil o ausente.
     3. Conclusión preliminar de suficiencia sin afirmar certeza judicial.
-    4. Profundizar análisis de «Evaluar preliminarmente fuerza de soporte probatorio» con referencia al expediente y norma aplicable.
+    4. Relacionar debilidades probatorias con plan de recaudo sugerido.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`
   - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
@@ -556,13 +551,11 @@
   - Agentes que lo usan: `coordinador_expediente_penal`
 - `construir_cronologia_penal`
   - Instrucción tipo: Ordenar hechos en linea de tiempo.
-  - Pasos (serie):
+  - Pasos:
     1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
-  - Pasos (paralelo entre sí):
     2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
-    3. Marcar inconsistencias entre versiones de fuentes.
-  - Pasos (serie):
-    4. Consolidar cronología con hechos confirmados, narrados e inferidos separados.
+    3. Marcar inconsistencias entre versiones.
+    4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `date_extractor`, `entity_extractor`, `case_state_writer`
   - Agentes que lo usan: `analista_cronologia_hechos_penales`, `preparador_estrategico_audiencias_penales`
@@ -659,12 +652,10 @@
   - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
 - `redactar_memorial_penal`
   - Instrucción tipo: Crear borrador de memorial penal.
-  - Pasos (serie):
+  - Pasos:
     1. Recopilar hechos soportados y pretensiones de la víctima.
-  - Pasos (paralelo entre sí):
     2. Verificar citas normativas aplicables al memorial.
     3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
-  - Pasos (serie):
     4. Redactar memorial integrando hechos, fundamentos y peticiones.
     5. Marcar pendientes de verificación antes de firma humana.
     6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
@@ -711,7 +702,7 @@
     1. Contrastar teoría del caso con etapa procesal y prueba disponible.
     2. Detectar desalineaciones entre ruta 906 y plan probatorio.
     3. Proponer ajustes coordinados para representación de la víctima.
-    4. Profundizar análisis de «Alinear teoria de victima con ruta procesal y plan probatorio» con referencia al expediente y norma aplicable.
+    4. Priorizar ajustes por plazos procesales y objetivos de la víctima.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `case_state_reader`, `rag_expediente_search`
   - Agentes que lo usan: `analista_representacion_victimas`, `analista_calidad_juridica`
@@ -789,7 +780,7 @@
     1. Identificar actuación o audiencia específica y marco Ley 906.
     2. Determinar formas de intervención de la víctima procedentes.
     3. Proponer contenido y momento de la intervención.
-    4. Profundizar análisis de «Definir intervencion posible de la victima en una actuacion o audiencia» con referencia al expediente y norma aplicable.
+    4. Documentar riesgos procesales si la intervención no es oportuna.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_ley906_search`, `rag_normas_victimas_search`
   - Agentes que lo usan: `analista_ruta_procesal_ley906`, `preparador_estrategico_audiencias_penales`
@@ -808,7 +799,7 @@
     1. Sintetizar etapa actual y actuaciones pendientes.
     2. Proponer secuencia de próximos pasos con responsables y plazos.
     3. Incluir riesgos procesales de la ruta propuesta.
-    4. Profundizar análisis de «Crear plan de proximos pasos procesales para revision del abogado» con referencia al expediente y norma aplicable.
+    4. Entregar ruta numerada con responsable y plazo por paso.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `task_manager_create`, `audit_log_write`
   - Agentes que lo usan: `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
@@ -818,7 +809,7 @@
     1. Revisar oportunidad, legitimación, competencia e improcedencia.
     2. Documentar riesgos de pérdida de derechos o extemporaneidad.
     3. Priorizar riesgos críticos para decisión inmediata.
-    4. Profundizar análisis de «Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos» con referencia al expediente y norma aplicable.
+    4. Recomendar actuación inmediata para riesgos críticos extemporáneos.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_ley906_search`, `case_state_reader`
   - Agentes que lo usan: `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
@@ -849,9 +840,8 @@
     1. Revisar actuaciones y estado del radicado.
     2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
     3. Señalar incertidumbres si el expediente es incompleto.
-    4. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-    5. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-    6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+    4. Señalar actuaciones habilitadas en la etapa identificada.
+    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`, `process_lookup_query`, `rag_ley906_search`
   - Agentes que lo usan: `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
 - `mapear_actuaciones_posibles_victima`
@@ -965,9 +955,8 @@
     1. Seleccionar tipos penales hipotéticos aplicables.
     2. Descomponer conducta, resultado, nexo y elementos normativos.
     3. Documentar dudas de tipicidad.
-    4. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-    5. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-    6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+    4. Registrar dudas de tipicidad por elemento sin concluir culpabilidad.
+    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_codigo_penal_search`, `citation_checker`
   - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
 - `detectar_agravantes_atenuantes`
@@ -1012,7 +1001,7 @@
     1. Relacionar cada elemento del tipo con hechos y pruebas.
     2. Visualizar fortalezas y debilidades por elemento.
     3. Proponer recaudo orientado a elementos débiles.
-    4. Profundizar análisis de «Relacionar elementos del tipo con hechos y pruebas» con referencia al expediente y norma aplicable.
+    4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `rag_expediente_search`, `rag_codigo_penal_search`
   - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`, `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
@@ -1033,7 +1022,7 @@
     1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
     2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
     3. Escalar con notificación si aplica.
-    4. Profundizar análisis de «Identificar si el caso requiere atencion humana inmediata» con referencia al expediente y norma aplicable.
+    4. Documentar motivo de escalamiento y agente destino.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `calendar_terms_calculator`, `case_state_reader`, `notification_create`
   - Agentes que lo usan: `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`

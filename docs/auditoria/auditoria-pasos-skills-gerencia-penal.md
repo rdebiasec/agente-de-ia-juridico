@@ -1,6 +1,6 @@
 # Auditoría gerencial de pasos por skill — Penal víctimas (Colombia) v2
 
-**Generado:** 2026-07-05 21:17  
+**Generado:** 2026-07-07 18:20  
 **Audiencia:** Gerencia del despacho y abogada líder  
 **Fuente canónica:** `docs/canon/lista-aprobacion-agentes-skills-pasos.md` + `scripts/lib/pasos_gerencia_matrix.py`
 
@@ -9,8 +9,8 @@
 ## Resumen ejecutivo
 
 - **Skills auditados:** 90
-- **Pasos totales (catálogo al auditar):** 404
-- **Pasos totales (propuesta gerencia v2):** 404
+- **Pasos totales (catálogo al auditar):** 402
+- **Pasos totales (propuesta gerencia v2):** 402
 - **Δ pasos:** +0
 
 ### Distribución por cantidad de pasos (histograma)
@@ -20,8 +20,8 @@
 | 2 | 4 | 4 |
 | 3 | 7 | 7 |
 | 4 | 49 | 49 |
-| 5 | 16 | 16 |
-| 6 | 6 | 6 |
+| 5 | 18 | 18 |
+| 6 | 4 | 4 |
 | 7 | 4 | 4 |
 | 8 | 2 | 2 |
 | 9 | 1 | 1 |
@@ -45,9 +45,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
-- **Purpose (SKILL.md):** clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
+- **Purpose (SKILL.md):** Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.78
+- **Score alineación (pasos actuales vs instrucción):** 0.68
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -70,9 +70,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Identificar si el caso requiere atencion humana inmediata.
-- **Purpose (SKILL.md):** identificar si el caso requiere atencion humana inmediata.
+- **Purpose (SKILL.md):** Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.35
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Identificar si el caso requiere atencion humana inmediata.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -80,13 +80,13 @@
   1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
   2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
   3. Escalar con notificación si aplica.
-  4. Profundizar análisis de «Identificar si el caso requiere atencion humana inmediata» con referencia al expediente y norma aplicable.
+  4. Documentar motivo de escalamiento y agente destino.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
   2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
   3. Escalar con notificación si aplica.
-  4. Profundizar análisis de «Identificar si el caso requiere atencion humana inmediata» con referencia al expediente y norma aplicable.
+  4. Documentar motivo de escalamiento y agente destino.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -97,9 +97,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar datos y documentos faltantes antes de analizar o redactar.
-- **Purpose (SKILL.md):** identificar datos y documentos faltantes antes de analizar o redactar.
+- **Purpose (SKILL.md):** Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.57
+- **Score alineación (pasos actuales vs instrucción):** 0.33
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar datos y documentos faltantes antes de analizar o redactar.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -122,9 +122,9 @@
 - **Prioridad:** P0
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
-- **Purpose (SKILL.md):** marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
+- **Purpose (SKILL.md):** Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
 - **Pasos:** 2 → **2** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.67
+- **Score alineación (pasos actuales vs instrucción):** 0.55
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill atómico («Marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 2 pasos:** 2 pasos (1 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -139,13 +139,13 @@
 #### `verificar_hechos_soportados`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`, `analista_cronologia_hechos_penales`
+- **Agentes:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Revisar si cada afirmacion factual tiene fuente.
-- **Purpose (SKILL.md):** revisar si cada afirmacion factual tiene fuente.
+- **Purpose (SKILL.md):** Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte.
 - **Pasos:** 3 → **3** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.33
+- **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Revisar si cada afirmacion factual tiene fuente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 3 pasos:** 3 pasos (2 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -168,9 +168,9 @@
 - **Prioridad:** P0
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.
-- **Purpose (SKILL.md):** distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.
+- **Purpose (SKILL.md):** Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados.
 - **Pasos:** 6 → **6** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.67
+- **Score alineación (pasos actuales vs instrucción):** 0.43
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 6 pasos:** 6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -197,9 +197,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Ordenar hechos en linea de tiempo.
-- **Purpose (SKILL.md):** ordenar hechos en linea de tiempo.
+- **Purpose (SKILL.md):** Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.38
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Ordenar hechos en linea de tiempo.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -207,13 +207,13 @@
   1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
   2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
   3. Marcar inconsistencias entre versiones.
-  4. Profundizar análisis de «Ordenar hechos en linea de tiempo» con referencia al expediente y norma aplicable.
+  4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
   2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
   3. Marcar inconsistencias entre versiones.
-  4. Profundizar análisis de «Ordenar hechos en linea de tiempo» con referencia al expediente y norma aplicable.
+  4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -224,9 +224,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Relacionar cada hecho con su fuente exacta.
-- **Purpose (SKILL.md):** relacionar cada hecho con su fuente exacta.
+- **Purpose (SKILL.md):** Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.83
+- **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Relacionar cada hecho con su fuente exacta.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -249,9 +249,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
-- **Purpose (SKILL.md):** encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
+- **Purpose (SKILL.md):** Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.25
+- **Score alineación (pasos actuales vs instrucción):** 0.35
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -274,9 +274,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar lo que falta para comprender o probar el caso.
-- **Purpose (SKILL.md):** identificar lo que falta para comprender o probar el caso.
+- **Purpose (SKILL.md):** Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.57
+- **Score alineación (pasos actuales vs instrucción):** 0.44
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar lo que falta para comprender o probar el caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -299,9 +299,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
-- **Purpose (SKILL.md):** extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
+- **Purpose (SKILL.md):** Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.71
+- **Score alineación (pasos actuales vs instrucción):** 0.80
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Extraer hechos relevantes de documentos, relatos, audios o comunicaciones.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -324,9 +324,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
-- **Purpose (SKILL.md):** crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
+- **Purpose (SKILL.md):** Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.40
+- **Score alineación (pasos actuales vs instrucción):** 0.39
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear preguntas para victima, testigos o abogado humano sin inducir respuestas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -349,9 +349,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
-- **Purpose (SKILL.md):** identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
+- **Purpose (SKILL.md):** Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar.
 - **Pasos:** 3 → **3** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.12
+- **Score alineación (pasos actuales vs instrucción):** 0.59
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 3 pasos:** 3 pasos (2 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -374,9 +374,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Evaluar posibles roles de los intervinientes de manera preliminar.
-- **Purpose (SKILL.md):** evaluar posibles roles de los intervinientes de manera preliminar.
+- **Purpose (SKILL.md):** Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.29
+- **Score alineación (pasos actuales vs instrucción):** 0.33
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Evaluar posibles roles de los intervinientes de manera preliminar.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -399,9 +399,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
-- **Purpose (SKILL.md):** identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
+- **Purpose (SKILL.md):** Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.50
+- **Score alineación (pasos actuales vs instrucción):** 0.44
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -424,26 +424,24 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Dividir un posible delito en elementos juridicos verificables.
-- **Purpose (SKILL.md):** dividir un posible delito en elementos juridicos verificables.
-- **Pasos:** 6 → **6** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Purpose (SKILL.md):** Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente.
+- **Pasos:** 5 → **5** (propuesta v2)
+- **Score alineación (pasos actuales vs instrucción):** 0.40
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Dividir un posible delito en elementos juridicos verificables.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
-- **Por qué 6 pasos:** 6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
+- **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
 - **Pasos actuales (al auditar):**
   1. Seleccionar tipos penales hipotéticos aplicables.
   2. Descomponer conducta, resultado, nexo y elementos normativos.
   3. Documentar dudas de tipicidad.
-  4. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-  6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+  4. Registrar dudas de tipicidad por elemento sin concluir culpabilidad.
+  5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Seleccionar tipos penales hipotéticos aplicables.
   2. Descomponer conducta, resultado, nexo y elementos normativos.
   3. Documentar dudas de tipicidad.
-  4. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-  6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+  4. Registrar dudas de tipicidad por elemento sin concluir culpabilidad.
+  5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
 #### `detectar_agravantes_atenuantes`
@@ -453,9 +451,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar circunstancias relevantes que puedan afectar gravedad juridica.
-- **Purpose (SKILL.md):** identificar circunstancias relevantes que puedan afectar gravedad juridica.
+- **Purpose (SKILL.md):** Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.12
+- **Score alineación (pasos actuales vs instrucción):** 0.19
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar circunstancias relevantes que puedan afectar gravedad juridica.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -478,9 +476,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar cuando un caso puede ser atipico o tener naturaleza no penal.
-- **Purpose (SKILL.md):** detectar cuando un caso puede ser atipico o tener naturaleza no penal.
+- **Purpose (SKILL.md):** Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.00
+- **Score alineación (pasos actuales vs instrucción):** 0.19
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Detectar cuando un caso puede ser atipico o tener naturaleza no penal.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -503,9 +501,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear preguntas para completar elementos del tipo penal.
-- **Purpose (SKILL.md):** crear preguntas para completar elementos del tipo penal.
+- **Purpose (SKILL.md):** Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.75
+- **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear preguntas para completar elementos del tipo penal.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -528,9 +526,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
-- **Purpose (SKILL.md):** proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
+- **Purpose (SKILL.md):** Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.10
+- **Score alineación (pasos actuales vs instrucción):** 0.37
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -553,9 +551,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Relacionar elementos del tipo con hechos y pruebas.
-- **Purpose (SKILL.md):** relacionar elementos del tipo con hechos y pruebas.
+- **Purpose (SKILL.md):** Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.80
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Relacionar elementos del tipo con hechos y pruebas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -563,13 +561,13 @@
   1. Relacionar cada elemento del tipo con hechos y pruebas.
   2. Visualizar fortalezas y debilidades por elemento.
   3. Proponer recaudo orientado a elementos débiles.
-  4. Profundizar análisis de «Relacionar elementos del tipo con hechos y pruebas» con referencia al expediente y norma aplicable.
+  4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Relacionar cada elemento del tipo con hechos y pruebas.
   2. Visualizar fortalezas y debilidades por elemento.
   3. Proponer recaudo orientado a elementos débiles.
-  4. Profundizar análisis de «Relacionar elementos del tipo con hechos y pruebas» con referencia al expediente y norma aplicable.
+  4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -582,9 +580,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Definir intervencion posible de la victima en una actuacion o audiencia.
-- **Purpose (SKILL.md):** definir intervencion posible de la victima en una actuacion o audiencia.
+- **Purpose (SKILL.md):** Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.56
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Definir intervencion posible de la victima en una actuacion o audiencia.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -592,13 +590,13 @@
   1. Identificar actuación o audiencia específica y marco Ley 906.
   2. Determinar formas de intervención de la víctima procedentes.
   3. Proponer contenido y momento de la intervención.
-  4. Profundizar análisis de «Definir intervencion posible de la victima en una actuacion o audiencia» con referencia al expediente y norma aplicable.
+  4. Documentar riesgos procesales si la intervención no es oportuna.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Identificar actuación o audiencia específica y marco Ley 906.
   2. Determinar formas de intervención de la víctima procedentes.
   3. Proponer contenido y momento de la intervención.
-  4. Profundizar análisis de «Definir intervencion posible de la victima en una actuacion o audiencia» con referencia al expediente y norma aplicable.
+  4. Documentar riesgos procesales si la intervención no es oportuna.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -609,9 +607,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar y alertar terminos relevantes. No reemplaza calculo humano.
-- **Purpose (SKILL.md):** identificar y alertar terminos relevantes. No reemplaza calculo humano.
+- **Purpose (SKILL.md):** Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.29
+- **Score alineación (pasos actuales vs instrucción):** 0.59
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar y alertar terminos relevantes. No reemplaza calculo humano.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -634,9 +632,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Crear plan de proximos pasos procesales para revision del abogado.
-- **Purpose (SKILL.md):** crear plan de proximos pasos procesales para revision del abogado.
+- **Purpose (SKILL.md):** Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Crear plan de proximos pasos procesales para revision del abogado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -644,13 +642,13 @@
   1. Sintetizar etapa actual y actuaciones pendientes.
   2. Proponer secuencia de próximos pasos con responsables y plazos.
   3. Incluir riesgos procesales de la ruta propuesta.
-  4. Profundizar análisis de «Crear plan de proximos pasos procesales para revision del abogado» con referencia al expediente y norma aplicable.
+  4. Entregar ruta numerada con responsable y plazo por paso.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Sintetizar etapa actual y actuaciones pendientes.
   2. Proponer secuencia de próximos pasos con responsables y plazos.
   3. Incluir riesgos procesales de la ruta propuesta.
-  4. Profundizar análisis de «Crear plan de proximos pasos procesales para revision del abogado» con referencia al expediente y norma aplicable.
+  4. Entregar ruta numerada con responsable y plazo por paso.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -661,9 +659,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
-- **Purpose (SKILL.md):** detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
+- **Purpose (SKILL.md):** Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -671,13 +669,13 @@
   1. Revisar oportunidad, legitimación, competencia e improcedencia.
   2. Documentar riesgos de pérdida de derechos o extemporaneidad.
   3. Priorizar riesgos críticos para decisión inmediata.
-  4. Profundizar análisis de «Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos» con referencia al expediente y norma aplicable.
+  4. Recomendar actuación inmediata para riesgos críticos extemporáneos.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Revisar oportunidad, legitimación, competencia e improcedencia.
   2. Documentar riesgos de pérdida de derechos o extemporaneidad.
   3. Priorizar riesgos críticos para decisión inmediata.
-  4. Profundizar análisis de «Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos» con referencia al expediente y norma aplicable.
+  4. Recomendar actuación inmediata para riesgos críticos extemporáneos.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -688,9 +686,9 @@
 - **Prioridad:** P1
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
-- **Purpose (SKILL.md):** determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
+- **Purpose (SKILL.md):** Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual.
 - **Pasos:** 7 → **7** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.43
+- **Score alineación (pasos actuales vs instrucción):** 0.64
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 7 pasos:** 7 pasos (6 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -719,9 +717,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
-- **Purpose (SKILL.md):** evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
+- **Purpose (SKILL.md):** Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.43
+- **Score alineación (pasos actuales vs instrucción):** 0.53
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -744,26 +742,24 @@
 - **Prioridad:** P1
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Determinar etapa del caso.
-- **Purpose (SKILL.md):** determinar etapa del caso.
-- **Pasos:** 6 → **6** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Purpose (SKILL.md):** Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres.
+- **Pasos:** 5 → **5** (propuesta v2)
+- **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Determinar etapa del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
-- **Por qué 6 pasos:** 6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
+- **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
 - **Pasos actuales (al auditar):**
   1. Revisar actuaciones y estado del radicado.
   2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
   3. Señalar incertidumbres si el expediente es incompleto.
-  4. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+  4. Señalar actuaciones habilitadas en la etapa identificada.
+  5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Revisar actuaciones y estado del radicado.
   2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
   3. Señalar incertidumbres si el expediente es incompleto.
-  4. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+  4. Señalar actuaciones habilitadas en la etapa identificada.
+  5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
 #### `mapear_actuaciones_posibles_victima`
@@ -773,9 +769,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Indicar que puede hacer la representacion de victimas segun etapa.
-- **Purpose (SKILL.md):** indicar que puede hacer la representacion de victimas segun etapa.
+- **Purpose (SKILL.md):** Listar actuaciones que la representación de víctimas puede promover en la etapa actual, con requisitos y efectos esperados.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.50
+- **Score alineación (pasos actuales vs instrucción):** 0.72
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Indicar que puede hacer la representacion de victimas segun etapa.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -800,9 +796,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Alinear teoria de victima con ruta procesal y plan probatorio.
-- **Purpose (SKILL.md):** alinear teoria de victima con ruta procesal y plan probatorio.
+- **Purpose (SKILL.md):** Detectar desalineación entre teoría del caso, ruta Ley 906 y plan probatorio; proponer ajustes coordinados.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.74
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Alinear teoria de victima con ruta procesal y plan probatorio.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -810,13 +806,13 @@
   1. Contrastar teoría del caso con etapa procesal y prueba disponible.
   2. Detectar desalineaciones entre ruta 906 y plan probatorio.
   3. Proponer ajustes coordinados para representación de la víctima.
-  4. Profundizar análisis de «Alinear teoria de victima con ruta procesal y plan probatorio» con referencia al expediente y norma aplicable.
+  4. Priorizar ajustes por plazos procesales y objetivos de la víctima.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Contrastar teoría del caso con etapa procesal y prueba disponible.
   2. Detectar desalineaciones entre ruta 906 y plan probatorio.
   3. Proponer ajustes coordinados para representación de la víctima.
-  4. Profundizar análisis de «Alinear teoria de victima con ruta procesal y plan probatorio» con referencia al expediente y norma aplicable.
+  4. Priorizar ajustes por plazos procesales y objetivos de la víctima.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -827,7 +823,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Mapear derechos de victima aplicables al caso.
-- **Purpose (SKILL.md):** mapear derechos de victima aplicables al caso.
+- **Purpose (SKILL.md):** Mapear derechos de victima aplicables al caso.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.60
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Mapear derechos de victima aplicables al caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -852,7 +848,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar sujetos de especial proteccion y necesidades diferenciadas.
-- **Purpose (SKILL.md):** identificar sujetos de especial proteccion y necesidades diferenciadas.
+- **Purpose (SKILL.md):** Identificar sujetos de especial proteccion y necesidades diferenciadas.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar sujetos de especial proteccion y necesidades diferenciadas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -877,9 +873,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Formular teoria preliminar desde la victima.
-- **Purpose (SKILL.md):** formular teoria preliminar desde la victima.
+- **Purpose (SKILL.md):** Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio.
 - **Pasos:** 7 → **7** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.20
+- **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Formular teoria preliminar desde la victima.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 7 pasos:** 7 pasos (6 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -908,7 +904,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
-- **Purpose (SKILL.md):** identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
+- **Purpose (SKILL.md):** Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.62
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -933,7 +929,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Organizar danos y afectaciones alegadas.
-- **Purpose (SKILL.md):** organizar danos y afectaciones alegadas.
+- **Purpose (SKILL.md):** Organizar danos y afectaciones alegadas.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.75
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Organizar danos y afectaciones alegadas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -958,7 +954,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Aclarar el objetivo real de la victima.
-- **Purpose (SKILL.md):** aclarar el objetivo real de la victima.
+- **Purpose (SKILL.md):** Aclarar el objetivo real de la victima.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.25
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Aclarar el objetivo real de la victima.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -983,9 +979,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Ordenar objetivos de la representacion.
-- **Purpose (SKILL.md):** ordenar objetivos de la representacion.
+- **Purpose (SKILL.md):** Listar y ordenar objetivos posibles de la representación de la víctima según urgencia, viabilidad y alineación con sus intereses, documentando trade-offs para decisión del abogado.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.67
+- **Score alineación (pasos actuales vs instrucción):** 0.81
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Ordenar objetivos de la representacion.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1010,7 +1006,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
-- **Purpose (SKILL.md):** clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
+- **Purpose (SKILL.md):** Clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.70
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1035,9 +1031,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Relacionar hechos con pruebas existentes y faltantes.
-- **Purpose (SKILL.md):** relacionar hechos con pruebas existentes y faltantes.
+- **Purpose (SKILL.md):** Vincular hechos relevantes con prueba existente, faltante o en trámite, priorizando brechas críticas.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.33
+- **Score alineación (pasos actuales vs instrucción):** 0.60
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Relacionar hechos con pruebas existentes y faltantes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1060,9 +1056,9 @@
 - **Prioridad:** P0
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Alertar si la evidencia puede requerir cadena de custodia.
-- **Purpose (SKILL.md):** alertar si la evidencia puede requerir cadena de custodia.
+- **Purpose (SKILL.md):** Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad.
 - **Pasos:** 7 → **7** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.67
+- **Score alineación (pasos actuales vs instrucción):** 0.79
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Alertar si la evidencia puede requerir cadena de custodia.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 7 pasos:** 7 pasos (6 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1091,9 +1087,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Proponer plan para obtener pruebas faltantes.
-- **Purpose (SKILL.md):** proponer plan para obtener pruebas faltantes.
+- **Purpose (SKILL.md):** Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.60
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Proponer plan para obtener pruebas faltantes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1101,13 +1097,13 @@
   1. Listar pruebas faltantes críticas según matriz hecho-prueba.
   2. Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).
   3. Ordenar por impacto procesal y urgencia.
-  4. Profundizar análisis de «Proponer plan para obtener pruebas faltantes» con referencia al expediente y norma aplicable.
+  4. Señalar dependencias (custodia antes de peritaje, etc.).
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Listar pruebas faltantes críticas según matriz hecho-prueba.
   2. Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).
   3. Ordenar por impacto procesal y urgencia.
-  4. Profundizar análisis de «Proponer plan para obtener pruebas faltantes» con referencia al expediente y norma aplicable.
+  4. Señalar dependencias (custodia antes de peritaje, etc.).
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1118,7 +1114,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar hechos relevantes sin soporte suficiente.
-- **Purpose (SKILL.md):** identificar hechos relevantes sin soporte suficiente.
+- **Purpose (SKILL.md):** Identificar hechos relevantes sin soporte suficiente.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar hechos relevantes sin soporte suficiente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1143,9 +1139,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Evaluar preliminarmente fuerza de soporte probatorio.
-- **Purpose (SKILL.md):** evaluar preliminarmente fuerza de soporte probatorio.
+- **Purpose (SKILL.md):** Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.73
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Evaluar preliminarmente fuerza de soporte probatorio.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1153,13 +1149,13 @@
   1. Evaluar fuerza preliminar del soporte (directo, indirecto, circunstancial).
   2. Identificar elementos del tipo penal con soporte débil o ausente.
   3. Conclusión preliminar de suficiencia sin afirmar certeza judicial.
-  4. Profundizar análisis de «Evaluar preliminarmente fuerza de soporte probatorio» con referencia al expediente y norma aplicable.
+  4. Relacionar debilidades probatorias con plan de recaudo sugerido.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Evaluar fuerza preliminar del soporte (directo, indirecto, circunstancial).
   2. Identificar elementos del tipo penal con soporte débil o ausente.
   3. Conclusión preliminar de suficiencia sin afirmar certeza judicial.
-  4. Profundizar análisis de «Evaluar preliminarmente fuerza de soporte probatorio» con referencia al expediente y norma aplicable.
+  4. Relacionar debilidades probatorias con plan de recaudo sugerido.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1170,7 +1166,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Preparar preguntas neutrales para testigos o peritos.
-- **Purpose (SKILL.md):** preparar preguntas neutrales para testigos o peritos.
+- **Purpose (SKILL.md):** Preparar preguntas neutrales para testigos o peritos.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Preparar preguntas neutrales para testigos o peritos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1195,9 +1191,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear inventario de todos los elementos disponibles.
-- **Purpose (SKILL.md):** crear inventario de todos los elementos disponibles.
+- **Purpose (SKILL.md):** Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.83
+- **Score alineación (pasos actuales vs instrucción):** 0.69
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear inventario de todos los elementos disponibles.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1220,7 +1216,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Definir medidas para proteger evidencia digital sin alterarla.
-- **Purpose (SKILL.md):** definir medidas para proteger evidencia digital sin alterarla.
+- **Purpose (SKILL.md):** Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar.
 - **Pasos:** 6 → **6** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Definir medidas para proteger evidencia digital sin alterarla.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1251,7 +1247,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Listar requisitos antes de audiencia.
-- **Purpose (SKILL.md):** listar requisitos antes de audiencia.
+- **Purpose (SKILL.md):** Listar requisitos antes de audiencia.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Listar requisitos antes de audiencia.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1276,7 +1272,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear resumen de una pagina para el abogado que interviene.
-- **Purpose (SKILL.md):** crear resumen de una pagina para el abogado que interviene.
+- **Purpose (SKILL.md):** Crear resumen de una pagina para el abogado que interviene.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.38
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear resumen de una pagina para el abogado que interviene.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1301,7 +1297,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
-- **Purpose (SKILL.md):** detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
+- **Purpose (SKILL.md):** Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.43
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1326,9 +1322,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Definir objetivo juridico y tactico de la audiencia para la victima.
-- **Purpose (SKILL.md):** definir objetivo juridico y tactico de la audiencia para la victima.
+- **Purpose (SKILL.md):** Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal).
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.53
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Definir objetivo juridico y tactico de la audiencia para la victima.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1336,13 +1332,13 @@
   1. Precisar tipo de audiencia y marco normativo Ley 906 aplicable.
   2. Definir objetivo jurídico y táctico para la representación de la víctima.
   3. Alinear objetivo con teoría del caso y prueba disponible.
-  4. Profundizar análisis de «Definir objetivo juridico y tactico de la audiencia para la victima» con referencia al expediente y norma aplicable.
+  4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Precisar tipo de audiencia y marco normativo Ley 906 aplicable.
   2. Definir objetivo jurídico y táctico para la representación de la víctima.
   3. Alinear objetivo con teoría del caso y prueba disponible.
-  4. Profundizar análisis de «Definir objetivo juridico y tactico de la audiencia para la victima» con referencia al expediente y norma aplicable.
+  4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1353,7 +1349,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Anticipar argumentos de defensa, Fiscalia u otros intervinientes.
-- **Purpose (SKILL.md):** anticipar argumentos de defensa, Fiscalia u otros intervinientes.
+- **Purpose (SKILL.md):** Anticipar argumentos de defensa, Fiscalia u otros intervinientes.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Anticipar argumentos de defensa, Fiscalia u otros intervinientes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1378,9 +1374,9 @@
 - **Prioridad:** P1
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Estructurar intervencion oral clara y breve.
-- **Purpose (SKILL.md):** estructurar intervencion oral clara y breve.
+- **Purpose (SKILL.md):** Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones.
 - **Pasos:** 8 → **8** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.40
+- **Score alineación (pasos actuales vs instrucción):** 0.47
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Estructurar intervencion oral clara y breve.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 8 pasos:** 8 pasos (7 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1411,9 +1407,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Sugerir preguntas para victima, testigos o peritos.
-- **Purpose (SKILL.md):** sugerir preguntas para victima, testigos o peritos.
+- **Purpose (SKILL.md):** Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia.
 - **Pasos:** 7 → **7** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.17
+- **Score alineación (pasos actuales vs instrucción):** 0.62
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Sugerir preguntas para victima, testigos o peritos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 7 pasos:** 7 pasos (6 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1442,9 +1438,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Formular solicitudes orales posibles segun etapa.
-- **Purpose (SKILL.md):** formular solicitudes orales posibles segun etapa.
+- **Purpose (SKILL.md):** Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.67
+- **Score alineación (pasos actuales vs instrucción):** 0.82
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Formular solicitudes orales posibles segun etapa.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1467,9 +1463,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Plantear escenarios probables y preparacion del abogado.
-- **Purpose (SKILL.md):** plantear escenarios probables y preparacion del abogado.
+- **Purpose (SKILL.md):** Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.64
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Plantear escenarios probables y preparacion del abogado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1477,13 +1473,13 @@
   1. Plantear escenarios favorable, intermedio y adverso probables.
   2. Definir respuesta táctica para cada escenario.
   3. Listar señales en audiencia que indiquen cambio de escenario.
-  4. Profundizar análisis de «Plantear escenarios probables y preparacion del abogado» con referencia al expediente y norma aplicable.
+  4. Cruzar escenario adverso con plan de contingencia procesal.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Plantear escenarios favorable, intermedio y adverso probables.
   2. Definir respuesta táctica para cada escenario.
   3. Listar señales en audiencia que indiquen cambio de escenario.
-  4. Profundizar análisis de «Plantear escenarios probables y preparacion del abogado» con referencia al expediente y norma aplicable.
+  4. Cruzar escenario adverso con plan de contingencia procesal.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1496,7 +1492,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Asegurar tono formal, preciso, no agresivo y no especulativo.
-- **Purpose (SKILL.md):** asegurar tono formal, preciso, no agresivo y no especulativo.
+- **Purpose (SKILL.md):** Asegurar tono formal, preciso, no agresivo y no especulativo.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Asegurar tono formal, preciso, no agresivo y no especulativo.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1521,7 +1517,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Ordenar cualquier documento juridico.
-- **Purpose (SKILL.md):** ordenar cualquier documento juridico.
+- **Purpose (SKILL.md):** Ordenar cualquier documento juridico.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.25
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Ordenar cualquier documento juridico.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1546,7 +1542,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
-- **Purpose (SKILL.md):** estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
+- **Purpose (SKILL.md):** Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.75
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1571,7 +1567,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Redactar derecho de peticion relacionado con autoridad o informacion del caso.
-- **Purpose (SKILL.md):** redactar derecho de peticion relacionado con autoridad o informacion del caso.
+- **Purpose (SKILL.md):** Redactar derecho de peticion relacionado con autoridad o informacion del caso.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.22
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Redactar derecho de peticion relacionado con autoridad o informacion del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1596,25 +1592,25 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Crear borrador de memorial penal.
-- **Purpose (SKILL.md):** crear borrador de memorial penal.
+- **Purpose (SKILL.md):** Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones.
 - **Pasos:** 6 → **6** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.60
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Crear borrador de memorial penal.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 6 pasos:** 6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
 - **Pasos actuales (al auditar):**
   1. Recopilar hechos soportados y pretensiones de la víctima.
-  2. Redactar memorial con estructura hechos-fundamentos-peticiones.
-  3. Verificar citas y marcar pendientes antes de firma humana.
-  4. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
+  2. Verificar citas normativas aplicables al memorial.
+  3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
+  4. Redactar memorial integrando hechos, fundamentos y peticiones.
+  5. Marcar pendientes de verificación antes de firma humana.
   6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Recopilar hechos soportados y pretensiones de la víctima.
-  2. Redactar memorial con estructura hechos-fundamentos-peticiones.
-  3. Verificar citas y marcar pendientes antes de firma humana.
-  4. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
+  2. Verificar citas normativas aplicables al memorial.
+  3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
+  4. Redactar memorial integrando hechos, fundamentos y peticiones.
+  5. Marcar pendientes de verificación antes de firma humana.
   6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1625,9 +1621,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
-- **Purpose (SKILL.md):** crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
+- **Purpose (SKILL.md):** Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.38
+- **Score alineación (pasos actuales vs instrucción):** 0.35
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1650,7 +1646,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear borrador para solicitar impulso procesal o actuaciones.
-- **Purpose (SKILL.md):** crear borrador para solicitar impulso procesal o actuaciones.
+- **Purpose (SKILL.md):** Crear borrador para solicitar impulso procesal o actuaciones.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.14
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear borrador para solicitar impulso procesal o actuaciones.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1675,7 +1671,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
-- **Purpose (SKILL.md):** crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
+- **Purpose (SKILL.md):** Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
 - **Pasos:** 10 → **10** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.25
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1714,9 +1710,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Mantener lista de tareas por agente o abogado.
-- **Purpose (SKILL.md):** mantener lista de tareas por agente o abogado.
+- **Purpose (SKILL.md):** Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento.
 - **Pasos:** 2 → **2** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.00
+- **Score alineación (pasos actuales vs instrucción):** 0.25
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill atómico («Mantener lista de tareas por agente o abogado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 2 pasos:** 2 pasos (1 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1735,7 +1731,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Administrar fechas, horas, enlaces y preparacion de audiencias.
-- **Purpose (SKILL.md):** administrar fechas, horas, enlaces y preparacion de audiencias.
+- **Purpose (SKILL.md):** Administrar fechas, horas, enlaces y preparacion de audiencias.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Administrar fechas, horas, enlaces y preparacion de audiencias.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1760,7 +1756,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear reporte interno periodico.
-- **Purpose (SKILL.md):** crear reporte interno periodico.
+- **Purpose (SKILL.md):** Crear reporte interno periodico.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear reporte interno periodico.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1781,13 +1777,13 @@
 #### `detectar_inactividad_procesal`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+- **Agentes:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Alertar falta de movimientos por periodo relevante.
-- **Purpose (SKILL.md):** alertar falta de movimientos por periodo relevante.
+- **Purpose (SKILL.md):** Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.33
+- **Score alineación (pasos actuales vs instrucción):** 0.57
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Alertar falta de movimientos por periodo relevante.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1806,13 +1802,13 @@
 #### `generar_alertas_terminos_vencimientos`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+- **Agentes:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear alertas de posibles vencimientos.
-- **Purpose (SKILL.md):** crear alertas de posibles vencimientos.
+- **Purpose (SKILL.md):** Generar alertas de vencimientos próximos clasificadas por criticidad.
 - **Pasos:** 3 → **3** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.50
+- **Score alineación (pasos actuales vs instrucción):** 0.56
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear alertas de posibles vencimientos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 3 pasos:** 3 pasos (2 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1833,7 +1829,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Consultar o registrar estado de radicado.
-- **Purpose (SKILL.md):** consultar o registrar estado de radicado.
+- **Purpose (SKILL.md):** Consultar o registrar estado del radicado con fuente y timestamp.
 - **Pasos:** 2 → **2** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 1.00
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill atómico («Consultar o registrar estado de radicado.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1854,7 +1850,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear version simple del estado del proceso para cliente, sin estrategia sensible.
-- **Purpose (SKILL.md):** crear version simple del estado del proceso para cliente, sin estrategia sensible.
+- **Purpose (SKILL.md):** Crear version simple del estado del proceso para cliente, sin estrategia sensible.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.73
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Crear version simple del estado del proceso para cliente, sin estrategia sensible.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1879,7 +1875,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Registrar una actuacion nueva en la bitacora del caso.
-- **Purpose (SKILL.md):** registrar una actuacion nueva en la bitacora del caso.
+- **Purpose (SKILL.md):** Registrar una actuacion nueva en la bitacora del caso.
 - **Pasos:** 2 → **2** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.29
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill atómico («Registrar una actuacion nueva en la bitacora del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1900,7 +1896,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Controlar documentos enviados y respuestas pendientes.
-- **Purpose (SKILL.md):** controlar documentos enviados y respuestas pendientes.
+- **Purpose (SKILL.md):** Controlar documentos enviados y respuestas pendientes.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 1.00
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Controlar documentos enviados y respuestas pendientes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -1927,9 +1923,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Identificar urgencia constitucional.
-- **Purpose (SKILL.md):** identificar urgencia constitucional.
+- **Purpose (SKILL.md):** Evaluar si el perjuicio alegado es actual, grave y de difícil reparación para sustentar inmediatez constitucional.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.62
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Identificar urgencia constitucional.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1937,13 +1933,13 @@
   1. Identificar el perjuicio alegado y su carácter actual o inminente.
   2. Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.
   3. Contrastar con mecanismos ordinarios y plazos procesales vigentes.
-  4. Profundizar análisis de «Identificar urgencia constitucional» con referencia al expediente y norma aplicable.
+  4. Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Identificar el perjuicio alegado y su carácter actual o inminente.
   2. Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.
   3. Contrastar con mecanismos ordinarios y plazos procesales vigentes.
-  4. Profundizar análisis de «Identificar urgencia constitucional» con referencia al expediente y norma aplicable.
+  4. Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1954,9 +1950,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Relacionar hechos con derechos afectados.
-- **Purpose (SKILL.md):** relacionar hechos con derechos afectados.
+- **Purpose (SKILL.md):** Vincular cada hecho relevante con el derecho fundamental comprometido y la conducta omisiva o activa de la autoridad.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.69
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Relacionar hechos con derechos afectados.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -1964,13 +1960,13 @@
   1. Listar hechos verificables y narrados relevantes para la vulneración alegada.
   2. Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.
   3. Señalar vacíos probatorios y norma constitucional de soporte preliminar.
-  4. Profundizar análisis de «Relacionar hechos con derechos afectados» con referencia al expediente y norma aplicable.
+  4. Ordenar filas por relevancia para pretensiones de tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Listar hechos verificables y narrados relevantes para la vulneración alegada.
   2. Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.
   3. Señalar vacíos probatorios y norma constitucional de soporte preliminar.
-  4. Profundizar análisis de «Relacionar hechos con derechos afectados» con referencia al expediente y norma aplicable.
+  4. Ordenar filas por relevancia para pretensiones de tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -1981,9 +1977,9 @@
 - **Prioridad:** P0
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Detectar si tutela puede ser prematura, subsidiaria o improcedente.
-- **Purpose (SKILL.md):** detectar si tutela puede ser prematura, subsidiaria o improcedente.
+- **Purpose (SKILL.md):** Alertar temprano si la tutela parece prematura, subsidiaria o improcedente antes del dictamen formal.
 - **Pasos:** 8 → **8** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.57
+- **Score alineación (pasos actuales vs instrucción):** 0.36
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Detectar si tutela puede ser prematura, subsidiaria o improcedente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 8 pasos:** 8 pasos (7 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2014,9 +2010,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Revisar si existe derecho de peticion incumplido.
-- **Purpose (SKILL.md):** revisar si existe derecho de peticion incumplido.
+- **Purpose (SKILL.md):** Verificar si hay petición previa incumplida y si procede derecho de petición antes de tutela u otra vía.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.53
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Revisar si existe derecho de peticion incumplido.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2024,13 +2020,13 @@
   1. Verificar existencia de petición previa, destinatario y objeto solicitado.
   2. Constatar plazo de respuesta y silencio administrativo si aplica.
   3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-  4. Profundizar análisis de «Revisar si existe derecho de peticion incumplido» con referencia al expediente y norma aplicable.
+  4. Documentar requisitos faltantes para interponer nueva petición o tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Verificar existencia de petición previa, destinatario y objeto solicitado.
   2. Constatar plazo de respuesta y silencio administrativo si aplica.
   3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-  4. Profundizar análisis de «Revisar si existe derecho de peticion incumplido» con referencia al expediente y norma aplicable.
+  4. Documentar requisitos faltantes para interponer nueva petición o tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -2041,9 +2037,9 @@
 - **Prioridad:** P0
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-- **Purpose (SKILL.md):** evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
+- **Purpose (SKILL.md):** Dictaminar preliminarmente si la tutela procede frente a legitimación, subsidiariedad, inmediatez y relevancia constitucional.
 - **Pasos:** 9 → **9** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.83
+- **Score alineación (pasos actuales vs instrucción):** 0.75
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 9 pasos:** 9 pasos (8 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2076,7 +2072,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar posibles derechos fundamentales comprometidos.
-- **Purpose (SKILL.md):** identificar posibles derechos fundamentales comprometidos.
+- **Purpose (SKILL.md):** Identificar posibles derechos fundamentales comprometidos.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.60
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Identificar posibles derechos fundamentales comprometidos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2101,9 +2097,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Preparar insumos para borrador de tutela.
-- **Purpose (SKILL.md):** preparar insumos para borrador de tutela.
+- **Purpose (SKILL.md):** Consolidar insumos estructurados para borrador de tutela solo si hay dictamen preliminar de procedencia.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.42
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Preparar insumos para borrador de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2111,13 +2107,13 @@
   1. Consolidar hechos, derechos afectados y pretensiones con fuentes.
   2. Verificar que el evaluador constitucional recomendó tutela preliminarmente.
   3. Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.
-  4. Profundizar análisis de «Preparar insumos para borrador de tutela» con referencia al expediente y norma aplicable.
+  4. Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Consolidar hechos, derechos afectados y pretensiones con fuentes.
   2. Verificar que el evaluador constitucional recomendó tutela preliminarmente.
   3. Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.
-  4. Profundizar análisis de «Preparar insumos para borrador de tutela» con referencia al expediente y norma aplicable.
+  4. Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -2128,9 +2124,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
-- **Purpose (SKILL.md):** recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
+- **Purpose (SKILL.md):** Inventariar vías disponibles (tutela, petición, solicitud Ley 906, queja, etc.), compararlas preliminarmente y recomendar ruta preferente con riesgos.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.56
+- **Score alineación (pasos actuales vs instrucción):** 0.71
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2153,9 +2149,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Verificar si hay vias ordinarias antes de tutela.
-- **Purpose (SKILL.md):** verificar si hay vias ordinarias antes de tutela.
+- **Purpose (SKILL.md):** Inventariar recursos y actuaciones ordinarias Ley 906 pendientes o agotadas para análisis de subsidiariedad.
 - **Pasos:** 5 → **5** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 1.00
+- **Score alineación (pasos actuales vs instrucción):** 0.44
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill estratégico («Verificar si hay vias ordinarias antes de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 5 pasos:** 5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2163,13 +2159,13 @@
   1. Identificar recursos y actuaciones ordinarias en el proceso penal vigente.
   2. Verificar si están pendientes de interponer o ya agotados.
   3. Determinar si la tutela es subsidiaria respecto de dichos mecanismos.
-  4. Profundizar análisis de «Verificar si hay vias ordinarias antes de tutela» con referencia al expediente y norma aplicable.
+  4. Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Pasos propuestos v2:**
   1. Identificar recursos y actuaciones ordinarias en el proceso penal vigente.
   2. Verificar si están pendientes de interponer o ya agotados.
   3. Determinar si la tutela es subsidiaria respecto de dichos mecanismos.
-  4. Profundizar análisis de «Verificar si hay vias ordinarias antes de tutela» con referencia al expediente y norma aplicable.
+  4. Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.
   5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
@@ -2182,7 +2178,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar.
-- **Purpose (SKILL.md):** clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar.
+- **Purpose (SKILL.md):** Clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar.
 - **Pasos:** 3 → **3** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.12
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2205,7 +2201,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar datos sensibles o innecesarios.
-- **Purpose (SKILL.md):** detectar datos sensibles o innecesarios.
+- **Purpose (SKILL.md):** Detectar datos sensibles o innecesarios.
 - **Pasos:** 3 → **3** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 1.00
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Detectar datos sensibles o innecesarios.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2228,9 +2224,9 @@
 - **Prioridad:** P1
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Revisar que la salida no culpe ni exponga indebidamente a la victima.
-- **Purpose (SKILL.md):** revisar que la salida no culpe ni exponga indebidamente a la victima.
+- **Purpose (SKILL.md):** Detectar lenguaje, preguntas o estrategias que culpen, minimicen o expongan indebidamente a la víctima; proponer reformulaciones.
 - **Pasos:** 6 → **6** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.86
+- **Score alineación (pasos actuales vs instrucción):** 0.76
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill crítico («Revisar que la salida no culpe ni exponga indebidamente a la victima.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 6 pasos:** 6 pasos (5 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2257,7 +2253,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
-- **Purpose (SKILL.md):** verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
+- **Purpose (SKILL.md):** Verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.25
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Verificar que no se confundan hechos probados, narrados, inferidos y pendientes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2282,7 +2278,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Revisar tono profesional y evitar lenguaje riesgoso.
-- **Purpose (SKILL.md):** revisar tono profesional y evitar lenguaje riesgoso.
+- **Purpose (SKILL.md):** Revisar tono profesional y evitar lenguaje riesgoso.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.33
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Revisar tono profesional y evitar lenguaje riesgoso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2307,7 +2303,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar fuentes, hechos, conclusiones o citas inventadas.
-- **Purpose (SKILL.md):** detectar fuentes, hechos, conclusiones o citas inventadas.
+- **Purpose (SKILL.md):** Detectar fuentes, hechos, conclusiones o citas inventadas.
 - **Pasos:** 3 → **3** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.50
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Detectar fuentes, hechos, conclusiones o citas inventadas.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2330,9 +2326,9 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Asegurar que documento o recomendacion sea coherente con la estrategia aprobada.
-- **Purpose (SKILL.md):** asegurar que documento o recomendacion sea coherente con la estrategia aprobada.
+- **Purpose (SKILL.md):** Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivos aprobados de la víctima.
 - **Pasos:** 4 → **4** (propuesta v2)
-- **Score alineación (pasos actuales vs instrucción):** 0.11
+- **Score alineación (pasos actuales vs instrucción):** 0.42
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Asegurar que documento o recomendacion sea coherente con la estrategia aprobada.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
 - **Por qué 4 pasos:** 4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.
 - **Riesgos si se recortan pasos:** Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente.
@@ -2355,7 +2351,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
-- **Purpose (SKILL.md):** verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
+- **Purpose (SKILL.md):** Verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
 - **Pasos:** 3 → **3** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.18
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2378,7 +2374,7 @@
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Revisar sentencias, radicados, fechas y organos judiciales.
-- **Purpose (SKILL.md):** revisar sentencias, radicados, fechas y organos judiciales.
+- **Purpose (SKILL.md):** Revisar sentencias, radicados, fechas y organos judiciales.
 - **Pasos:** 4 → **4** (propuesta v2)
 - **Score alineación (pasos actuales vs instrucción):** 0.67
 - **Reasoning gerencial:** Gerencia penal-víctimas: skill operativo («Revisar sentencias, radicados, fechas y organos judiciales.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
@@ -2610,15 +2606,14 @@
   6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
-#### `identificar_etapa_procesal_ley906` — tier `estrategico`, **6 pasos**
+#### `identificar_etapa_procesal_ley906` — tier `estrategico`, **5 pasos**
 
 - **Reasoning:** Gerencia penal-víctimas: skill estratégico («Determinar etapa del caso.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.
   1. Revisar actuaciones y estado del radicado.
   2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
   3. Señalar incertidumbres si el expediente es incompleto.
-  4. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  5. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-  6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+  4. Señalar actuaciones habilitadas en la etapa identificada.
+  5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 - **Aprobación abogada:** [ ] Pendiente
 
 #### `evaluar_oportunidad_procesal` — tier `critico`, **7 pasos**
@@ -2638,7 +2633,7 @@
 ## Resumen por agente
 
 ### `coordinador_expediente_penal` — Coordinador del expediente
-- **Skills:** 11 · **Flujo:** Recibe la consulta de la abogada, entiende que necesita y la envia al especialista correcto.
+- **Skills:** 11 · **Flujo:** Recibe la consulta del despacho, entiende que necesita y la envia al especialista correcto.
 
 ### `analista_cronologia_hechos_penales` — Analista de cronologia y hechos
 - **Skills:** 9 · **Flujo:** Convierte relatos y documentos en una historia factual ordenada y verificable.
@@ -2659,7 +2654,7 @@
 - **Skills:** 16 · **Flujo:** Prepara audiencias con objetivo, guion, preguntas y solicitudes.
 
 ### `redactor_documentos_juridicos_penales` — Redactor de documentos penales
-- **Skills:** 16 · **Flujo:** Convierte analisis juridico en escritos utilizables por la abogada.
+- **Skills:** 16 · **Flujo:** Convierte analisis juridico en escritos utilizables por el despacho.
 
 ### `gestor_seguimiento_procesal_penal` — Gestor de seguimiento procesal
 - **Skills:** 12 · **Flujo:** Monitorea estado de radicado, actuaciones, audiencias y terminos.

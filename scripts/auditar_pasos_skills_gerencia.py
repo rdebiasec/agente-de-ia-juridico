@@ -36,9 +36,19 @@ def _tokens(text: str) -> set[str]:
     return {w.lower() for w in re.findall(r"[a-záéíóúñü0-9]+", text, re.I) if len(w) > 2}
 
 
-def alignment_score(instruccion: str, purpose: str, steps: list[str]) -> float:
+def _step_texts(steps: list) -> list[str]:
+    out: list[str] = []
+    for s in steps:
+        if isinstance(s, dict):
+            out.append(str(s.get("text", "")))
+        else:
+            out.append(str(s))
+    return out
+
+
+def alignment_score(instruccion: str, purpose: str, steps: list) -> float:
     ref = _tokens(f"{instruccion} {purpose}")
-    step_t = _tokens(" ".join(steps))
+    step_t = _tokens(" ".join(_step_texts(steps)))
     if not ref or not step_t:
         return 0.0
     return len(ref & step_t) / len(ref)
@@ -51,11 +61,11 @@ def apply_steps_to_lista(proposed: dict[str, list[str]]) -> int:
         steps_block = "\n".join(f"    {i}. {s}" for i, s in enumerate(steps, 1)) + "\n"
         pattern = (
             rf"(- `{re.escape(sid)}`\n"
-            rf"(?:  - [^\n]+\n)*?"
-            rf"  - Pasos:\n)"
-            rf"(?:    \d+\. .+\n)+"
+            rf"(?:  - [^\n]+\n)*?)"
+            rf"  - Pasos(?: \([^)]+\))?:\n"
+            rf"(?:(?:    \d+\. .+\n)|(?:  - Pasos(?: \([^)]+\))?:\n(?:    \d+\. .+\n)+))*"
         )
-        repl = rf"\1{steps_block}"
+        repl = rf"\1  - Pasos:\n{steps_block}"
         new_text, n = re.subn(pattern, repl, text, count=1)
         if n:
             text = new_text
@@ -158,7 +168,7 @@ def generate_markdown(skills: dict[str, dict], agent_map: dict[str, list[str]]) 
             w(f"- **Por qué {len(prop)} pasos:** {meta.por_que_n}")
             w(f"- **Riesgos si se recortan pasos:** {meta.riesgos_si_faltan}")
             w("- **Pasos actuales (al auditar):**")
-            for i, s in enumerate(steps, 1):
+            for i, s in enumerate(_step_texts(steps), 1):
                 w(f"  {i}. {s}")
             w("- **Pasos propuestos v2:**")
             for i, s in enumerate(prop, 1):
@@ -219,7 +229,7 @@ def run_check(skills: dict[str, dict]) -> int:
     errors = []
     for sid, data in skills.items():
         prop = get_proposed_steps(sid, data.get("category", ""), data.get("instruccion", ""))
-        if data.get("steps", []) != prop:
+        if _step_texts(data.get("steps", [])) != prop:
             errors.append(sid)
     if errors:
         print(f"CHECK FAIL: {len(errors)} skills (ej. {errors[:3]})")

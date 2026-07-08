@@ -152,6 +152,44 @@ Nunca apruebes automáticamente sin marcar hallazgos y cambios requeridos.
     )
 
 
+def build_coordinador_agent() -> Agent:
+    base = _load_system_prompt()
+    instructions = f"""{base}
+
+Eres el COORDINADOR DEL EXPEDIENTE PENAL del despacho.
+Clasifica la consulta, identifica etapa aparente y enruta al especialista.
+No inventes normas, sentencias, radicados ni hechos.
+"""
+    return Agent(
+        name="coordinador_expediente_penal",
+        instructions=instructions,
+        model=get_settings().openai_model,
+        tools=get_knowledge_tools(),
+    )
+
+
+_AGENT_BUILDERS: dict[str, object] = {
+    "coordinador_expediente_penal": build_coordinador_agent,
+    "analista_cronologia_hechos_penales": build_analista_cronologia_hechos_penales_agent,
+    "analista_tipicidad_y_responsabilidad_penal": build_analista_tipicidad_y_responsabilidad_penal_agent,
+    "analista_ruta_procesal_ley906": build_analista_ruta_procesal_ley906_agent,
+    "analista_representacion_victimas": build_analista_representacion_victimas_agent,
+    "gestor_evidencia_y_soporte_probatorio": build_gestor_evidencia_y_soporte_probatorio_agent,
+    "preparador_estrategico_audiencias_penales": build_preparador_estrategico_audiencias_penales_agent,
+    "redactor_documentos_juridicos_penales": build_redactor_documentos_juridicos_penales_agent,
+    "gestor_seguimiento_procesal_penal": build_gestor_seguimiento_procesal_penal_agent,
+    "evaluador_derechos_fundamentales_tutela": build_evaluador_derechos_fundamentales_tutela_agent,
+    "analista_calidad_juridica": build_analista_calidad_juridica_agent,
+}
+
+
+def get_agent_by_id(agent_id: str) -> Agent | None:
+    builder = _AGENT_BUILDERS.get(agent_id)
+    if builder is None:
+        return None
+    return builder()  # type: ignore[operator]
+
+
 _SPECIALIST_BUILDERS = (
     build_analista_cronologia_hechos_penales_agent,
     build_analista_tipicidad_y_responsabilidad_penal_agent,
