@@ -39,7 +39,7 @@ from src.gateway.reset import reset_conversation
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
-from src.security import debug_enabled, is_production, security_headers, validate_production_settings
+from src.security import debug_enabled, is_production, security_headers, security_headers_for_path, validate_production_settings
 from src.validation.probes import generate_probes
 from src.validation.report import build_export_html, build_rules_only, build_session_report
 from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_weight
@@ -252,7 +252,7 @@ app.add_middleware(
 async def security_headers_middleware(request: Request, call_next):
     response = await call_next(request)
     if is_production(get_settings()):
-        for header, value in security_headers().items():
+        for header, value in security_headers_for_path(request.url.path).items():
             response.headers.setdefault(header, value)
     return response
 

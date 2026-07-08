@@ -94,6 +94,14 @@ def test_security_headers_include_csp():
     assert "default-src 'self'" in headers["Content-Security-Policy"]
 
 
+def test_audit_portal_csp_allows_cdn_assets():
+    from src.security import security_headers_for_path
+
+    csp = security_headers_for_path("/auditoria/")["Content-Security-Policy"]
+    assert "cdn.tailwindcss.com" in csp
+    assert "cdnjs.cloudflare.com" in csp
+
+
 def test_health_reports_twilio_flag(monkeypatch):
     from src.config import get_settings
 
