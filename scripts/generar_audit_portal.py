@@ -67,6 +67,9 @@ def copy_site_to_dist() -> None:
 
 def validate_portal_js() -> None:
     """Falla el build si app.js o auth-gate.js tienen error de sintaxis."""
+    if shutil.which("node") is None:
+        print("  js: omitiendo node --check (node no disponible en este entorno)")
+        return
     for rel in ("app.js", "auth-gate.js"):
         path = SITE_DIR / rel
         if not path.is_file():

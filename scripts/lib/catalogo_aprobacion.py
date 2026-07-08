@@ -6,7 +6,16 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILLS_DIR = ROOT / ".cursor" / "skills"
+
+
+def _resolve_skills_dir() -> Path:
+    for candidate in (ROOT / ".cursor" / "skills", ROOT / "agente" / "skills"):
+        if candidate.is_dir() and any(candidate.glob("*/SKILL.md")):
+            return candidate
+    return ROOT / ".cursor" / "skills"
+
+
+SKILLS_DIR = _resolve_skills_dir()
 LISTA = ROOT / "docs" / "canon" / "lista-aprobacion-agentes-skills-pasos.md"
 
 GUARDRAILS = [
@@ -357,7 +366,8 @@ def load_skills_catalog() -> dict[str, dict]:
     for p in sorted(SKILLS_DIR.glob("*/SKILL.md")):
         sid = p.parent.name
         data = parse_skill_md(p)
-        data["path"] = f".cursor/skills/{sid}/SKILL.md"
+        rel = p.relative_to(ROOT).as_posix()
+        data["path"] = rel
         extra = lista.get(sid, {})
         data["instruccion"] = extra.get("instruccion", "")
         lista_steps = extra.get("steps", [])
