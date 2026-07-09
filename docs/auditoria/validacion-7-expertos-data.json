@@ -9,7 +9,9 @@
     "generic_risk": 0,
     "profundizar": 0,
     "multi_no_boundary": 0,
-    "mono_sin_rol": 0
+    "mono_sin_rol": 0,
+    "missing_g9": 0,
+    "missing_g10": 0
   },
   "skills": {
     "actualizar_tareas_responsable": {

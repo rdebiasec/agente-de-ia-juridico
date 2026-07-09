@@ -20,7 +20,7 @@ def disable_web_auth_by_default(monkeypatch, request):
         "test_audit_portal_api"
     ) or request.module.__name__.endswith("test_compliance") or request.module.__name__.endswith(
         "test_access_control"
-    ):
+    ) or request.module.__name__.endswith("test_fase3_plan_product"):
         yield
         return
 

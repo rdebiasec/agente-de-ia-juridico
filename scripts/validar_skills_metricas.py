@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from lib.catalogo_aprobacion import SKILLS_DIR, load_skills_catalog  # noqa: E402
+from lib.catalogo_aprobacion import GUARDRAILS, SKILLS_DIR, load_skills_catalog  # noqa: E402
 from lib.pasos_gerencia_matrix import get_proposed_steps  # noqa: E402
 
 OUT_BASELINE = ROOT / "docs" / "auditoria" / "validacion-7-expertos-baseline.md"
@@ -127,6 +127,27 @@ VICTIM_QUESTION_SKILLS = {
     "generar_preguntas_testigos_peritos",
 }
 
+G9_CATEGORIES = {
+    "Skills de ruta procesal Ley 906",
+    "Skills de seguimiento procesal",
+    "Skills de evidencia y soporte probatorio",
+}
+EXTRA_G9_SKILLS = {
+    "controlar_terminos_procesales_preliminares",
+    "generar_alertas_terminos_vencimientos",
+    "evaluar_oportunidad_procesal",
+    "detectar_inactividad_procesal",
+}
+G10_CHAIN_SKILLS = set(CHAINS["evidencia_digital"])
+
+
+def needs_g9(sd: SkillData) -> bool:
+    return sd.category in G9_CATEGORIES or sd.sid in EXTRA_G9_SKILLS
+
+
+def needs_g10(sd: SkillData) -> bool:
+    return sd.category in G9_CATEGORIES or sd.sid in G10_CHAIN_SKILLS
+
 
 @dataclass
 class SkillData:
@@ -225,6 +246,10 @@ def collect_metrics(skills: dict[str, SkillData]) -> dict:
             c["with_rol"] += 1
         if sd.has_no_dup or sd.has_handoff:
             c["with_boundary"] += 1
+        if needs_g9(sd) and "g9" not in sd.text:
+            c["missing_g9"] += 1
+        if needs_g10(sd) and "g10" not in sd.text:
+            c["missing_g10"] += 1
     c["total"] = len(skills)
     for key in (
         "generic_io",
@@ -236,6 +261,8 @@ def collect_metrics(skills: dict[str, SkillData]) -> dict:
         "with_guardrails",
         "with_rol",
         "with_boundary",
+        "missing_g9",
+        "missing_g10",
     ):
         c.setdefault(key, 0)
     return dict(c)
@@ -376,6 +403,7 @@ def expert_e4(sd: SkillData) -> ExpertResult:
 
 def expert_e5(sd: SkillData) -> ExpertResult:
     recurso = sd.sid == "redactar_recurso_o_intervencion_preliminar"
+    g9_req = needs_g9(sd)
     gate_ok = True
     msg = ""
     if recurso:
@@ -386,7 +414,7 @@ def expert_e5(sd: SkillData) -> ExpertResult:
         ("inputs", len(sd.inputs) > 25, ""),
         ("outputs", len(sd.outputs) > 25, ""),
         ("steps", len(sd.steps) >= 2, ""),
-        ("guardrails", True, ""),
+        ("guardrails", "g9" in sd.text if g9_req else True, "Sin g9 plazos/etapa Ley 906"),
         ("boundaries", (not recurso) or sd.has_no_dup or "Rol en" in sd.text, "Sin frontera ruta/redactor"),
         ("risk", GENERIC_RISK not in sd.text, ""),
         ("business", gate_ok, msg),
@@ -404,6 +432,7 @@ def expert_e6(sd: SkillData) -> ExpertResult:
         or "confidencial" in sd.sid
         or sd.sid in VICTIM_QUESTION_SKILLS
     )
+    g10_req = needs_g10(sd)
     comp_ok = True
     msg = ""
     if sd.sid in CLIENT_SKILLS:
@@ -416,7 +445,7 @@ def expert_e6(sd: SkillData) -> ExpertResult:
         ("inputs", len(sd.inputs) > 20, ""),
         ("outputs", len(sd.outputs) > 20, ""),
         ("steps", len(sd.steps) >= 2, ""),
-        ("guardrails", "g5" in sd.text if sensitive else True, "Skill sensible sin g5"),
+        ("guardrails", ("g5" in sd.text if sensitive else True) and ("g10" in sd.text if g10_req else True), "Skill sensible sin g5 o sin g10 custodia"),
         ("boundaries", True, ""),
         ("risk", GENERIC_RISK not in sd.text, ""),
         ("business", comp_ok if sensitive else True, msg),
@@ -538,6 +567,8 @@ def validate_chain(chain_name: str, sids: list[str], skills: dict[str, SkillData
             issues.append("resumen cliente: sin etiqueta de aprobación previa")
     if chain_name == "evidencia_digital":
         for s in sids:
+            if s in skills and "g10" not in skills[s].text:
+                issues.append(f"{s}: falta g10 custodia probatoria")
             if s in skills and skills[s].tier == "critico" and len(skills[s].inputs) < 30:
                 issues.append(f"{s}: inputs podrían ser más concretos (observación)")
     status = "OK" if not issues else "OBSERVACIONES" if len(issues) <= 1 else "FAIL"
@@ -615,6 +646,7 @@ def write_report(
         "90/90 skills con Steps, Guardrails y sin plantillas genéricas I/O/riesgo.",
         "Lista canónica y matriz alineadas (CHECK OK).",
         "Multi-agente con No duplicar o Handoff en todos los skills compartidos.",
+        "10 reglas globales g1–g10 (plazos Ley 906 y custodia probatoria).",
     ]
 
     risks = [
@@ -659,7 +691,7 @@ def write_report(
         obs = "; ".join(ch["issues"]) if ch["issues"] else "Sin contradicciones"
         lines.append(f"| {ch['chain']} | {ch['status']} | {obs} |")
 
-    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela solo tras evaluador | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |"])
+    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela solo tras evaluador | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |", f"| Guardrails globales g1–g10 | {'OK' if len(GUARDRAILS) == 10 else 'FAIL'} |"])
 
     remediation = [
         ("analizar_perjuicio_irremediable", "Añadido g4 HITL en cadena tutela."),
@@ -711,6 +743,10 @@ def main() -> int:
     parser.add_argument("--baseline-only", action="store_true")
     parser.add_argument("--json", action="store_true", help="Escribir JSON de resultados")
     args = parser.parse_args()
+
+    if len(GUARDRAILS) != 10:
+        print(f"FAIL: se esperan 10 guardrails globales, hay {len(GUARDRAILS)}")
+        return 1
 
     catalog = load_skills_catalog()
     skills: dict[str, SkillData] = {}

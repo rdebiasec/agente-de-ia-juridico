@@ -1,4 +1,4 @@
-# Baseline — Validación 7 expertos (2026-07-07 19:15)
+# Baseline — Validación 7 expertos (2026-07-09 16:41)
 
 ## Métricas automáticas
 
@@ -6,6 +6,8 @@
 |---------|------:|
 | generic_io | 0 |
 | generic_risk | 0 |
+| missing_g10 | 0 |
+| missing_g9 | 0 |
 | mono_sin_rol | 0 |
 | multi_no_boundary | 0 |
 | profundizar | 0 |
@@ -145,5 +147,5 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-8 passed, 2 warnings in 1.31s
+8 passed, 2 warnings in 1.43s
 ```

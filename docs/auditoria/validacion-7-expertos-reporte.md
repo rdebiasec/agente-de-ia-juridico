@@ -1,4 +1,4 @@
-# Reporte — Validación absoluta 7 expertos (2026-07-07 19:15)
+# Reporte — Validación absoluta 7 expertos (2026-07-09 16:41)
 
 ## Resumen ejecutivo
 
@@ -13,6 +13,8 @@ Se validaron **90 skills** con 7 perspectivas expertas (rúbrica automatizada + 
 |---------|------:|
 | generic_io | 0 |
 | generic_risk | 0 |
+| missing_g10 | 0 |
+| missing_g9 | 0 |
 | mono_sin_rol | 0 |
 | multi_no_boundary | 0 |
 | profundizar | 0 |
@@ -31,6 +33,7 @@ Se validaron **90 skills** con 7 perspectivas expertas (rúbrica automatizada + 
 - 90/90 skills con Steps, Guardrails y sin plantillas genéricas I/O/riesgo.
 - Lista canónica y matriz alineadas (CHECK OK).
 - Multi-agente con No duplicar o Handoff en todos los skills compartidos.
+- 10 reglas globales g1–g10 (plazos Ley 906 y custodia probatoria).
 
 ## Cadenas críticas (5)
 
@@ -50,6 +53,7 @@ Se validaron **90 skills** con 7 perspectivas expertas (rúbrica automatizada + 
 | Ruta 906 no redacta recursos | OK |
 | Preguntas víctima HITL | OK |
 | IA propone; abogado aprueba | OK |
+| Guardrails globales g1–g10 | OK |
 
 ## Remediación aplicada (Fase V3)
 

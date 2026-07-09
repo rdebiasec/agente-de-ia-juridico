@@ -1,5 +1,7 @@
 """Fase 3 — plantillas, patrones, export MD y dashboard."""
 
+import os
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -10,6 +12,20 @@ from src.agents.planner import approve_plan, create_execution_plan
 from src.main import app
 from src.storage import get_repository
 from src.storage.models import ExecutionPlanRecord
+
+
+async def _login_web(client: AsyncClient, monkeypatch: pytest.MonkeyPatch, password: str = "fase3-web-pass-long!!") -> None:
+    from src.config import get_settings
+
+    monkeypatch.setenv("SITE_PASSWORD", password)
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars!!")
+    get_settings.cache_clear()
+    login = await client.post(
+        "/auth/login",
+        json={"username": "despacho", "password": password},
+    )
+    assert login.status_code == 200, login.text
 
 
 @pytest.fixture(autouse=True)
@@ -84,9 +100,10 @@ def test_render_plan_markdown_template_label():
 
 
 @pytest.mark.asyncio
-async def test_chat_plan_export_md_endpoint():
+async def test_chat_plan_export_md_endpoint(monkeypatch):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _login_web(client, monkeypatch)
         created = await client.post(
             "/chat/plan",
             json={
@@ -95,6 +112,7 @@ async def test_chat_plan_export_md_endpoint():
                 "user_id": "export-api",
             },
         )
+        assert created.status_code == 200, created.text
         plan_id = created.json()["plan_id"]
         res = await client.get(f"/chat/plan/{plan_id}/export.md?user_id=export-api")
     assert res.status_code == 200
@@ -116,10 +134,23 @@ async def test_audit_execution_dashboard_requires_auth(monkeypatch):
         unauth = await client.get("/api/audit/execution-plans/dashboard")
         assert unauth.status_code == 401
 
-        login = await client.post(
-            "/api/audit/login",
-            json={"email": "auditor@despacho.com", "password": "audit-dash-pass-long", "pin": "123456"},
+        prelogin = await client.post(
+            "/api/audit/prelogin",
+            json={"email": "auditor@despacho.com", "password": "audit-dash-pass-long"},
         )
+        assert prelogin.status_code == 200, prelogin.text
+        login_body: dict = {
+            "email": "auditor@despacho.com",
+            "password": "audit-dash-pass-long",
+            "accept_privacy": True,
+            "accept_sensitive_data": True,
+        }
+        state = prelogin.json()
+        if state.get("needs_pin_setup"):
+            login_body["new_pin"] = "123456"
+        else:
+            login_body["pin"] = "123456"
+        login = await client.post("/api/audit/login", json=login_body)
         if login.status_code == 200:
             dash = await client.get("/api/audit/execution-plans/dashboard")
             assert dash.status_code == 200
@@ -168,21 +199,30 @@ async def test_audit_clear_execution_plans(monkeypatch):
     repo = get_repository()
     assert repo.execution_plan_stats()["total"] >= 1
 
+    email = "clear@despacho.com"
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         unauth = await client.delete("/api/audit/execution-plans")
         assert unauth.status_code == 401
 
-        login = await client.post(
-            "/api/audit/login",
-            json={
-                "email": "clear@despacho.com",
-                "password": "audit-clear-plans-pass",
-                "new_pin": "112233",
-                "accept_privacy": True,
-                "accept_sensitive_data": True,
-            },
+        login_body: dict = {
+            "email": email,
+            "password": "audit-clear-plans-pass",
+            "accept_privacy": True,
+            "accept_sensitive_data": True,
+        }
+        prelogin = await client.post(
+            "/api/audit/prelogin",
+            json={"email": email, "password": "audit-clear-plans-pass"},
         )
+        assert prelogin.status_code == 200, prelogin.text
+        state = prelogin.json()
+        if state.get("needs_pin_setup"):
+            login_body["new_pin"] = "112233"
+        else:
+            login_body["pin"] = "112233"
+
+        login = await client.post("/api/audit/login", json=login_body)
         assert login.status_code == 200
 
         cleared = await client.delete("/api/audit/execution-plans")

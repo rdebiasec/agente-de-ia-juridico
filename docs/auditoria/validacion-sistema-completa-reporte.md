@@ -1,14 +1,16 @@
-# Reporte — Validación extensa del sistema (2026-07-07 19:16)
+# Reporte — Validación extensa del sistema (2026-07-09 16:41)
 
 ## Resumen ejecutivo
 
-**Resultado global: FAIL** — 1 capa(s) con error.
+**Resultado global: PASS** — todas las capas completadas.
 
 | Capa | Estado | Duración (s) |
 |------|--------|-------------:|
 | Capa 1 — Skills 7-expertos | OK | 2 |
-| Capa 2 — Gates estáticos | OK | 0 |
-| Capa 3 — Pytest suite | FAIL | 20 |
+| Capa 2 — Gates estáticos | OK | 1 |
+| Capa 3 — Pytest suite | OK | 15 |
+| Capa 4 — Runtime | OK | 2 |
+| Capa 5 — Smoke HTTP local | OK | 6 |
 
 ### Skills 7-expertos (Capa 1)
 
@@ -60,21 +62,6 @@ Espejo OK: 90 SKILL.md sincronizados
 
 ### Capa 3 — Pytest suite
 ```
-tests/test_trace_workflow.py::test_debug_trace_returns_session_history
-  /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/httpx/_client.py:1859: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
-    return await self.request(
-
-tests/test_access_control.py::test_plan_bola_blocks_cross_subject
-tests/test_conversation.py::test_expediente_sync_from_tutela_message
-tests/test_conversation.py::test_repository_agent_session_roundtrip
-  /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/alembic/config.py:612: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
-    util.warn_deprecated(
-
-tests/test_access_control.py: 4 warnings
-tests/test_auth.py: 5 warnings
-tests/test_compliance.py: 1 warning
-tests/test_trace_workflow.py: 2 warnings
-  /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/httpx/_client.py:1768: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
     return await self.request(
 
 tests/test_compliance.py::test_audit_progress_history_and_isolation
@@ -82,8 +69,24 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-FAILED tests/test_fase3_plan_product.py::test_audit_clear_execution_plans - a...
-1 failed, 155 passed, 1 skipped, 7 deselected, 24 warnings in 18.07s
+157 passed, 1 skipped, 7 deselected, 24 warnings in 14.79s
+```
+
+### Capa 4 — Runtime
+```
+................                                                         [100%]
+16 passed in 0.87s
+```
+
+### Capa 5 — Smoke HTTP local
+```
+tests/test_smoke_local.py::test_login_page PASSED                        [ 28%]
+tests/test_smoke_local.py::test_auditoria_static_has_auth_gate PASSED    [ 42%]
+tests/test_smoke_local.py::test_audit_login_and_progress PASSED          [ 57%]
+tests/test_smoke_local.py::test_audit_catalog_live PASSED                [ 71%]
+tests/test_smoke_local.py::test_web_chat_with_trace PASSED               [ 85%]
+tests/test_smoke_local.py::test_chat_plan_flow PASSED                    [100%]
+
+============================== 7 passed in 3.86s ===============================
 ```
 
