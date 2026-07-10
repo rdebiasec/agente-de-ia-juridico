@@ -29,10 +29,27 @@
         });
     }
 
+    const AUDIT_STORAGE_KEYS = [
+        'legal-audit-sync-v4',
+        'legal-audit-sync-v3',
+        'legal-audit-sync-v2',
+    ];
+
+    function clearAuditLocalCache() {
+        for (const key of AUDIT_STORAGE_KEYS) {
+            try {
+                localStorage.removeItem(key);
+            } catch (_) {
+                /* ignore */
+            }
+        }
+    }
+
     function showGate() {
         document.getElementById('audit-auth-gate')?.classList.remove('gate-hidden');
         document.getElementById('audit-app-root')?.classList.add('app-gated');
         document.body.classList.add('overflow-hidden');
+        document.getElementById('audit-auth-logout')?.classList.add('hidden');
     }
 
     function hideGate() {
@@ -175,18 +192,37 @@
             }
         });
 
-        document.getElementById('audit-auth-logout')?.addEventListener('click', async () => {
+    }
+
+    function bindLogoutButton() {
+        const btn = document.getElementById('audit-auth-logout');
+        if (!btn || btn.dataset.bound === '1') return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
             try {
-                await fetchAuditApi('/api/audit/logout', { method: 'POST' });
-            } catch (_) { /* ignore */ }
+                const res = await fetchAuditApi('/api/audit/logout', { method: 'POST' });
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.detail || `HTTP ${res.status}`);
+                }
+            } catch (err) {
+                console.warn('audit logout:', err);
+                alert(err.message || 'No se pudo cerrar sesión. Intente de nuevo.');
+                btn.disabled = false;
+                return;
+            }
             setSessionEmail(null);
             preloginState = null;
+            clearAuditLocalCache();
+            window.dispatchEvent(new CustomEvent('audit-session-ended'));
             showGate();
             location.reload();
         });
     }
 
     window.__auditAuthPromise = new Promise(resolve => {
+        bindLogoutButton();
         (async () => {
             try {
                 const active = await checkSession();

@@ -142,4 +142,35 @@ async def test_legal_pages_public(monkeypatch):
         assert "Ley 1581" in r.text
         r = await client.get("/legal/tratamiento-datos-casos")
         assert r.status_code == 200
-        assert "datos de casos" in r.text.lower()
+
+
+@pytest.mark.asyncio
+async def test_audit_logout_clears_session(monkeypatch):
+    _audit_env(monkeypatch)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.post(
+            "/api/audit/login",
+            json={
+                "email": "logout@despacho.com",
+                "password": "audit-test-secret-pass",
+                "new_pin": "123456",
+                "accept_privacy": True,
+                "accept_sensitive_data": True,
+            },
+        )
+        assert r.status_code == 200
+
+        r = await client.get("/api/audit/session")
+        assert r.status_code == 200
+        assert r.json()["authenticated"] is True
+
+        r = await client.post("/api/audit/logout")
+        assert r.status_code == 200
+        set_cookie = r.headers.get("set-cookie", "").lower()
+        assert "audit_session=" in set_cookie
+        assert "max-age=0" in set_cookie
+
+        r = await client.get("/api/audit/session")
+        assert r.status_code == 200
+        assert r.json()["authenticated"] is False

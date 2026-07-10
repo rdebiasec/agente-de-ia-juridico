@@ -97,12 +97,17 @@ def _apply_audit_cookie(response: Response, token: str, settings: Settings) -> N
 
 
 def _clear_audit_cookie(response: Response, settings: Settings) -> None:
-    response.delete_cookie(
+    secure = cookie_secure(settings)
+    samesite = "none" if secure else "lax"
+    # set_cookie max_age=0 es más fiable que delete_cookie con SameSite=None en prod.
+    response.set_cookie(
         key=AUDIT_COOKIE_NAME,
-        path="/",
-        secure=cookie_secure(settings),
+        value="",
+        max_age=0,
         httponly=True,
-        samesite="none" if cookie_secure(settings) else "lax",
+        secure=secure,
+        samesite=samesite,
+        path="/",
     )
 
 
