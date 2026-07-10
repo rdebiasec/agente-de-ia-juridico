@@ -2077,14 +2077,15 @@ async function init() {
     if (!catalogOk) return;
 
     bindCatalogUi();
-    renderAll();
-    updatePersistStatus();
-    void loadConfigStatus();
 
     const authOk = typeof window.waitForAuditAuth === 'function'
         ? await window.waitForAuditAuth()
         : true;
     if (!authOk) return;
+
+    renderAll();
+    updatePersistStatus();
+    void loadConfigStatus();
 
     await syncProgressFromServer();
     renderAll();
@@ -2107,3 +2108,14 @@ window.exportarProgresoJson = exportarProgresoJson;
 window.exportarMarkdown = exportarMarkdown;
 
 document.addEventListener('DOMContentLoaded', init);
+
+window.addEventListener('audit-session-ended', () => {
+    auditLog.guardrails = {};
+    auditLog.agentes = {};
+    auditLog.guias = {};
+    auditLog.pasos = {};
+    auditLog.custom = null;
+    ensureCustom();
+    serverUpdatedAt = null;
+    serverSyncEnabled = true;
+});

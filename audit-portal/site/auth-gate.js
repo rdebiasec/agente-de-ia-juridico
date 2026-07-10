@@ -216,8 +216,10 @@
             preloginState = null;
             clearAuditLocalCache();
             window.dispatchEvent(new CustomEvent('audit-session-ended'));
+            document.getElementById('audit-auth-form')?.reset();
+            preloginState = null;
             showGate();
-            location.reload();
+            btn.disabled = false;
         });
     }
 
