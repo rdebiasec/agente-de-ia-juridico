@@ -1,4 +1,4 @@
-# Reporte — Validación extensa del sistema (2026-07-09 16:41)
+# Reporte — Validación extensa del sistema (2026-07-09 19:52)
 
 ## Resumen ejecutivo
 
@@ -8,7 +8,7 @@
 |------|--------|-------------:|
 | Capa 1 — Skills 7-expertos | OK | 2 |
 | Capa 2 — Gates estáticos | OK | 1 |
-| Capa 3 — Pytest suite | OK | 15 |
+| Capa 3 — Pytest suite | OK | 18 |
 | Capa 4 — Runtime | OK | 2 |
 | Capa 5 — Smoke HTTP local | OK | 6 |
 
@@ -69,13 +69,13 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-157 passed, 1 skipped, 7 deselected, 24 warnings in 14.79s
+157 passed, 1 skipped, 7 deselected, 24 warnings in 16.99s
 ```
 
 ### Capa 4 — Runtime
 ```
 ................                                                         [100%]
-16 passed in 0.87s
+16 passed in 0.94s
 ```
 
 ### Capa 5 — Smoke HTTP local
@@ -87,6 +87,6 @@ tests/test_smoke_local.py::test_audit_catalog_live PASSED                [ 71%]
 tests/test_smoke_local.py::test_web_chat_with_trace PASSED               [ 85%]
 tests/test_smoke_local.py::test_chat_plan_flow PASSED                    [100%]
 
-============================== 7 passed in 3.86s ===============================
+============================== 7 passed in 4.14s ===============================
 ```
 

@@ -43,3 +43,17 @@ AUDIT_API_BASE="" python scripts/generar_audit_portal.py
 
 - Dictamen 7 expertos previo (2026-07-07) es pre-g9/g10 formalizado en rubricas; re-ejecutar en este corte.
 - Auditoría humana portal (693 ítems): pendiente despacho.
+
+---
+
+## Checkpoint 2026-07-09 — pausa (local = prod)
+
+| Campo | Valor |
+|-------|-------|
+| Commit | `5aebc42f5e79776b7227665977df24543dd050e4` |
+| Push | `origin/main` actualizado |
+| Validación 5 capas | PASS (Postgres, 2026-07-09 19:52) |
+| Smoke prod | PASS 8/8 (2026-07-09 19:54) |
+| Paridad catálogo | local = Render = dist → 10/11/90/402/693 |
+
+**Pausa activa:** ver [`checkpoint-pausa-auditoria-humana-2026-07-09.md`](checkpoint-pausa-auditoria-humana-2026-07-09.md).
