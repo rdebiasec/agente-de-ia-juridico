@@ -8,6 +8,7 @@ const SAVE_DEBOUNCE_MS = 800;
 let serverUpdatedAt = null;
 let saveDebounceTimer = null;
 let serverSyncEnabled = true;
+let initialProgressSynced = false;
 
 const GROUP_LABELS = {
     coordinacion: 'Coordinación',
@@ -341,7 +342,7 @@ function saveAuditLogLocalOnly() {
 }
 
 async function pushProgressToServer() {
-    if (!serverSyncEnabled) return;
+    if (!serverSyncEnabled || !initialProgressSynced) return;
     const email = typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
     if (!email) return;
     try {
@@ -364,7 +365,7 @@ async function pushProgressToServer() {
 }
 
 function scheduleServerSave() {
-    if (!serverSyncEnabled) return;
+    if (!serverSyncEnabled || !initialProgressSynced) return;
     if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(() => {
         saveDebounceTimer = null;
@@ -2083,11 +2084,11 @@ async function init() {
         : true;
     if (!authOk) return;
 
-    renderAll();
-    updatePersistStatus();
-    void loadConfigStatus();
-
+    serverSyncEnabled = false;
     await syncProgressFromServer();
+    initialProgressSynced = true;
+    serverSyncEnabled = true;
+
     renderAll();
     updatePersistStatus();
     await loadConfigStatus();
@@ -2118,4 +2119,5 @@ window.addEventListener('audit-session-ended', () => {
     ensureCustom();
     serverUpdatedAt = null;
     serverSyncEnabled = true;
+    initialProgressSynced = false;
 });
