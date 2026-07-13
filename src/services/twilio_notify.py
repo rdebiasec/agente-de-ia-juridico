@@ -7,6 +7,7 @@ no-op. Para producción se recomienda Messaging Service (`TWILIO_MESSAGING_SERVI
 from __future__ import annotations
 
 import logging
+import os
 import re
 from datetime import date
 
@@ -23,6 +24,17 @@ def twilio_habilitado() -> bool:
     tiene_credenciales = bool(settings.twilio_account_sid and settings.twilio_auth_token)
     tiene_origen = bool(settings.twilio_messaging_service_sid or settings.twilio_from_number)
     return tiene_credenciales and tiene_origen and bool(settings.twilio_alert_to)
+
+
+def resolve_status_callback_url() -> str | None:
+    """URL absoluta del StatusCallback (env explícita o RENDER_EXTERNAL_URL)."""
+    settings = get_settings()
+    if settings.twilio_status_callback:
+        return settings.twilio_status_callback.rstrip("/")
+    render_url = (os.environ.get("RENDER_EXTERNAL_URL") or "").strip().rstrip("/")
+    if render_url:
+        return f"{render_url}/twilio/sms-status"
+    return None
 
 
 def normalizar_e164(telefono: str, *, default_country: str = "CO") -> str | None:
@@ -88,11 +100,50 @@ def notificar_texto_sms(mensaje: str, *, to: str | None = None) -> str | None:
             params["messaging_service_sid"] = settings.twilio_messaging_service_sid
         else:
             params["from_"] = settings.twilio_from_number
-        if settings.twilio_status_callback:
-            params["status_callback"] = settings.twilio_status_callback
+        callback = resolve_status_callback_url()
+        if callback:
+            params["status_callback"] = callback
 
         message = client.messages.create(**params)
         return message.sid
     except Exception as exc:  # pragma: no cover - depende de red/credenciales
         logger.warning("No se pudo enviar alerta SMS via Twilio: %s", exc)
         return None
+
+
+def verify_twilio_request(url: str, params: dict[str, str], signature: str | None) -> bool:
+    """Valida X-Twilio-Signature con el Auth Token (helper oficial del SDK)."""
+    settings = get_settings()
+    if not settings.twilio_auth_token or not signature:
+        return False
+    try:
+        from twilio.request_validator import RequestValidator
+
+        validator = RequestValidator(settings.twilio_auth_token)
+        return bool(validator.validate(url, params, signature))
+    except Exception:
+        logger.exception("Fallo al validar firma Twilio")
+        return False
+
+
+def handle_sms_status_callback(params: dict[str, str]) -> dict:
+    """Registra el estado de entrega; no expone PII en logs."""
+    message_sid = (params.get("MessageSid") or params.get("SmsSid") or "").strip()
+    status = (params.get("MessageStatus") or params.get("SmsStatus") or "").strip().lower()
+    error_code = (params.get("ErrorCode") or "").strip()
+
+    if status in {"failed", "undelivered"}:
+        logger.warning(
+            "SMS Twilio no entregado sid=%s status=%s error=%s",
+            message_sid or "unknown",
+            status,
+            error_code or "n/a",
+        )
+    else:
+        logger.info("SMS Twilio sid=%s status=%s", message_sid or "unknown", status or "unknown")
+
+    return {
+        "message_sid": message_sid or None,
+        "status": status or None,
+        "error_code": error_code or None,
+    }

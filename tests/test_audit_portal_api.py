@@ -133,6 +133,44 @@ async def test_audit_progress_rejects_empty_overwrite(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_audit_progress_rejects_regression(monkeypatch):
+    _audit_env(monkeypatch)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await _login(client, "regress@despacho.com")
+        assert r.status_code == 200
+
+        full = {
+            "version": 4,
+            "guardrails": {
+                "g1": {"status": "APROBADO", "reason": "", "solution": ""},
+                "g2": {"status": "APROBADO", "reason": "", "solution": ""},
+            },
+            "agentes": {},
+            "guias": {},
+            "pasos": {},
+        }
+        r = await client.put("/api/audit/progress", json=full)
+        assert r.status_code == 200
+
+        partial = {
+            "version": 4,
+            "guardrails": {
+                "g1": {"status": "APROBADO", "reason": "", "solution": ""},
+                "g2": {"status": "PENDIENTE", "reason": "", "solution": ""},
+            },
+            "agentes": {},
+            "guias": {},
+            "pasos": {},
+        }
+        r = await client.put("/api/audit/progress", json=partial)
+        assert r.status_code == 409
+
+        r = await client.get("/api/audit/progress")
+        assert r.json()["guardrails"]["g2"]["status"] == "APROBADO"
+
+
+@pytest.mark.asyncio
 async def test_audit_unavailable_without_site_password(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "")
     from src.config import get_settings

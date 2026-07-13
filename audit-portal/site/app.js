@@ -9,6 +9,7 @@ let serverUpdatedAt = null;
 let saveDebounceTimer = null;
 let serverSyncEnabled = true;
 let initialProgressSynced = false;
+let progressUserDirty = false;
 
 const GROUP_LABELS = {
     coordinacion: 'Coordinación',
@@ -341,6 +342,10 @@ function saveAuditLogLocalOnly() {
     }
 }
 
+function markProgressDirty() {
+    progressUserDirty = true;
+}
+
 async function pushProgressToServer() {
     if (!serverSyncEnabled || !initialProgressSynced) return;
     if (!hasPersistedDecisions()) return;
@@ -351,6 +356,14 @@ async function pushProgressToServer() {
             method: 'PUT',
             body: JSON.stringify(buildPersistPayload()),
         });
+        if (res.status === 409) {
+            console.warn('Servidor rechazó regresión de progreso; resincronizando.');
+            progressUserDirty = false;
+            await syncProgressFromServer();
+            renderAll();
+            updatePersistStatus({ serverError: true });
+            return;
+        }
         if (!res.ok) {
             console.warn('No se pudo guardar en servidor:', res.status);
             updatePersistStatus({ serverError: true });
@@ -358,6 +371,7 @@ async function pushProgressToServer() {
         }
         const data = await res.json();
         serverUpdatedAt = data.updated_at || new Date().toISOString();
+        progressUserDirty = false;
         updatePersistStatus();
     } catch (err) {
         console.warn('Error al sincronizar con servidor:', err);
@@ -520,7 +534,7 @@ function saveAuditLog() {
     try {
         saveAuditLogLocalOnly();
         updatePersistStatus();
-        scheduleServerSave();
+        if (progressUserDirty) scheduleServerSave();
     } catch (err) {
         console.error('No se pudo guardar el progreso:', err);
         const el = document.getElementById('audit-persist-status');
@@ -551,6 +565,7 @@ function importarProgresoJson(file) {
         try {
             const parsed = JSON.parse(reader.result);
             if (!applyPersistPayload(parsed)) throw new Error('Formato inválido');
+            markProgressDirty();
             saveAuditLog();
             renderAll();
             alert('Progreso restaurado correctamente.');
@@ -593,6 +608,12 @@ function getDecision(type, id) {
     if (!auditLog[type]) auditLog[type] = {};
     if (!auditLog[type][id]) auditLog[type][id] = defaultDecision();
     return auditLog[type][id];
+}
+
+function peekDecision(type, id) {
+    const bucket = auditLog[type];
+    if (bucket && bucket[id]) return bucket[id];
+    return defaultDecision();
 }
 
 function isReviewed(state) {
@@ -1381,24 +1402,24 @@ function updateProgress() {
     const total = countEffectiveItems();
 
     getEffectiveGuardrails().forEach(g => {
-        if (isReviewed(getDecision('guardrails', g.id))) reviewed += 1;
+        if (isReviewed(peekDecision('guardrails', g.id))) reviewed += 1;
     });
     catalog.agentes.forEach(a => {
-        if (isReviewed(getDecision('agentes', a.id))) reviewed += 1;
+        if (isReviewed(peekDecision('agentes', a.id))) reviewed += 1;
     });
     catalog.skills.forEach(s => {
         getSkillContextKeys(s).forEach(key => {
-            if (isReviewed(getDecision('guias', key))) reviewed += 1;
+            if (isReviewed(peekDecision('guias', key))) reviewed += 1;
         });
         getEffectiveSteps(s).forEach(st => {
-            if (isReviewed(getDecision('pasos', st.key))) reviewed += 1;
+            if (isReviewed(peekDecision('pasos', st.key))) reviewed += 1;
         });
     });
 
     const countSection = (type, items, getId) => {
         let secRev = 0;
         items.forEach(item => {
-            if (isReviewed(getDecision(type, getId(item)))) secRev += 1;
+            if (isReviewed(peekDecision(type, getId(item)))) secRev += 1;
         });
         return { pending: items.length - secRev, total: items.length };
     };
@@ -1410,10 +1431,10 @@ function updateProgress() {
     let guiasCtxPending = 0;
     catalog.skills.forEach(s => {
         getSkillContextKeys(s).forEach(key => {
-            if (!isReviewed(getDecision('guias', key))) guiasCtxPending += 1;
+            if (!isReviewed(peekDecision('guias', key))) guiasCtxPending += 1;
         });
         getEffectiveSteps(s).forEach(st => {
-            if (!isReviewed(getDecision('pasos', st.key))) pasosPending += 1;
+            if (!isReviewed(peekDecision('pasos', st.key))) pasosPending += 1;
         });
     });
 
@@ -1452,6 +1473,7 @@ function renderAll() {
 }
 
 function removeGuardrail(id) {
+    markProgressDirty();
     const custom = ensureCustom();
     const isCustom = custom.guardrailsAdded.some(g => g.id === id);
     if (isCustom) {
@@ -1464,6 +1486,7 @@ function removeGuardrail(id) {
 }
 
 function addGuardrail(name, desc) {
+    markProgressDirty();
     const custom = ensureCustom();
     const id = `custom_g_${Date.now()}`;
     custom.guardrailsAdded.push({ id, name, desc, custom: true });
@@ -1471,6 +1494,7 @@ function addGuardrail(name, desc) {
 }
 
 function removePaso(pasoKeyVal, skillId) {
+    markProgressDirty();
     const custom = ensureCustom();
     const added = custom.pasosAdded[skillId] || [];
     const customId = pasoKeyVal.split('::')[1];
@@ -1486,6 +1510,7 @@ function removePaso(pasoKeyVal, skillId) {
 }
 
 function addPaso(skillId, text) {
+    markProgressDirty();
     const custom = ensureCustom();
     if (!custom.pasosAdded[skillId]) custom.pasosAdded[skillId] = [];
     const id = `c${Date.now()}`;
@@ -1541,6 +1566,7 @@ function saveAddModal() {
 }
 
 function setDecision(type, id, status) {
+    markProgressDirty();
     const current = getDecision(type, id);
     if (status === 'PENDIENTE') {
         auditLog[type][id] = defaultDecision();
@@ -1582,6 +1608,7 @@ function saveModalAdjustment() {
     }
     if (currentModalTarget) {
         const { type, id } = currentModalTarget;
+        markProgressDirty();
         auditLog[type][id] = { status: 'AJUSTAR', reason, solution };
         closeModal();
         renderAll();
@@ -2089,6 +2116,7 @@ async function init() {
     await syncProgressFromServer();
     initialProgressSynced = true;
     serverSyncEnabled = true;
+    progressUserDirty = false;
 
     renderAll();
     updatePersistStatus();
@@ -2121,4 +2149,5 @@ window.addEventListener('audit-session-ended', () => {
     serverUpdatedAt = null;
     serverSyncEnabled = true;
     initialProgressSynced = false;
+    progressUserDirty = false;
 });

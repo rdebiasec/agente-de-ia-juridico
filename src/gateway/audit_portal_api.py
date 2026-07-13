@@ -19,7 +19,10 @@ from src.compliance.pin import hash_pin, validate_pin_format, verify_pin
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
 from src.config import Settings, get_settings
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
-from src.gateway.audit_progress import audit_progress_decision_count
+from src.gateway.audit_progress import (
+    audit_progress_decision_count,
+    audit_progress_regression_blocked,
+)
 from src.storage import get_repository
 from src.storage.models import AuditPortalAccessLog, AuditPortalUser, ComplianceConsent
 
@@ -27,6 +30,8 @@ router = APIRouter(prefix="/api/audit", tags=["audit-portal"])
 
 LOGIN_RATE_MAX = 12
 LOGIN_RATE_WINDOW = 900
+PROGRESS_PUT_RATE_MAX = 90
+PROGRESS_PUT_RATE_WINDOW = 60
 
 
 class AuditCredentialsBody(BaseModel):
@@ -396,26 +401,35 @@ async def put_audit_progress(
     request: Request,
     email: str = Depends(_require_audit_email),
 ):
+    if not check_rate_limit(
+        f"audit:put_progress:{email}",
+        max_attempts=PROGRESS_PUT_RATE_MAX,
+        window_seconds=PROGRESS_PUT_RATE_WINDOW,
+    ):
+        _log_access(request, action="put_progress_rate_limited", email=email)
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados guardados seguidos. Espere un momento e intente de nuevo.",
+        )
     repo = get_repository()
     payload = body.model_dump()
     existing = repo.get_audit_portal_progress(email)
-    if existing is not None:
+    if existing is not None and audit_progress_regression_blocked(existing.payload, payload):
         existing_count = audit_progress_decision_count(existing.payload)
         incoming_count = audit_progress_decision_count(payload)
-        if existing_count > 0 and incoming_count == 0:
-            _log_access(
-                request,
-                action="put_progress_rejected",
-                email=email,
-                detail="empty_overwrite_blocked",
-            )
-            raise HTTPException(
-                status_code=409,
-                detail=(
-                    "No se puede sobrescribir progreso existente con un estado vacío. "
-                    "Use «Borrar mi progreso» si desea eliminarlo."
-                ),
-            )
+        _log_access(
+            request,
+            action="put_progress_rejected",
+            email=email,
+            detail=f"regression_blocked:{existing_count}->{incoming_count}",
+        )
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "No se puede reducir el progreso guardado desde el navegador. "
+                "Recargue la página o use «Borrar mi progreso» solo si desea empezar de cero."
+            ),
+        )
     row = repo.save_audit_portal_progress(email, payload)
     repo.append_audit_progress_history(email, payload)
     _log_access(request, action="put_progress", email=email)

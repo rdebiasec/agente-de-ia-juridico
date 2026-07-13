@@ -31,3 +31,15 @@ def audit_progress_decision_count(payload: dict | None) -> int:
         if isinstance(removed_p, list):
             count += len(removed_p)
     return count
+
+
+def audit_progress_regression_blocked(
+    existing_payload: dict | None,
+    incoming_payload: dict | None,
+) -> bool:
+    """True si el PUT borraría decisiones ya guardadas (regresión monótona)."""
+    existing_count = audit_progress_decision_count(existing_payload)
+    if existing_count <= 0:
+        return False
+    incoming_count = audit_progress_decision_count(incoming_payload)
+    return incoming_count < existing_count

@@ -6,23 +6,6 @@
   const errorEl = document.getElementById("auth-error");
   const usernameEl = document.getElementById("auth-username");
 
-  function debugClientLog(hypothesisId, location, message, data = {}) {
-    // region agent log
-    fetch("/debug/client-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        runId: "pre-fix",
-        hypothesisId,
-        location,
-        message,
-        data: { ...data, ua: navigator.userAgent.slice(0, 160) },
-      }),
-    }).catch(() => {});
-    // endregion
-  }
-
   function showError(message) {
     if (!errorEl || !message) return;
     errorEl.hidden = false;
@@ -46,11 +29,6 @@
   }
 
   async function bootstrap() {
-    const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
-    debugClientLog("H5", "login.js:bootstrap", "login_page_loaded", {
-      mobile: isMobile,
-      query: window.location.search,
-    });
     consumeQueryMessages();
     try {
       const res = await fetch("/auth/status", { credentials: "include" });
@@ -68,7 +46,7 @@
 
   document.addEventListener("DOMContentLoaded", bootstrap);
 
-  document.getElementById("login-form")?.addEventListener("submit", async e => {
+  document.getElementById("login-form")?.addEventListener("submit", async (e) => {
     const privacy = document.getElementById("auth-accept-privacy");
     const cases = document.getElementById("auth-accept-cases");
     const username = document.getElementById("auth-username")?.value?.trim() || "";

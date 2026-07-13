@@ -6,6 +6,7 @@ import logging
 import os
 
 from src.config import Settings
+from src.auth.passwords import is_password_hash
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +53,31 @@ def validate_production_settings(settings: Settings) -> None:
     if settings.app_debug:
         errors.append("APP_DEBUG debe ser false en producción.")
 
-    if not settings.site_password or len(settings.site_password) < 12:
-        errors.append("SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) configurado en Render.")
-    elif len(settings.site_password) < 16:
-        logger.warning(
-            "SITE_PASSWORD tiene menos de 16 caracteres; considere rotarlo por uno más largo."
+    if not settings.site_password:
+        errors.append(
+            "SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) o un hash "
+            "pbkdf2_sha256$… generado con scripts/hash_site_password.py."
         )
+    elif is_password_hash(settings.site_password):
+        pass
     elif settings.site_password in _WEAK_SECRETS:
         logger.critical(
             "SITE_PASSWORD coincide con un valor de ejemplo conocido; rote el secreto en Render cuando pueda."
+        )
+    elif len(settings.site_password) < 12:
+        errors.append(
+            "SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) o un hash "
+            "pbkdf2_sha256$… generado con scripts/hash_site_password.py."
+        )
+    elif len(settings.site_password) < 16:
+        logger.warning(
+            "SITE_PASSWORD en texto plano tiene menos de 16 caracteres; "
+            "prefiera un hash PBKDF2 (scripts/hash_site_password.py)."
+        )
+    else:
+        logger.warning(
+            "SITE_PASSWORD está en texto plano; use un hash PBKDF2 en Render "
+            "(scripts/hash_site_password.py) y rote el secreto."
         )
 
     if not settings.session_secret or len(settings.session_secret) < 24:

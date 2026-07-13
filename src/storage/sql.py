@@ -746,9 +746,24 @@ class SqlRepository:
                 created_at=row.created_at,
             )
 
-    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 30) -> None:
+    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 60) -> None:
+        from src.gateway.audit_progress import audit_progress_decision_count
+
         now = datetime.now(timezone.utc)
+        incoming_count = audit_progress_decision_count(payload)
         with self._session() as s:
+            last = s.execute(
+                select(AuditPortalProgressHistoryRow)
+                .where(AuditPortalProgressHistoryRow.email == email)
+                .order_by(AuditPortalProgressHistoryRow.created_at.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+            if last is not None:
+                last_count = audit_progress_decision_count(last.payload)
+                age = (now - last.created_at).total_seconds()
+                if incoming_count == last_count and age < 15:
+                    return
+
             s.add(
                 AuditPortalProgressHistoryRow(
                     email=email,
@@ -756,13 +771,29 @@ class SqlRepository:
                     created_at=now,
                 )
             )
-            stmt = (
-                select(AuditPortalProgressHistoryRow.id)
+            s.flush()
+
+            rows = s.execute(
+                select(AuditPortalProgressHistoryRow)
                 .where(AuditPortalProgressHistoryRow.email == email)
                 .order_by(AuditPortalProgressHistoryRow.created_at.desc())
-                .offset(keep_last)
-            )
-            stale_ids = [row_id for (row_id,) in s.execute(stmt).all()]
+            ).scalars().all()
+            if len(rows) <= keep_last:
+                s.commit()
+                return
+
+            best_id = None
+            best_count = -1
+            for row in rows:
+                count = audit_progress_decision_count(row.payload)
+                if count > best_count:
+                    best_count = count
+                    best_id = row.id
+
+            stale_ids = [row.id for row in rows[keep_last:]]
+            if best_id is not None and best_count > 0 and best_id in stale_ids:
+                stale_ids = [row_id for row_id in stale_ids if row_id != best_id]
+
             if stale_ids:
                 s.execute(
                     delete(AuditPortalProgressHistoryRow).where(

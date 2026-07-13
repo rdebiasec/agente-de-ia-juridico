@@ -43,6 +43,8 @@ def test_notificar_texto_sms_mock(monkeypatch):
     monkeypatch.setenv("TWILIO_AUTH_TOKEN", "secret")
     monkeypatch.setenv("TWILIO_FROM_NUMBER", "+15551234567")
     monkeypatch.setenv("TWILIO_ALERT_TO", "3001234567")
+    monkeypatch.delenv("TWILIO_STATUS_CALLBACK", raising=False)
+    monkeypatch.delenv("RENDER_EXTERNAL_URL", raising=False)
     from src.config import get_settings
 
     get_settings.cache_clear()
@@ -55,6 +57,7 @@ def test_notificar_texto_sms_mock(monkeypatch):
             assert kwargs["to"] == "+573001234567"
             assert kwargs["from_"] == "+15551234567"
             assert "Alerta" in kwargs["body"]
+            assert "status_callback" not in kwargs
             return FakeMessage()
 
     class FakeClient:
@@ -63,3 +66,4 @@ def test_notificar_texto_sms_mock(monkeypatch):
     monkeypatch.setattr("twilio.rest.Client", lambda *a, **k: FakeClient())
     sid = notificar_texto_sms("Alerta de terminos procesales\nVENCIDO: test")
     assert sid == "SM" + "b" * 32
+    get_settings.cache_clear()

@@ -104,20 +104,30 @@ Antes del primer deploy en Render, confirme:
 
 | Control | Render / prod | Local dev |
 |--------|----------------|-----------|
-| `SITE_PASSWORD` | Secreto fuerte (≥12 chars), único | `.env` local |
+| `SITE_PASSWORD` | ≥12 chars en claro **o** hash `pbkdf2_sha256$…` (`scripts/hash_site_password.py`) | `.env` local |
 | `SESSION_SECRET` | Aleatorio (≥32 chars) | `.env` local |
 | `DEV_AUTO_LOGIN` | **`false`** | `true` opcional |
-| `APP_DEBUG` | **`false`** | `false` (o `true` solo al depurar) |
+| `APP_DEBUG` | **`false`** (telemetría `/debug/client-log` eliminada del código) | n/a |
 | `SESSION_COOKIE_SECURE` | **`true`** | `false` |
 | `OPENAI_API_KEY` | Obligatorio | `.env` |
 | `DATABASE_URL` | Inyectado por blueprint | Docker local |
-| Twilio (opcional) | `TWILIO_*` secretos | `.env` |
+| Twilio (opcional) | `TWILIO_*`; callback `POST /twilio/sms-status` | `.env` |
 
 La app **falla al arrancar** en Render si detecta secretos débiles, `DEV_AUTO_LOGIN=true`,
 `APP_DEBUG=true`, o falta `OPENAI_API_KEY` / `DATABASE_URL`.
 
-Endpoints de depuración (`POST /debug/client-log`, middleware de telemetría) quedan
-**desactivados** en producción. `/debug/trace/{session_id}` sigue protegido por login web.
+Login web y portal de auditoría tienen **rate limiting**. Slack y Twilio validan firma
+en sus webhooks. `/debug/trace/{session_id}` sigue protegido por login web.
+
+Hash recomendado para `SITE_PASSWORD` (paridad local/Render):
+
+```bash
+.venv/bin/python scripts/hash_site_password.py 'tu-secreto-largo'
+# pegar la salida completa como SITE_PASSWORD en .env y en Render
+```
+
+Si `TWILIO_STATUS_CALLBACK` está vacío y existe `RENDER_EXTERNAL_URL`, se usa
+`https://…/twilio/sms-status` automáticamente.
 
 Headers de seguridad (HSTS, X-Frame-Options, nosniff, **Content-Security-Policy**) se aplican automáticamente en Render.
 

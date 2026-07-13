@@ -8,7 +8,23 @@ from typing import Any
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
+from src.auth.passwords import hash_password, is_password_hash, verify_password
+
 COOKIE_NAME = "agente_session"
+
+__all__ = [
+    "COOKIE_NAME",
+    "auth_enabled",
+    "create_session_token",
+    "hash_password",
+    "is_password_hash",
+    "is_session_active",
+    "new_subject_id",
+    "parse_session_token",
+    "refresh_session_token",
+    "subject_id_from_token",
+    "verify_password",
+]
 
 
 def _serializer(secret: str) -> URLSafeTimedSerializer:
@@ -84,12 +100,6 @@ def refresh_session_token(
     username = str(data.get("username", "")) if data else None
     subject_id = str(data.get("subject_id") or "").strip() or new_subject_id()
     return create_session_token(secret, username=username or None, subject_id=subject_id)
-
-
-def verify_password(expected: str, provided: str) -> bool:
-    if not expected:
-        return False
-    return secrets.compare_digest(expected, provided)
 
 
 def auth_enabled(site_password: str) -> bool:

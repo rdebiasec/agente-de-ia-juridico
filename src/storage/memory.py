@@ -298,16 +298,37 @@ class InMemoryRepository:
             self._audit_access_logs.append(entry)
             return entry
 
-    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 30) -> None:
+    def append_audit_progress_history(self, email: str, payload: dict, *, keep_last: int = 60) -> None:
+        from src.gateway.audit_progress import audit_progress_decision_count
+
         now = datetime.now(timezone.utc)
+        incoming_count = audit_progress_decision_count(payload)
         with self._lock:
+            per_email = [(i, e, p, t) for i, (e, p, t) in enumerate(self._audit_progress_history) if e == email]
+            if per_email:
+                _, _, last_payload, last_time = per_email[-1]
+                if (
+                    audit_progress_decision_count(last_payload) == incoming_count
+                    and (now - last_time).total_seconds() < 15
+                ):
+                    return
+
             self._audit_progress_history.append((email, payload, now))
             per_email = [(i, e, p, t) for i, (e, p, t) in enumerate(self._audit_progress_history) if e == email]
-            if len(per_email) > keep_last:
-                drop = {i for i, *_ in per_email[:-keep_last]}
-                self._audit_progress_history = [
-                    item for idx, item in enumerate(self._audit_progress_history) if idx not in drop
-                ]
+            if len(per_email) <= keep_last:
+                return
+
+            best_idx = max(
+                per_email,
+                key=lambda item: audit_progress_decision_count(item[2]),
+            )[0]
+            best_count = audit_progress_decision_count(self._audit_progress_history[best_idx][1])
+            drop = {i for i, *_ in per_email[:-keep_last]}
+            if best_count > 0 and best_idx in drop:
+                drop.discard(best_idx)
+            self._audit_progress_history = [
+                item for idx, item in enumerate(self._audit_progress_history) if idx not in drop
+            ]
 
     def get_execution_plan(self, plan_id: str) -> ExecutionPlanRecord | None:
         return self._execution_plans.get(plan_id)

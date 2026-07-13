@@ -6,10 +6,7 @@ import asyncio
 import json
 import logging
 import sys
-import time
-import traceback
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,7 +36,7 @@ from src.gateway.reset import reset_conversation
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
-from src.security import debug_enabled, is_production, security_headers, security_headers_for_path, validate_production_settings
+from src.security import is_production, security_headers_for_path, validate_production_settings
 from src.validation.probes import generate_probes
 from src.validation.report import build_export_html, build_rules_only, build_session_report
 from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_weight
@@ -47,69 +44,6 @@ from src.validation.rubric import CONNECTION_BLOCK, VALIDATION_BLOCKS, total_wei
 if not logging.getLogger().handlers:
     logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-_DEBUG_LOG = Path(__file__).resolve().parents[1] / ".cursor" / "debug-835df5.log"
-_DEBUG_LOG_83755E = Path(__file__).resolve().parents[1] / ".cursor" / "debug-83755e.log"
-
-
-def _debug_log(
-    hypothesis_id: str,
-    location: str,
-    message: str,
-    data: dict | None = None,
-    *,
-    run_id: str = "pre-fix",
-) -> None:
-    if not debug_enabled(get_settings()):
-        return
-    # region agent log
-    try:
-        payload = {
-            "sessionId": "835df5",
-            "runId": run_id,
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "message": message,
-            "data": data or {},
-            "timestamp": int(time.time() * 1000),
-        }
-        _DEBUG_LOG.parent.mkdir(parents=True, exist_ok=True)
-        with _DEBUG_LOG.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
-        logger.warning("[DEBUG-835df5] %s", json.dumps(payload, ensure_ascii=False))
-    except Exception:
-        pass
-    # endregion
-
-
-def _debug_log_83755e(run_id: str, hypothesis_id: str, location: str, message: str, data: dict) -> None:
-    if not debug_enabled(get_settings()):
-        return
-    # region agent log
-    try:
-        payload = {
-            "sessionId": "83755e",
-            "runId": run_id,
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "message": message,
-            "data": data,
-            "timestamp": int(time.time() * 1000),
-        }
-        _DEBUG_LOG_83755E.parent.mkdir(parents=True, exist_ok=True)
-        with _DEBUG_LOG_83755E.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-    # endregion
-
-
-class ClientDebugLog(BaseModel):
-    hypothesisId: str = "H4"
-    location: str = "client"
-    message: str = ""
-    data: dict | None = None
-    runId: str = "pre-fix"
 
 
 @asynccontextmanager
@@ -257,65 +191,19 @@ async def security_headers_middleware(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
-async def debug_request_middleware(request: Request, call_next):
-    settings = get_settings()
-    if not debug_enabled(settings):
-        return await call_next(request)
-
-    ua = request.headers.get("user-agent", "")[:160]
-    is_mobile = any(token in ua.lower() for token in ("iphone", "ipad", "android", "mobile"))
-    try:
-        response = await call_next(request)
-    except Exception as exc:
-        # region agent log
-        _debug_log(
-            "H1",
-            "main:middleware",
-            "unhandled_exception",
-            {
-                "method": request.method,
-                "path": request.url.path,
-                "mobile": is_mobile,
-                "error": type(exc).__name__,
-                "detail": str(exc)[:300],
-                "trace": traceback.format_exc()[-1200:],
-            },
-            run_id="post-fix",
-        )
-        # endregion
-        raise
-    status = getattr(response, "status_code", 0)
-    if status >= 400 or is_mobile:
-        # region agent log
-        _debug_log(
-            "H2" if status >= 500 else "H4",
-            "main:middleware",
-            "request_completed",
-            {
-                "method": request.method,
-                "path": request.url.path,
-                "status": status,
-                "mobile": is_mobile,
-                "ua": ua,
-            },
-            run_id="post-fix",
-        )
-        # endregion
-    return response
-
-
 from src.gateway.audit_portal_api import router as audit_portal_router
 from src.gateway.compliance_api import router as compliance_router
 from src.gateway.firma_api import router as firma_router
 from src.gateway.slack_interactivity import router as slack_router
 from src.gateway.support_api import router as support_router
+from src.gateway.twilio_webhook import router as twilio_router
 
 app.include_router(audit_portal_router)
 app.include_router(compliance_router)
 app.include_router(firma_router)
 app.include_router(slack_router)
 app.include_router(support_router)
+app.include_router(twilio_router)
 
 _static_dir = get_settings().project_root / "static"
 if _static_dir.is_dir():
@@ -464,20 +352,6 @@ async def auth_status(
         data = parse_session_token(settings.session_secret, token) if token else None
         username = (data or {}).get("username") or settings.site_username
         subject_id = subject_id_from_token(settings.session_secret, token)
-    # region agent log
-    _debug_log_83755e(
-        "pre-fix",
-        "H2",
-        "src/main.py:267",
-        "auth_status_snapshot",
-        {
-            "auth_enabled": enabled,
-            "authenticated": authenticated if enabled else True,
-            "has_cookie": bool(request.cookies.get(COOKIE_NAME)),
-            "username_present": bool(username),
-        },
-    )
-    # endregion
     return {
         "auth_enabled": enabled,
         "authenticated": authenticated if enabled else True,
@@ -506,14 +380,6 @@ async def auth_login(
             username = str(form.get("username", ""))
             password = str(form.get("password", ""))
     except Exception as exc:
-        # region agent log
-        _debug_log(
-            "H1",
-            "main:auth_login",
-            "login_parse_failed",
-            {"error": type(exc).__name__, "detail": str(exc)[:200]},
-        )
-        # endregion
         logger.exception("Fallo al parsear login")
         if wants_redirect:
             return RedirectResponse(url="/login?login_error=1", status_code=302)
@@ -537,20 +403,6 @@ async def auth_login(
     credentials_ok = username == settings.site_username and verify_password(
         settings.site_password, password
     )
-    # region agent log
-    _debug_log_83755e(
-        "pre-fix",
-        "H2",
-        "src/main.py:322",
-        "auth_login_attempt",
-        {
-            "wants_redirect": wants_redirect,
-            "username_matches": username == settings.site_username,
-            "credentials_ok": credentials_ok,
-            "auth_enabled": auth_enabled(settings.site_password),
-        },
-    )
-    # endregion
     if not credentials_ok:
         if wants_redirect:
             return RedirectResponse(url="/login?login_error=1", status_code=302)
@@ -672,23 +524,6 @@ async def health():
         "dev_auto_login": dev_auto_login_allowed(settings) if auth_enabled(settings.site_password) else False,
     }
     return payload
-
-
-@app.post("/debug/client-log", dependencies=[Depends(require_web_session)])
-async def debug_client_log(entry: ClientDebugLog):
-    """Recibe telemetría del navegador (solo desarrollo con APP_DEBUG=true)."""
-    if not debug_enabled(get_settings()):
-        raise HTTPException(status_code=404, detail="No encontrado.")
-    # region agent log
-    _debug_log(
-        entry.hypothesisId,
-        entry.location,
-        entry.message,
-        entry.data or {},
-        run_id=entry.runId,
-    )
-    # endregion
-    return {"ok": True}
 
 
 @app.post("/chat", response_model=ChatResponse, dependencies=[Depends(require_web_session)])
