@@ -46,14 +46,30 @@
     }
 
     function showGate() {
-        document.getElementById('audit-auth-gate')?.classList.remove('gate-hidden');
+        const gate = document.getElementById('audit-auth-gate');
+        gate?.classList.remove('gate-hidden', 'gate-checking');
         document.getElementById('audit-app-root')?.classList.add('app-gated');
         document.body.classList.add('overflow-hidden');
         document.getElementById('audit-auth-logout')?.classList.add('hidden');
     }
 
+    function showGateChecking() {
+        const gate = document.getElementById('audit-auth-gate');
+        gate?.classList.remove('gate-hidden');
+        gate?.classList.add('gate-checking');
+        document.getElementById('audit-app-root')?.classList.add('app-gated');
+        document.body.classList.add('overflow-hidden');
+        document.getElementById('audit-auth-logout')?.classList.add('hidden');
+    }
+
+    function showLoginForm() {
+        document.getElementById('audit-auth-gate')?.classList.remove('gate-checking');
+    }
+
     function hideGate() {
-        document.getElementById('audit-auth-gate')?.classList.add('gate-hidden');
+        const gate = document.getElementById('audit-auth-gate');
+        gate?.classList.add('gate-hidden');
+        gate?.classList.remove('gate-checking');
         document.getElementById('audit-app-root')?.classList.remove('app-gated');
         document.body.classList.remove('overflow-hidden');
         document.getElementById('audit-auth-logout')?.classList.remove('hidden');
@@ -234,9 +250,11 @@
                     return;
                 }
                 showGate();
+                showLoginForm();
                 bindGateForm(resolve);
             } catch (err) {
                 showGate();
+                showLoginForm();
                 showError(err.message || 'No se pudo verificar la sesión.');
                 bindGateForm(resolve);
             }
