@@ -19,6 +19,7 @@ from src.compliance.pin import hash_pin, validate_pin_format, verify_pin
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
 from src.config import Settings, get_settings
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
+from src.gateway.audit_progress import audit_progress_decision_count
 from src.storage import get_repository
 from src.storage.models import AuditPortalAccessLog, AuditPortalUser, ComplianceConsent
 
@@ -397,6 +398,24 @@ async def put_audit_progress(
 ):
     repo = get_repository()
     payload = body.model_dump()
+    existing = repo.get_audit_portal_progress(email)
+    if existing is not None:
+        existing_count = audit_progress_decision_count(existing.payload)
+        incoming_count = audit_progress_decision_count(payload)
+        if existing_count > 0 and incoming_count == 0:
+            _log_access(
+                request,
+                action="put_progress_rejected",
+                email=email,
+                detail="empty_overwrite_blocked",
+            )
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "No se puede sobrescribir progreso existente con un estado vacío. "
+                    "Use «Borrar mi progreso» si desea eliminarlo."
+                ),
+            )
     row = repo.save_audit_portal_progress(email, payload)
     repo.append_audit_progress_history(email, payload)
     _log_access(request, action="put_progress", email=email)

@@ -343,6 +343,7 @@ function saveAuditLogLocalOnly() {
 
 async function pushProgressToServer() {
     if (!serverSyncEnabled || !initialProgressSynced) return;
+    if (!hasPersistedDecisions()) return;
     const email = typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
     if (!email) return;
     try {
