@@ -1,0 +1,52 @@
+name: Recover from R2
+
+# Descarga el último paquete de R2, lo descifra y lo publica como artifact
+# (NO restaura producción automáticamente).
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Día YYYYMMDD (vacío = LATEST)"
+        required: false
+        default: ""
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnupg
+          pip install "awscli>=1.32,<2"
+
+      - name: Download and decrypt from R2
+        env:
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          RECOVERY_OUT: ${{ runner.temp }}/recovery
+          DAY_INPUT: ${{ inputs.day }}
+        run: |
+          chmod +x scripts/dr/recover_from_r2.sh
+          mkdir -p "$RECOVERY_OUT"
+          if [[ -n "$DAY_INPUT" ]]; then
+            ./scripts/dr/recover_from_r2.sh --day "$DAY_INPUT" --out "$RECOVERY_OUT"
+          else
+            ./scripts/dr/recover_from_r2.sh --out "$RECOVERY_OUT"
+          fi
+          # Exponer path del run para el artifact
+          echo "RECOVERY_DIR=$(ls -1d "$RECOVERY_OUT"/run-* | tail -1)" >> "$GITHUB_ENV"
+
+      - name: Upload recovery package (artifact, 1 day)
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-package
+          path: ${{ env.RECOVERY_DIR }}
+          retention-days: 1
+          if-no-files-found: error

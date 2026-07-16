@@ -207,33 +207,42 @@ DATABASE_URL='...' .venv/bin/python scripts/restore_audit_progress.py \
 | Código | Cada feature | GitHub |
 | Dump local (opcional) | Antes de `down -v` | `~/Backups/agente-juridico/postgres/` |
 
-### Backup automático (GitHub Actions → R2)
+### Backup automático (GitHub Actions → R2) — recuperación completa
 
-Workflow: [`.github/workflows/backup-postgres.yml`](../../.github/workflows/backup-postgres.yml)  
-Script: [`scripts/dr/backup_to_r2.sh`](../../scripts/dr/backup_to_r2.sh)
+| Pieza | Dónde |
+|-------|--------|
+| Código + workflows | GitHub `main` |
+| Datos + secretos cifrados | Cloudflare R2 `agente-ia-juridico-backups` |
+| Clave maestra GPG | Gestor de contraseñas + `~/Backups/agente-juridico/BACKUP_ENCRYPTION_KEY.txt` |
 
-**Secrets** (GitHub → Settings → Secrets and variables → Actions):
+Cada noche (y con Run workflow) se sube a R2:
 
-| Secret | Origen |
-|--------|--------|
-| `PROD_DATABASE_URL` | Render → `agente-db` → Connections → External Database URL |
-| `BACKUP_ENCRYPTION_KEY` | Passphrase GPG (generada una vez) |
-| `R2_ACCOUNT_ID` | Cloudflare R2 |
-| `R2_ACCESS_KEY_ID` | Token R2 |
-| `R2_SECRET_ACCESS_KEY` | Token R2 |
-| `R2_BUCKET` | Nombre del bucket (ej. `agente-ia-juridico-backups`) |
+- `postgres/YYYYMMDD/*.dump.gpg` — base completa
+- `audit-progress/YYYYMMDD/*.json.gpg` — progreso auditoría
+- `secrets/YYYYMMDD/secrets-*.env.gpg` — secretos de app (SITE_PASSWORD, OPENAI, Slack…)
+- `LATEST.txt` — puntero al último backup
 
-**Probar:** Actions → **Backup Postgres → R2** → Run workflow.
+Workflows:
 
-**Restaurar desde R2:**
+- Backup: [`.github/workflows/backup-postgres.yml`](../../.github/workflows/backup-postgres.yml)
+- Recover (artifact, no toca prod): [`.github/workflows/recover-from-r2.yml`](../../.github/workflows/recover-from-r2.yml)
 
-```bash
-# Descargar .dump.gpg desde el bucket, luego:
-gpg --batch --passphrase "$BACKUP_ENCRYPTION_KEY" -d agente-….dump.gpg > agente.dump
-./scripts/dr/restore_postgres.sh agente.dump
-# Prod (peligroso): confirmación RESTORE PRODUCTION
-# ./scripts/dr/restore_postgres.sh --remote agente.dump
-```
+Scripts: `scripts/dr/backup_to_r2.sh`, `scripts/dr/recover_from_r2.sh`.
+
+#### Checklist recuperación en 5 pasos
+
+1. **Código:** `git clone` del repo (o redeploy Render desde `main`).
+2. **Bajar paquete:** Actions → **Recover from R2** → Run → descargar artifact `recovery-package`  
+   *o en Mac:*  
+   `R2_*=… BACKUP_ENCRYPTION_KEY=… ./scripts/dr/recover_from_r2.sh`
+3. **Secretos:** abrir `secrets.env` del paquete → pegar en Render Environment (y `.env` local).  
+   Mantener `DEV_AUTO_LOGIN=false` en prod.
+4. **Datos:**  
+   `./scripts/dr/restore_postgres.sh ruta/al/agente-….dump`  
+   (prod: `--remote` + escribir `RESTORE PRODUCTION`).
+5. **Verificar:** `./scripts/dr/verify_recovery.sh --local` o `--prod` + login auditoría.
+
+**Importante:** la clave `BACKUP_ENCRYPTION_KEY` no vive dentro de R2; sin ella no se abre el paquete. Guárdala en el gestor de contraseñas.
 
 Fallback offline (Mac, opcional): `./scripts/dr/daily_backup.sh`
 

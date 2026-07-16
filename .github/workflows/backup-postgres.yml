@@ -21,7 +21,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq gnupg
-          # pg_dump va vía Docker postgres:18 (paridad con Render)
 
       - name: Install Python deps (export audit + AWS CLI)
         run: |
@@ -31,15 +30,38 @@ jobs:
       - name: Pull Postgres 18 image (for pg_dump)
         run: docker pull postgres:18
 
-      - name: Run backup to R2
+      - name: Run full backup to R2
         env:
           DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
           BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           LABEL: prod
+          # App secrets → paquete cifrado en R2 (vacíos se omiten)
+          SITE_USERNAME: ${{ secrets.SITE_USERNAME }}
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          SESSION_IDLE_MINUTES: ${{ secrets.SESSION_IDLE_MINUTES }}
+          SESSION_MAX_MESSAGES: ${{ secrets.SESSION_MAX_MESSAGES }}
+          SESSION_COOKIE_SECURE: ${{ secrets.SESSION_COOKIE_SECURE }}
+          AGENT_MAX_TURNS: ${{ secrets.AGENT_MAX_TURNS }}
+          DEV_AUTO_LOGIN: ${{ secrets.DEV_AUTO_LOGIN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+          SLACK_REVIEW_CHANNEL: ${{ secrets.SLACK_REVIEW_CHANNEL }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_MESSAGING_SERVICE_SID: ${{ secrets.TWILIO_MESSAGING_SERVICE_SID }}
+          TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+          TWILIO_ALERT_TO: ${{ secrets.TWILIO_ALERT_TO }}
+          TWILIO_STATUS_CALLBACK: ${{ secrets.TWILIO_STATUS_CALLBACK }}
+          AUDIT_CORS_ORIGINS: ${{ secrets.AUDIT_CORS_ORIGINS }}
         run: |
-          chmod +x scripts/dr/backup_to_r2.sh
+          chmod +x scripts/dr/backup_to_r2.sh scripts/dr/pack_recovery_secrets.sh
           ./scripts/dr/backup_to_r2.sh

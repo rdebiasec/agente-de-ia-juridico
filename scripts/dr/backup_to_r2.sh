@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
-# Backup Postgres + progreso auditoría → cifrado GPG → Cloudflare R2.
-# Pensado para GitHub Actions (también usable en local con las mismas env vars).
+# Backup completo → cifrado GPG → Cloudflare R2.
+# Incluye: Postgres dump, progreso auditoría JSON, secrets.env de recuperación.
 #
 # Requiere:
-#   DATABASE_URL              External URL Postgres (prod)
-#   BACKUP_ENCRYPTION_KEY     Passphrase GPG simétrica
-#   R2_ACCOUNT_ID
-#   R2_ACCESS_KEY_ID
-#   R2_SECRET_ACCESS_KEY
-#   R2_BUCKET                 p.ej. agente-juridico-backups
-#
-# Opcional:
-#   RETAIN_DAYS               default 30
-#   LABEL                     default prod
+#   DATABASE_URL / PROD_DATABASE_URL
+#   BACKUP_ENCRYPTION_KEY
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
+#   + variables de app (SITE_PASSWORD, OPENAI_API_KEY, …) para el paquete de secretos
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -30,6 +24,15 @@ require() {
     exit 1
   fi
 }
+
+# Aceptar DATABASE_URL o PROD_DATABASE_URL
+if [[ -z "${DATABASE_URL:-}" && -n "${PROD_DATABASE_URL:-}" ]]; then
+  DATABASE_URL="$PROD_DATABASE_URL"
+fi
+if [[ -z "${PROD_DATABASE_URL:-}" && -n "${DATABASE_URL:-}" ]]; then
+  PROD_DATABASE_URL="$DATABASE_URL"
+fi
+export DATABASE_URL PROD_DATABASE_URL
 
 require DATABASE_URL
 require BACKUP_ENCRYPTION_KEY
@@ -49,6 +52,13 @@ normalize_url() {
   fi
 }
 
+gpg_enc() {
+  local src="$1" dst="$2"
+  gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
+    --passphrase "$BACKUP_ENCRYPTION_KEY" \
+    -o "$dst" "$src"
+}
+
 PGURL="$(normalize_url "$DATABASE_URL")"
 ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
@@ -60,10 +70,11 @@ DUMP_RAW="$WORK/agente-${STAMP}-${LABEL}.dump"
 DUMP_ENC="${DUMP_RAW}.gpg"
 JSON_RAW="$WORK/audit-progress-${STAMP}-${LABEL}.json"
 JSON_ENC="${JSON_RAW}.gpg"
+SECRETS_RAW="$WORK/secrets-${STAMP}-${LABEL}.env"
+SECRETS_ENC="${SECRETS_RAW}.gpg"
+MANIFEST="$WORK/MANIFEST-${STAMP}-${LABEL}.txt"
 
 echo "→ pg_dump (${LABEL})"
-# No imprimir PGURL (contiene credenciales).
-# Render free usa Postgres 18; el cliente del runner a menudo es más viejo → Docker.
 if command -v docker >/dev/null 2>&1; then
   docker run --rm \
     -v "$WORK:/out" \
@@ -78,18 +89,26 @@ DATABASE_URL="$DATABASE_URL" \
   python3 "$ROOT/scripts/dr/export_audit_progress.py" \
   --label "$LABEL" \
   --out-dir "$WORK" >/dev/null
-# El export escribe con su propio stamp; tomar el JSON más reciente del workdir
 JSON_SRC="$(ls -1t "$WORK"/audit-progress-*.json | head -1)"
 cp "$JSON_SRC" "$JSON_RAW"
 
+echo "→ pack recovery secrets"
+chmod +x "$ROOT/scripts/dr/pack_recovery_secrets.sh"
+"$ROOT/scripts/dr/pack_recovery_secrets.sh" "$SECRETS_RAW"
+
+{
+  echo "created_at_utc=${STAMP}"
+  echo "label=${LABEL}"
+  echo "postgres=$(basename "$DUMP_ENC")"
+  echo "audit=$(basename "$JSON_ENC")"
+  echo "secrets=$(basename "$SECRETS_ENC")"
+  echo "note=Decrypt with BACKUP_ENCRYPTION_KEY from password manager / local Backups file."
+} >"$MANIFEST"
+
 echo "→ cifrar con GPG"
-# --batch --yes --pinentry-mode loopback: no interactivo en CI
-gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
-  --passphrase "$BACKUP_ENCRYPTION_KEY" \
-  -o "$DUMP_ENC" "$DUMP_RAW"
-gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
-  --passphrase "$BACKUP_ENCRYPTION_KEY" \
-  -o "$JSON_ENC" "$JSON_RAW"
+gpg_enc "$DUMP_RAW" "$DUMP_ENC"
+gpg_enc "$JSON_RAW" "$JSON_ENC"
+gpg_enc "$SECRETS_RAW" "$SECRETS_ENC"
 
 echo "→ upload R2 s3://${R2_BUCKET}/"
 aws s3 cp "$DUMP_ENC" \
@@ -98,11 +117,20 @@ aws s3 cp "$DUMP_ENC" \
 aws s3 cp "$JSON_ENC" \
   "s3://${R2_BUCKET}/audit-progress/${DAY}/$(basename "$JSON_ENC")" \
   --endpoint-url "$ENDPOINT"
+aws s3 cp "$SECRETS_ENC" \
+  "s3://${R2_BUCKET}/secrets/${DAY}/$(basename "$SECRETS_ENC")" \
+  --endpoint-url "$ENDPOINT"
+aws s3 cp "$MANIFEST" \
+  "s3://${R2_BUCKET}/manifests/${DAY}/$(basename "$MANIFEST")" \
+  --endpoint-url "$ENDPOINT"
+# Puntero "latest" para recuperación rápida
+aws s3 cp "$MANIFEST" \
+  "s3://${R2_BUCKET}/LATEST.txt" \
+  --endpoint-url "$ENDPOINT"
 
 echo "→ retención: borrar objetos con más de ${RETAIN_DAYS} días"
 CUTOFF="$(date -u -d "-${RETAIN_DAYS} days" +%Y%m%d 2>/dev/null || date -u -v-"${RETAIN_DAYS}"d +%Y%m%d)"
-for prefix in postgres audit-progress; do
-  # Listar "carpetas" día YYYYMMDD bajo el prefijo
+for prefix in postgres audit-progress secrets manifests; do
   aws s3 ls "s3://${R2_BUCKET}/${prefix}/" --endpoint-url "$ENDPOINT" \
     | awk '{print $2}' | sed 's:/$::' | while read -r daydir; do
       [[ "$daydir" =~ ^[0-9]{8}$ ]] || continue
@@ -113,4 +141,4 @@ for prefix in postgres audit-progress; do
     done
 done
 
-echo "OK: backup subido a R2 (postgres/${DAY}/ + audit-progress/${DAY}/)"
+echo "OK: backup completo en R2 (postgres + audit-progress + secrets + LATEST.txt)"

@@ -372,11 +372,14 @@ Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **c
 
 Runbooks y backups: [`docs/operaciones/PLAN_DESASTRE.md`](docs/operaciones/PLAN_DESASTRE.md).
 
-### Backup automático (prod → Cloudflare R2)
+### Backup / recuperación completa (prod → Cloudflare R2)
 
-Workflow diario: **Actions → Backup Postgres → R2** (también *Run workflow* manual).
+- **Backup diario:** Actions → **Backup Postgres → R2** (dump + auditoría + `secrets.env` cifrado).
+- **Recuperar:** Actions → **Recover from R2** → descargar artifact → seguir `NEXT_STEPS.txt`.
+- Detalle: [`docs/operaciones/PLAN_DESASTRE.md`](docs/operaciones/PLAN_DESASTRE.md).
 
-Secrets: `PROD_DATABASE_URL`, `BACKUP_ENCRYPTION_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
+Secrets mínimos R2: `PROD_DATABASE_URL`, `BACKUP_ENCRYPTION_KEY`, `R2_*`.  
+Además, para que el paquete de secretos esté completo: `SITE_PASSWORD`, `SESSION_SECRET`, `OPENAI_API_KEY`, Slack/Twilio si aplica.
 
 ```bash
 # Backup / restore local (opcional, Docker)
