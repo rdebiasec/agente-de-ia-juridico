@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Auditoría de instrucciones del asistente penal-víctimas — DBX Solutions">
+    <title>DBX Solutions - Auditoría de Instrucciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="guia.css?v=3.3">
+    <link rel="stylesheet" href="audit-portal.css?v=3.5">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; }
+        html { scroll-behavior: smooth; }
+        .modal { transition: opacity 0.25s ease; }
+        /* Auth gate — CSS propio (no depender de Tailwind .hidden) */
+        #audit-auth-gate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: #0f172a;
+        }
+        #audit-auth-gate.gate-hidden {
+            display: none !important;
+        }
+        #audit-auth-gate.gate-checking #audit-auth-form,
+        #audit-auth-gate.gate-checking #audit-auth-gate-footer {
+            display: none !important;
+        }
+        #audit-auth-gate:not(.gate-checking) #audit-auth-checking {
+            display: none !important;
+        }
+        #audit-app-root.app-gated {
+            display: none !important;
+        }
+        .guia-badge-coord { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-blue-100 text-blue-800; }
+        .guia-badge-spec { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-purple-100 text-purple-800; }
+        .guia-badge-cal { @apply text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .agent-panel-chevron,
+        details[open] > summary .agent-skill-chevron { transform: rotate(90deg); }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .agent-panel-chevron,
+        details[open] > summary .agent-skill-chevron { transform: rotate(90deg); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <div id="audit-auth-gate" class="fixed inset-0 z-[100] gate-checking">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 px-6 py-5 text-white text-center">
+                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wider text-xl mb-3">dbx</div>
+                <h2 class="text-lg font-bold">Entrar al portal de auditoría</h2>
+                <p class="text-xs text-slate-400 mt-1">Solo personal autorizado del despacho</p>
+            </div>
+            <div id="audit-auth-checking" class="p-10 text-center text-slate-600" aria-live="polite">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-blue-600 mb-4" aria-hidden="true"></i>
+                <p class="text-sm font-medium">Verificando sesión…</p>
+            </div>
+            <form id="audit-auth-form" class="p-6 space-y-4" autocomplete="on">
+                <p id="audit-auth-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert"></p>
+                <div>
+                    <label for="audit-auth-email" class="block text-xs font-bold uppercase text-slate-500 mb-1">Correo electrónico</label>
+                    <input id="audit-auth-email" name="email" type="email" autocomplete="email" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="abogada@despacho.com" required>
+                </div>
+                <div>
+                    <label for="audit-auth-password" class="block text-xs font-bold uppercase text-slate-500 mb-1">Contraseña del despacho</label>
+                    <input id="audit-auth-password" name="password" type="password" autocomplete="current-password" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div id="audit-auth-pin-block" class="hidden">
+                    <label for="audit-auth-pin" class="block text-xs font-bold uppercase text-slate-500 mb-1">PIN personal</label>
+                    <input id="audit-auth-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" autocomplete="off" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="6–8 dígitos">
+                </div>
+                <div id="audit-auth-new-pin-block" class="hidden">
+                    <label for="audit-auth-new-pin" class="block text-xs font-bold uppercase text-slate-500 mb-1">Crear PIN personal (primera vez)</label>
+                    <input id="audit-auth-new-pin" name="new_pin" type="password" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" autocomplete="new-password" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="6–8 dígitos">
+                    <p class="text-[10px] text-slate-500 mt-1">El PIN es solo suyo. Nadie más del despacho puede ver su progreso de revisión.</p>
+                </div>
+                <div id="audit-auth-consent-block" class="space-y-2 text-xs text-slate-600">
+                    <label class="flex gap-2 items-start">
+                        <input id="audit-accept-privacy" type="checkbox" class="mt-0.5" required>
+                        <span>Acepto el <a href="/legal/privacidad" target="_blank" rel="noopener" class="text-blue-600 underline">aviso de privacidad</a>.</span>
+                    </label>
+                    <label class="flex gap-2 items-start">
+                        <input id="audit-accept-cases" type="checkbox" class="mt-0.5" required>
+                        <span>Autorizo el <a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener" class="text-blue-600 underline">tratamiento de datos de casos</a> que ingrese en esta herramienta.</span>
+                    </label>
+                </div>
+                <button type="submit" id="audit-auth-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl shadow-md transition-all">Entrar</button>
+            </form>
+            <p id="audit-auth-gate-footer" class="text-[10px] text-slate-400 text-center px-6 pb-4">Datos de casos permitidos con autorización · ARCO: privacidad@dbxsolutions.com</p>
+        </div>
+    </div>
+
+    <div id="audit-app-root" class="flex flex-col min-h-screen flex-1 app-gated">
+    <header class="bg-slate-900 text-white shadow-xl border-b border-slate-700 px-4 md:px-8 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sticky top-0 z-40">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wider text-xl shadow-md">dbx</div>
+            <div>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight text-slate-100">
+                    Auditoría de Instrucciones
+                    <span id="build-generated-at" class="text-[10px] text-slate-500 ml-1 hidden md:inline" title="Última generación del catálogo"></span>
+                </h1>
+                <p class="text-xs text-slate-400">Asistente penal-víctimas (Colombia) · Revisión antes de producción</p>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+            <div id="progress-chip" class="text-xs bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-slate-300">
+                Cargando catálogo…
+            </div>
+            <div id="config-status-chip" class="text-xs bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-slate-300 hidden md:block" title="Configuración operativa publicada desde auditoría">
+                Config…
+            </div>
+            <button type="button" id="audit-auth-logout" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-600 transition-all text-sm">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar sesión
+            </button>
+            <button type="button" onclick="exportarMarkdown()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center space-x-2 w-full md:w-auto justify-center">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Finalizar y Exportar .MD</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1">
+        <aside class="w-72 bg-slate-900 text-slate-300 border-r border-slate-800 p-5 hidden lg:block sticky top-[88px] h-[calc(100vh-88px)] overflow-y-auto">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Secciones</p>
+            <nav class="space-y-1" id="sidebar-nav">
+                <a href="#guia" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-book-open text-emerald-400"></i>
+                    <span class="text-sm">GUÍA</span>
+                </a>
+                <a href="#guardrails" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                    <span class="text-sm">REGLAS ESTRICTAS</span>
+                    <span id="badge-guardrails" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
+                </a>
+                <a href="#agentes" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-robot text-purple-400"></i>
+                    <span class="text-sm">AGENTES DEL EQUIPO</span>
+                    <span id="badge-agentes" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700"></span>
+                    <span id="badge-pasos" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700" title="Pasos pendientes"></span>
+                </a>
+                <a href="#execution-plans" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-all border-t border-slate-800 mt-3 pt-3">
+                    <i class="fa-solid fa-diagram-project text-amber-400"></i>
+                    <span class="text-sm">PLANES DE EJECUCIÓN</span>
+                </a>
+            </nav>
+            <div class="mt-6 pt-5 border-t border-slate-800 text-xs text-slate-500 space-y-2">
+                <p><i class="fa-solid fa-scale-balanced mr-1"></i> <strong>Principio profesional:</strong> La IA propone; usted revisa, ajusta y aprueba.</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-10 overflow-y-auto w-full">
+
+            <section id="guia" class="scroll-mt-24">
+
+                <div class="guia-hero">
+                    <h2>Revise las instrucciones del asistente antes de usarlo en casos reales</h2>
+                    <p class="guia-hero-lead" id="guia-intro-text">Aquí usted lee cómo funciona el asistente y marca qué reglas, agentes y pasos están bien para el despacho. La IA solo propone borradores; usted revisa, ajusta y aprueba.</p>
+                    <div class="guia-read-progress" aria-hidden="true">
+                        <div class="guia-read-progress-bar" id="guia-read-progress-bar"></div>
+                    </div>
+                </div>
+
+                <div class="guia-layout">
+                    <nav class="guia-toc-wrap" aria-label="En esta guía">
+                        <p class="guia-toc-title">En esta guía</p>
+                        <ul class="guia-toc" id="guia-toc">
+                            <li><a href="#guia-inicio" data-guia-section="guia-inicio">Qué es este portal</a></li>
+                            <li><a href="#guia-modelo" data-guia-section="guia-modelo">Qué va a revisar</a></li>
+                            <li><a href="#guia-ejemplo" data-guia-section="guia-ejemplo">Cómo trabaja el asistente</a></li>
+                            <li><a href="#guia-uso-local" data-guia-section="guia-uso-local">Cómo usar esta página</a></li>
+                            <li><a href="#guia-equipo" data-guia-section="guia-equipo">Los 11 agentes</a></li>
+                            <li><a href="#guia-glosario-sec" data-guia-section="guia-glosario-sec">Palabras clave</a></li>
+                            <li><a href="#guia-empezar" data-guia-section="guia-empezar">Empezar ahora</a></li>
+                        </ul>
+                    </nav>
+
+                    <div class="guia-content">
+
+                        <article id="guia-inicio" class="guia-section">
+                            <h3>Qué es este portal</h3>
+                            <p class="guia-section-desc">Es la herramienta donde el despacho <strong>revisa y aprueba las instrucciones</strong> del asistente digital de penal-víctimas (Ley 906) <strong>antes</strong> de usarlo con casos reales.</p>
+                            <p class="guia-section-desc">El asistente ayuda con tareas repetitivas: ordenar hechos, armar cronologías, preparar audiencias, redactar memoriales o tutelas y hacer seguimiento. <strong>No reemplaza su criterio:</strong> entrega borradores y análisis preliminares para que usted los revise y firme.</p>
+                            <div class="guia-value-box">
+                                <p class="guia-value-title">Por qué usarlo</p>
+                                <ul class="guia-value-list">
+                                    <li><strong>Más rápido, con control:</strong> primer borrador en minutos; la responsabilidad profesional sigue en el despacho.</li>
+                                    <li><strong>Mismo criterio en todo el equipo:</strong> todos trabajan con las mismas reglas y pasos aprobados.</li>
+                                    <li><strong>Trazabilidad:</strong> cada resultado indica qué datos usó, qué agente lo hizo y para quién es.</li>
+                                    <li><strong>Menos riesgo:</strong> usted detecta instrucciones confusas o peligrosas antes de producción.</li>
+                                </ul>
+                            </div>
+                            <p class="guia-section-desc">No necesita saber de programación. Lea esta guía y luego marque sus decisiones en el panel de abajo.</p>
+                        </article>
+
+                        <article id="guia-modelo" class="guia-section">
+                            <h3>Qué va a revisar</h3>
+                            <p class="guia-section-desc">Todo sigue el mismo orden, de lo general a lo detallado:</p>
+                            <ol class="guia-checklist">
+                                <li><strong>10 reglas estrictas</strong> — límites que el asistente debe cumplir siempre (no inventar normas, plazos Ley 906, custodia probatoria, etc.).</li>
+                                <li><strong>11 agentes</strong> — los “especialistas” del equipo digital (coordinador, cronología, redacción, tutela, etc.).</li>
+                                <li><strong>90 tareas (guías)</strong> — instrucciones concretas, por ejemplo «construir cronología» o «redactar memorial».</li>
+                                <li><strong>Pasos de cada tarea</strong> — el detalle paso a paso dentro de cada guía.</li>
+                            </ol>
+                            <div id="guia-diagrama"></div>
+                            <div class="guia-rules-teaser mt-6">
+                                <p class="m-0">Empiece por las <strong>10 reglas estrictas</strong>. Sin ellas aprobadas, el resto no tiene sentido. <a href="#guardrails">Ir a las reglas →</a></p>
+                            </div>
+                        </article>
+
+                        <article id="guia-ejemplo" class="guia-section">
+                            <h3>Cómo trabaja el asistente</h3>
+                            <p class="guia-section-desc">Cuando usted hace una consulta en el chat del despacho, el flujo es siempre el mismo:</p>
+                            <div id="guia-ejemplo-completo"></div>
+                        </article>
+
+                        <article id="guia-uso-local" class="guia-section">
+                            <h3>Cómo usar esta página</h3>
+                            <p class="guia-section-desc">Siga estos pasos cada vez que entre al portal (en local o en el servidor del despacho):</p>
+                            <ol class="guia-checklist">
+                                <li><strong>Entre con su correo</strong> y la contraseña del despacho. La primera vez cree un <strong>PIN personal</strong> (6–8 dígitos) y acepte privacidad y tratamiento de datos de casos.</li>
+                                <li><strong>Lea esta guía</strong> (arriba) para entender qué revisa y en qué orden.</li>
+                                <li><strong>Revise las 10 reglas estrictas</strong> en el panel de abajo y marque <em>Aprobar</em> o <em>Ajustar</em>.</li>
+                                <li><strong>Abra cada agente</strong>, entre en sus tareas (guías) y revise instrucción, herramientas, reglas de la guía y cada paso.</li>
+                                <li><strong>Exporte su dictamen</strong> con «Finalizar y Exportar .MD» y compártalo con quien implemente los cambios.</li>
+                            </ol>
+                            <p class="guia-section-desc">Su progreso se guarda en el servidor con su correo. Si cambia de computador, entre con el mismo correo y PIN. Use <strong>Respaldo JSON</strong> solo como copia extra.</p>
+                        </article>
+
+                        <article id="guia-equipo" class="guia-section">
+                            <h3>Los 11 agentes</h3>
+                            <p class="guia-section-desc">El asistente no es una sola IA: son <strong>11 especialistas</strong> que se reparten el trabajo. Uno recibe su consulta, otros analizan o redactan, y al final calidad revisa antes de entregarle el borrador. El detalle de cada uno está en <a href="#agentes" class="text-blue-700 font-semibold hover:underline">Agentes del equipo</a> (panel de abajo).</p>
+                            <div id="guia-equipo-bandas"></div>
+                            <p class="guia-caption"><a href="#agentes" class="text-blue-700 font-semibold hover:underline">Ir a auditar agentes del equipo →</a></p>
+                        </article>
+
+                        <article id="guia-glosario-sec" class="guia-section">
+                            <h3>Palabras clave</h3>
+                            <p class="guia-section-desc">Significado de los términos que verá en el panel:</p>
+                            <div class="guia-glossary" id="guia-glosario"></div>
+                        </article>
+
+                        <article id="guia-empezar" class="guia-section">
+                            <h3>Empezar ahora</h3>
+                            <p class="guia-section-desc">Resumen en 4 pasos:</p>
+                            <ol class="guia-checklist">
+                                <li><a href="#guardrails">Reglas estrictas</a> — las 10 globales.</li>
+                                <li><a href="#agentes">Agentes del equipo</a> — abra cada uno y revise sus tareas.</li>
+                                <li>Marque <strong>Aprobar</strong> si está conforme, o <strong>Ajustar</strong> si algo debe cambiar (debe escribir el motivo).</li>
+                                <li>Exporte el .MD y envíelo al equipo técnico o a quien actualice las instrucciones.</li>
+                            </ol>
+                            <p class="guia-buttons-help">
+                                <strong>Aprobar</strong> — está de acuerdo con ese ítem.<br>
+                                <strong>Ajustar</strong> — pide un cambio; debe explicar por qué.<br>
+                                <strong>Restablecer</strong> — borra su decisión y deja el ítem sin revisar.<br>
+                                El contador superior (<em>X / Y revisados</em>) muestra su avance.
+                            </p>
+                            <p class="guia-caption" id="guia-categorias-note"></p>
+                            <a href="#guardrails" class="guia-cta-primary" id="guia-cta-auditoria">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                                Ir al panel de auditoría
+                            </a>
+                        </article>
+
+                    </div>
+                </div>
+
+                <div class="guia-transition-band">
+                    Siga abajo para marcar sus decisiones. Puede volver a esta guía cuando quiera.
+                </div>
+
+            </section>
+
+            <div class="audit-toolbar bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-slate-900">Panel de auditoría</h2>
+                        <p class="text-slate-600 mt-1">Marque cada regla, agente, tarea y paso. Use la búsqueda si busca algo concreto.</p>
+                    </div>
+                    <div class="bg-slate-100 px-4 py-3 rounded-xl text-xs text-slate-600 border border-slate-200">
+                        <strong>Última generación:</strong><br>
+                        <span id="generated-at">—</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input id="search-input" type="search" placeholder="Buscar por nombre o descripción…" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <select id="filter-category" class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white min-w-[180px]">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                    <select id="filter-agent" class="border border-slate-300 rounded-xl px-3 py-2.5 bg-white min-w-[180px]">
+                        <option value="">Todos los agentes</option>
+                    </select>
+                </div>
+                <div class="flex flex-wrap items-center gap-4 text-slate-600 text-sm">
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> Aprobar — conforme</span>
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> Ajustar — pide cambio</span>
+                    <span><span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span> Sin revisar</span>
+                </div>
+                <div class="border-t border-slate-100 pt-4 space-y-3">
+                    <p class="text-sm text-slate-600 m-0">
+                        <strong>Dentro de cada tarea (guía)</strong> revise instrucción, herramientas, guardrails y pasos.
+                        Los ajustes con texto corregido se conservan al aprobar. Cuando todo esté <em>APROBADO</em>, use
+                        <strong>Publicar configuración</strong> para que el servicio (local y producción) use solo esa versión.
+                    </p>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <p id="audit-persist-status" class="text-sm text-slate-500 m-0">Cargando estado de guardado…</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" id="btn-publish-config" class="px-4 py-2 rounded-xl text-sm font-semibold border border-emerald-400 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 transition-all">
+                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publicar configuración
+                            </button>
+                            <button type="button" id="btn-export-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all">
+                                <i class="fa-solid fa-download mr-1"></i> Respaldo JSON
+                            </button>
+                            <button type="button" id="btn-import-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-all">
+                                <i class="fa-solid fa-upload mr-1"></i> Restaurar JSON
+                            </button>
+                            <button type="button" id="btn-delete-progress" class="px-4 py-2 rounded-xl text-sm font-semibold border border-red-300 bg-red-50 text-red-800 hover:bg-red-100 transition-all">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Borrar mi progreso
+                            </button>
+                            <input type="file" id="audit-import-file" accept=".json,application/json" class="hidden">
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 m-0">El progreso se guarda con su correo en el servidor. Respaldo JSON es opcional.</p>
+                </div>
+            </div>
+
+            <section id="guardrails" class="space-y-4 scroll-mt-24">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-200">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <h3 class="audit-section-heading">Reglas Estrictas</h3>
+                </div>
+                <div class="grid gap-4" id="container-guardrails"></div>
+            </section>
+
+            <section id="agentes" class="space-y-6 scroll-mt-24">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-purple-50 text-purple-600 rounded-xl border border-purple-200">
+                        <i class="fa-solid fa-robot text-lg"></i>
+                    </div>
+                    <h3 class="audit-section-heading">Agentes del equipo</h3>
+                </div>
+                <p class="audit-body -mt-2">Haga clic en cada agente para ver sus tareas. En cada tarea revise instrucción, herramientas, reglas y pasos.</p>
+                <div id="container-agentes"></div>
+            </section>
+
+            <section id="execution-plans" class="space-y-6 scroll-mt-24 border-t border-slate-200 pt-10">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2.5 bg-amber-50 text-amber-700 rounded-xl border border-amber-200 shrink-0">
+                            <i class="fa-solid fa-diagram-project text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="audit-section-heading">Planes de ejecución</h3>
+                            <p class="text-sm text-slate-600 m-0 mt-1 max-w-2xl">
+                                Historial del chat web: cada consulta crea un plan que usted aprueba antes de ejecutar.
+                                Aquí ve cuántos planes hay por estado y puede descargar el detalle.
+                            </p>
+                            <p class="text-xs text-slate-500 m-0 mt-2">
+                                Complementa la auditoría de instrucciones; no la reemplaza. Los datos vienen del mismo servidor que el chat <code class="text-xs bg-slate-100 px-1 rounded">/abogado</code>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 shrink-0">
+                        <button type="button" id="execution-dashboard-refresh" class="px-4 py-2 rounded-xl text-sm font-semibold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Actualizar
+                        </button>
+                        <button type="button" id="execution-dashboard-reset" class="px-4 py-2 rounded-xl text-sm font-semibold border border-red-300 bg-red-50 text-red-800 hover:bg-red-100 transition-all" title="Borra todos los registros de planes en el servidor">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Reiniciar contador
+                        </button>
+                    </div>
+                </div>
+                <p id="execution-dashboard-generated" class="text-xs text-slate-500 m-0"></p>
+                <div id="execution-dashboard-kpis" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div id="execution-dashboard-by-status" class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"></div>
+                    <div id="execution-dashboard-by-template" class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"></div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-slate-700 mb-2">Últimos planes (máx. 25)</h4>
+                    <div id="execution-dashboard-table" class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="rejectModal" class="modal opacity-0 pointer-events-none fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transform scale-95 transition-all duration-200" id="modalBox">
+            <div class="bg-slate-950 px-6 py-4 text-white flex justify-between items-center">
+                <h4 class="font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    <span>Retroalimentación Requerida</span>
+                </h4>
+                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-600">Indique qué está mal y qué debería decir o hacer el asistente:</p>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Qué hay que cambiar</label>
+                    <textarea id="modalReason" rows="3" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej.: Falta pedir el radicado antes de concluir. En casos de víctimas menores debe…"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Cómo debería quedar (opcional)</label>
+                    <textarea id="modalSolution" rows="2" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end space-x-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+                <button type="button" onclick="saveModalAdjustment()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl shadow-md">Aplicar Instrucción</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addModal" class="modal opacity-0 pointer-events-none fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transform scale-95 transition-all duration-200" id="addModalBox">
+            <div class="bg-blue-700 px-6 py-4 text-white flex justify-between items-center">
+                <h4 class="font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-plus text-blue-200"></i>
+                    <span id="addModalTitle">Agregar ítem</span>
+                </h4>
+                <button type="button" onclick="closeAddModal()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="addFieldNameWrap">
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Nombre de la regla</label>
+                    <input id="addFieldName" type="text" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej.: Verificar radicado antes de concluir">
+                </div>
+                <div>
+                    <label id="addFieldDescLabel" class="block text-xs font-bold uppercase text-slate-500 mb-1">Descripción</label>
+                    <textarea id="addFieldDesc" rows="4" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Describa el paso o la regla…"></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end space-x-3 border-t border-slate-100">
+                <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+                <button type="button" onclick="saveAddModal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl shadow-md">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /audit-app-root -->
+
+    <script src="./audit-api-config.js?v=3.5"></script>
+    <script src="./auth-config.js?v=3.0.1"></script>
+    <script src="./auth-gate.js?v=3.8"></script>
+    <script src="./app.js?v=4.3.4"></script>
+</body>
+</html>
