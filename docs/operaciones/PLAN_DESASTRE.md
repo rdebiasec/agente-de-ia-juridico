@@ -10,17 +10,17 @@ Scripts: [`scripts/dr/`](../../scripts/dr/). Despliegue diario: [`DEPLOY.md`](..
 | Prioridad | Qué respaldar | Dónde | Cómo |
 |-----------|---------------|-------|------|
 | 1 | Código | GitHub `main` | `git push` frecuente |
-| 2 | Secretos (`.env`, Render env) | Gestor / Render dashboard | Nunca en git; inventario con `env_inventory.sh` |
-| 3 | Postgres (local + prod) | `~/Backups/agente-juridico/postgres/` | `./scripts/dr/backup_postgres.sh` |
-| 4 | Progreso auditoría | Mismo Postgres + historial | `restore_audit_progress.py` (punto fino) |
+| 2 | Secretos + datos prod | R2 `prod/` (cifrado) | Actions → Backup Postgres → R2 |
+| 3 | Secretos + datos dev | R2 `dev/` + `~/Backups/…` | LaunchAgent `install_local_backup.sh` |
+| 4 | Clave maestra GPG | Gestor de contraseñas | `BACKUP_ENCRYPTION_KEY` |
 
 **Orden de recuperación típico (Mac desde cero):**  
 clone → `.env` → `rebuild_local.sh` → `restore_postgres.sh` (si hay dump) → `verify_recovery.sh --local`.
 
-**Backups:** fuera del repo, p. ej. `~/Backups/agente-juridico/` (FileVault en Mac).  
-**Nunca** commitear `.env`, `*.dump` ni exports con datos de casos.
+**Backups:** Cloudflare R2 (`dev/` + `prod/`) y espejo local en `~/Backups/agente-juridico/`.  
+**Nunca** commitear `.env`, `*.dump`, `backup.env` ni exports con datos de casos.
 
-**Render free:** `agente-db` no tiene PITR ni backups automáticos. El DR de prod depende de `pg_dump` manual.
+**Render free:** sin PITR nativo; el DR de prod es el workflow diario → R2.
 
 ---
 
