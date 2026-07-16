@@ -1,0 +1,356 @@
+{
+  "meta": {
+    "base": "https://agente-de-ia-juridico.onrender.com",
+    "pages": "https://rdebiasec.github.io/agente-de-ia-juridico",
+    "commit": "af2ad58",
+    "generated_at": "2026-07-16T05:36:29.351693+00:00",
+    "health": {
+      "status": "ok",
+      "modo": "firma",
+      "environment": "production",
+      "openai_configured": true,
+      "slack_configured": false,
+      "twilio_configured": false,
+      "persistencia": "postgres",
+      "web_auth_enabled": true,
+      "dev_auto_login": false
+    }
+  },
+  "verdict": "GO",
+  "counts": {
+    "PASS": 31,
+    "INFO": 2
+  },
+  "findings": [
+    {
+      "expert_id": "E01",
+      "expert": "AppSec (OWASP)",
+      "test_id": "E01-01",
+      "name": "CSP en /auditoria/",
+      "status": "PASS",
+      "detail": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/auditoria/",
+      "source": "https://owasp.org/www-project-secure-headers/"
+    },
+    {
+      "expert_id": "E01",
+      "expert": "AppSec (OWASP)",
+      "test_id": "E01-02",
+      "name": "HSTS",
+      "status": "PASS",
+      "detail": "max-age=31536000; includeSubDomains",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/auditoria/",
+      "source": "https://owasp.org/www-project-secure-headers/"
+    },
+    {
+      "expert_id": "E01",
+      "expert": "AppSec (OWASP)",
+      "test_id": "E01-03",
+      "name": "X-Frame-Options",
+      "status": "PASS",
+      "detail": "DENY",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/auditoria/",
+      "source": "https://owasp.org/www-project-secure-headers/"
+    },
+    {
+      "expert_id": "E01",
+      "expert": "AppSec (OWASP)",
+      "test_id": "E01-04",
+      "name": "OpenAPI oculto en prod",
+      "status": "PASS",
+      "detail": "docs=404 openapi=404",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/docs",
+      "source": "https://owasp.org/www-project-application-security-verification-standard/"
+    },
+    {
+      "expert_id": "E02",
+      "expert": "Platform / hosting",
+      "test_id": "E02-01",
+      "name": "Health production + postgres",
+      "status": "PASS",
+      "detail": "{'status': 'ok', 'environment': 'production', 'persistencia': 'postgres', 'openai_configured': True}",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "https://render.com/docs"
+    },
+    {
+      "expert_id": "E02",
+      "expert": "Platform / hosting",
+      "test_id": "E02-02",
+      "name": "DEV_AUTO_LOGIN off",
+      "status": "PASS",
+      "detail": "dev_auto_login=False",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E02",
+      "expert": "Platform / hosting",
+      "test_id": "E02-03",
+      "name": "HTTPS servicio alcanzable",
+      "status": "PASS",
+      "detail": "https_health=200 http_probe=200",
+      "evidence": "https://agente-de-ia-juridico.onrender.com",
+      "source": "https://owasp.org/www-project-application-security-verification-standard/"
+    },
+    {
+      "expert_id": "E03",
+      "expert": "Identity & access",
+      "test_id": "E03-01",
+      "name": "Prelogin exige password",
+      "status": "PASS",
+      "detail": "HTTP 422",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/prelogin",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E03",
+      "expert": "Identity & access",
+      "test_id": "E03-02",
+      "name": "Bad password → 401",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/prelogin",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E03",
+      "expert": "Identity & access",
+      "test_id": "E03-03",
+      "name": "Progress sin sesión → 401",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/progress",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E03",
+      "expert": "Identity & access",
+      "test_id": "E03-04",
+      "name": "Chat sin sesión → 401",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/chat",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E04",
+      "expert": "Data protection / privacy",
+      "test_id": "E04-01",
+      "name": "Aviso privacidad publicado",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/legal/privacidad",
+      "source": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981"
+    },
+    {
+      "expert_id": "E04",
+      "expert": "Data protection / privacy",
+      "test_id": "E04-02",
+      "name": "Tratamiento datos de casos",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/legal/tratamiento-datos-casos",
+      "source": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981"
+    },
+    {
+      "expert_id": "E04",
+      "expert": "Data protection / privacy",
+      "test_id": "E04-03",
+      "name": "Policy API + contacto ARCO",
+      "status": "PASS",
+      "detail": "contact=privacidad@dbxsolutions.com",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/policy",
+      "source": "https://sedeelectronica.sic.gov.co/transparencia/normativa/ley-1581"
+    },
+    {
+      "expert_id": "E05",
+      "expert": "Backup & disaster recovery",
+      "test_id": "E05-01",
+      "name": "Workflow backup Postgres→R2",
+      "status": "PASS",
+      "detail": ".github/workflows/backup-postgres.yml",
+      "evidence": "/Users/ricardodebiase/Documents/agente de IA juridico/.github/workflows/backup-postgres.yml",
+      "source": "https://render.com/docs/postgresql-backups"
+    },
+    {
+      "expert_id": "E05",
+      "expert": "Backup & disaster recovery",
+      "test_id": "E05-02",
+      "name": "Plan de desastre documentado",
+      "status": "PASS",
+      "detail": "PLAN_DESASTRE.md",
+      "evidence": "/Users/ricardodebiase/Documents/agente de IA juridico/docs/operaciones/PLAN_DESASTRE.md",
+      "source": "https://csrc.nist.gov/pubs/sp/800/34/r1/final"
+    },
+    {
+      "expert_id": "E05",
+      "expert": "Backup & disaster recovery",
+      "test_id": "E05-03",
+      "name": "Último backup Actions success",
+      "status": "PASS",
+      "detail": "[{\"conclusion\": \"success\", \"createdAt\": \"2026-07-16T04:15:33Z\", \"displayTitle\": \"Backup Postgres → R2\"}]",
+      "evidence": "gh workflow backup-postgres.yml",
+      "source": "https://render.com/docs/postgresql-backups"
+    },
+    {
+      "expert_id": "E06",
+      "expert": "Secrets management",
+      "test_id": "E06-01",
+      "name": ".env no trackeado en git",
+      "status": "PASS",
+      "detail": "tracked=none",
+      "evidence": ".gitignore",
+      "source": "https://owasp.org/www-project-application-security-verification-standard/"
+    },
+    {
+      "expert_id": "E06",
+      "expert": "Secrets management",
+      "test_id": "E06-02",
+      "name": "Auth web habilitada en prod",
+      "status": "PASS",
+      "detail": "web_auth_enabled=True",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E06",
+      "expert": "Secrets management",
+      "test_id": "E06-03",
+      "name": "Herramienta hash SITE_PASSWORD",
+      "status": "PASS",
+      "detail": "hash_site_password.py",
+      "evidence": "/Users/ricardodebiase/Documents/agente de IA juridico/scripts/hash_site_password.py",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E07",
+      "expert": "Availability & reliability",
+      "test_id": "E07-01",
+      "name": "Health latency x3 < 15s",
+      "status": "PASS",
+      "detail": "ms=[230, 216, 210]",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "https://render.com/docs"
+    },
+    {
+      "expert_id": "E07",
+      "expert": "Availability & reliability",
+      "test_id": "E07-02",
+      "name": "OpenAI configurado",
+      "status": "PASS",
+      "detail": "openai=True",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "ops"
+    },
+    {
+      "expert_id": "E07",
+      "expert": "Availability & reliability",
+      "test_id": "E07-03",
+      "name": "Slack HITL canal",
+      "status": "INFO",
+      "detail": "slack=False",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/health",
+      "source": "ops"
+    },
+    {
+      "expert_id": "E08",
+      "expert": "Reputation / legal-tech trust",
+      "test_id": "E08-01",
+      "name": "Chat abogado alcanzable",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/abogado",
+      "source": "producto"
+    },
+    {
+      "expert_id": "E08",
+      "expert": "Reputation / legal-tech trust",
+      "test_id": "E08-02",
+      "name": "Anti-wipe merge en portal",
+      "status": "PASS",
+      "detail": "merge=True",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/auditoria/app.js",
+      "source": "integridad de datos"
+    },
+    {
+      "expert_id": "E08",
+      "expert": "Reputation / legal-tech trust",
+      "test_id": "E08-03",
+      "name": "Logout no borra cache local",
+      "status": "PASS",
+      "detail": "wipe_helpers=False",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/auditoria/auth-gate.js",
+      "source": "integridad de datos"
+    },
+    {
+      "expert_id": "E09",
+      "expert": "Supply chain / CI-CD",
+      "test_id": "E09-01",
+      "name": "CI workflow presente",
+      "status": "PASS",
+      "detail": "ci.yml",
+      "evidence": "/Users/ricardodebiase/Documents/agente de IA juridico/.github/workflows/ci.yml",
+      "source": "https://owasp.org/www-project-application-security-verification-standard/"
+    },
+    {
+      "expert_id": "E09",
+      "expert": "Supply chain / CI-CD",
+      "test_id": "E09-02",
+      "name": "Último CI",
+      "status": "INFO",
+      "detail": "[{\"conclusion\": \"\", \"createdAt\": \"2026-07-16T05:35:41Z\", \"headSha\": \"af2ad58fdb3d71e3bbb58cd1cf7df21cea152f64\"}]",
+      "evidence": "gh workflow ci.yml",
+      "source": "https://owasp.org/www-project-application-security-verification-standard/"
+    },
+    {
+      "expert_id": "E09",
+      "expert": "Supply chain / CI-CD",
+      "test_id": "E09-03",
+      "name": "Deploy portal Pages workflow",
+      "status": "PASS",
+      "detail": "deploy-audit-portal.yml",
+      "evidence": "/Users/ricardodebiase/Documents/agente de IA juridico/.github/workflows/deploy-audit-portal.yml",
+      "source": "GitHub Pages"
+    },
+    {
+      "expert_id": "E10",
+      "expert": "Boundary / CORS / abuse",
+      "test_id": "E10-01",
+      "name": "CORS allowlist Pages",
+      "status": "PASS",
+      "detail": "ACAO='https://rdebiasec.github.io'",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/policy",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E10",
+      "expert": "Boundary / CORS / abuse",
+      "test_id": "E10-02",
+      "name": "CORS rechaza origen evil",
+      "status": "PASS",
+      "detail": "ACAO=''",
+      "evidence": "https://agente-de-ia-juridico.onrender.com/api/audit/policy",
+      "source": "https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html"
+    },
+    {
+      "expert_id": "E10",
+      "expert": "Boundary / CORS / abuse",
+      "test_id": "E10-03",
+      "name": "Catálogo Pages 10/90/402",
+      "status": "PASS",
+      "detail": "{'guardrails': 10, 'agentes': 11, 'skills': 90, 'guias_contexto': 270, 'pasos': 402, 'items': 693}",
+      "evidence": "https://rdebiasec.github.io/agente-de-ia-juridico/audit-data.json",
+      "source": "integridad publicación"
+    },
+    {
+      "expert_id": "E10",
+      "expert": "Boundary / CORS / abuse",
+      "test_id": "E10-04",
+      "name": "Anti-wipe en GitHub Pages",
+      "status": "PASS",
+      "detail": "merge=True",
+      "evidence": "https://rdebiasec.github.io/agente-de-ia-juridico/app.js",
+      "source": "integridad publicación"
+    }
+  ]
+}
