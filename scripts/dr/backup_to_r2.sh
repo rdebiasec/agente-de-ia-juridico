@@ -110,35 +110,36 @@ gpg_enc "$DUMP_RAW" "$DUMP_ENC"
 gpg_enc "$JSON_RAW" "$JSON_ENC"
 gpg_enc "$SECRETS_RAW" "$SECRETS_ENC"
 
-echo "→ upload R2 s3://${R2_BUCKET}/"
+ENV_ROOT="${R2_ENV_ROOT:-prod}"
+echo "→ upload R2 s3://${R2_BUCKET}/${ENV_ROOT}/"
 aws s3 cp "$DUMP_ENC" \
-  "s3://${R2_BUCKET}/postgres/${DAY}/$(basename "$DUMP_ENC")" \
+  "s3://${R2_BUCKET}/${ENV_ROOT}/postgres/${DAY}/$(basename "$DUMP_ENC")" \
   --endpoint-url "$ENDPOINT"
 aws s3 cp "$JSON_ENC" \
-  "s3://${R2_BUCKET}/audit-progress/${DAY}/$(basename "$JSON_ENC")" \
+  "s3://${R2_BUCKET}/${ENV_ROOT}/audit-progress/${DAY}/$(basename "$JSON_ENC")" \
   --endpoint-url "$ENDPOINT"
 aws s3 cp "$SECRETS_ENC" \
-  "s3://${R2_BUCKET}/secrets/${DAY}/$(basename "$SECRETS_ENC")" \
+  "s3://${R2_BUCKET}/${ENV_ROOT}/secrets/${DAY}/$(basename "$SECRETS_ENC")" \
   --endpoint-url "$ENDPOINT"
 aws s3 cp "$MANIFEST" \
-  "s3://${R2_BUCKET}/manifests/${DAY}/$(basename "$MANIFEST")" \
+  "s3://${R2_BUCKET}/${ENV_ROOT}/manifests/${DAY}/$(basename "$MANIFEST")" \
   --endpoint-url "$ENDPOINT"
 # Puntero "latest" para recuperación rápida
 aws s3 cp "$MANIFEST" \
-  "s3://${R2_BUCKET}/LATEST.txt" \
+  "s3://${R2_BUCKET}/${ENV_ROOT}/LATEST.txt" \
   --endpoint-url "$ENDPOINT"
 
 echo "→ retención: borrar objetos con más de ${RETAIN_DAYS} días"
 CUTOFF="$(date -u -d "-${RETAIN_DAYS} days" +%Y%m%d 2>/dev/null || date -u -v-"${RETAIN_DAYS}"d +%Y%m%d)"
 for prefix in postgres audit-progress secrets manifests; do
-  aws s3 ls "s3://${R2_BUCKET}/${prefix}/" --endpoint-url "$ENDPOINT" \
+  aws s3 ls "s3://${R2_BUCKET}/${ENV_ROOT}/${prefix}/" --endpoint-url "$ENDPOINT" \
     | awk '{print $2}' | sed 's:/$::' | while read -r daydir; do
       [[ "$daydir" =~ ^[0-9]{8}$ ]] || continue
       if [[ "$daydir" < "$CUTOFF" ]]; then
-        echo "  borrando s3://${R2_BUCKET}/${prefix}/${daydir}/"
-        aws s3 rm "s3://${R2_BUCKET}/${prefix}/${daydir}/" --recursive --endpoint-url "$ENDPOINT"
+        echo "  borrando s3://${R2_BUCKET}/${ENV_ROOT}/${prefix}/${daydir}/"
+        aws s3 rm "s3://${R2_BUCKET}/${ENV_ROOT}/${prefix}/${daydir}/" --recursive --endpoint-url "$ENDPOINT"
       fi
     done
 done
 
-echo "OK: backup completo en R2 (postgres + audit-progress + secrets + LATEST.txt)"
+echo "OK: backup completo en R2 (${ENV_ROOT}/postgres + audit-progress + secrets + LATEST.txt)"

@@ -6,25 +6,31 @@
 #   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
 #
 # Uso:
-#   ./scripts/dr/recover_from_r2.sh
-#   ./scripts/dr/recover_from_r2.sh --day 20260716
+#   ./scripts/dr/recover_from_r2.sh                 # prod (default)
+#   ./scripts/dr/recover_from_r2.sh --env dev
+#   ./scripts/dr/recover_from_r2.sh --env prod --day 20260716
 #   ./scripts/dr/recover_from_r2.sh --out ~/Backups/agente-juridico/recovery
-#
-# Luego (manual, con confirmación):
-#   ./scripts/dr/restore_postgres.sh "$OUT"/agente-….dump
-#   # y cargar secrets.env en Render / .env local
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="${RECOVERY_OUT:-$HOME/Backups/agente-juridico/recovery}"
 DAY=""
+ENV_ROOT="${R2_ENV_ROOT:-prod}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --out) OUT="${2:?}"; shift 2 ;;
     --day) DAY="${2:?}"; shift 2 ;;
+    --env)
+      ENV_ROOT="${2:?}"
+      if [[ "$ENV_ROOT" != "prod" && "$ENV_ROOT" != "dev" ]]; then
+        echo "ERROR: --env debe ser prod o dev" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
     -h|--help)
-      echo "Uso: recover_from_r2.sh [--day YYYYMMDD] [--out DIR]"
+      echo "Uso: recover_from_r2.sh [--env prod|dev] [--day YYYYMMDD] [--out DIR]"
       exit 0
       ;;
     *) echo "Opción desconocida: $1" >&2; exit 1 ;;
@@ -77,10 +83,10 @@ STAMP="$(date -u +%Y%m%d-%H%M%S)"
 WORKDIR="$OUT/run-$STAMP"
 mkdir -p "$WORKDIR"
 
-echo "→ leyendo LATEST.txt / día"
+echo "→ entorno R2: ${ENV_ROOT}"
+echo "→ leyendo ${ENV_ROOT}/LATEST.txt / día"
 if [[ -z "$DAY" ]]; then
-  aws s3 cp "s3://${R2_BUCKET}/LATEST.txt" "$WORKDIR/LATEST.txt" --endpoint-url "$ENDPOINT"
-  # Preferir día del manifiesto; si no, del nombre postgres=
+  aws s3 cp "s3://${R2_BUCKET}/${ENV_ROOT}/LATEST.txt" "$WORKDIR/LATEST.txt" --endpoint-url "$ENDPOINT"
   DAY="$(grep -E '^created_at_utc=' "$WORKDIR/LATEST.txt" | head -1 | cut -d= -f2 | cut -c1-8 || true)"
   if [[ -z "$DAY" ]]; then
     DAY="$(date -u +%Y%m%d)"
@@ -92,9 +98,9 @@ else
 fi
 
 echo "→ descargar objetos del día $DAY"
-aws s3 sync "s3://${R2_BUCKET}/postgres/${DAY}/" "$WORKDIR/postgres/" --endpoint-url "$ENDPOINT"
-aws s3 sync "s3://${R2_BUCKET}/audit-progress/${DAY}/" "$WORKDIR/audit-progress/" --endpoint-url "$ENDPOINT"
-aws s3 sync "s3://${R2_BUCKET}/secrets/${DAY}/" "$WORKDIR/secrets/" --endpoint-url "$ENDPOINT"
+aws s3 sync "s3://${R2_BUCKET}/${ENV_ROOT}/postgres/${DAY}/" "$WORKDIR/postgres/" --endpoint-url "$ENDPOINT"
+aws s3 sync "s3://${R2_BUCKET}/${ENV_ROOT}/audit-progress/${DAY}/" "$WORKDIR/audit-progress/" --endpoint-url "$ENDPOINT"
+aws s3 sync "s3://${R2_BUCKET}/${ENV_ROOT}/secrets/${DAY}/" "$WORKDIR/secrets/" --endpoint-url "$ENDPOINT"
 
 gpg_dec() {
   local src="$1" dst="$2"

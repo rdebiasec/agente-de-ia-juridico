@@ -139,18 +139,19 @@ aws_s3() {
   "$PY" -m awscli s3 "$@"
 }
 
-echo "→ upload R2 local/${DAY}/"
-aws_s3 cp "$DUMP_ENC" "s3://${R2_BUCKET}/local/postgres/${DAY}/$(basename "$DUMP_ENC")" --endpoint-url "$ENDPOINT"
-aws_s3 cp "$JSON_ENC" "s3://${R2_BUCKET}/local/audit-progress/${DAY}/$(basename "$JSON_ENC")" --endpoint-url "$ENDPOINT"
-aws_s3 cp "$SECRETS_ENC" "s3://${R2_BUCKET}/local/secrets/${DAY}/$(basename "$SECRETS_ENC")" --endpoint-url "$ENDPOINT"
+ENV_ROOT="${R2_ENV_ROOT:-dev}"
+echo "→ upload R2 ${ENV_ROOT}/${DAY}/"
+aws_s3 cp "$DUMP_ENC" "s3://${R2_BUCKET}/${ENV_ROOT}/postgres/${DAY}/$(basename "$DUMP_ENC")" --endpoint-url "$ENDPOINT"
+aws_s3 cp "$JSON_ENC" "s3://${R2_BUCKET}/${ENV_ROOT}/audit-progress/${DAY}/$(basename "$JSON_ENC")" --endpoint-url "$ENDPOINT"
+aws_s3 cp "$SECRETS_ENC" "s3://${R2_BUCKET}/${ENV_ROOT}/secrets/${DAY}/$(basename "$SECRETS_ENC")" --endpoint-url "$ENDPOINT"
 
 {
   echo "created_at_utc=${STAMP}"
-  echo "label=local"
+  echo "label=dev"
   echo "postgres=$(basename "$DUMP_ENC")"
   echo "audit=$(basename "$JSON_ENC")"
   echo "secrets=$(basename "$SECRETS_ENC")"
-} | aws_s3 cp - "s3://${R2_BUCKET}/local/LATEST.txt" --endpoint-url "$ENDPOINT"
+} | aws_s3 cp - "s3://${R2_BUCKET}/${ENV_ROOT}/LATEST.txt" --endpoint-url "$ENDPOINT"
 
 echo "→ retención local (${RETAIN_DAYS}d) + R2"
 find "$LOCAL_DIR/postgres" -type f -name 'agente-*.dump' -mtime +"${RETAIN_DAYS}" -delete 2>/dev/null || true
@@ -158,7 +159,7 @@ find "$LOCAL_DIR/audit-progress" -type f -name 'audit-progress-*.json' -mtime +"
 find "$LOCAL_DIR/secrets" -type f -name 'secrets-*.env' -mtime +"${RETAIN_DAYS}" -delete 2>/dev/null || true
 
 CUTOFF="$(date -u -v-"${RETAIN_DAYS}"d +%Y%m%d 2>/dev/null || date -u -d "-${RETAIN_DAYS} days" +%Y%m%d)"
-for prefix in local/postgres local/audit-progress local/secrets; do
+for prefix in "${ENV_ROOT}/postgres" "${ENV_ROOT}/audit-progress" "${ENV_ROOT}/secrets"; do
   aws_s3 ls "s3://${R2_BUCKET}/${prefix}/" --endpoint-url "$ENDPOINT" 2>/dev/null \
     | awk '{print $2}' | sed 's:/$::' | while read -r daydir; do
       [[ "$daydir" =~ ^[0-9]{8}$ ]] || continue

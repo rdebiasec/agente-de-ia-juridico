@@ -5,6 +5,14 @@ name: Recover from R2
 on:
   workflow_dispatch:
     inputs:
+      env:
+        description: "Entorno R2 (prod o dev)"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
       day:
         description: "Día YYYYMMDD (vacío = LATEST)"
         required: false
@@ -32,15 +40,15 @@ jobs:
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           RECOVERY_OUT: ${{ runner.temp }}/recovery
           DAY_INPUT: ${{ inputs.day }}
+          ENV_INPUT: ${{ inputs.env }}
         run: |
           chmod +x scripts/dr/recover_from_r2.sh
           mkdir -p "$RECOVERY_OUT"
+          ARGS=(--env "$ENV_INPUT" --out "$RECOVERY_OUT")
           if [[ -n "$DAY_INPUT" ]]; then
-            ./scripts/dr/recover_from_r2.sh --day "$DAY_INPUT" --out "$RECOVERY_OUT"
-          else
-            ./scripts/dr/recover_from_r2.sh --out "$RECOVERY_OUT"
+            ARGS+=(--day "$DAY_INPUT")
           fi
-          # Exponer path del run para el artifact
+          ./scripts/dr/recover_from_r2.sh "${ARGS[@]}"
           echo "RECOVERY_DIR=$(ls -1d "$RECOVERY_OUT"/run-* | tail -1)" >> "$GITHUB_ENV"
 
       - name: Upload recovery package (artifact, 1 day)

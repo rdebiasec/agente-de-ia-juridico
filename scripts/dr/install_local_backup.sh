@@ -131,7 +131,7 @@ launchctl kickstart -k "gui/$(id -u)/${LABEL}" 2>/dev/null || true
 
 echo "OK: LaunchAgent ${LABEL}"
 echo "  Frecuencia: al iniciar sesión + cada 6 horas (si la Mac está despierta)"
-echo "  Destino: R2 s3://${R2_BUCKET}/local/… + ~/Backups/agente-juridico/"
+echo "  Destino: R2 s3://${R2_BUCKET}/dev/… + ~/Backups/agente-juridico/"
 echo "  Logs: ${BACKUP_ROOT}/logs/"
 echo "Estado: launchctl print gui/\$(id -u)/${LABEL} | head"
 echo "Prueba en primer plano: $SCRIPT"

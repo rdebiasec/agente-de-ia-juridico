@@ -215,12 +215,14 @@ DATABASE_URL='...' .venv/bin/python scripts/restore_audit_progress.py \
 | Datos + secretos cifrados | Cloudflare R2 `agente-ia-juridico-backups` |
 | Clave maestra GPG | Gestor de contraseñas + `~/Backups/agente-juridico/BACKUP_ENCRYPTION_KEY.txt` |
 
-Cada noche (y con Run workflow) se sube a R2:
+Estructura del bucket (raíz):
 
-- `postgres/YYYYMMDD/*.dump.gpg` — base completa
-- `audit-progress/YYYYMMDD/*.json.gpg` — progreso auditoría
-- `secrets/YYYYMMDD/secrets-*.env.gpg` — secretos de app (SITE_PASSWORD, OPENAI, Slack…)
-- `LATEST.txt` — puntero al último backup
+```
+dev/     ← Mac local (automático cada 6 h)
+prod/    ← Render (GitHub Actions diario)
+```
+
+Bajo cada uno: `postgres/`, `audit-progress/`, `secrets/`, `manifests/`, `LATEST.txt`.
 
 Workflows:
 
@@ -244,18 +246,17 @@ Scripts: `scripts/dr/backup_to_r2.sh`, `scripts/dr/recover_from_r2.sh`.
 
 **Importante:** la clave `BACKUP_ENCRYPTION_KEY` no vive dentro de R2; sin ella no se abre el paquete. Guárdala en el gestor de contraseñas.
 
-#### Backup LOCAL automático (Mac → R2)
-
-Mismo bucket, prefijo `local/` (dump + auditoría + secrets).
+#### Backup DEV automático (Mac → R2 `dev/`)
 
 ```bash
 ./scripts/dr/install_local_backup.sh   # una vez
 ```
 
 - LaunchAgent: al iniciar sesión + cada **6 horas** (si la Mac está despierta / Docker disponible).
+- Prefijo R2: `dev/` (prod usa `prod/`).
 - Credenciales: `~/Backups/agente-juridico/backup.env` (chmod 600).
 - Logs: `~/Backups/agente-juridico/logs/local-backup-*.log`
-- Copia local: `~/Backups/agente-juridico/{postgres,audit-progress,secrets}/`
+- Recuperar: `./scripts/dr/recover_from_r2.sh --env dev` (o Actions → Recover from R2 → env=dev).
 
 **Reglas anti-pérdida del portal de auditoría**
 
