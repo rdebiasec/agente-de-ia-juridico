@@ -365,3 +365,23 @@ El export `.md` sigue siendo el dictamen formal al despacho. Respaldo JSON es co
 Portal v2.2: manual de uso en sección 0, audita reglas estrictas, agentes y **cada paso** de cada skill (totales dinámicos).
 
 </details>
+
+---
+
+## Plan de desastre
+
+Runbooks y backups: [`docs/operaciones/PLAN_DESASTRE.md`](docs/operaciones/PLAN_DESASTRE.md).
+
+### Backup automático (prod → Cloudflare R2)
+
+Workflow diario: **Actions → Backup Postgres → R2** (también *Run workflow* manual).
+
+Secrets: `PROD_DATABASE_URL`, `BACKUP_ENCRYPTION_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
+
+```bash
+# Backup / restore local (opcional, Docker)
+./scripts/dr/backup_postgres.sh
+./scripts/dr/restore_postgres.sh ~/Backups/agente-juridico/postgres/agente-….dump
+./scripts/dr/verify_recovery.sh --local
+./scripts/dr/verify_recovery.sh --prod
+```

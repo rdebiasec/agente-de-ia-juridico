@@ -6,6 +6,7 @@
 |---|---|
 | [`canon/`](./canon/) | Fuente viva — editar aquí |
 | [`auditoria/`](./auditoria/) | Reportes de pasos por skill |
+| [`operaciones/`](./operaciones/) | DR / runbooks (p. ej. [plan de desastre](./operaciones/PLAN_DESASTRE.md)) |
 | [`entregables/`](./entregables/) | Versiones para abogada y comercial |
 | [`generados/`](./generados/) | Volcados automáticos (no editar a mano) |
 | [`archive/`](./archive/) | Documentos históricos |

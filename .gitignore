@@ -7,3 +7,5 @@ __pycache__/
 .DS_Store
 .cursor/debug-*.log
 audit-portal/dist/
+backups/
+*.dump
