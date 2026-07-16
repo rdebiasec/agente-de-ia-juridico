@@ -1,4 +1,4 @@
-# Baseline — Validación 7 expertos (2026-07-09 19:51)
+# Baseline — Validación 7 expertos (2026-07-15 23:54)
 
 ## Métricas automáticas
 
@@ -136,7 +136,7 @@ CHECK OK: 90 skills + matriz variable validada
 ## Pytest
 
 ```
-........                                                                 [100%]
+.........                                                                [100%]
 =============================== warnings summary ===============================
 tests/test_compliance.py::test_audit_progress_history_and_isolation
   /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/httpx/_client.py:1896: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
@@ -147,5 +147,5 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-8 passed, 2 warnings in 1.57s
+9 passed, 2 warnings in 1.53s
 ```

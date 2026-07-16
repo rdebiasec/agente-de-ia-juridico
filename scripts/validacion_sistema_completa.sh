@@ -14,11 +14,13 @@ SERVER_PID=""
 STARTED_SERVER=0
 
 # shellcheck disable=SC1091
-if [[ -f "${ROOT}/.env" ]]; then
-  set -a
-  # shellcheck source=/dev/null
-  source "${ROOT}/.env"
-  set +a
+LOAD_DOTENV_PYTHON="${ROOT}/.venv/bin/python"
+# shellcheck source=scripts/lib/load_dotenv.sh
+source "${ROOT}/scripts/lib/load_dotenv.sh"
+load_dotenv "${ROOT}/.env"
+# Credenciales de smoke (plaintext) si existen — no van a git.
+if [[ -f "${HOME}/Backups/agente-juridico/smoke.env" ]]; then
+  load_dotenv "${HOME}/Backups/agente-juridico/smoke.env"
 fi
 
 log() { printf '%s\n' "$*"; }
@@ -43,9 +45,13 @@ else
   export DATABASE_URL=""
 fi
 
-export SMOKE_BASE_URL="${SMOKE_BASE_URL:-http://127.0.0.1:8000}"
-export SMOKE_SITE_PASSWORD="${SMOKE_SITE_PASSWORD:-${SITE_PASSWORD:-test-secret-pass}}"
+# Capa 5 usa puerto dedicado para no pelear con el servidor de desarrollo
+# y para poder fijar SITE_PASSWORD en claro (el .env suele tener hash PBKDF2).
+export SMOKE_BASE_URL="${SMOKE_BASE_URL:-http://127.0.0.1:8010}"
+export SMOKE_SITE_PASSWORD="${SMOKE_SITE_PASSWORD:-test-secret-pass-long}"
 export SMOKE_SITE_USERNAME="${SMOKE_SITE_USERNAME:-${SITE_USERNAME:-despacho}}"
+export SMOKE_AUDIT_EMAIL="${SMOKE_AUDIT_EMAIL:-smoke@despacho.com}"
+export SMOKE_AUDIT_PIN="${SMOKE_AUDIT_PIN:-654321}"
 
 declare -a LAYER_NAMES=()
 declare -a LAYER_STATUS=()
@@ -102,17 +108,25 @@ wait_for_health() {
 
 start_server() {
   if curl -sf "${SMOKE_BASE_URL}/health" >/dev/null 2>&1; then
-    log "Servidor ya activo en ${SMOKE_BASE_URL}"
+    log "Servidor smoke ya activo en ${SMOKE_BASE_URL}"
     return 0
   fi
-  if lsof -ti :8000 >/dev/null 2>&1; then
-    lsof -ti :8000 | xargs kill -9 2>/dev/null || true
+  local smoke_port
+  smoke_port="$(printf '%s' "${SMOKE_BASE_URL}" | sed -E 's#.*:([0-9]+).*#\1#')"
+  smoke_port="${smoke_port:-8010}"
+  if lsof -ti ":${smoke_port}" >/dev/null 2>&1; then
+    lsof -ti ":${smoke_port}" | xargs kill -9 2>/dev/null || true
     sleep 1
   fi
   log "→ Generando portal auditoría..."
   AUDIT_API_BASE="" "$PY" scripts/generar_audit_portal.py >/dev/null
-  log "→ Arrancando servidor en :8000..."
-  "$PY" -m src.main >/tmp/agente-smoke-server.log 2>&1 &
+  log "→ Arrancando servidor smoke en :${smoke_port} (SITE_PASSWORD=SMOKE_SITE_PASSWORD)..."
+  # Plaintext para que test_smoke_local pueda hacer login; no usa el hash del .env.
+  PORT="${smoke_port}" \
+    SITE_PASSWORD="${SMOKE_SITE_PASSWORD}" \
+    DEV_AUTO_LOGIN=false \
+    SESSION_COOKIE_SECURE=false \
+    "$PY" -m src.main >/tmp/agente-smoke-server.log 2>&1 &
   SERVER_PID=$!
   STARTED_SERVER=1
   wait_for_health

@@ -4,6 +4,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Carga .env sin expandir $ de hashes PBKDF2 (evita SITE_PASSWORD corrupto).
+# shellcheck disable=SC1091
+LOAD_DOTENV_PYTHON="${ROOT}/.venv/bin/python"
+# shellcheck source=scripts/lib/load_dotenv.sh
+source "${ROOT}/scripts/lib/load_dotenv.sh"
+load_dotenv "${ROOT}/.env"
+
 if lsof -ti :8000 >/dev/null 2>&1; then
   echo "Puerto 8000 ocupado. Deteniendo proceso anterior..."
   lsof -ti :8000 | xargs kill -9 2>/dev/null || true

@@ -127,7 +127,16 @@ async def lifespan(app: FastAPI):
         logger.exception("Error al detener el scheduler")
 
 
-app = FastAPI(title="Agente Jurídico", version="0.1.0", lifespan=lifespan)
+# En Render/producción no exponer OpenAPI (superficie de ataque innecesaria).
+_DISABLE_API_DOCS = bool(__import__("os").environ.get("RENDER"))
+app = FastAPI(
+    title="Agente Jurídico",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url=None if _DISABLE_API_DOCS else "/docs",
+    redoc_url=None if _DISABLE_API_DOCS else "/redoc",
+    openapi_url=None if _DISABLE_API_DOCS else "/openapi.json",
+)
 
 WEB_LOGIN_RATE_MAX = 12
 WEB_LOGIN_RATE_WINDOW = 900

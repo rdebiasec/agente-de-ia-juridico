@@ -1,4 +1,4 @@
-# Reporte — Validación absoluta 7 expertos (2026-07-09 19:51)
+# Reporte — Validación absoluta 7 expertos (2026-07-15 23:54)
 
 ## Resumen ejecutivo
 
