@@ -101,23 +101,21 @@ flowchart TB
 ## Comandos DR
 
 ```bash
-# Backup local (Docker db corriendo)
-./scripts/dr/backup_postgres.sh
+# Recuperar desde R2 (prod o dev)
+./scripts/dr/recover_from_r2.sh --env prod
+./scripts/dr/recover_from_r2.sh --env dev
 
-# Backup prod (External Database URL desde Render → agente-db)
-DATABASE_URL='postgresql://agente:...@dpg-....render.com/agente' \
-  ./scripts/dr/backup_postgres.sh --label prod
+# Restore Postgres (tras descifrar)
+./scripts/dr/restore_postgres.sh ~/Backups/agente-juridico/recovery/run-…/agente-….dump
 
-# Restore local
-./scripts/dr/restore_postgres.sh ~/Backups/agente-juridico/postgres/agente-YYYYMMDD-HHMM.dump
+# Instalar backup automático Mac → R2 dev/
+./scripts/dr/install_local_backup.sh
 
 # Inventario de secretos (nunca imprime valores)
 ./scripts/dr/env_inventory.sh
 
-# Reconstruir entorno local
+# Reconstruir / verificar
 ./scripts/dr/rebuild_local.sh
-
-# Verificar
 ./scripts/dr/verify_recovery.sh --local
 ./scripts/dr/verify_recovery.sh --prod
 ```
