@@ -62,8 +62,16 @@ JSON_RAW="$WORK/audit-progress-${STAMP}-${LABEL}.json"
 JSON_ENC="${JSON_RAW}.gpg"
 
 echo "→ pg_dump (${LABEL})"
-# No imprimir PGURL (contiene credenciales)
-pg_dump "$PGURL" -Fc -f "$DUMP_RAW"
+# No imprimir PGURL (contiene credenciales).
+# Render free usa Postgres 18; el cliente del runner a menudo es más viejo → Docker.
+if command -v docker >/dev/null 2>&1; then
+  docker run --rm \
+    -v "$WORK:/out" \
+    postgres:18 \
+    pg_dump "$PGURL" -Fc -f "/out/$(basename "$DUMP_RAW")"
+else
+  pg_dump "$PGURL" -Fc -f "$DUMP_RAW"
+fi
 
 echo "→ export audit progress JSON"
 DATABASE_URL="$DATABASE_URL" \

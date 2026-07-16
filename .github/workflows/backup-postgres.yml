@@ -20,12 +20,16 @@ jobs:
       - name: Install system tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client gnupg
+          sudo apt-get install -y -qq gnupg
+          # pg_dump va vía Docker postgres:18 (paridad con Render)
 
       - name: Install Python deps (export audit + AWS CLI)
         run: |
           pip install -e .
           pip install "awscli>=1.32,<2"
+
+      - name: Pull Postgres 18 image (for pg_dump)
+        run: docker pull postgres:18
 
       - name: Run backup to R2
         env:
