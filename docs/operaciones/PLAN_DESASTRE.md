@@ -244,7 +244,18 @@ Scripts: `scripts/dr/backup_to_r2.sh`, `scripts/dr/recover_from_r2.sh`.
 
 **Importante:** la clave `BACKUP_ENCRYPTION_KEY` no vive dentro de R2; sin ella no se abre el paquete. Guárdala en el gestor de contraseñas.
 
-Fallback offline (Mac, opcional): `./scripts/dr/daily_backup.sh`
+#### Backup LOCAL automático (Mac → R2)
+
+Mismo bucket, prefijo `local/` (dump + auditoría + secrets).
+
+```bash
+./scripts/dr/install_local_backup.sh   # una vez
+```
+
+- LaunchAgent: al iniciar sesión + cada **6 horas** (si la Mac está despierta / Docker disponible).
+- Credenciales: `~/Backups/agente-juridico/backup.env` (chmod 600).
+- Logs: `~/Backups/agente-juridico/logs/local-backup-*.log`
+- Copia local: `~/Backups/agente-juridico/{postgres,audit-progress,secrets}/`
 
 **Reglas anti-pérdida del portal de auditoría**
 
