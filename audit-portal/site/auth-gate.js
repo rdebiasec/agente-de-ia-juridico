@@ -29,21 +29,8 @@
         });
     }
 
-    const AUDIT_STORAGE_KEYS = [
-        'legal-audit-sync-v4',
-        'legal-audit-sync-v3',
-        'legal-audit-sync-v2',
-    ];
-
-    function clearAuditLocalCache() {
-        for (const key of AUDIT_STORAGE_KEYS) {
-            try {
-                localStorage.removeItem(key);
-            } catch (_) {
-                /* ignore */
-            }
-        }
-    }
+    // No borrar localStorage al cerrar sesión: es el último respaldo si el
+    // servidor falla. La caché va por correo (app.js) y no se mezcla entre usuarios.
 
     function showGate() {
         const gate = document.getElementById('audit-auth-gate');
@@ -230,7 +217,6 @@
             }
             setSessionEmail(null);
             preloginState = null;
-            clearAuditLocalCache();
             window.dispatchEvent(new CustomEvent('audit-session-ended'));
             document.getElementById('audit-auth-form')?.reset();
             preloginState = null;

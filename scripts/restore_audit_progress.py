@@ -103,10 +103,17 @@ def main() -> int:
         type=int,
         help="Restaurar un id concreto de audit_portal_progress_history.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Con --restore: muestra qué se restauraría sin escribir en la DB.",
+    )
     args = parser.parse_args()
     email = normalize_audit_email(args.email)
     if not args.list and not args.restore:
         parser.error("Indique --list y/o --restore")
+    if args.dry_run and not args.restore:
+        parser.error("--dry-run requiere --restore")
 
     db_url = os.environ.get("DATABASE_URL", "").strip()
     if not db_url:
@@ -151,10 +158,19 @@ def main() -> int:
             else:
                 chosen = max(candidates, key=lambda h: (h["decisions"], h["created_at"]))
 
-            if current and current["decisions"] >= chosen["decisions"]:
+            current_dec = current["decisions"] if current else 0
+            if current and current_dec >= chosen["decisions"]:
                 print(
-                    f"AVISO: el progreso actual ya tiene {current['decisions']} decisiones; "
+                    f"AVISO: el progreso actual ya tiene {current_dec} decisiones; "
                     f"historial elegido tiene {chosen['decisions']}. No se restauró."
+                )
+                return 0
+
+            if args.dry_run:
+                print(
+                    f"DRY-RUN: restauraría history id={chosen['id']} "
+                    f"({chosen['decisions']} decisiones, created_at={chosen['created_at']}) "
+                    f"sobre actual decisions={current_dec}. Sin escritura."
                 )
                 return 0
 

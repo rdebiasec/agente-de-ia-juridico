@@ -4,12 +4,130 @@ const STORAGE_KEY = 'legal-audit-sync-v4';
 const STORAGE_KEY_LEGACY = 'legal-audit-sync-v3';
 const STORAGE_KEY_LEGACY_V2 = 'legal-audit-sync-v2';
 const SAVE_DEBOUNCE_MS = 800;
+const DECISION_STATUSES = new Set(['APROBADO', 'AJUSTAR']);
+const STATUS_RANK = { PENDIENTE: 0, AJUSTAR: 1, APROBADO: 2 };
 
 let serverUpdatedAt = null;
 let saveDebounceTimer = null;
 let serverSyncEnabled = true;
 let initialProgressSynced = false;
 let progressUserDirty = false;
+
+function normalizeEmailKey(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+function storageKeyForEmail(email) {
+    const e = normalizeEmailKey(email);
+    return e ? `${STORAGE_KEY}:${e}` : STORAGE_KEY;
+}
+
+function decisionCount(payload) {
+    if (!payload || typeof payload !== 'object') return 0;
+    let count = 0;
+    for (const type of ['guardrails', 'agentes', 'guias', 'pasos']) {
+        const bucket = payload[type] || {};
+        for (const id of Object.keys(bucket)) {
+            const st = bucket[id];
+            if (st && DECISION_STATUSES.has(st.status)) count += 1;
+        }
+    }
+    const custom = payload.custom || {};
+    if (Array.isArray(custom.guardrailsAdded)) count += custom.guardrailsAdded.length;
+    if (custom.pasosAdded && typeof custom.pasosAdded === 'object') {
+        for (const steps of Object.values(custom.pasosAdded)) {
+            if (Array.isArray(steps)) count += steps.length;
+        }
+    }
+    if (Array.isArray(custom.guardrailsRemoved)) count += custom.guardrailsRemoved.length;
+    if (Array.isArray(custom.pasosRemoved)) count += custom.pasosRemoved.length;
+    return count;
+}
+
+function mergeDecisionItem(left, right) {
+    const a = left && typeof left === 'object' ? left : {};
+    const b = right && typeof right === 'object' ? right : {};
+    const aStatus = a.status || 'PENDIENTE';
+    const bStatus = b.status || 'PENDIENTE';
+    const aRank = STATUS_RANK[aStatus] ?? 0;
+    const bRank = STATUS_RANK[bStatus] ?? 0;
+    let chosen;
+    let status;
+    if (bRank > aRank) {
+        chosen = b;
+        status = bStatus;
+    } else if (aRank > bRank) {
+        chosen = a;
+        status = aStatus;
+    } else if (DECISION_STATUSES.has(bStatus)) {
+        chosen = b;
+        status = bStatus;
+    } else {
+        chosen = Object.keys(b).length ? b : a;
+        status = bStatus || aStatus;
+    }
+    return {
+        status,
+        reason: String(chosen.reason || a.reason || b.reason || ''),
+        solution: String(chosen.solution || a.solution || b.solution || ''),
+    };
+}
+
+function mergeBucket(left, right) {
+    const a = left && typeof left === 'object' ? left : {};
+    const b = right && typeof right === 'object' ? right : {};
+    const out = {};
+    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+        out[key] = mergeDecisionItem(a[key], b[key]);
+    }
+    return out;
+}
+
+function mergeCustom(left, right) {
+    const a = left && typeof left === 'object' ? left : {};
+    const b = right && typeof right === 'object' ? right : {};
+    const uniq = (arr) => {
+        const seen = new Set();
+        const out = [];
+        for (const item of arr || []) {
+            const k = JSON.stringify(item);
+            if (seen.has(k)) continue;
+            seen.add(k);
+            out.push(item);
+        }
+        return out;
+    };
+    const pasosAdded = {};
+    for (const src of [a.pasosAdded || {}, b.pasosAdded || {}]) {
+        for (const [skillId, steps] of Object.entries(src)) {
+            if (!Array.isArray(steps)) continue;
+            pasosAdded[skillId] = uniq([...(pasosAdded[skillId] || []), ...steps]);
+        }
+    }
+    return {
+        guardrailsAdded: uniq([...(a.guardrailsAdded || []), ...(b.guardrailsAdded || [])]),
+        guardrailsRemoved: uniq([...(a.guardrailsRemoved || []), ...(b.guardrailsRemoved || [])]),
+        pasosAdded,
+        pasosRemoved: uniq([...(a.pasosRemoved || []), ...(b.pasosRemoved || [])]),
+    };
+}
+
+function mergePersistPayload(existing, incoming) {
+    const left = existing && typeof existing === 'object' ? existing : {};
+    const right = incoming && typeof incoming === 'object' ? incoming : {};
+    if (!Object.keys(left).length) return { ...right };
+    if (!Object.keys(right).length) return { ...left };
+    return {
+        version: right.version || left.version || 4,
+        savedAt: right.savedAt || left.savedAt || null,
+        catalogGeneratedAt: right.catalogGeneratedAt || left.catalogGeneratedAt || null,
+        guardrails: mergeBucket(left.guardrails, right.guardrails),
+        agentes: mergeBucket(left.agentes, right.agentes),
+        guias: mergeBucket(left.guias, right.guias),
+        pasos: mergeBucket(left.pasos, right.pasos),
+        custom: mergeCustom(left.custom, right.custom),
+    };
+}
 
 const GROUP_LABELS = {
     coordinacion: 'Coordinación',
@@ -316,27 +434,21 @@ async function fetchAuditApi(path, options = {}) {
 }
 
 function hasPersistedDecisions() {
-    const types = ['guardrails', 'agentes', 'guias', 'pasos'];
-    for (const type of types) {
-        const bucket = auditLog[type] || {};
-        for (const id of Object.keys(bucket)) {
-            const st = bucket[id];
-            if (st && (st.status === 'APROBADO' || st.status === 'AJUSTAR')) return true;
-        }
-    }
-    const custom = auditLog.custom;
-    if (!custom) return false;
-    return Boolean(
-        (custom.guardrailsAdded && custom.guardrailsAdded.length) ||
-            (custom.pasosAdded && Object.keys(custom.pasosAdded).length) ||
-            (custom.guardrailsRemoved && custom.guardrailsRemoved.length) ||
-            (custom.pasosRemoved && custom.pasosRemoved.length),
-    );
+    return decisionCount(buildPersistPayload()) > 0;
 }
 
 function saveAuditLogLocalOnly() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistPayload()));
+        const email =
+            typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+        const payload = buildPersistPayload();
+        const key = storageKeyForEmail(email);
+        localStorage.setItem(key, JSON.stringify(payload));
+        // Espejo legacy + backup por correo (recuperación si un arreglo limpia la clave activa).
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        if (email) {
+            localStorage.setItem(`${STORAGE_KEY}:backup:${normalizeEmailKey(email)}`, JSON.stringify(payload));
+        }
     } catch (err) {
         console.error('No se pudo guardar caché local:', err);
     }
@@ -390,6 +502,8 @@ function scheduleServerSave() {
 
 async function syncProgressFromServer() {
     loadAuditLog();
+    const localBefore = buildPersistPayload();
+    const localCount = decisionCount(localBefore);
     if (!serverSyncEnabled) {
         updatePersistStatus();
         return;
@@ -397,7 +511,7 @@ async function syncProgressFromServer() {
     try {
         const res = await fetchAuditApi('/api/audit/progress');
         if (res.status === 404) {
-            if (hasPersistedDecisions()) {
+            if (localCount > 0) {
                 await pushProgressToServer();
             }
             updatePersistStatus();
@@ -407,11 +521,19 @@ async function syncProgressFromServer() {
             updatePersistStatus({ serverError: true });
             return;
         }
-        const payload = await res.json();
-        if (applyPersistPayload(payload)) {
+        const serverPayload = await res.json();
+        const serverCount = decisionCount(serverPayload);
+        // Nunca pisar decisiones locales con un servidor vacío o más pobre.
+        const merged = mergePersistPayload(serverPayload, localBefore);
+        const mergedCount = decisionCount(merged);
+        if (applyPersistPayload(merged)) {
             saveAuditLogLocalOnly();
         }
-        serverUpdatedAt = payload.savedAt || null;
+        serverUpdatedAt = merged.savedAt || serverPayload.savedAt || null;
+        if (mergedCount > serverCount || (localCount > 0 && serverCount === 0)) {
+            progressUserDirty = true;
+            await pushProgressToServer();
+        }
         updatePersistStatus();
     } catch (err) {
         console.warn('No se pudo cargar progreso del servidor:', err);
@@ -424,10 +546,20 @@ async function deleteServerProgress() {
         typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
     const label = email ? ` (${email})` : '';
     const ok = confirm(
-        `¿Borrar todo su progreso en el servidor${label}? Esta acción no se puede deshacer.`,
+        `¿Borrar todo su progreso en el servidor${label}? Quedará una copia en el historial del servidor para recuperación de emergencia.`,
     );
     if (!ok) return;
     try {
+        // Respaldo local de emergencia antes del borrado ARCO.
+        try {
+            const snap = buildPersistPayload();
+            if (email && decisionCount(snap) > 0) {
+                localStorage.setItem(
+                    `${STORAGE_KEY}:deleted:${normalizeEmailKey(email)}:${Date.now()}`,
+                    JSON.stringify(snap),
+                );
+            }
+        } catch (_) { /* ignore */ }
         const res = await fetchAuditApi('/api/audit/progress', { method: 'DELETE' });
         if (res.status !== 404 && !res.ok) {
             alert('No se pudo borrar el progreso en el servidor.');
@@ -442,6 +574,10 @@ async function deleteServerProgress() {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STORAGE_KEY_LEGACY);
         localStorage.removeItem(STORAGE_KEY_LEGACY_V2);
+        if (email) {
+            localStorage.removeItem(storageKeyForEmail(email));
+            localStorage.removeItem(`${STORAGE_KEY}:backup:${normalizeEmailKey(email)}`);
+        }
         serverUpdatedAt = null;
         renderAll();
         updatePersistStatus();
@@ -516,17 +652,31 @@ function updatePersistStatus(opts = {}) {
 }
 
 function loadAuditLog() {
-    const keys = [STORAGE_KEY, STORAGE_KEY_LEGACY, STORAGE_KEY_LEGACY_V2];
+    const email =
+        typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+    const keyed = email ? storageKeyForEmail(email) : null;
+    const backup = email ? `${STORAGE_KEY}:backup:${normalizeEmailKey(email)}` : null;
+    const keys = [keyed, backup, STORAGE_KEY, STORAGE_KEY_LEGACY, STORAGE_KEY_LEGACY_V2].filter(Boolean);
+    let best = null;
+    let bestCount = -1;
     for (const key of keys) {
         try {
             const raw = localStorage.getItem(key);
             if (!raw) continue;
             const parsed = JSON.parse(raw);
-            if (applyPersistPayload(parsed)) {
-                if (key !== STORAGE_KEY) saveAuditLogLocalOnly();
-                break;
+            if (!parsed || typeof parsed !== 'object') continue;
+            const count = decisionCount(parsed);
+            if (count > bestCount) {
+                best = parsed;
+                bestCount = count;
+            } else if (best && count === bestCount && count > 0) {
+                best = mergePersistPayload(best, parsed);
+                bestCount = decisionCount(best);
             }
         } catch (_) { /* ignore */ }
+    }
+    if (best && applyPersistPayload(best)) {
+        saveAuditLogLocalOnly();
     }
 }
 
@@ -564,11 +714,12 @@ function importarProgresoJson(file) {
     reader.onload = () => {
         try {
             const parsed = JSON.parse(reader.result);
-            if (!applyPersistPayload(parsed)) throw new Error('Formato inválido');
+            const merged = mergePersistPayload(buildPersistPayload(), parsed);
+            if (!applyPersistPayload(merged)) throw new Error('Formato inválido');
             markProgressDirty();
             saveAuditLog();
             renderAll();
-            alert('Progreso restaurado correctamente.');
+            alert('Progreso restaurado correctamente (fusionado sin perder decisiones previas).');
         } catch (err) {
             console.error(err);
             alert('No se pudo leer el archivo. Verifique que sea un respaldo JSON del portal.');
@@ -593,9 +744,17 @@ function bindPersistUi() {
         e.target.value = '';
     });
     window.addEventListener('storage', e => {
-        if ((e.key !== STORAGE_KEY && e.key !== STORAGE_KEY_LEGACY) || !e.newValue) return;
+        if (!e.newValue) return;
+        const email =
+            typeof window.getAuditSessionEmail === 'function' ? window.getAuditSessionEmail() : null;
+        const allowed = new Set(
+            [STORAGE_KEY, STORAGE_KEY_LEGACY, storageKeyForEmail(email)].filter(Boolean),
+        );
+        if (!allowed.has(e.key)) return;
         try {
-            if (applyPersistPayload(JSON.parse(e.newValue))) renderAll();
+            const incoming = JSON.parse(e.newValue);
+            const merged = mergePersistPayload(buildPersistPayload(), incoming);
+            if (applyPersistPayload(merged)) renderAll();
         } catch (_) { /* ignore */ }
     });
 }

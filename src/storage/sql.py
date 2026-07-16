@@ -782,17 +782,15 @@ class SqlRepository:
                 s.commit()
                 return
 
-            best_id = None
-            best_count = -1
-            for row in rows:
-                count = audit_progress_decision_count(row.payload)
-                if count > best_count:
-                    best_count = count
-                    best_id = row.id
-
-            stale_ids = [row.id for row in rows[keep_last:]]
-            if best_id is not None and best_count > 0 and best_id in stale_ids:
-                stale_ids = [row_id for row_id in stale_ids if row_id != best_id]
+            # Nunca borrar instantáneas con decisiones reales (anti-pérdida).
+            protected_ids = {
+                row.id
+                for row in rows
+                if audit_progress_decision_count(row.payload) > 0
+            }
+            empty_rows = [row for row in rows if row.id not in protected_ids]
+            # Mantener las N vacías más recientes; el resto (solo vacías) se puede podar.
+            stale_ids = [row.id for row in empty_rows[keep_last:]]
 
             if stale_ids:
                 s.execute(

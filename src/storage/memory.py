@@ -318,17 +318,17 @@ class InMemoryRepository:
             if len(per_email) <= keep_last:
                 return
 
-            best_idx = max(
-                per_email,
-                key=lambda item: audit_progress_decision_count(item[2]),
-            )[0]
-            best_count = audit_progress_decision_count(self._audit_progress_history[best_idx][1])
-            drop = {i for i, *_ in per_email[:-keep_last]}
-            if best_count > 0 and best_idx in drop:
-                drop.discard(best_idx)
-            self._audit_progress_history = [
-                item for idx, item in enumerate(self._audit_progress_history) if idx not in drop
+            # Solo podar instantáneas vacías; nunca borrar filas con decisiones.
+            empty = [
+                (i, e, p, t)
+                for i, e, p, t in per_email
+                if audit_progress_decision_count(p) <= 0
             ]
+            drop = {i for i, *_ in empty[:-keep_last]}
+            if drop:
+                self._audit_progress_history = [
+                    item for idx, item in enumerate(self._audit_progress_history) if idx not in drop
+                ]
 
     def get_execution_plan(self, plan_id: str) -> ExecutionPlanRecord | None:
         return self._execution_plans.get(plan_id)

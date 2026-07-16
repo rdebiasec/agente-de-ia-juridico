@@ -22,6 +22,7 @@ from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
 from src.gateway.audit_progress import (
     audit_progress_decision_count,
     audit_progress_regression_blocked,
+    merge_audit_progress,
 )
 from src.storage import get_repository
 from src.storage.models import AuditPortalAccessLog, AuditPortalUser, ComplianceConsent
@@ -414,8 +415,10 @@ async def put_audit_progress(
     repo = get_repository()
     payload = body.model_dump()
     existing = repo.get_audit_portal_progress(email)
-    if existing is not None and audit_progress_regression_blocked(existing.payload, payload):
-        existing_count = audit_progress_decision_count(existing.payload)
+    existing_payload = existing.payload if existing is not None else None
+    merged = merge_audit_progress(existing_payload, payload)
+    if existing is not None and audit_progress_regression_blocked(existing_payload, merged):
+        existing_count = audit_progress_decision_count(existing_payload)
         incoming_count = audit_progress_decision_count(payload)
         _log_access(
             request,
@@ -430,24 +433,42 @@ async def put_audit_progress(
                 "Recargue la página o use «Borrar mi progreso» solo si desea empezar de cero."
             ),
         )
-    row = repo.save_audit_portal_progress(email, payload)
-    repo.append_audit_progress_history(email, payload)
-    _log_access(request, action="put_progress", email=email)
+    row = repo.save_audit_portal_progress(email, merged)
+    repo.append_audit_progress_history(email, merged)
+    _log_access(
+        request,
+        action="put_progress",
+        email=email,
+        detail=f"decisions={audit_progress_decision_count(merged)}",
+    )
     return {
         "ok": True,
         "email": row.email,
         "updated_at": row.updated_at.isoformat(),
+        "decisions": audit_progress_decision_count(merged),
+        "merged": audit_progress_decision_count(merged)
+        > audit_progress_decision_count(payload),
     }
 
 
 @router.delete("/progress")
 async def delete_audit_progress(request: Request, email: str = Depends(_require_audit_email)):
     repo = get_repository()
+    existing = repo.get_audit_portal_progress(email)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Sin progreso guardado para este correo.")
+    # Instantánea previa al borrado ARCO — recuperable con restore_audit_progress.py
+    repo.append_audit_progress_history(email, existing.payload)
     deleted = repo.delete_audit_portal_progress(email)
     if not deleted:
         raise HTTPException(status_code=404, detail="Sin progreso guardado para este correo.")
-    _log_access(request, action="delete_progress", email=email)
-    return {"ok": True, "deleted": True}
+    _log_access(
+        request,
+        action="delete_progress",
+        email=email,
+        detail=f"archived_decisions={audit_progress_decision_count(existing.payload)}",
+    )
+    return {"ok": True, "deleted": True, "archived": True}
 
 
 @router.get("/execution-plans/dashboard")
