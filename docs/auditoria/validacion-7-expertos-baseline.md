@@ -1,4 +1,4 @@
-# Baseline — Validación 7 expertos (2026-07-15 23:54)
+# Baseline — Validación 7 expertos (2026-07-16 00:09)
 
 ## Métricas automáticas
 
@@ -147,5 +147,5 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-9 passed, 2 warnings in 1.53s
+9 passed, 2 warnings in 1.37s
 ```
