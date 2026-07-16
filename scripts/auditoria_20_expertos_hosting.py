@@ -1080,9 +1080,12 @@ def run(base: str, *, waves: set[int] | None = None) -> tuple[list[Finding], dic
             os.environ["AWS_SECRET_ACCESS_KEY"] = env.get("R2_SECRET_ACCESS_KEY", "")
             os.environ["AWS_DEFAULT_REGION"] = "auto"
             endpoint = f"https://{env['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com"
+            # Usar sys.executable evita shebang roto cuando el path del repo tiene espacios.
+            import sys
+
             out = subprocess.check_output(
                 [
-                    str(ROOT / ".venv" / "bin" / "python"),
+                    sys.executable,
                     "-m",
                     "awscli",
                     "s3",
@@ -1093,6 +1096,7 @@ def run(base: str, *, waves: set[int] | None = None) -> tuple[list[Finding], dic
                 ],
                 text=True,
                 timeout=45,
+                env={**os.environ},
             )
             r2_ok = "LATEST.txt" in out or "postgres/" in out
             r2_detail = out.strip().replace("\n", " | ")[:200]

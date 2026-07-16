@@ -2,8 +2,8 @@
   "meta": {
     "base": "https://agente-de-ia-juridico.onrender.com",
     "pages": "https://rdebiasec.github.io/agente-de-ia-juridico",
-    "commit": "8aa90af",
-    "generated_at": "2026-07-16T05:44:52.725701+00:00",
+    "commit": "293baf2",
+    "generated_at": "2026-07-16T16:19:52.036888+00:00",
     "waves": [
       1,
       2,
@@ -194,7 +194,7 @@
       "test_id": "E05-03",
       "name": "Último backup Actions success",
       "status": "PASS",
-      "detail": "[{\"conclusion\": \"success\", \"createdAt\": \"2026-07-16T04:15:33Z\", \"displayTitle\": \"Backup Postgres → R2\"}]",
+      "detail": "[{\"conclusion\": \"success\", \"createdAt\": \"2026-07-16T09:10:43Z\", \"displayTitle\": \"Backup Postgres → R2\"}]",
       "evidence": "gh workflow backup-postgres.yml",
       "source": "https://render.com/docs/postgresql-backups"
     },
@@ -234,7 +234,7 @@
       "test_id": "E07-01",
       "name": "Health latency x3 < 15s",
       "status": "PASS",
-      "detail": "ms=[160, 199, 200]",
+      "detail": "ms=[229, 232, 193]",
       "evidence": "https://agente-de-ia-juridico.onrender.com/health",
       "source": "https://render.com/docs"
     },
@@ -304,7 +304,7 @@
       "test_id": "E09-02",
       "name": "Último CI",
       "status": "PASS",
-      "detail": "[{\"conclusion\": \"success\", \"createdAt\": \"2026-07-16T05:36:45Z\", \"headSha\": \"8aa90af1bbefeb2806ad3c649b8f5968df6579ff\"}]",
+      "detail": "[{\"conclusion\": \"success\", \"createdAt\": \"2026-07-16T05:45:12Z\", \"headSha\": \"293baf2ffb483dae694f1f0094d4f6c7679c86d2\"}]",
       "evidence": "gh workflow ci.yml",
       "source": "https://owasp.org/www-project-application-security-verification-standard/"
     },
@@ -634,7 +634,7 @@
       "test_id": "E19-03",
       "name": "R2 prod/ reachable",
       "status": "PASS",
-      "detail": "PRE audit-progress/ |                            PRE manifests/ |                            PRE postgres/ |                            PRE secrets/ | 2026-07-15 23:42:06        268 LATEST.txt",
+      "detail": "PRE audit-progress/ |                            PRE manifests/ |                            PRE postgres/ |                            PRE secrets/ | 2026-07-16 04:12:03        268 LATEST.txt",
       "evidence": "s3://…/prod/",
       "source": "https://render.com/docs/postgresql-backups"
     },

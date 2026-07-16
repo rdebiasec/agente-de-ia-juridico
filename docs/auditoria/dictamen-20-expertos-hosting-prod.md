@@ -1,7 +1,7 @@
 # Dictamen 20 expertos — hosting seguro y reputación (producción)
 
-**Fecha:** 2026-07-16T05:44:52.725701+00:00
-**Commit:** `8aa90af`
+**Fecha:** 2026-07-16T16:19:52.036888+00:00
+**Commit:** `293baf2`
 **Target:** https://agente-de-ia-juridico.onrender.com
 **Pages:** https://rdebiasec.github.io/agente-de-ia-juridico
 **Oleadas:** [1, 2, 3, 4]
@@ -52,18 +52,18 @@
 | E04 | E04-03 Policy API + contacto ARCO | PASS | contact=privacidad@dbxsolutions.com | https://sedeelectronica.sic.gov.co/transparencia/normativa/ley-1581 |
 | E05 | E05-01 Workflow backup Postgres→R2 | PASS | .github/workflows/backup-postgres.yml | https://render.com/docs/postgresql-backups |
 | E05 | E05-02 Plan de desastre documentado | PASS | PLAN_DESASTRE.md | https://csrc.nist.gov/pubs/sp/800/34/r1/final |
-| E05 | E05-03 Último backup Actions success | PASS | [{"conclusion": "success", "createdAt": "2026-07-16T04:15:33Z", "displayTitle": "Backup Postgres → R2"}] | https://render.com/docs/postgresql-backups |
+| E05 | E05-03 Último backup Actions success | PASS | [{"conclusion": "success", "createdAt": "2026-07-16T09:10:43Z", "displayTitle": "Backup Postgres → R2"}] | https://render.com/docs/postgresql-backups |
 | E06 | E06-01 .env no trackeado en git | PASS | tracked=none | https://owasp.org/www-project-application-security-verification-standard/ |
 | E06 | E06-02 Auth web habilitada en prod | PASS | web_auth_enabled=True | https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html |
 | E06 | E06-03 Herramienta hash SITE_PASSWORD | PASS | hash_site_password.py | https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html |
-| E07 | E07-01 Health latency x3 < 15s | PASS | ms=[160, 199, 200] | https://render.com/docs |
+| E07 | E07-01 Health latency x3 < 15s | PASS | ms=[229, 232, 193] | https://render.com/docs |
 | E07 | E07-02 OpenAI configurado | PASS | openai=True | ops |
 | E07 | E07-03 Slack HITL canal | INFO | slack=False | ops |
 | E08 | E08-01 Chat abogado alcanzable | PASS | HTTP 200 | producto |
 | E08 | E08-02 Anti-wipe merge en portal | PASS | merge=True | integridad de datos |
 | E08 | E08-03 Logout no borra cache local | PASS | wipe_helpers=False | integridad de datos |
 | E09 | E09-01 CI workflow presente | PASS | ci.yml | https://owasp.org/www-project-application-security-verification-standard/ |
-| E09 | E09-02 Último CI | PASS | [{"conclusion": "success", "createdAt": "2026-07-16T05:36:45Z", "headSha": "8aa90af1bbefeb2806ad3c649b8f5968df6579ff"}] | https://owasp.org/www-project-application-security-verification-standard/ |
+| E09 | E09-02 Último CI | PASS | [{"conclusion": "success", "createdAt": "2026-07-16T05:45:12Z", "headSha": "293baf2ffb483dae694f1f0094d4f6c7679c86d2"}] | https://owasp.org/www-project-application-security-verification-standard/ |
 | E09 | E09-03 Deploy portal Pages workflow | PASS | deploy-audit-portal.yml | GitHub Pages |
 | E10 | E10-01 CORS allowlist Pages | PASS | ACAO='https://rdebiasec.github.io' | https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html |
 | E10 | E10-02 CORS rechaza origen evil | PASS | ACAO='' | https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html |
@@ -96,7 +96,7 @@
 | E18 | E18-03 Test cross-subject access control | PASS | test_plan_bola_blocks_cross_subject | https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html |
 | E19 | E19-01 Workflow recover-from-r2 | PASS | recover-from-r2.yml (manual, no auto-restore) | https://csrc.nist.gov/pubs/sp/800/34/r1/final |
 | E19 | E19-02 Script recover_from_r2.sh | PASS | scripts/dr/recover_from_r2.sh | https://render.com/docs/postgresql-backups |
-| E19 | E19-03 R2 prod/ reachable | PASS | PRE audit-progress/ /                            PRE manifests/ /                            PRE postgres/ /                            PRE secrets/ / 2026-07-15 23:42:06        268 LATEST.txt | https://render.com/docs/postgresql-backups |
+| E19 | E19-03 R2 prod/ reachable | PASS | PRE audit-progress/ /                            PRE manifests/ /                            PRE postgres/ /                            PRE secrets/ / 2026-07-16 04:12:03        268 LATEST.txt | https://render.com/docs/postgresql-backups |
 | E20 | E20-01 Guardrails g1–g10 en catálogo | PASS | ['g1', 'g10', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8', 'g9'] | reputación jurídica |
 | E20 | E20-02 Superficie chat con señal humana/HITL | PASS | HTTP 200 hitl_markers=True | IA propone; abogado aprueba |
 | E20 | E20-03 Slack HITL gap conocido | INFO | slack_configured=False | ops |
