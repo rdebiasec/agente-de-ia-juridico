@@ -49,6 +49,11 @@ def main() -> int:
     if not db_url:
         print("ERROR: configure DATABASE_URL.", file=sys.stderr)
         return 1
+    # Render External URL suele ser postgresql://… → forzar driver psycopg3 del proyecto
+    if db_url.startswith("postgres://"):
+        db_url = "postgresql+psycopg://" + db_url[len("postgres://") :]
+    elif db_url.startswith("postgresql://") and "+psycopg" not in db_url:
+        db_url = "postgresql+psycopg://" + db_url[len("postgresql://") :]
 
     out_dir = Path(args.out_dir).expanduser()
     out_dir.mkdir(parents=True, exist_ok=True)
