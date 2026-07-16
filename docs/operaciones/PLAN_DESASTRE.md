@@ -221,7 +221,7 @@ Script: [`scripts/dr/backup_to_r2.sh`](../../scripts/dr/backup_to_r2.sh)
 | `R2_ACCOUNT_ID` | Cloudflare R2 |
 | `R2_ACCESS_KEY_ID` | Token R2 |
 | `R2_SECRET_ACCESS_KEY` | Token R2 |
-| `R2_BUCKET` | Nombre del bucket (ej. `agente-juridico-backups`) |
+| `R2_BUCKET` | Nombre del bucket (ej. `agente-ia-juridico-backups`) |
 
 **Probar:** Actions → **Backup Postgres → R2** → Run workflow.
 
