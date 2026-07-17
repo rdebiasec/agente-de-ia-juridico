@@ -1,7 +1,10 @@
-"""Webhook de interactividad de Slack para aprobar/rechazar borradores.
+"""Webhook HTTP de interactividad Slack + lógica compartida con Bolt Socket Mode.
 
-Verifica la firma con `SLACK_SIGNING_SECRET`. Botones definidos en
-`src/hitl/slack_review.py` (action_id `draft_aprobar` / `draft_rechazar`).
+Verifica la firma con `SLACK_SIGNING_SECRET` (docs.slack.dev verifying-requests-from-slack).
+Botones en `src/hitl/slack_review.py` (`draft_aprobar` / `draft_rechazar`).
+
+Con Socket Mode activado, Slack envía interacciones por WebSocket (handlers en
+`src/channels/slack_bot.py`). Este endpoint queda como respaldo si Socket Mode está off.
 """
 
 from __future__ import annotations
@@ -18,6 +21,28 @@ from src.hitl.drafts import TransicionInvalida
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def aplicar_accion_borrador(
+    action_id: str | None,
+    draft_id: str | None,
+    revisor: str = "slack",
+) -> str | None:
+    """Aplica aprobar/rechazar. Devuelve texto de respuesta Slack o None si no aplica."""
+    if not action_id or not draft_id:
+        return None
+    try:
+        if action_id == "draft_aprobar":
+            hitl.aprobar(draft_id, revisor=revisor, comentario="Aprobado desde Slack")
+            return f":white_check_mark: Borrador {draft_id} aprobado por {revisor}."
+        if action_id == "draft_rechazar":
+            hitl.rechazar(draft_id, revisor=revisor, comentario="Rechazado desde Slack")
+            return f":x: Borrador {draft_id} rechazado por {revisor}."
+    except KeyError:
+        return f":warning: Borrador {draft_id} no encontrado."
+    except TransicionInvalida as exc:
+        return f":warning: {exc}"
+    return None
 
 
 def _verificar_firma(body: bytes, timestamp: str | None, signature: str | None, secret: str) -> bool:
@@ -57,20 +82,12 @@ async def slack_interactivity(request: Request):
         return {"ok": True}
 
     action = actions[0]
-    action_id = action.get("action_id")
-    draft_id = action.get("value")
     revisor = (payload.get("user") or {}).get("username") or "slack"
-
-    try:
-        if action_id == "draft_aprobar":
-            hitl.aprobar(draft_id, revisor=revisor, comentario="Aprobado desde Slack")
-            return {"text": f":white_check_mark: Borrador {draft_id} aprobado por {revisor}."}
-        if action_id == "draft_rechazar":
-            hitl.rechazar(draft_id, revisor=revisor, comentario="Rechazado desde Slack")
-            return {"text": f":x: Borrador {draft_id} rechazado por {revisor}."}
-    except KeyError:
-        return {"text": f":warning: Borrador {draft_id} no encontrado."}
-    except TransicionInvalida as exc:
-        return {"text": f":warning: {exc}"}
-
+    texto = aplicar_accion_borrador(
+        action_id=action.get("action_id"),
+        draft_id=action.get("value"),
+        revisor=revisor,
+    )
+    if texto:
+        return {"text": texto}
     return {"ok": True}

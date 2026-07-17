@@ -182,8 +182,37 @@ Buenas prácticas:
   `alembic upgrade head` (migración inicial: extensión `vector` + tablas `drafts`, `expedientes`,
   `deadlines`, `document_chunks`). Si Alembic falla, hay fallback a `create_all`.
   - Migración manual (opcional): `DATABASE_URL=... .venv/bin/alembic upgrade head`.
-- Para habilitar la aprobación desde Slack, configure `SLACK_BOT_TOKEN` y `SLACK_SIGNING_SECRET`
-  (secretos `sync:false`) y apunte la URL de interactividad a `POST /slack/interactivity`.
+### Slack (HITL + chat) — Socket Mode
+
+Fuente oficial: [Bolt Python Socket Mode](https://docs.slack.dev/tools/bolt-python/concepts/socket-mode),
+[Using Socket Mode](https://docs.slack.dev/apis/events-api/using-socket-mode),
+[Creating an app](https://docs.slack.dev/app-management/quickstart-app-settings),
+[Tokens](https://docs.slack.dev/authentication/tokens).
+
+En Render (secretos `sync:false` salvo el canal):
+
+| Variable | Qué es |
+|---|---|
+| `SLACK_BOT_TOKEN` | Bot token `xoxb-…` (OAuth & Permissions) |
+| `SLACK_APP_TOKEN` | App-level token `xapp-…` con scope `connections:write` (Socket Mode) |
+| `SLACK_SIGNING_SECRET` | Signing Secret (Basic Information) |
+| `SLACK_REVIEW_CHANNEL` | Canal de revisión, p. ej. `#revision-abogado` |
+
+Pasos en [api.slack.com/apps](https://api.slack.com/apps):
+
+1. Create app **From scratch** → nombre `Agente Jurídico`.
+2. **OAuth & Permissions** → Bot Token Scopes: `chat:write`, `app_mentions:read`,
+   `channels:history`, `groups:history`, `im:history`, `mpim:history`, `channels:read` → Install.
+3. **Socket Mode** → Enable → generar App-Level Token con `connections:write`.
+4. **Event Subscriptions** → Enable → bot events: `app_mention`, `message.im`,
+   `message.channels`, `message.groups` (reinstall si Slack lo pide).
+5. Invitar el bot al canal: `/invite @Agente Jurídico`.
+
+Con Socket Mode ON, eventos y botones llegan por WebSocket (Bolt). Respaldo HTTP
+(si apaga Socket Mode): Request URL de Interactivity →
+`https://agente-de-ia-juridico.onrender.com/slack/interactivity`
+([verifying requests](https://docs.slack.dev/authentication/verifying-requests-from-slack)).
+
 - **Scheduler de plazos**: arranca con la app (APScheduler). Job diario que marca términos
   vencidos y avisa por Slack los próximos a vencer, más un recordatorio mensual de seguimiento.
 - **PDF**: el `Dockerfile` ya incluye las libs de WeasyPrint (pango/cairo/gdk-pixbuf), por lo que

@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
 
     slack_bot_token: str = ""
+    # App-level token (xapp-…) for Socket Mode — see docs.slack.dev Socket Mode / Bolt.
+    slack_app_token: str = ""
     slack_signing_secret: str = ""
     slack_review_channel: str = "#revision-abogado"
 
