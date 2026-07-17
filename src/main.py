@@ -71,13 +71,22 @@ async def lifespan(app: FastAPI):
 
     slack_task = None
     if settings.slack_bot_token and settings.slack_signing_secret:
+        if not settings.slack_app_token:
+            logger.warning(
+                "Slack: bot+signing presentes pero falta SLACK_APP_TOKEN — "
+                "Socket Mode no arrancará (usar xapp-…, no xoxb-…)"
+            )
         try:
             from src.channels.slack_bot import start_slack_socket_mode
 
             slack_task = asyncio.create_task(start_slack_socket_mode())
-            logger.info("Slack Socket Mode iniciado")
+            logger.info("Slack Socket Mode: tarea de conexión creada")
         except Exception as e:
             logger.warning("Slack Socket Mode no iniciado: %s", e)
+    elif settings.slack_bot_token or settings.slack_signing_secret:
+        logger.warning(
+            "Slack parcial: se requieren SLACK_BOT_TOKEN y SLACK_SIGNING_SECRET juntos"
+        )
 
     try:
         scripts = settings.project_root / "scripts"
@@ -519,14 +528,18 @@ class TraceDebugResponse(BaseModel):
 @app.get("/health")
 async def health():
     settings = get_settings()
+    from src.channels.slack_status import slack_health_flags
     from src.services.twilio_notify import twilio_habilitado
 
+    slack_flags = slack_health_flags()
     payload = {
         "status": "ok",
         "modo": "firma",
         "environment": "production" if is_production(settings) else "development",
         "openai_configured": bool(settings.openai_api_key),
-        "slack_configured": bool(settings.slack_bot_token),
+        "slack_configured": slack_flags["slack_configured"],
+        "slack_app_token_configured": slack_flags["slack_app_token_configured"],
+        "slack_socket_started": slack_flags["slack_socket_started"],
         "twilio_configured": twilio_habilitado(),
         "persistencia": "postgres" if settings.database_url else "memoria",
         "web_auth_enabled": auth_enabled(settings.site_password),

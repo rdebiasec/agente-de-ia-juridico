@@ -7,7 +7,8 @@ services:
     runtime: docker
     dockerfilePath: ./deploy/Dockerfile
     dockerContext: .
-    plan: free
+    # starter = always-on (Socket Mode Slack no sobrevive al sleep del plan free)
+    plan: starter
     region: oregon
     branch: main
     healthCheckPath: /health

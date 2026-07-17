@@ -12,6 +12,7 @@ from slack_bolt.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 
 from src.channels.slack_plan import handle_slack_plan_message
+from src.channels.slack_status import mark_slack_socket_started
 from src.config import get_settings
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.slack_interactivity import aplicar_accion_borrador
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 def create_slack_app() -> AsyncApp | None:
     settings = get_settings()
     if not settings.slack_bot_token or not settings.slack_signing_secret:
+        logger.warning(
+            "Slack incompleto: faltan SLACK_BOT_TOKEN y/o SLACK_SIGNING_SECRET — omitiendo Bolt"
+        )
         return None
 
     app = AsyncApp(
@@ -91,12 +95,22 @@ async def start_slack_socket_mode():
     app = create_slack_app()
     if not app:
         logger.warning("Slack no configurado — omitiendo Socket Mode")
+        mark_slack_socket_started(False)
         return
     if not settings.slack_app_token:
         logger.warning(
             "SLACK_APP_TOKEN ausente — Socket Mode requiere token xapp-… "
-            "(docs.slack.dev Socket Mode). Omitiendo."
+            "(docs.slack.dev Socket Mode). Usar xapp- con connections:write, "
+            "no el bot token xoxb- (falla con not_allowed_token_type)."
         )
+        mark_slack_socket_started(False)
         return
     handler = AsyncSocketModeHandler(app, settings.slack_app_token)
-    await handler.start_async()
+    logger.info("Slack Socket Mode: conectando con SLACK_APP_TOKEN (xapp-…)")
+    try:
+        mark_slack_socket_started(True)
+        await handler.start_async()
+    except Exception:
+        mark_slack_socket_started(False)
+        logger.exception("Slack Socket Mode: conexión fallida")
+        raise

@@ -286,3 +286,60 @@ async def test_slack_plan_handler_execute_keyword():
     )
     assert handled2 is True
     assert any("Plan aprobado" in m or "Ejecución completada" in m or "↳" in m for m in messages)
+
+
+@pytest.mark.asyncio
+async def test_slack_plan_execute_survives_memory_cache_clear(monkeypatch):
+    """Simula redeploy: caché RAM vacía pero plan pending sigue en el repositorio."""
+    from src.channels import slack_plan
+    from src.channels.slack_plan import _pending_plans, handle_slack_plan_message
+    from src.config import get_settings
+    from src.storage import get_repository, reset_repository
+
+    monkeypatch.setenv("DATABASE_URL", "")
+    get_settings.cache_clear()
+    reset_repository()
+
+    async def _fake_schedule(plan_id, user_id, on_step_message=None):
+        return {"ok": True}
+
+    async def _fake_wait(plan_id, user_id, timeout=90.0):
+        return {"text": "Ejecución completada (test).", "session_id": f"slack:{user_id}", "trace": {}}
+
+    monkeypatch.setattr(slack_plan, "schedule_execute_async", _fake_schedule)
+    monkeypatch.setattr(slack_plan, "wait_for_plan_completion", _fake_wait)
+
+    _pending_plans.clear()
+    messages: list[str] = []
+
+    async def say(text, thread_ts=None):
+        messages.append(text)
+
+    await handle_slack_plan_message(
+        text="Necesito matriz hecho-prueba del caso",
+        user_id="U999",
+        say=say,
+        thread_ts="T-RESTART",
+    )
+    plan_id = _pending_plans.get("T-RESTART")
+    assert plan_id
+    record = get_repository().get_execution_plan(plan_id)
+    assert record is not None
+    assert record.status == "pending_approval"
+    assert (record.payload or {}).get("slack_thread_key") == "T-RESTART"
+
+    # Reinicio de proceso: solo se pierde la caché en memoria
+    _pending_plans.clear()
+
+    await handle_slack_plan_message(
+        text="EJECUTAR",
+        user_id="U999",
+        say=say,
+        thread_ts="T-RESTART",
+    )
+    joined = "\n".join(messages)
+    assert "No hay un plan pendiente" not in joined
+    assert "Plan aprobado" in joined
+    assert "Ejecución completada" in joined
+    get_settings.cache_clear()
+    reset_repository()

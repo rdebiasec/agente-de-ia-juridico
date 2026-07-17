@@ -257,7 +257,66 @@ Resultados esperados:
 
 - El servicio se **duerme** tras ~15 min sin uso
 - El primer request puede tardar 30–60 s (cold start)
-- Suficiente para desarrollo/staging
+- Suficiente para desarrollo/staging **web**
+
+### Slack HITL en producción (always-on)
+
+Socket Mode mantiene un WebSocket permanente. En plan **free** el sleep corta esa conexión y el bot deja de recibir eventos hasta el próximo wake.
+
+- `render.yaml` fija `plan: starter` (always-on) para el web service.
+- Si el dashboard sigue en free: [Settings del servicio](https://dashboard.render.com/web/srv-d8qvbk6gvqtc73eajbk0/settings) → Instance type → **Starter** (o superior) → Save.
+- Tras el cambio: redeploy y en logs debe verse `⚡️ Bolt app is running!` sin `not_allowed_token_type`.
+
+---
+
+## Operación Slack producción (runbook)
+
+**Principio:** configurar y probar Slack solo con Chrome del perfil DBX (`ricardo.debiase@dbx-solutions.com`) o Slack desktop ya logueado. **No** usar el Simple Browser de Cursor para login Google/Slack (passkey no automatizable).
+
+### Secretos (Render → Environment)
+
+| Variable | Prefijo esperado |
+|---|---|
+| `SLACK_BOT_TOKEN` | `xoxb-` |
+| `SLACK_APP_TOKEN` | `xapp-` (scope `connections:write`) |
+| `SLACK_SIGNING_SECRET` | cadena del Basic Information |
+| `SLACK_REVIEW_CHANNEL` | `#revision-abogado` |
+
+Rotación: regenerar token en api.slack.com → pegar en Render → Manual Deploy. Nunca subir `.env` a git.
+
+### Logs que importan
+
+| Señal | Significado |
+|---|---|
+| `⚡️ Bolt app is running!` | Socket Mode conectado |
+| `not_allowed_token_type` | Se usó `xoxb` donde va `xapp` |
+| `SLACK_APP_TOKEN ausente` | Falta variable en Render |
+
+### `/health` (sin secretos)
+
+```bash
+curl -s https://agente-de-ia-juridico.onrender.com/health | python3 -m json.tool
+```
+
+Campos: `slack_configured`, `slack_app_token_configured`, `slack_socket_started`.
+
+### Checklist HITL end-to-end
+
+1. En `#revision-abogado`: mencionar `@Agente Juridico` con una consulta → llega plan.
+2. En el **hilo**: `EJECUTAR` → “Plan aprobado…” y pasos.
+3. Botones de borrador:
+   ```bash
+   # Local con .env que apunte a los mismos secretos Slack (o tokens de prod en shell)
+   .venv/bin/python scripts/smoke_slack_hitl_drafts.py
+   ```
+   En Chrome DBX: **Aprobar** el primer mensaje y **Rechazar** el segundo.
+4. Recuperación: si el bot no responde → revisar plan always-on, logs Socket Mode, `/invite @Agente Juridico`, reinstall si cambiaron scopes.
+
+### Qué no hacer
+
+- Poner `SLACK_BOT_TOKEN` (`xoxb`) en el handler de Socket Mode (debe ser `xapp`).
+- Depender de automatización Playwright sobre `api.slack.com` como proceso diario.
+- Probar login Google passkey dentro del browser embebido de Cursor.
 
 ---
 
