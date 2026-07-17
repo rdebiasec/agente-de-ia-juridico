@@ -50,7 +50,7 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 ## Pendiente prioritario (siguiente sprint)
 
 ### P0 — Operación despacho
-1. **Slack HITL en producción** — Socket Mode con `SLACK_APP_TOKEN` (`xapp`), canal `#revision-abogado`, plan/`EJECUTAR` verificado; runbook en `DEPLOY.md`. Pendiente operativo: Instance type **Starter+** (always-on) en Render si el dashboard aún muestra free; completar Aprobar/Rechazar con `scripts/smoke_slack_hitl_drafts.py`.
+1. **Slack HITL en producción** — Socket Mode con `SLACK_APP_TOKEN` (`xapp`), canal `#revision-abogado`, plan/`EJECUTAR` verificado; Render en plan **starter** (always-on); `/health` con `slack_socket_started`; runbook en `DEPLOY.md`. Mensajes SMOKE2 con botones ya publicados: confirmar Aprobar/Rechazar con un clic humano en Chrome DBX.
 2. **Checklist REQ-001…050** — marcar `activo` + prueba manual por requisito en `requisitos_asistente.json`.
 3. **Tutela completa (REQ-038…042)** — borrador estructurado `output_type=Tutela` + término 10 días al aprobar (parcial hoy).
 
