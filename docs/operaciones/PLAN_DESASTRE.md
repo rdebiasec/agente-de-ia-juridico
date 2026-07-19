@@ -182,6 +182,9 @@ flowchart TB
 
 ## D10 — Restaurar progreso de un usuario
 
+Runbook completo (MCP, logs `put_progress_rejected`, rotación de API key, caso Michele):
+[`docs/auditoria/runbook-progreso-auditoria.md`](../auditoria/runbook-progreso-auditoria.md).
+
 ```bash
 DATABASE_URL='...' .venv/bin/python scripts/restore_audit_progress.py \
   --email usuario@ejemplo.com --list
