@@ -36,7 +36,7 @@ async def test_login_accepts_hashed_site_password(monkeypatch):
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         login = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "test-secret-pass"},
+            json={"username": "despacho", "password": "test-secret-pass", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert login.status_code == 200
         assert login.cookies.get("agente_session")

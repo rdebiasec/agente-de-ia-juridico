@@ -398,19 +398,25 @@ function buildMessageMeta(role, options = {}) {
 
 function formatAgentRoute(agent) {
   if (!agent) return "";
-  if (agent === "coordinador_expediente_penal") return "Coordinador de expediente penal";
-  if (agent === "analista_cronologia_hechos_penales") return "Analista de cronología penal";
-  if (agent === "analista_tipicidad_y_responsabilidad_penal") return "Analista de tipicidad y responsabilidad penal";
-  if (agent === "analista_ruta_procesal_ley906") return "Analista de ruta procesal Ley 906";
-  if (agent === "analista_representacion_victimas") return "Analista de representación de víctimas";
-  if (agent === "gestor_evidencia_y_soporte_probatorio") return "Gestor de evidencia y soporte probatorio";
-  if (agent === "preparador_estrategico_audiencias_penales") return "Preparador estratégico de audiencias penales";
-  if (agent === "redactor_documentos_juridicos_penales") return "Redactor de documentos jurídicos penales";
-  if (agent === "gestor_seguimiento_procesal_penal") return "Gestor de seguimiento procesal penal";
-  if (agent === "evaluador_derechos_fundamentales_tutela") return "Evaluador de derechos fundamentales y tutela";
-  if (agent === "analista_calidad_juridica") return "Analista de calidad jurídica";
+  // Cara al abogado: siempre POC / despacho (especialistas solo en Workflow Trace).
+  if (
+    agent === "coordinador_expediente_penal" ||
+    agent === "analista_cronologia_hechos_penales" ||
+    agent === "analista_tipicidad_y_responsabilidad_penal" ||
+    agent === "analista_ruta_procesal_ley906" ||
+    agent === "analista_representacion_victimas" ||
+    agent === "gestor_evidencia_y_soporte_probatorio" ||
+    agent === "preparador_estrategico_audiencias_penales" ||
+    agent === "redactor_documentos_juridicos_penales" ||
+    agent === "gestor_seguimiento_procesal_penal" ||
+    agent === "evaluador_derechos_fundamentales_tutela" ||
+    agent === "analista_calidad_juridica" ||
+    agent === "fallback" ||
+    agent === "orquestador"
+  ) {
+    return "Coordinador del expediente";
+  }
   // Compatibilidad con trazas legacy previas al rediseño penal.
-  if (agent === "orquestador") return "Orquestador (legacy)";
   if (agent === "intake") return "Especialista intake (legacy)";
   if (agent === "estratega") return "Especialista estrategia (legacy)";
   if (agent === "comunicacion_clientes") return "Especialista comunicación (legacy)";
@@ -419,7 +425,6 @@ function formatAgentRoute(agent) {
   if (agent === "conceptos_juridicos") return "Especialista conceptos (legacy)";
   if (agent === "tutela_constitucional") return "Especialista tutela (legacy)";
   if (agent === "dependiente_judicial") return "Dependiente judicial (legacy)";
-  if (agent === "fallback") return "Modo respaldo";
   if (agent === "guardrail") return "Bloqueo de seguridad";
   if (agent === "error") return "Ruta de error controlado";
   return agent;
@@ -791,8 +796,8 @@ function hideTyping() {
 }
 
 function agentLabel(agentId) {
+  if (agentId === "coordinador_expediente_penal") return "Coordinador del expediente";
   const labels = {
-    coordinador_expediente_penal: "Coordinador del expediente",
     analista_cronologia_hechos_penales: "Cronología y hechos",
     analista_tipicidad_y_responsabilidad_penal: "Tipicidad y responsabilidad",
     analista_ruta_procesal_ley906: "Ruta procesal Ley 906",
@@ -804,7 +809,9 @@ function agentLabel(agentId) {
     evaluador_derechos_fundamentales_tutela: "Tutela y derechos fundamentales",
     analista_calidad_juridica: "Control de calidad jurídica",
   };
-  return labels[agentId] || agentId;
+  const name = labels[agentId];
+  if (!name) return agentId || "";
+  return `Equipo interno · ${name}`;
 }
 
 function renderPlanStepsHtml(steps) {
@@ -837,6 +844,9 @@ function showPlanCard(plan, userEntryId, epochAtSend) {
     cronologia: "Cronología y hechos",
     tutela: "Acción de tutela",
     audiencia: "Preparación de audiencia",
+    indagacion_impulso: "Impulso / anti-archivo en indagación",
+    vif_proteccion: "VIF y medidas de protección",
+    querella_abreviado: "Querella / procedimiento abreviado",
     generico: "Consulta general",
   };
   const kind = plan.template_kind || "generico";
@@ -1876,6 +1886,42 @@ function setResetButtonsBusy(busy) {
   });
 }
 
+async function arcoEraseOwnData() {
+  if (
+    !confirm(
+      "¿Solicitud ARCO — borrar mis datos de esta sesión?\n\nSe eliminarán historial, trazas, borradores HITL, expediente y planes. Esta acción es para ejercicio del derecho de supresión (Ley 1581)."
+    )
+  ) {
+    return;
+  }
+  try {
+    const res = await authFetch("/api/compliance/arco-erase", { method: "POST" });
+    if (!res.ok) {
+      let detail = "No se pudo completar la supresión ARCO.";
+      try {
+        const err = await res.json();
+        if (err?.detail) detail = typeof err.detail === "string" ? err.detail : detail;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(detail);
+    }
+    resetChatConversation();
+    recordEvent({ type: "arco_erase" });
+    saveSessionState();
+    window.Workspace?.setExpediente?.(null);
+    window.FirmaPanel?.loadBandeja?.();
+    window.FirmaPanel?.loadTerminos?.();
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show("Datos de la sesión eliminados (ARCO).", "info");
+    }
+  } catch (err) {
+    if (typeof Toast !== "undefined" && Toast.show) {
+      Toast.show(err?.message || "No se pudo borrar (ARCO).", "error");
+    }
+  }
+}
+
 async function resetChatSession() {
   let pendingDrafts = 0;
   try {
@@ -2157,6 +2203,9 @@ function initValidationPanel() {
   resetScoreBtn?.addEventListener("click", resetScoreOnly);
   resetChatBtn?.addEventListener("click", () => {
     resetChatSession();
+  });
+  document.getElementById("arco-erase-btn")?.addEventListener("click", () => {
+    arcoEraseOwnData();
   });
   document.getElementById("reset-chat-btn-header")?.addEventListener("click", () => {
     resetChatSession();

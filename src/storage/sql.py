@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import JSON, Date, DateTime, Float, String, Text, create_engine, delete, select, text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, String, Text, create_engine, delete, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from src.storage.models import (
@@ -83,6 +83,8 @@ class ExpedienteRow(Base):
     etapa_actual: Mapped[str | None] = mapped_column(String(120), nullable=True)
     partes: Mapped[list] = mapped_column(JSON, default=list)
     terminos: Mapped[list] = mapped_column(JSON, default=list)
+    involucra_menor: Mapped[bool] = mapped_column(Boolean, default=False)
+    datos_sensibles: Mapped[bool] = mapped_column(Boolean, default=False)
     actualizado_en: Mapped[float] = mapped_column(Float, default=0.0)
 
 
@@ -206,12 +208,14 @@ def _to_execution_plan(row: ExecutionPlanRow) -> ExecutionPlanRecord:
 
 
 def _to_draft(row: DraftRow) -> Draft:
+    from src.compliance.crypto_at_rest import decrypt_text
+
     return Draft(
         id=row.id,
         session_id=row.session_id,
         tipo=row.tipo,
         titulo=row.titulo,
-        contenido=row.contenido,
+        contenido=decrypt_text(row.contenido),
         materia=row.materia,
         estado=row.estado,
         revisor=row.revisor,
@@ -247,16 +251,20 @@ def _to_expediente(row: ExpedienteRow) -> Expediente:
         etapa_actual=row.etapa_actual,
         partes=row.partes or [],
         terminos=row.terminos or [],
+        involucra_menor=bool(getattr(row, "involucra_menor", False)),
+        datos_sensibles=bool(getattr(row, "datos_sensibles", False)),
         actualizado_en=row.actualizado_en or 0.0,
     )
 
 
 def _to_chat_session(row: ChatSessionRow) -> ChatSession:
+    from src.compliance.crypto_at_rest import decrypt_messages
+
     return ChatSession(
         session_id=row.session_id,
         channel=row.channel,
         user_id=row.user_id,
-        messages=row.messages or [],
+        messages=decrypt_messages(row.messages or []),
         metadata=row.session_metadata or {},
         created_at=row.created_at,
         updated_at=row.updated_at,
@@ -304,13 +312,15 @@ class SqlRepository:
 
     # --- Borradores ---
     def add_draft(self, draft: Draft) -> Draft:
+        from src.compliance.crypto_at_rest import encrypt_text
+
         with self._session() as s:
             row = DraftRow(
                 id=draft.id,
                 session_id=draft.session_id,
                 tipo=draft.tipo,
                 titulo=draft.titulo,
-                contenido=draft.contenido,
+                contenido=encrypt_text(draft.contenido),
                 materia=draft.materia,
                 estado=draft.estado,
                 revisor=draft.revisor,
@@ -341,16 +351,74 @@ class SqlRepository:
             return [_to_draft(r) for r in s.scalars(stmt).all()]
 
     def update_draft(self, draft_id: str, **changes) -> Draft | None:
+        from src.compliance.crypto_at_rest import encrypt_text
+
         with self._session() as s:
             row = s.get(DraftRow, draft_id)
             if row is None:
                 return None
             for key, value in changes.items():
-                if hasattr(row, key):
+                if not hasattr(row, key):
+                    continue
+                if key == "contenido" and isinstance(value, str):
+                    setattr(row, key, encrypt_text(value))
+                else:
                     setattr(row, key, value)
             row.updated_at = datetime.now(timezone.utc)
             s.commit()
             return _to_draft(row)
+
+    def delete_drafts_for_session(self, session_id: str) -> int:
+        with self._session() as s:
+            result = s.execute(delete(DraftRow).where(DraftRow.session_id == session_id))
+            s.commit()
+            return int(result.rowcount or 0)
+
+    def delete_chat_session(self, session_id: str) -> bool:
+        with self._session() as s:
+            row = s.get(ChatSessionRow, session_id)
+            if row is None:
+                return False
+            s.delete(row)
+            s.commit()
+            return True
+
+    def delete_expediente(self, session_id: str) -> bool:
+        with self._session() as s:
+            row = s.get(ExpedienteRow, session_id)
+            if row is None:
+                return False
+            s.delete(row)
+            s.commit()
+            return True
+
+    def delete_execution_plans_for_user(self, user_id: str) -> int:
+        with self._session() as s:
+            result = s.execute(
+                delete(ExecutionPlanRow).where(ExecutionPlanRow.initiator_user_id == user_id)
+            )
+            s.commit()
+            return int(result.rowcount or 0)
+
+    def list_stale_chat_sessions(self, *, older_than: datetime, limit: int = 500) -> list[ChatSession]:
+        with self._session() as s:
+            stmt = (
+                select(ChatSessionRow)
+                .where(ChatSessionRow.updated_at < older_than)
+                .order_by(ChatSessionRow.updated_at.asc())
+                .limit(limit)
+            )
+            return [_to_chat_session(r) for r in s.scalars(stmt).all()]
+
+    def list_stale_audit_progress_emails(self, *, older_than: datetime, limit: int = 500) -> list[str]:
+        with self._session() as s:
+            stmt = (
+                select(AuditPortalProgressRow.email)
+                .where(AuditPortalProgressRow.updated_at < older_than)
+                .order_by(AuditPortalProgressRow.updated_at.asc())
+                .limit(limit)
+            )
+            return [str(e) for e in s.scalars(stmt).all()]
 
     # --- Términos ---
     def add_deadline(self, deadline: Deadline) -> Deadline:
@@ -484,6 +552,8 @@ class SqlRepository:
             row.etapa_actual = expediente.etapa_actual
             row.partes = expediente.partes
             row.terminos = expediente.terminos
+            row.involucra_menor = bool(expediente.involucra_menor)
+            row.datos_sensibles = bool(expediente.datos_sensibles)
             row.actualizado_en = expediente.actualizado_en
             s.commit()
         return expediente
@@ -495,6 +565,8 @@ class SqlRepository:
             return _to_chat_session(row) if row else None
 
     def save_chat_session(self, session: ChatSession) -> ChatSession:
+        from src.compliance.crypto_at_rest import encrypt_messages
+
         with self._session() as s:
             row = s.get(ChatSessionRow, session.session_id)
             if row is None:
@@ -502,7 +574,7 @@ class SqlRepository:
                 s.add(row)
             row.channel = session.channel
             row.user_id = session.user_id
-            row.messages = session.messages
+            row.messages = encrypt_messages(session.messages)
             row.session_metadata = session.metadata
             row.created_at = session.created_at
             row.updated_at = session.updated_at
@@ -529,8 +601,10 @@ class SqlRepository:
                     updated_at=now,
                 )
                 s.add(row)
+            from src.compliance.crypto_at_rest import encrypt_text
+
             messages = list(row.messages or [])
-            messages.append({"role": role, "content": content, "ts": time.time()})
+            messages.append({"role": role, "content": encrypt_text(content), "ts": time.time()})
             if len(messages) > max_messages:
                 messages = messages[-max_messages:]
             row.messages = messages

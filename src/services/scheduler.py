@@ -81,9 +81,24 @@ def start_scheduler():
         sched.add_job(
             recordatorio_seguimiento, "cron", day=1, hour=8, minute=0, id="seguimiento_mensual", replace_existing=True
         )
+
+        def _retention_job() -> None:
+            from src.compliance.retention import purge_expired_data
+
+            purge_expired_data(dry_run=False)
+
+        sched.add_job(
+            _retention_job,
+            "cron",
+            day=1,
+            hour=3,
+            minute=15,
+            id="retention_purge_mensual",
+            replace_existing=True,
+        )
         sched.start()
         _scheduler = sched
-        logger.info("Scheduler de plazos iniciado")
+        logger.info("Scheduler de plazos e retención iniciado")
     except Exception:
         logger.exception("No se pudo iniciar el scheduler de plazos")
     return _scheduler

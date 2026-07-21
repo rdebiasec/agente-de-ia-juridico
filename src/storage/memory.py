@@ -51,17 +51,31 @@ class InMemoryRepository:
 
     # --- Borradores ---
     def add_draft(self, draft: Draft) -> Draft:
+        from src.compliance.crypto_at_rest import encrypt_text
+        from copy import copy
+
+        stored = copy(draft)
+        stored.contenido = encrypt_text(draft.contenido)
         with self._lock:
-            self._drafts[draft.id] = draft
+            self._drafts[draft.id] = stored
         return draft
 
     def get_draft(self, draft_id: str) -> Draft | None:
-        return self._drafts.get(draft_id)
+        from src.compliance.crypto_at_rest import decrypt_text
+        from copy import copy
+
+        raw = self._drafts.get(draft_id)
+        if raw is None:
+            return None
+        out = copy(raw)
+        out.contenido = decrypt_text(raw.contenido)
+        return out
 
     def list_drafts(
         self, *, estado: str | None = None, session_id: str | None = None
     ) -> list[Draft]:
-        items = list(self._drafts.values())
+        items = [self.get_draft(d.id) for d in self._drafts.values()]
+        items = [d for d in items if d is not None]
         if estado is not None:
             items = [d for d in items if d.estado == estado]
         if session_id is not None:
@@ -78,6 +92,44 @@ class InMemoryRepository:
                     setattr(draft, key, value)
             draft.updated_at = datetime.now(timezone.utc)
             return draft
+
+    def delete_drafts_for_session(self, session_id: str) -> int:
+        with self._lock:
+            ids = [d.id for d in self._drafts.values() if d.session_id == session_id]
+            for did in ids:
+                self._drafts.pop(did, None)
+            return len(ids)
+
+    def delete_chat_session(self, session_id: str) -> bool:
+        with self._lock:
+            return self._chat_sessions.pop(session_id, None) is not None
+
+    def delete_expediente(self, session_id: str) -> bool:
+        with self._lock:
+            return self._expedientes.pop(session_id, None) is not None
+
+    def delete_execution_plans_for_user(self, user_id: str) -> int:
+        with self._lock:
+            ids = [p.plan_id for p in self._execution_plans.values() if p.initiator_user_id == user_id]
+            for pid in ids:
+                self._execution_plans.pop(pid, None)
+            return len(ids)
+
+    def list_stale_chat_sessions(self, *, older_than, limit: int = 500) -> list[ChatSession]:
+        with self._lock:
+            items = [s for s in self._chat_sessions.values() if s.updated_at < older_than]
+            items.sort(key=lambda s: s.updated_at)
+            return items[:limit]
+
+    def list_stale_audit_progress_emails(self, *, older_than, limit: int = 500) -> list[str]:
+        with self._lock:
+            items = [
+                (e, p.updated_at)
+                for e, p in self._audit_progress.items()
+                if p.updated_at < older_than
+            ]
+            items.sort(key=lambda x: x[1])
+            return [e for e, _ in items[:limit]]
 
     # --- Términos ---
     def add_deadline(self, deadline: Deadline) -> Deadline:
@@ -180,11 +232,24 @@ class InMemoryRepository:
 
     # --- Conversación y trazas ---
     def get_chat_session(self, session_id: str) -> ChatSession | None:
-        return self._chat_sessions.get(session_id)
+        from src.compliance.crypto_at_rest import decrypt_messages
+        from copy import copy
+
+        raw = self._chat_sessions.get(session_id)
+        if raw is None:
+            return None
+        out = copy(raw)
+        out.messages = decrypt_messages(raw.messages)
+        return out
 
     def save_chat_session(self, session: ChatSession) -> ChatSession:
+        from src.compliance.crypto_at_rest import encrypt_messages
+        from copy import copy
+
+        stored = copy(session)
+        stored.messages = encrypt_messages(session.messages)
         with self._lock:
-            self._chat_sessions[session.session_id] = session
+            self._chat_sessions[session.session_id] = stored
         return session
 
     def append_chat_message(
@@ -192,19 +257,21 @@ class InMemoryRepository:
     ) -> ChatSession:
         import time
 
+        from src.compliance.crypto_at_rest import encrypt_text
+
         now = datetime.now(timezone.utc)
         with self._lock:
             session = self._chat_sessions.get(session_id)
             if session is None:
                 session = ChatSession(session_id=session_id, channel=channel, user_id=user_id)
                 self._chat_sessions[session_id] = session
-            session.messages.append({"role": role, "content": content, "ts": time.time()})
+            session.messages.append({"role": role, "content": encrypt_text(content), "ts": time.time()})
             if len(session.messages) > max_messages:
                 session.messages = session.messages[-max_messages:]
             session.updated_at = now
             session.channel = channel
             session.user_id = user_id
-        return session
+        return self.get_chat_session(session_id) or session
 
     def add_session_trace(self, trace: SessionTrace) -> SessionTrace:
         with self._lock:

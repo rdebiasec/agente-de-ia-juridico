@@ -27,6 +27,27 @@ async def test_auth_disabled_when_no_password(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_login_requires_consent_flags(monkeypatch):
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setenv("SITE_PASSWORD", "test-secret-pass")
+    monkeypatch.setenv("SITE_USERNAME", "despacho")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        denied = await client.post(
+            "/auth/login",
+            json={"username": "despacho", "password": "test-secret-pass"},
+        )
+        assert denied.status_code == 428
+        assert not denied.cookies.get("agente_session")
+
+    get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
 async def test_login_logout_and_protected_routes(monkeypatch):
     from src.config import get_settings
 
@@ -42,13 +63,13 @@ async def test_login_logout_and_protected_routes(monkeypatch):
 
         bad = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "wrong"},
+            json={"username": "despacho", "password": "wrong", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert bad.status_code == 401
 
         login = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "test-secret-pass"},
+            json={"username": "despacho", "password": "test-secret-pass", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert login.status_code == 200
         cookie = login.cookies.get("agente_session")
@@ -212,9 +233,21 @@ async def test_form_login_redirects_and_sets_cookie(monkeypatch):
         assert bad.headers.get("location") == "/login?login_error=1"
         assert bad.cookies.get("agente_session") is None
 
-        ok = await client.post(
+        missing_consent = await client.post(
             "/auth/login",
             data={"username": "despacho", "password": "test-secret-pass"},
+        )
+        assert missing_consent.status_code == 302
+        assert missing_consent.headers.get("location") == "/login?consent_error=1"
+
+        ok = await client.post(
+            "/auth/login",
+            data={
+                "username": "despacho",
+                "password": "test-secret-pass",
+                "accept_privacy": "true",
+                "accept_sensitive_data": "true",
+            },
         )
         assert ok.status_code == 302
         assert ok.headers.get("location") == "/"
@@ -247,7 +280,7 @@ async def test_debug_trace_requires_auth_and_scope(monkeypatch):
 
         login = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "test-secret-pass"},
+            json={"username": "despacho", "password": "test-secret-pass", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert login.status_code == 200
         cookie = login.cookies.get("agente_session")
@@ -304,13 +337,13 @@ async def test_login_rate_limited_after_many_failures(monkeypatch):
         for _ in range(12):
             bad = await client.post(
                 "/auth/login",
-                json={"username": "despacho", "password": "wrong"},
+                json={"username": "despacho", "password": "wrong", "accept_privacy": True, "accept_sensitive_data": True},
             )
             assert bad.status_code == 401
 
         blocked = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "wrong"},
+            json={"username": "despacho", "password": "wrong", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert blocked.status_code == 429
 

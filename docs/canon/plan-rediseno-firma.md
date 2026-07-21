@@ -30,24 +30,32 @@ Archivos: unificar `agente/prompts/sistema-fase-0.md` y `agente/prompts/sistema-
 Reescribir `src/agents/orchestrator.py` como una firma. Roles + litigantes por área, todos con la persona compartida:
 
 ```mermaid
-flowchart TD
-  Orquestador["Orquestador (socio coordinador)"]
-  Orquestador -->|handoff| Intake["Intake: ordena hechos, clasifica materia"]
-  Orquestador -->|handoff| Estratega["Estratega: teoria del caso, riesgos"]
-  Orquestador -->|handoff| Civil["Litigante Civil (CGP)"]
-  Orquestador -->|handoff| Penal["Litigante Penal (Ley 906)"]
-  Orquestador -->|handoff| Redaccion["Redaccion documental y contratos"]
-  Orquestador -->|handoff| Conceptos["Conceptos juridicos"]
-  Orquestador -->|handoff| Tutela["Tutela y constitucional"]
-  Orquestador -->|handoff| Dependiente["Dependiente judicial: terminos y seguimiento"]
-  Orquestador -->|handoff| Comunicacion["Comunicacion y atencion"]
+flowchart LR
+  User[Abogado usuario]
+  POC[coordinador_expediente_penal POC]
+  SpecA[especialista_backoffice]
+  SpecB[especialista_backoffice]
+  HITL[HITL borrador]
+  Trace[Workflow Trace]
+
+  User <-->|unico canal de voz| POC
+  POC -->|tool call interno| SpecA
+  POC -->|tool call interno| SpecB
+  SpecA -->|hallazgos internos| POC
+  SpecB -->|hallazgos internos| POC
+  POC -->|propuesta| HITL
+  POC -.->|auditoria| Trace
+  SpecA -.-> Trace
+  SpecB -.-> Trace
 ```
+
+> **Modelo vigente (POC / backoffice):** el coordinador es el único interlocutor en web/Slack. Los 10 especialistas se invocan con `Agent.as_tool` (no handoffs terminales). El chat muestra voz de despacho; la traza conserva `sent_to_agent` / tools del especialista.
 
 ## A.3 Skills por rol/área (todas stateless, leen la KB)
 
 Ampliar `src/mcp/tools.py`. Cada agente recibe solo sus tools:
 
-- **Orquestador:** `clasificar_materia`, `detectar_etapa`, handoffs.
+- **Orquestador (POC):** `clasificar_materia`, `detectar_etapa`, tools de especialistas (backoffice) + KB.
 - **Intake (REQ-012..014, 017):** `ordenar_hechos`, `solicitar_datos_faltantes`.
 - **Estratega (REQ-016, 018..023, 048, 049):** `analizar_riesgos`, `construir_teoria_caso`, `clasificar_civil_penal`, `detectar_pruebas_faltantes`, `preparar_entrevista`.
 - **Litigante Civil — CGP (REQ-024, 027, 028):** `redactar_demanda_civil`, `redactar_contestacion`, `proponer_excepciones`, `preparar_audiencia(372|373)`.

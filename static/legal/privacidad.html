@@ -42,14 +42,17 @@
   <p>La infraestructura en la nube (Render, Oregon) y el procesamiento de lenguaje natural (OpenAI) pueden implicar transferencia a Estados Unidos. Aplicamos medidas contractuales y técnicas razonables (cifrado en tránsito, acceso restringido, minimización).</p>
 
   <h2>6. Derechos ARCO</h2>
-  <p>Puede solicitar acceso, rectificación, actualización o supresión escribiendo a <a href="mailto:privacidad@dbxsolutions.com">privacidad@dbxsolutions.com</a>. En el portal puede usar «Borrar mi progreso».</p>
+  <p>Puede solicitar acceso, rectificación, actualización o supresión escribiendo a <a href="mailto:privacidad@dbxsolutions.com">privacidad@dbxsolutions.com</a>. En el portal use «Borrar mi progreso». En el chat web autenticado, <code>POST /api/compliance/arco-erase</code> elimina historial, trazas, borradores HITL, expediente y planes de esa sesión (se conservan consentimientos y logs de acceso para trazabilidad).</p>
 
   <h2>7. Retención</h2>
-  <p>Progreso de auditoría: hasta 3 años. Expediente y conversaciones del agente: hasta 5 años o según obligación legal y política del despacho.</p>
+  <p>Progreso de auditoría: hasta 3 años. Expediente y conversaciones del agente: hasta 5 años o según obligación legal y política del despacho. La purga automática corre mensualmente en el scheduler del servicio (también <code>scripts/purge_retention.py</code>).</p>
 
   <h2>8. Seguridad</h2>
-  <p>Contraseña del despacho, PIN personal por correo, cookies httpOnly, HTTPS en producción, registros de acceso y copias de historial del progreso de auditoría.</p>
+  <p>Contraseña del despacho, PIN personal por correo, cookies httpOnly, HTTPS en producción, registros de acceso y copias de historial del progreso de auditoría. Cookies de sesión son estrictamente necesarias (no hay publicidad ni tracking de terceros).</p>
 
-  <p><a href="/legal/tratamiento-datos-casos">Tratamiento de datos de casos</a> · <a href="/auditoria/">Portal de auditoría</a></p>
+  <h2>9. Encargados y transferencia</h2>
+  <p>Proveedores actuales: Render (hosting/Postgres, EE.UU.), OpenAI (modelo de lenguaje, EE.UU.), Slack (revisión HITL). El despacho debe mantener acuerdos de tratamiento (DPA) vigentes; ver runbook operativo de cumplimiento.</p>
+
+  <p><a href="/legal/tratamiento-datos-casos">Tratamiento de datos de casos</a> · <a href="/legal/terminos">Términos de uso</a> · <a href="/auditoria/">Portal de auditoría</a></p>
 </body>
 </html>

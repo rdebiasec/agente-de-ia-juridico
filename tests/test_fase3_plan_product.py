@@ -23,7 +23,12 @@ async def _login_web(client: AsyncClient, monkeypatch: pytest.MonkeyPatch, passw
     get_settings.cache_clear()
     login = await client.post(
         "/auth/login",
-        json={"username": "despacho", "password": password},
+        json={
+            "username": "despacho",
+            "password": password,
+            "accept_privacy": True,
+            "accept_sensitive_data": True,
+        },
     )
     assert login.status_code == 200, login.text
 
@@ -43,11 +48,65 @@ def test_classify_plan_template_tutela():
     assert classify_plan_template("Evaluar acción de tutela por derecho fundamental") == "tutela"
 
 
+def test_classify_plan_template_indagacion_impulso():
+    assert (
+        classify_plan_template("Necesito impulso procesal: hay riesgo de archivo en indagación")
+        == "indagacion_impulso"
+    )
+
+
+def test_classify_plan_template_vif_proteccion():
+    assert (
+        classify_plan_template("Caso de violencia intrafamiliar: solicitar medidas de protección")
+        == "vif_proteccion"
+    )
+
+
+def test_classify_plan_template_querella_abreviado():
+    assert classify_plan_template("Preparar querella bajo procedimiento abreviado") == "querella_abreviado"
+
+
 def test_templated_steps_cronologia_has_analyst():
     steps = build_templated_steps("cronologia", "cronología de hechos")
     assert steps is not None
     agents = [s.agent_id for s in steps]
     assert "analista_cronologia_hechos_penales" in agents
+
+
+def test_templated_steps_indagacion_impulso_chain_order():
+    steps = build_templated_steps(
+        "indagacion_impulso",
+        "Impulso procesal ante riesgo de archivo en indagación",
+    )
+    assert steps is not None
+    agents = [s.agent_id for s in steps]
+    expected = [
+        "coordinador_expediente_penal",
+        "analista_cronologia_hechos_penales",
+        "analista_tipicidad_y_responsabilidad_penal",
+        "analista_ruta_procesal_ley906",
+        "gestor_evidencia_y_soporte_probatorio",
+        "redactor_documentos_juridicos_penales",
+        "gestor_seguimiento_procesal_penal",
+        "analista_calidad_juridica",
+    ]
+    assert agents == expected
+    for i in range(1, len(steps)):
+        assert steps[i - 1].step_id in (steps[i].depends_on or [])
+
+
+def test_create_plan_indagacion_impulso_smoke():
+    plan, err = create_execution_plan(
+        message="Solicitar impulso procesal: el caso lleva meses en indagación con riesgo de archivo.",
+        channel="web",
+        session_id="web:smoke-impulso",
+        user_id="smoke-impulso",
+    )
+    assert err is None and plan
+    assert plan.template_kind == "indagacion_impulso"
+    assert "[Impulso / anti-archivo en indagación]" in plan.objective
+    assert len(plan.steps) >= 7
+    assert any(s.agent_id == "redactor_documentos_juridicos_penales" for s in plan.steps)
 
 
 def test_remember_pattern_reused_on_second_plan():

@@ -38,6 +38,30 @@ class EditarRequest(BaseModel):
     comentario: str | None = None
 
 
+class ExpedienteFlagsRequest(BaseModel):
+    session_id: str
+    involucra_menor: bool | None = None
+    datos_sensibles: bool | None = None
+
+
+@router.patch("/expediente/flags")
+async def actualizar_flags_expediente(req: ExpedienteFlagsRequest):
+    """Marca menor / datos sensibles para reforzar minimización (Ley 1581)."""
+    from src.gateway.expediente import expediente_store
+
+    if not req.session_id.strip():
+        raise HTTPException(status_code=400, detail="session_id requerido.")
+    campos = {}
+    if req.involucra_menor is not None:
+        campos["involucra_menor"] = req.involucra_menor
+    if req.datos_sensibles is not None:
+        campos["datos_sensibles"] = req.datos_sensibles
+    if not campos:
+        raise HTTPException(status_code=400, detail="Sin cambios.")
+    exp = expediente_store.update(req.session_id.strip(), **campos)
+    return {"ok": True, "expediente": exp.to_dict()}
+
+
 @router.get("/drafts")
 async def listar_borradores(estado: str | None = None, session_id: str | None = None):
     repo = get_repository()

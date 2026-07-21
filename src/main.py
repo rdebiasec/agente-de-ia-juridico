@@ -355,6 +355,14 @@ async def legal_case_data_page():
     raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
 
+@app.get("/legal/terminos")
+async def legal_terminos_page():
+    page = _static_dir / "legal" / "terminos.html"
+    if page.is_file():
+        return FileResponse(page)
+    raise HTTPException(status_code=404, detail="Términos no encontrados.")
+
+
 @app.get("/auth/status")
 async def auth_status(
     request: Request,
@@ -393,10 +401,16 @@ async def auth_login(
             body = await request.json()
             username = str(body.get("username", ""))
             password = str(body.get("password", ""))
+            from src.compliance.consent import extract_consent_flags
+
+            accept_privacy, accept_cases = extract_consent_flags(body if isinstance(body, dict) else {})
         else:
             form = await request.form()
             username = str(form.get("username", ""))
             password = str(form.get("password", ""))
+            from src.compliance.consent import extract_consent_flags
+
+            accept_privacy, accept_cases = extract_consent_flags(dict(form))
     except Exception as exc:
         logger.exception("Fallo al parsear login")
         if wants_redirect:
@@ -425,6 +439,18 @@ async def auth_login(
         if wants_redirect:
             return RedirectResponse(url="/login?login_error=1", status_code=302)
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos.")
+
+    if not accept_privacy or not accept_cases:
+        if wants_redirect:
+            return RedirectResponse(url="/login?consent_error=1", status_code=302)
+        raise HTTPException(
+            status_code=428,
+            detail="Debe aceptar el aviso de privacidad y la autorización de datos de casos.",
+        )
+
+    from src.compliance.consent import record_web_chat_consent
+
+    record_web_chat_consent(username=username, request=request)
 
     reset_rate_limit(_web_login_rate_key(request))
     token = create_session_token(settings.session_secret, username=username)
@@ -532,6 +558,8 @@ async def health():
     from src.services.twilio_notify import twilio_habilitado
 
     slack_flags = slack_health_flags()
+    from src.compliance.crypto_at_rest import status_payload as crypto_status
+
     payload = {
         "status": "ok",
         "modo": "firma",
@@ -544,6 +572,7 @@ async def health():
         "persistencia": "postgres" if settings.database_url else "memoria",
         "web_auth_enabled": auth_enabled(settings.site_password),
         "dev_auto_login": dev_auto_login_allowed(settings) if auth_enabled(settings.site_password) else False,
+        **crypto_status(),
     }
     return payload
 

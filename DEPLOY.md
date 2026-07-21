@@ -369,6 +369,8 @@ El progreso de aprobación se persiste en **PostgreSQL** por correo electrónico
 
 ### Cumplimiento y datos de casos (Ley 1581 / US safeguards)
 
+Runbook operativo: `docs/operaciones/RUNBOOK_CUMPLIMIENTO_1581.md`. Login web exige consentimiento (HTTP 428). ARCO chat: `POST /api/compliance/arco-erase`. Retención: job mensual + `scripts/purge_retention.py`.
+
 **Sí puede ingresar información de casos** si cumple:
 
 1. Acepta el [aviso de privacidad](/legal/privacidad) y la [autorización de datos de casos](/legal/tratamiento-datos-casos) en el login.

@@ -7,7 +7,8 @@ import re
 
 from src.agents.planner import approve_plan, create_execution_plan, reject_plan
 from src.agents.plan_executor import schedule_execute_async, wait_for_plan_completion
-from src.agents.skill_catalog import agent_display_name
+from src.agents.plan_templates import template_label
+from src.agents.skill_catalog import desk_label
 from src.gateway.trace import trace_store
 from src.storage import get_repository
 
@@ -79,14 +80,18 @@ def _clear_pending(thread_key: str, plan_id: str | None = None) -> None:
 
 
 def _format_plan_message(plan_dict: dict) -> str:
+    kind = plan_dict.get("template_kind") or "generico"
     lines = [
-        "*Plan de ejecución propuesto*",
+        "*Plan de ejecución propuesto* (voz del coordinador del expediente)",
+        f"*Plantilla:* {template_label(kind)} (`{kind}`)",
         f"*Objetivo:* {plan_dict.get('objective', '')}",
+        "",
+        "_Consultaré al equipo interno en estos pasos; usted habla solo conmigo._",
         "",
     ]
     for step in plan_dict.get("steps") or []:
         lines.append(
-            f"{step.get('order')}. *{step.get('title')}* — {agent_display_name(step.get('agent_id', ''))}"
+            f"{step.get('order')}. *{step.get('title')}* — {desk_label(step.get('agent_id', ''))}"
         )
         lines.append(f"   _{step.get('user_summary', '')}_")
     lines.extend(

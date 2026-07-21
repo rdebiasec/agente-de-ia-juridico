@@ -54,7 +54,9 @@ def test_all_catalog_agents_have_primary_skill():
         ("Evaluar acción de tutela por derecho fundamental", "tutela", True),
         ("Necesito una cronología de hechos del caso", "cronologia", True),
         ("Preparar audiencia de juicio oral", "audiencia", True),
-        ("Redactar memorial penal de impulso procesal", "generico", False),
+        ("Redactar memorial penal de impulso procesal", "indagacion_impulso", True),
+        ("Querella por injuria y procedimiento abreviado", "querella_abreviado", True),
+        ("Violencia intrafamiliar y medidas de protección", "vif_proteccion", True),
     ],
 )
 def test_plan_templates_classify_and_build_valid_skills(message: str, kind: str, expect_steps: bool):

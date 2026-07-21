@@ -21,6 +21,8 @@ services:
         sync: false
       - key: SESSION_SECRET
         sync: false
+      - key: DATA_AT_REST_KEY
+        sync: false
       - key: SESSION_IDLE_MINUTES
         value: "360"
       - key: SESSION_MAX_MESSAGES

@@ -234,7 +234,7 @@ async def _run_single_step(
                         classification="inferencia",
                     )
                 ],
-                user_update=f"Completé: {step.title}.",
+                user_update=f"↳ Completé: {step.title}.",
                 status="done",
             )
             return text, report
@@ -311,7 +311,11 @@ async def _run_single_step(
                     classification="inferencia",
                 )
             ],
-            user_update=f"Completé: {step.title}." if status == "done" else f"No completé: {step.title}.",
+            user_update=(
+                f"↳ Completé: {step.title}."
+                if status == "done"
+                else f"↳ No completé: {step.title}."
+            ),
             status=status,  # type: ignore[arg-type]
         )
         return text, report

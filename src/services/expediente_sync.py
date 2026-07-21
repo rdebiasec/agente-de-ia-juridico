@@ -129,6 +129,21 @@ def sync_expediente_from_chat(
             exp.etapa_actual = "tutela_en_preparacion"
             cambios.append("etapa=tutela_en_preparacion")
 
+    lower = text.lower()
+    if not exp.involucra_menor and re.search(
+        r"\b(menor\s+de\s+edad|niñ[oa]|nino|nina|adolescente|infante)\b",
+        lower,
+    ):
+        exp.involucra_menor = True
+        cambios.append("involucra_menor=true")
+    if not exp.datos_sensibles and re.search(
+        r"\b(dato\s+sensible|violencia\s+sexual|salud\s+mental|orientaci[oó]n\s+sexual|"
+        r"identidad\s+de\s+g[eé]nero|violencia\s+intrafamiliar)\b",
+        lower,
+    ):
+        exp.datos_sensibles = True
+        cambios.append("datos_sensibles=true")
+
     if cambios:
         import time
 

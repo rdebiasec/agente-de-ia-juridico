@@ -47,11 +47,11 @@
 
         <div class="auth-consent-block" style="margin-top:1rem;font-size:0.85rem;line-height:1.45;">
           <label style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:0.5rem;">
-            <input type="checkbox" id="auth-accept-privacy" required style="margin-top:0.2rem;" />
-            <span>Acepto el <a href="/legal/privacidad" target="_blank" rel="noopener">aviso de privacidad</a>.</span>
+            <input type="checkbox" id="auth-accept-privacy" name="accept_privacy" value="true" required style="margin-top:0.2rem;" />
+            <span>Acepto el <a href="/legal/privacidad" target="_blank" rel="noopener">aviso de privacidad</a> y los <a href="/legal/terminos" target="_blank" rel="noopener">términos de uso</a>.</span>
           </label>
           <label style="display:flex;gap:0.5rem;align-items:flex-start;">
-            <input type="checkbox" id="auth-accept-cases" required style="margin-top:0.2rem;" />
+            <input type="checkbox" id="auth-accept-cases" name="accept_sensitive_data" value="true" required style="margin-top:0.2rem;" />
             <span>Autorizo el <a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">tratamiento de datos de casos</a>, incluidos datos sensibles cuando sean necesarios para la representación.</span>
           </label>
         </div>

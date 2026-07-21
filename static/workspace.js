@@ -52,13 +52,52 @@
       ["Tipo de proceso", exp.tipo_proceso],
       ["Etapa", exp.etapa_actual],
       ["Despacho", exp.despacho_judicial],
+      ["Involucra menor", exp.involucra_menor ? "Sí" : "No"],
+      ["Datos sensibles", exp.datos_sensibles ? "Sí" : "No"],
     ].filter(([, v]) => v);
 
-    el.innerHTML = rows.length
-      ? `<dl class="expediente-dl">${rows
-          .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`)
-          .join("")}</dl>`
-      : '<p class="expediente-empty">Expediente iniciado sin campos identificados aún.</p>';
+    const flags = `
+      <div class="expediente-flags" style="margin-top:0.75rem;font-size:0.85rem;">
+        <label style="display:flex;gap:0.4rem;align-items:center;margin-bottom:0.35rem;">
+          <input type="checkbox" id="flag-involucra-menor" ${exp.involucra_menor ? "checked" : ""} />
+          <span>Involucra menor de edad</span>
+        </label>
+        <label style="display:flex;gap:0.4rem;align-items:center;">
+          <input type="checkbox" id="flag-datos-sensibles" ${exp.datos_sensibles ? "checked" : ""} />
+          <span>Datos sensibles autorizados</span>
+        </label>
+      </div>`;
+
+    el.innerHTML =
+      (rows.length
+        ? `<dl class="expediente-dl">${rows
+            .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`)
+            .join("")}</dl>`
+        : '<p class="expediente-empty">Expediente iniciado sin campos identificados aún.</p>') + flags;
+
+    document.getElementById("flag-involucra-menor")?.addEventListener("change", (ev) => {
+      patchExpedienteFlags({ involucra_menor: ev.target.checked });
+    });
+    document.getElementById("flag-datos-sensibles")?.addEventListener("change", (ev) => {
+      patchExpedienteFlags({ datos_sensibles: ev.target.checked });
+    });
+  }
+
+  async function patchExpedienteFlags(partial) {
+    const sid = getSessionId();
+    if (!sid || typeof authFetch !== "function") return;
+    try {
+      const res = await authFetch("/expediente/flags", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sid, ...partial }),
+      });
+      if (!res.ok) throw new Error("No se pudieron guardar las marcas.");
+      const data = await res.json();
+      if (data.expediente) setExpediente(data.expediente);
+    } catch (err) {
+      Toast?.show?.(err?.message || "Error al guardar marcas de sensibilidad.", "error");
+    }
   }
 
   function renderContextChips(exp) {
@@ -69,6 +108,8 @@
     if (exp?.materia) chips.push(exp.materia);
     if (exp?.tipo_proceso) chips.push(exp.tipo_proceso);
     if (exp?.radicado) chips.push(`Rad. ${exp.radicado}`);
+    if (exp?.involucra_menor) chips.push("Menor");
+    if (exp?.datos_sensibles) chips.push("Datos sensibles");
     el.innerHTML = chips.map((c) => `<span class="context-chip">${esc(c)}</span>`).join("");
     if (caseChip) {
       caseChip.textContent = exp?.radicado ? `Rad. ${exp.radicado}` : exp?.materia ? exp.materia : "Caso activo";

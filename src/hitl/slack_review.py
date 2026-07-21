@@ -22,7 +22,10 @@ def _bloques_revision(draft: Draft) -> list[dict]:
     cuerpo = draft.contenido.strip()
     if len(cuerpo) > 2800:
         cuerpo = cuerpo[:2800] + "\n…(truncado)"
-    encabezado = f"*Borrador para revisión* · {draft.tipo}"
+    encabezado = (
+        "*Borrador para revisión* · preparado por el equipo interno · presentado por el "
+        f"coordinador del expediente · {draft.tipo}"
+    )
     if draft.materia:
         encabezado += f" · {draft.materia}"
     return [

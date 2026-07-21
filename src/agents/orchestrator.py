@@ -1,15 +1,68 @@
 """Firma virtual penal-victimas — definición de agentes (OpenAI Agents SDK).
 
 Arquitectura penal enfocada en representación de víctimas en Colombia:
-un coordinador del expediente enruta a 10 especialistas por función
-jurídica (cronología, tipicidad, ruta 906, víctimas, evidencia, audiencias,
-redacción, seguimiento, tutela y control de calidad).
+un coordinador del expediente (POC) es el único interlocutor del abogado;
+10 especialistas operan como backoffice interno (tools + trazas).
 """
 
-from agents import Agent, handoff
+from agents import Agent
 
 from src.config import get_settings
 from src.mcp.tools import get_knowledge_tools
+
+POC_AGENT_ID = "coordinador_expediente_penal"
+
+_BACKOFFICE_VOICE = """
+Modo BACKOFFICE (equipo interno):
+- No saludas al abogado ni te presentas como interlocutor ("yo soy el analista…").
+- No firmas la respuesta como cara del despacho.
+- Devuelves hallazgos operativos para el coordinador: hechos, riesgos, borrador interno,
+  pendientes de verificación y recomendaciones accionables.
+- El coordinador sintetiza y responde al abogado con una sola voz.
+"""
+
+_SPECIALIST_TOOL_DESCRIPTIONS: dict[str, str] = {
+    "analista_cronologia_hechos_penales": (
+        "Consulta interna al equipo de cronología y hechos penales: línea de tiempo, "
+        "actores, contradicciones y vacíos fácticos."
+    ),
+    "analista_tipicidad_y_responsabilidad_penal": (
+        "Consulta interna al equipo de tipicidad y responsabilidad penal: elementos del tipo, "
+        "autoría, dolo/culpa, agravantes y riesgos de atipicidad."
+    ),
+    "analista_ruta_procesal_ley906": (
+        "Consulta interna al equipo de ruta procesal Ley 906: etapa, oportunidades de "
+        "intervención, términos preliminares y riesgos procesales."
+    ),
+    "analista_representacion_victimas": (
+        "Consulta interna al equipo de representación de víctimas: teoría del caso, "
+        "derechos, daño/afectación, enfoque diferencial y no revictimización."
+    ),
+    "gestor_evidencia_y_soporte_probatorio": (
+        "Consulta interna al equipo probatorio: inventario de evidencia, matriz hecho-prueba, "
+        "brechas y plan de recaudo."
+    ),
+    "preparador_estrategico_audiencias_penales": (
+        "Consulta interna al equipo de audiencias: objetivos, guiones, solicitudes, "
+        "preguntas y checklist para representación de víctimas."
+    ),
+    "redactor_documentos_juridicos_penales": (
+        "Consulta interna al equipo de redacción: borradores internos de memoriales, "
+        "solicitudes, ampliaciones, derechos de petición o tutela preliminar."
+    ),
+    "gestor_seguimiento_procesal_penal": (
+        "Consulta interna al equipo de seguimiento procesal: radicados, actuaciones, "
+        "audiencias, términos e inactividad."
+    ),
+    "evaluador_derechos_fundamentales_tutela": (
+        "Consulta interna al equipo constitucional: derechos fundamentales y procedencia "
+        "preliminar de tutela vinculada al caso penal."
+    ),
+    "analista_calidad_juridica": (
+        "Consulta interna al equipo de calidad jurídica: soporte fáctico, citas, coherencia "
+        "estratégica, confidencialidad y no revictimización."
+    ),
+}
 
 
 def _load_system_prompt() -> str:
@@ -20,7 +73,7 @@ def _load_system_prompt() -> str:
 
 def _build_agent(name: str, rol_instructions: str, *, with_tools: bool = True) -> Agent:
     base = _load_system_prompt()
-    instructions = f"{base}\n\n{rol_instructions.strip()}\n"
+    instructions = f"{base}\n\n{rol_instructions.strip()}\n{_BACKOFFICE_VOICE.strip()}\n"
     kwargs: dict = {
         "name": name,
         "instructions": instructions,
@@ -156,12 +209,12 @@ def build_coordinador_agent() -> Agent:
     base = _load_system_prompt()
     instructions = f"""{base}
 
-Eres el COORDINADOR DEL EXPEDIENTE PENAL del despacho.
-Clasifica la consulta, identifica etapa aparente y enruta al especialista.
-No inventes normas, sentencias, radicados ni hechos.
+Eres el COORDINADOR DEL EXPEDIENTE PENAL y el único interlocutor (POC) del abogado.
+Clasificas la consulta, consultas al equipo interno cuando hace falta y respondes
+con una sola voz de despacho. No inventes normas, sentencias, radicados ni hechos.
 """
     return Agent(
-        name="coordinador_expediente_penal",
+        name=POC_AGENT_ID,
         instructions=instructions,
         model=get_settings().openai_model,
         tools=get_knowledge_tools(),
@@ -203,17 +256,37 @@ _SPECIALIST_BUILDERS = (
     build_analista_calidad_juridica_agent,
 )
 
+SPECIALIST_AGENT_IDS = frozenset(_SPECIALIST_TOOL_DESCRIPTIONS.keys())
+
 
 def build_orchestrator() -> Agent:
+    """POC coordinador con especialistas como tools internas (no handoffs terminales)."""
     base = _load_system_prompt()
     specialists = [builder() for builder in _SPECIALIST_BUILDERS]
-    handoffs = [handoff(agent) for agent in specialists]
+    specialist_tools = [
+        agent.as_tool(
+            tool_name=agent.name,
+            tool_description=_SPECIALIST_TOOL_DESCRIPTIONS.get(
+                agent.name,
+                f"Consulta interna al equipo {agent.name}.",
+            ),
+        )
+        for agent in specialists
+    ]
     instructions = f"""{base}
 
-Eres el COORDINADOR DEL EXPEDIENTE PENAL del despacho.
+Eres el COORDINADOR DEL EXPEDIENTE PENAL del despacho y el **único interlocutor (POC)**
+frente al abogado (web y Slack).
+
 Alcance único: representación de víctimas en contexto penal colombiano.
 
-Enrutas cada consulta al especialista adecuado:
+Reglas de voz:
+- Tú eres el único que responde al abogado. Entregas una sola voz de despacho.
+- Consultas especialistas como **tools de backoffice** (no cedes el control de la conversación).
+- Sintetiza hallazgos del equipo interno; no digas "yo soy el analista de tipicidad" ni listes IDs técnicos.
+- Puedes decir "consulté al equipo interno" o "el área de redacción preparó un borrador".
+
+Cuándo consultar cada tool interna:
 - Cronología y depuración factual -> analista_cronologia_hechos_penales
 - Tipicidad y responsabilidad preliminar -> analista_tipicidad_y_responsabilidad_penal
 - Etapa/ruta procesal Ley 906 -> analista_ruta_procesal_ley906
@@ -233,9 +306,8 @@ concluir. Mantén la conversación abierta hasta lograr un borrador útil y traz
 No inventes normas, sentencias, radicados ni hechos.
 """
     return Agent(
-        name="coordinador_expediente_penal",
+        name=POC_AGENT_ID,
         instructions=instructions,
         model=get_settings().openai_model,
-        handoffs=handoffs,
-        tools=get_knowledge_tools(),
+        tools=[*get_knowledge_tools(), *specialist_tools],
     )

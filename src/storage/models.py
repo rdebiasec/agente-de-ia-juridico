@@ -28,6 +28,8 @@ class Expediente:
     etapa_actual: str | None = None
     partes: list[dict] = field(default_factory=list)
     terminos: list[dict] = field(default_factory=list)
+    involucra_menor: bool = False
+    datos_sensibles: bool = False
     actualizado_en: float = field(default_factory=time.time)
 
     def resumen(self) -> str:
@@ -42,6 +44,10 @@ class Expediente:
             partes.append(f"- Radicado: {self.radicado}")
         if self.etapa_actual:
             partes.append(f"- Etapa actual: {self.etapa_actual}")
+        if self.involucra_menor:
+            partes.append("- Atención: involucra menor de edad — minimización y no revictimización reforzada.")
+        if self.datos_sensibles:
+            partes.append("- Atención: datos sensibles autorizados — confidencialidad reforzada.")
         if len(partes) == 1:
             return "Expediente sin datos aún; solicite rol de la víctima, partes, radicado y etapa."
         return "\n".join(partes)

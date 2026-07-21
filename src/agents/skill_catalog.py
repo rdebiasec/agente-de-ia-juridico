@@ -77,3 +77,13 @@ def skill_io_lists(skill_id: str | None) -> tuple[list[str], list[str]]:
 
 def agent_display_name(agent_id: str) -> str:
     return agent_titulo(agent_id) if agent_id in VALID_AGENT_IDS else agent_id
+
+
+def desk_label(agent_id: str) -> str:
+    """Etiqueta de despacho para planes/chat (sin IDs técnicos como interlocutor)."""
+    if agent_id == "coordinador_expediente_penal":
+        return "Coordinador del expediente"
+    name = agent_display_name(agent_id)
+    if name == agent_id:
+        return "Equipo interno"
+    return f"Equipo interno · {name}"

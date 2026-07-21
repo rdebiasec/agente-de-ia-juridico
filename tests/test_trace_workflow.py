@@ -46,7 +46,11 @@ async def test_trace_followup_capability_is_active():
     assert trace.get("sent_to_agent") == "gestor_seguimiento_procesal_penal"
     assert trace.get("skill_kan") == "PEN-SEGUIMIENTO"
     assert isinstance(trace.get("completion"), dict)
-    assert any(step.get("step") == "Enruté al especialista" and step.get("status") == "done" for step in trace.get("steps", []))
+    assert any(
+        step.get("step") in {"Consulté al equipo interno", "Enruté al especialista"}
+        and step.get("status") == "done"
+        for step in trace.get("steps", [])
+    )
 
 
 @pytest.mark.asyncio
@@ -62,7 +66,7 @@ async def test_debug_trace_returns_session_history(monkeypatch):
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         login = await client.post(
             "/auth/login",
-            json={"username": "despacho", "password": "trace-secret-pass"},
+            json={"username": "despacho", "password": "trace-secret-pass", "accept_privacy": True, "accept_sensitive_data": True},
         )
         assert login.status_code == 200
         cookie = login.cookies.get("agente_session")

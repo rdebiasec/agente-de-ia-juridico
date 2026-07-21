@@ -42,7 +42,12 @@ def web_session(base_url: str) -> dict[str, str]:
             return {}
         login = client.post(
             "/auth/login",
-            json={"username": SMOKE_USERNAME, "password": SMOKE_PASSWORD},
+            json={
+                "username": SMOKE_USERNAME,
+                "password": SMOKE_PASSWORD,
+                "accept_privacy": True,
+                "accept_sensitive_data": True,
+            },
         )
         assert login.status_code == 200, login.text
         cookie = login.cookies.get("agente_session")

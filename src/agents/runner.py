@@ -19,8 +19,9 @@ from src.agents.guardrails import (
     check_input,
     needs_human_review,
 )
-from src.agents.orchestrator import build_orchestrator
+from src.agents.orchestrator import POC_AGENT_ID, SPECIALIST_AGENT_IDS, build_orchestrator
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
+from src.agents.skill_catalog import agent_display_name
 from src.config import get_settings
 from src.gateway.agent_session import RepositoryAgentSession, reconcile_turn_messages
 from src.gateway.expediente import expediente_store
@@ -181,6 +182,15 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
     async def on_tool_start(self, context: Any, agent: Any, tool: Any) -> None:
         tool_name = getattr(tool, "name", None) or type(tool).__name__
         self._span(f"tool:{tool_name}", "tool", "in_progress", f"Ejecutando {tool_name}.")
+        if tool_name in SPECIALIST_AGENT_IDS:
+            self.trace["backoffice_agent"] = tool_name
+            _append_action(
+                self.trace,
+                action_type="backoffice_consult",
+                status="in_progress",
+                actor=POC_AGENT_ID,
+                detail=f"POC consultó equipo interno: {tool_name}.",
+            )
 
     async def on_tool_end(self, context: Any, agent: Any, tool: Any, result: object) -> None:
         tool_name = getattr(tool, "name", None) or type(tool).__name__
@@ -190,6 +200,14 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             "done",
             f"Resultado: {_truncate(_safe_json_preview(result, limit=200))}",
         )
+        if tool_name in SPECIALIST_AGENT_IDS:
+            _append_action(
+                self.trace,
+                action_type="backoffice_consult",
+                status="done",
+                actor=POC_AGENT_ID,
+                detail=f"Hallazgos internos de {tool_name} disponibles para síntesis del POC.",
+            )
 
     async def on_llm_start(
         self,
@@ -498,16 +516,52 @@ def _fallback_response(message: str) -> str:
         )
     elif any(w in lower for w in ("perfil", "experiencia", "quien eres", "quién eres")):
         body = (
-            "Soy la firma virtual penal-víctimas del despacho. Coordino especialistas en cronología, "
-            "tipicidad, ruta Ley 906, evidencia, audiencias, redacción, seguimiento, tutela y calidad."
+            "Soy el coordinador del expediente penal-víctimas del despacho: tu único interlocutor. "
+            "Cuando hace falta, consulto al equipo interno (cronología, tipicidad, ruta Ley 906, "
+            "evidencia, audiencias, redacción, seguimiento, tutela y calidad) y te entrego una sola "
+            "voz de despacho para tu revisión."
         )
     else:
         body = (
-            "Puedo apoyar estrategia penal de víctimas de extremo a extremo: hechos, tipicidad, "
-            "ruta 906, evidencia, audiencias, redacción, seguimiento y control de calidad. "
-            "¿Qué parte del caso necesitas trabajar primero?"
+            "Como coordinador del despacho puedo apoyar estrategia penal de víctimas de extremo a "
+            "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
+            "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
         )
     return apply_output_guardrails(body)
+
+
+def _resolve_backoffice_agent(
+    *,
+    message: str,
+    last_agent_name: str | None,
+    trace: dict,
+) -> str:
+    """Especialista real (auditoría); el chat siempre habla como POC."""
+    backoffice = trace.get("backoffice_agent")
+    if isinstance(backoffice, str) and backoffice in SPECIALIST_AGENT_IDS:
+        return backoffice
+    if last_agent_name and last_agent_name in SPECIALIST_AGENT_IDS:
+        return last_agent_name
+    inferred = _infer_destination_agent(message)
+    return inferred
+
+
+def _ensure_poc_voice(text: str, *, last_agent_name: str | None, backoffice_agent: str) -> str:
+    """Red de seguridad: si un handoff residual dejó voz de especialista, enmarca como POC."""
+    if not last_agent_name or last_agent_name == POC_AGENT_ID:
+        return text
+    if last_agent_name in {"guardrail", "error", "fallback"}:
+        return text
+    if last_agent_name not in SPECIALIST_AGENT_IDS:
+        return text
+    label = agent_display_name(backoffice_agent or last_agent_name)
+    stripped = (text or "").strip()
+    if stripped.lower().startswith("como coordinador del expediente"):
+        return text
+    return (
+        f"Como coordinador del expediente, consolidé el trabajo del equipo interno "
+        f"({label}):\n\n{stripped}"
+    )
 
 
 async def run_agent(
@@ -603,7 +657,14 @@ async def run_agent(
             session_id, channel=channel, user_id=uid, role="assistant", content=text,
             max_messages=settings.session_max_messages,
         )
-        return {"text": text, "agent": "fallback", "pending_review": pending_review, "draft_id": draft_id, "session_id": session_id, "trace": trace}
+        return {
+            "text": text,
+            "agent": POC_AGENT_ID,
+            "pending_review": pending_review,
+            "draft_id": draft_id,
+            "session_id": session_id,
+            "trace": trace,
+        }
 
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
@@ -680,20 +741,36 @@ async def run_agent(
                 "at_ms": int(time.time() * 1000),
             }
         )
+        last_agent_name = getattr(getattr(result, "last_agent", None), "name", None)
+        backoffice_agent = _resolve_backoffice_agent(
+            message=message,
+            last_agent_name=last_agent_name,
+            trace=trace,
+        )
         text = apply_output_guardrails(result.final_output or "", channel)
+        text = _ensure_poc_voice(
+            text,
+            last_agent_name=last_agent_name,
+            backoffice_agent=backoffice_agent,
+        )
         text = run_post_validations(message, text, trace)
-        destination_agent = getattr(getattr(result, "last_agent", None), "name", None) or trace["received_by_agent"]
-        if destination_agent == trace["received_by_agent"]:
-            destination_agent = _infer_destination_agent(message)
+        destination_agent = backoffice_agent
         trace["sent_to_agent"] = destination_agent
         trace["skill_kan"] = _kan_for_agent(destination_agent)
-        trace["skill_reason"] = f"Handoff/resultado final del coordinador penal hacia {destination_agent}."
+        trace["skill_reason"] = (
+            f"POC consultó backoffice ({destination_agent}) y sintetizó respuesta de despacho."
+            if destination_agent != POC_AGENT_ID
+            else "POC atendió la consulta directamente sin tool de especialista."
+        )
         _append_action(
             trace,
             action_type="routing_decision",
             status="done",
-            actor=trace["received_by_agent"],
-            detail=f"Consulta enviada a {destination_agent} con skill {trace['skill_kan']}.",
+            actor=POC_AGENT_ID,
+            detail=(
+                f"Backoffice {destination_agent} con skill {trace['skill_kan']}; "
+                f"voz de cara al abogado: {POC_AGENT_ID}."
+            ),
         )
         for item in getattr(result, "new_items", []) or []:
             item_type = item.__class__.__name__
@@ -755,9 +832,18 @@ async def run_agent(
     trace["route"] = "orchestrator"
     trace["blocked"] = False
     trace["selected_agent"] = destination_agent
-    trace["steps"].append(
-        _trace_step("Enruté al especialista", "done", f"La consulta fue enrutada a {destination_agent}.")
-    )
+    if destination_agent != POC_AGENT_ID:
+        trace["steps"].append(
+            _trace_step(
+                "Consulté al equipo interno",
+                "done",
+                f"Backoffice: {destination_agent}. Respuesta al abogado en voz del POC.",
+            )
+        )
+    else:
+        trace["steps"].append(
+            _trace_step("Atendí como coordinador", "done", "Consulta resuelta por el POC sin especialista.")
+        )
     trace["human_review_required"] = pending_review
     draft_id = None
     if pending_review:
@@ -786,7 +872,7 @@ async def run_agent(
     reconcile_turn_messages(session_id, user_text=message, assistant_text=text)
     return {
         "text": text,
-        "agent": destination_agent,
+        "agent": POC_AGENT_ID,
         "pending_review": pending_review,
         "draft_id": draft_id,
         "session_id": session_id,

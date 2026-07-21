@@ -1,13 +1,14 @@
-"""Registro de consentimiento para el chat web."""
+"""Registro de consentimiento, policy y ARCO para el chat web."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from src.auth.deps import get_web_subject_id, require_web_session
+from src.compliance.arco import erase_web_subject
+from src.compliance.consent import record_web_chat_consent
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
-from src.storage import get_repository
-from src.storage.models import ComplianceConsent
 
 router = APIRouter(prefix="/api/compliance", tags=["compliance"])
 
@@ -25,6 +26,8 @@ async def compliance_policy():
         "controller": DATA_CONTROLLER,
         "privacy_url": "/legal/privacidad",
         "case_data_url": "/legal/tratamiento-datos-casos",
+        "terms_url": "/legal/terminos",
+        "arco_email": DATA_CONTROLLER.get("contact_email"),
     }
 
 
@@ -32,21 +35,14 @@ async def compliance_policy():
 async def record_web_consent(body: WebConsentBody, request: Request):
     if not body.accept_privacy or not body.accept_sensitive_data:
         return {"ok": False, "detail": "Consentimiento incompleto."}
-    ip = request.client.host if request.client else None
-    forwarded = request.headers.get("x-forwarded-for", "").strip()
-    if forwarded:
-        ip = forwarded.split(",")[0].strip()
-    ua = (request.headers.get("user-agent") or "")[:500]
-    key = f"web:{body.username.strip().lower()}"
-    get_repository().record_compliance_consent(
-        ComplianceConsent(
-            subject_key=key,
-            context="web_chat",
-            policy_version=CURRENT_POLICY_VERSION,
-            privacy_accepted=True,
-            sensitive_data_ack=True,
-            ip_address=ip,
-            user_agent=ua,
-        )
-    )
+    record_web_chat_consent(username=body.username, request=request)
     return {"ok": True, "policy_version": CURRENT_POLICY_VERSION}
+
+
+@router.post("/arco-erase", dependencies=[Depends(require_web_session)])
+async def arco_erase_own_data(uid: str = Depends(get_web_subject_id)):
+    """Supresión ARCO de chat, trazas, borradores, expediente y planes del titular web."""
+    result = erase_web_subject(uid, channel="web")
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("detail") or "No se pudo borrar.")
+    return result

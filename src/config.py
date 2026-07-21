@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     dev_auto_login: bool = False
     # Telemetría de depuración (middleware /debug/*). Nunca activar en producción.
     app_debug: bool = False
+    # Cifrado en reposo (Fernet). Si vacío, se deriva de SESSION_SECRET cuando exista.
+    data_at_rest_key: str = ""
 
     @property
     def project_root(self) -> Path:

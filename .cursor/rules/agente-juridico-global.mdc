@@ -9,4 +9,5 @@ alwaysApply: true
 - Estado actual: **firma virtual** — ver `agente/fases/ESTADO_PROYECTO.md` (no gating por Fase 0/1/2/3)
 - La IA propone; el abogado revisa y aprueba
 - No inventar sentencias, radicados ni normas
-- Canales producción: web (activo), Slack (configurar token), WhatsApp (pendiente decisión)
+- Canales producción: web (activo), Slack (HITL); WhatsApp no implementado (no activar sin evaluación 1581/2300)
+- Cumplimiento: consentimiento hard en login; ARCO chat `POST /api/compliance/arco-erase`; runbook `docs/operaciones/RUNBOOK_CUMPLIMIENTO_1581.md`

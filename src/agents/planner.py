@@ -13,7 +13,7 @@ from src.agents.runner import _infer_destination_agent, _summarize_input
 from src.agents.skill_catalog import (
     HITL_OUTPUT_AGENTS,
     HIGH_RISK_AGENTS,
-    agent_display_name,
+    desk_label,
     primary_skill_for_agent,
     skill_io_lists,
     valid_skill_ids,
@@ -48,8 +48,8 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
             skill_id=coord_skill,
             title="Clasificar consulta y etapa aparente",
             user_summary=(
-                "Revisaré su consulta, identificaré la tarea y la etapa procesal aparente "
-                "para enrutar el trabajo al especialista correcto."
+                "Como coordinador del expediente, revisaré su consulta, identificaré la tarea "
+                "y la etapa procesal aparente, y pediré apoyo al equipo interno cuando haga falta."
             ),
             inputs_expected=cin or ["solicitud del despacho", "resumen de caso", "documentos disponibles"],
             outputs_promised=cout or ["clasificación", "etapa aparente", "agentes requeridos"],
@@ -70,10 +70,10 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
                 order=order,
                 agent_id=destination_agent,
                 skill_id=spec_skill,
-                title=f"Trabajo especializado — {agent_display_name(destination_agent)}",
+                title=f"Consulta al equipo interno — {desk_label(destination_agent)}",
                 user_summary=(
-                    f"El especialista {agent_display_name(destination_agent)} procesará su solicitud "
-                    f"con base en la clasificación previa y el expediente disponible."
+                    f"Voy a pedir al equipo interno ({desk_label(destination_agent)}) que procese "
+                    f"su solicitud con base en la clasificación previa y el expediente disponible."
                 ),
                 inputs_expected=sin or ["consulta clasificada", "hechos y documentos del caso"],
                 outputs_promised=sout or ["análisis preliminar", "recomendaciones operativas"],
@@ -95,8 +95,8 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
                     skill_id=cal_skill,
                     title="Control de calidad jurídica",
                     user_summary=(
-                        "Revisaré coherencia estratégica, soporte fáctico y riesgos antes de "
-                        "entregar la salida al despacho."
+                        "Como coordinador, pediré al equipo de calidad revisar coherencia "
+                        "estratégica, soporte fáctico y riesgos antes de entregarte la salida."
                     ),
                     inputs_expected=cin2 or ["borrador del especialista", "fuentes citadas"],
                     outputs_promised=cout2 or ["dictamen de conformidad", "hallazgos y ajustes"],

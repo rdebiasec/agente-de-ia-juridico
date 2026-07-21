@@ -1,8 +1,14 @@
-# Estado del proyecto — firma virtual (actualizado 2026-06-29)
+# Estado del proyecto — firma virtual (actualizado 2026-07-20)
 
 Fuente sagrada: `agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md` y `agente/requisitos/requisitos_asistente.json`.
 
 El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** por el modelo **firma virtual** (`docs/canon/plan-rediseno-firma.md`): todos los agentes activos, supervisión humana (HITL), persistencia Postgres en dev==prod.
+
+**Voz de despacho (POC):** `coordinador_expediente_penal` es el único interlocutor en web/Slack. Los 10 especialistas operan como **backoffice** (`Agent.as_tool` + trazas); el chat no los expone como caras distintas.
+
+**Cadenas = planes/tools; sin handoffs peer:** flujos frecuentes SPOA (indagación/impulso, VIF, querella/abreviado) se orquestan por plantillas en `plan_templates.py` (ver `docs/canon/flujos-frecuentes-penal-victimas-co.md`).
+
+**Cumplimiento Ley 1581 (2026-07-21):** consentimiento hard en `/auth/login`; ARCO web `POST /api/compliance/arco-erase`; retención mensual; términos `/legal/terminos`; cifrado en reposo (Fernet via `DATA_AT_REST_KEY`/`SESSION_SECRET`); flags `involucra_menor`/`datos_sensibles` en expediente; plantillas DPA/RNBD en `docs/operaciones/`.
 
 ## Resumen ejecutivo
 
@@ -22,9 +28,10 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 - Tools: `src/mcp/tools.py` (`listar_areas_derecho`, playbooks, RAG)
 
 ### Firma de agentes (plan Fase A)
-- `src/agents/orchestrator.py` — intake, estratega, civil, penal, redacción, conceptos, tutela, dependiente, comunicación
+- `src/agents/orchestrator.py` — POC `coordinador_expediente_penal` + 10 especialistas como tools internas (backoffice)
 - Salidas estructuradas: `src/agents/schemas.py`
 - Sin gating por fase: `src/agents/guardrails.py`
+- Runner: payload `agent` = POC; `trace.sent_to_agent` / `selected_agent` = especialista de auditoría
 
 ### Persistencia y firma operativa (plan Fase B)
 - Postgres + pgvector: `src/storage/sql.py`, `deploy/docker-compose.yml`, `render.yaml`
