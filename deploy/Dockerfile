@@ -18,6 +18,7 @@ COPY alembic.ini ./
 COPY src ./src
 COPY migrations ./migrations
 COPY agente ./agente
+COPY config ./config
 COPY docs/canon ./docs/canon
 COPY scripts ./scripts
 COPY static ./static
