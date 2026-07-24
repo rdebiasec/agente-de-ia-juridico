@@ -682,17 +682,25 @@ async def run_agent(
         rag_chunks = buscar(message, incluir_kb=True, k=4)
         rag_text = contexto_para_prompt(rag_chunks)
         if rag_text and "No se encontraron" not in rag_text:
+            from src.services.rag import last_embed_used_local_fallback
+
+            degraded = last_embed_used_local_fallback()
             context_block += f"[Base de conocimiento — fragmentos relevantes]\n{rag_text}\n\n"
+            detail = f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno."
+            if degraded:
+                detail += " ADVERTENCIA: embeddings en fallback local (calidad degradada)."
+                logger.warning("RAG prefetch con embedding local fallback session=%s", session_id)
             trace.setdefault("spans", []).append(
                 {
                     "name": "RAG: recuperación KB",
                     "kind": "context",
                     "status": "done",
-                    "detail": f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno.",
+                    "detail": detail,
                     "at_ms": int(time.time() * 1000),
                 }
             )
             trace["rag_chunks_count"] = len(rag_chunks)
+            trace["rag_embed_fallback"] = degraded
     except Exception:
         logger.exception("RAG prefetch falló")
         trace.setdefault("spans", []).append(
@@ -724,6 +732,11 @@ async def run_agent(
         },
     )
     try:
+        from agents.exceptions import (
+            InputGuardrailTripwireTriggered,
+            OutputGuardrailTripwireTriggered,
+        )
+
         result = await Runner.run(
             orchestrator,
             agent_input,
@@ -747,7 +760,10 @@ async def run_agent(
             last_agent_name=last_agent_name,
             trace=trace,
         )
-        text = apply_output_guardrails(result.final_output or "", channel)
+        raw_out = result.final_output or ""
+        if raw_out and not isinstance(raw_out, str):
+            raw_out = str(raw_out)
+        text = apply_output_guardrails(raw_out, channel)
         text = _ensure_poc_voice(
             text,
             last_agent_name=last_agent_name,
@@ -798,6 +814,39 @@ async def run_agent(
             )
         else:
             trace["completion"]["note"] = "No se recibieron eventos de completion en hooks."
+    except (InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered) as exc:
+        logger.warning("Guardrail tripwire channel=%s: %s", channel, exc)
+        text = apply_output_guardrails(
+            "No puedo procesar esa consulta en el alcance del despacho penal-víctimas. "
+            "Reformule con el componente penal o de representación de víctimas.",
+            channel,
+        )
+        trace["route"] = "sdk_guardrail"
+        trace["blocked"] = True
+        trace["selected_agent"] = "guardrail"
+        trace["sent_to_agent"] = "none"
+        trace["skill_kan"] = "KAN-GUARDRAIL"
+        trace["skill_reason"] = "Tripwire de guardrail nativo del Agents SDK."
+        trace["completion"]["note"] = "Ejecución detenida por guardrail."
+        _append_action(
+            trace,
+            action_type="sdk_guardrail",
+            status="blocked",
+            actor="poc_guardrail",
+            detail=str(exc),
+        )
+        trace["steps"].append(
+            _trace_step("Guardrail SDK", "blocked", "La consulta o salida activó un límite del despacho.")
+        )
+        trace["human_review_required"] = False
+        _finalize_trace(trace, text)
+        return {
+            "text": text,
+            "agent": "guardrail",
+            "pending_review": False,
+            "session_id": session_id,
+            "trace": trace,
+        }
     except Exception:
         logger.exception("Runner.run falló para channel=%s", channel)
         text = apply_output_guardrails(

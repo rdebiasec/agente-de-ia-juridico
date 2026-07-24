@@ -14,7 +14,7 @@ from agents.run_config import RunConfig
 
 from src.agents.execution_schemas import AgentIOReport, ArtifactRef, ExecutionPlan, PlanStep
 from src.agents.guardrails import apply_output_guardrails, needs_human_review
-from src.agents.orchestrator import get_agent_by_id
+from src.agents.orchestrator import POC_AGENT_ID, SPECIALIST_AGENT_IDS, build_orchestrator
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.agents.plan_events import PlanEventBroker
 from src.agents.planner import approve_plan
@@ -22,6 +22,7 @@ from src.agents.runner import (
     _TraceRunHooks,
     _append_action,
     _base_trace,
+    _ensure_poc_voice,
     _fallback_response,
     _finalize_trace,
     _kan_for_agent,
@@ -31,7 +32,7 @@ from src.agents.runner import (
 )
 from src.agents.skill_catalog import agent_display_name
 from src.config import get_settings
-from src.gateway.agent_session import RepositoryAgentSession, reconcile_turn_messages
+from src.gateway.agent_session import reconcile_turn_messages
 from src.gateway.expediente import expediente_store
 from src.storage import get_repository
 
@@ -40,6 +41,71 @@ logger = logging.getLogger(__name__)
 _PREVIEW_MAX = 200
 _EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 _RADICADO_RE = re.compile(r"\b\d{10,23}\b")
+
+
+def _plan_step_session_id(lawyer_session_id: str, plan_id: str | None, step_id: str) -> str:
+    """Sesión aislada: no contamina el historial del chat del abogado."""
+    plan_part = plan_id or "orphan"
+    return f"{lawyer_session_id}:plan:{plan_part}:{step_id}"
+
+
+def _poc_step_prompt(
+    step: PlanStep,
+    *,
+    user_message: str,
+    exp_resumen: str,
+    prior_summary: str,
+) -> str:
+    context = ""
+    if exp_resumen and "sin datos" not in exp_resumen.lower():
+        context += f"[Expediente]\n{exp_resumen}\n\n"
+    if prior_summary:
+        context += f"[Salida de pasos previos]\n{prior_summary}\n\n"
+
+    if step.agent_id == POC_AGENT_ID:
+        tool_directive = (
+            "Ejecuta este paso como coordinador. Consulta especialistas internos "
+            "solo si aportan a la clasificación o al cierre del paso."
+        )
+    elif step.agent_id in SPECIALIST_AGENT_IDS:
+        tool_directive = (
+            f"DEBES consultar la tool interna `{step.agent_id}` para este paso. "
+            "Sintetiza el hallazgo del backoffice en una sola voz de coordinador (POC). "
+            "No te presentes como el especialista ni cedas el control de la conversación."
+        )
+    else:
+        tool_directive = (
+            "Responde como coordinador del expediente con la información disponible."
+        )
+
+    return (
+        f"{context}"
+        f"[Plan aprobado — paso {step.step_id}: {step.title}]\n"
+        f"Skill: {step.skill_id or 'N/A'}\n"
+        f"Instrucción operativa: {step.user_summary}\n"
+        f"{tool_directive}\n\n"
+        f"[Consulta del despacho]\n{user_message}"
+    )
+
+
+def _final_output_text(result: Any) -> str:
+    output = getattr(result, "final_output", None)
+    if output is None:
+        return ""
+    if isinstance(output, str):
+        return output
+    if hasattr(output, "model_dump"):
+        data = output.model_dump()
+        cuerpo = data.get("cuerpo")
+        if isinstance(cuerpo, str) and cuerpo.strip():
+            titulo = data.get("titulo") or ""
+            pendientes = data.get("pendientes_verificacion") or []
+            extra = ""
+            if pendientes:
+                extra = "\n\nPendientes de verificación:\n- " + "\n- ".join(str(p) for p in pendientes)
+            return f"{titulo}\n\n{cuerpo}{extra}".strip()
+        return str(data)
+    return str(output)
 
 
 def _mask_sensitive(text: str) -> str:
@@ -239,57 +305,53 @@ async def _run_single_step(
             )
             return text, report
 
-        agent = get_agent_by_id(step.agent_id)
-        if agent is None:
-            text = apply_output_guardrails(
-                f"No pude instanciar el agente {step.agent_id}. Revise la configuración del sistema.",
-                channel,
-            )
-            report = AgentIOReport(
-                step_id=step.step_id,
-                agent_id=step.agent_id,
-                received_from=received_from,
-                inputs=inputs,
-                outputs=[],
-                user_update=f"Bloqueado: agente {step.agent_id} no disponible.",
-                status="blocked",
-            )
-            return text, report
-
-        context = ""
-        if exp_resumen and "sin datos" not in exp_resumen.lower():
-            context += f"[Expediente]\n{exp_resumen}\n\n"
-        if prior_summary:
-            context += f"[Salida de pasos previos]\n{prior_summary}\n\n"
-        prompt = (
-            f"{context}"
-            f"[Plan aprobado — paso {step.step_id}: {step.title}]\n"
-            f"Skill: {step.skill_id or 'N/A'}\n"
-            f"Instrucción operativa: {step.user_summary}\n\n"
-            f"[Consulta del despacho]\n{user_message}"
+        agent = build_orchestrator()
+        prompt = _poc_step_prompt(
+            step,
+            user_message=user_message,
+            exp_resumen=exp_resumen,
+            prior_summary=prior_summary,
         )
 
         trace_hooks = _TraceRunHooks(trace)
-        agent_session = RepositoryAgentSession(session_id, channel=channel, user_id=user_id)
+        # Sin session del abogado: el plan no escribe turns de especialistas en el chat.
         run_config = RunConfig(
             workflow_name="firma-plan-step",
-            group_id=session_id,
+            group_id=_plan_step_session_id(session_id, plan_id, step.step_id),
             trace_metadata={"plan_id": trace.get("execution_plan_id", ""), "step_id": step.step_id},
         )
         if settings.openai_api_key:
             os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 
         try:
+            from agents.exceptions import (
+                InputGuardrailTripwireTriggered,
+                OutputGuardrailTripwireTriggered,
+            )
+
             result = await Runner.run(
                 agent,
                 prompt,
-                session=agent_session,
+                session=None,
                 max_turns=min(settings.agent_max_turns, 6),
                 hooks=trace_hooks,
                 run_config=run_config,
             )
-            text = apply_output_guardrails(result.final_output or "", channel)
+            text = apply_output_guardrails(_final_output_text(result), channel)
+            text = _ensure_poc_voice(
+                text,
+                last_agent_name=POC_AGENT_ID,
+                backoffice_agent=step.agent_id if step.agent_id in SPECIALIST_AGENT_IDS else POC_AGENT_ID,
+            )
             status: str = "done"
+        except (InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered) as exc:
+            logger.warning("Guardrail tripwire en paso %s: %s", step.step_id, exc)
+            text = apply_output_guardrails(
+                "No puedo continuar con este paso: la consulta o la salida no cumplen "
+                "los límites del despacho penal-víctimas. Reformule o aporte el ancla penal.",
+                channel,
+            )
+            status = "blocked"
         except Exception:
             logger.exception("Fallo ejecutando paso %s", step.step_id)
             text = apply_output_guardrails(
@@ -475,13 +537,21 @@ async def execute_approved_plan(
         )
 
     text = run_post_validations(message, last_text, trace)
+    text = _ensure_poc_voice(
+        text,
+        last_agent_name=POC_AGENT_ID,
+        backoffice_agent=destination_agent if destination_agent in SPECIALIST_AGENT_IDS else POC_AGENT_ID,
+    )
     pending_review = needs_human_review(text, channel, message) or any(
         s.requires_hitl_output for s in plan.steps
     )
+    # Cara al abogado = POC; backoffice queda en sent_to_agent / selected_agent.
     trace["sent_to_agent"] = destination_agent
     trace["selected_agent"] = destination_agent
     trace["skill_kan"] = _kan_for_agent(destination_agent)
-    trace["skill_reason"] = f"Ejecución del plan aprobado {plan_id}."
+    trace["skill_reason"] = (
+        f"Plan {plan_id} ejecutado vía POC (as_tool); backoffice {destination_agent}."
+    )
     trace["human_review_required"] = pending_review
     trace["blocked"] = False
 
@@ -499,7 +569,7 @@ async def execute_approved_plan(
         action_type="plan_execution",
         status="done",
         actor="plan_executor",
-        detail=f"Plan {plan_id} ejecutado con {len(plan.steps)} paso(s).",
+        detail=f"Plan {plan_id} ejecutado con {len(plan.steps)} paso(s) vía POC.",
     )
     trace["steps"].append(
         _trace_step(
@@ -512,7 +582,7 @@ async def execute_approved_plan(
     plan.status = "done"
     result_payload = {
         "text": text,
-        "agent": destination_agent,
+        "agent": POC_AGENT_ID,
         "pending_review": pending_review,
         "draft_id": draft_id,
         "session_id": session_id,

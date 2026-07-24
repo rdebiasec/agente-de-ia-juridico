@@ -18,6 +18,8 @@ from src.storage.models import (
     AuditPortalUser,
     ChatSession,
     ComplianceConsent,
+    ConfigActive,
+    ConfigVersion,
     Deadline,
     DocumentChunk,
     Draft,
@@ -190,6 +192,32 @@ class ExecutionPlanRow(Base):
     status: Mapped[str] = mapped_column(Text)
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ConfigVersionRow(Base):
+    __tablename__ = "config_versions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    kind: Mapped[str] = mapped_column(Text, index=True)
+    key: Mapped[str] = mapped_column(Text, index=True)
+    version: Mapped[int] = mapped_column()
+    content: Mapped[str] = mapped_column(Text)
+    checksum: Mapped[str] = mapped_column(Text)
+    author_email: Mapped[str] = mapped_column(Text, default="")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ConfigActiveRow(Base):
+    __tablename__ = "config_active"
+
+    kind: Mapped[str] = mapped_column(Text, primary_key=True)
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    active_version: Mapped[int] = mapped_column()
+    checksum: Mapped[str] = mapped_column(Text)
+    path: Mapped[str] = mapped_column(Text, default="")
+    updated_by: Mapped[str] = mapped_column(Text, default="")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -926,3 +954,135 @@ class SqlRepository:
             s.execute(delete(ExecutionPlanRow))
             s.commit()
             return int(count)
+
+    # --- Config store ---
+    def add_config_version(self, row: ConfigVersion) -> ConfigVersion:
+        with self._session() as s:
+            db_row = ConfigVersionRow(
+                kind=row.kind,
+                key=row.key,
+                version=row.version,
+                content=row.content,
+                checksum=row.checksum,
+                author_email=row.author_email,
+                note=row.note,
+                created_at=row.created_at,
+            )
+            s.add(db_row)
+            s.commit()
+            s.refresh(db_row)
+            return ConfigVersion(
+                id=db_row.id,
+                kind=db_row.kind,
+                key=db_row.key,
+                version=db_row.version,
+                content=db_row.content,
+                checksum=db_row.checksum,
+                author_email=db_row.author_email,
+                note=db_row.note,
+                created_at=db_row.created_at,
+            )
+
+    def get_config_version(self, kind: str, key: str, version: int) -> ConfigVersion | None:
+        with self._session() as s:
+            row = s.scalars(
+                select(ConfigVersionRow).where(
+                    ConfigVersionRow.kind == kind,
+                    ConfigVersionRow.key == key,
+                    ConfigVersionRow.version == version,
+                )
+            ).first()
+            if row is None:
+                return None
+            return ConfigVersion(
+                id=row.id,
+                kind=row.kind,
+                key=row.key,
+                version=row.version,
+                content=row.content,
+                checksum=row.checksum,
+                author_email=row.author_email,
+                note=row.note,
+                created_at=row.created_at,
+            )
+
+    def list_config_versions(self, kind: str, key: str, *, limit: int = 50) -> list[ConfigVersion]:
+        with self._session() as s:
+            rows = s.scalars(
+                select(ConfigVersionRow)
+                .where(ConfigVersionRow.kind == kind, ConfigVersionRow.key == key)
+                .order_by(ConfigVersionRow.version.desc())
+                .limit(limit)
+            ).all()
+            return [
+                ConfigVersion(
+                    id=r.id,
+                    kind=r.kind,
+                    key=r.key,
+                    version=r.version,
+                    content=r.content,
+                    checksum=r.checksum,
+                    author_email=r.author_email,
+                    note=r.note,
+                    created_at=r.created_at,
+                )
+                for r in rows
+            ]
+
+    def get_config_active(self, kind: str, key: str) -> ConfigActive | None:
+        with self._session() as s:
+            row = s.get(ConfigActiveRow, {"kind": kind, "key": key})
+            if row is None:
+                return None
+            return ConfigActive(
+                kind=row.kind,
+                key=row.key,
+                active_version=row.active_version,
+                checksum=row.checksum,
+                path=row.path,
+                updated_by=row.updated_by,
+                updated_at=row.updated_at,
+            )
+
+    def upsert_config_active(self, row: ConfigActive) -> ConfigActive:
+        with self._session() as s:
+            db_row = s.get(ConfigActiveRow, {"kind": row.kind, "key": row.key})
+            if db_row is None:
+                db_row = ConfigActiveRow(kind=row.kind, key=row.key)
+                s.add(db_row)
+            db_row.active_version = row.active_version
+            db_row.checksum = row.checksum
+            db_row.path = row.path
+            db_row.updated_by = row.updated_by
+            db_row.updated_at = row.updated_at
+            s.commit()
+            s.refresh(db_row)
+            return ConfigActive(
+                kind=db_row.kind,
+                key=db_row.key,
+                active_version=db_row.active_version,
+                checksum=db_row.checksum,
+                path=db_row.path,
+                updated_by=db_row.updated_by,
+                updated_at=db_row.updated_at,
+            )
+
+    def list_config_active(self, *, kind: str | None = None) -> list[ConfigActive]:
+        with self._session() as s:
+            stmt = select(ConfigActiveRow)
+            if kind:
+                stmt = stmt.where(ConfigActiveRow.kind == kind)
+            stmt = stmt.order_by(ConfigActiveRow.kind.asc(), ConfigActiveRow.key.asc())
+            rows = s.scalars(stmt).all()
+            return [
+                ConfigActive(
+                    kind=r.kind,
+                    key=r.key,
+                    active_version=r.active_version,
+                    checksum=r.checksum,
+                    path=r.path,
+                    updated_by=r.updated_by,
+                    updated_at=r.updated_at,
+                )
+                for r in rows
+            ]

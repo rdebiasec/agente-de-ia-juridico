@@ -35,6 +35,18 @@ PROGRESS_PUT_RATE_MAX = 90
 PROGRESS_PUT_RATE_WINDOW = 60
 
 
+def _config_write_file_enabled() -> bool:
+    """En tests se puede desactivar exportación a disco (AUDIT_CONFIG_WRITE_FILE=0)."""
+    import os
+
+    return os.environ.get("AUDIT_CONFIG_WRITE_FILE", "1").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+
+
 class AuditCredentialsBody(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=1)
@@ -200,11 +212,41 @@ async def audit_catalog():
     return build_live_audit_catalog()
 
 
+@router.get("/config/catalog")
+async def audit_config_catalog(email: str = Depends(_require_audit_email)):
+    from src.config_store import list_catalog_items, seed_from_filesystem
+
+    # Sembrar bajo demanda si la DB aún no tiene activos (p. ej. memoria en tests).
+    try:
+        seed_from_filesystem(author_email=email or "system@seed")
+    except Exception:
+        pass
+    items = list_catalog_items()
+    return {
+        "ok": True,
+        "counts": {k: len(v) for k, v in items.items()},
+        "items": items,
+    }
+
+
 @router.get("/config/status")
 async def audit_config_status():
     from src.compliance.skill_config import config_status
+    from src.config_store import validate_config_store
+    from src.storage import get_repository
 
-    return config_status()
+    status = config_status()
+    actives = get_repository().list_config_active()
+    status["config_store"] = {
+        "active_items": len(actives),
+        "by_kind": {
+            "prompt": sum(1 for a in actives if a.kind == "prompt"),
+            "guardrail": sum(1 for a in actives if a.kind == "guardrail"),
+            "skill": sum(1 for a in actives if a.kind == "skill"),
+        },
+        "validation_errors": validate_config_store(),
+    }
+    return status
 
 
 @router.get("/config/events")
@@ -224,6 +266,146 @@ async def audit_config_events(email: str = Depends(_require_audit_email)):
         )
     status = config_status()
     return {"status": status, "events": events}
+
+
+class ConfigSaveBody(BaseModel):
+    kind: str = Field(min_length=3, max_length=32)
+    key: str = Field(min_length=1, max_length=120)
+    content: str = Field(min_length=1)
+    expected_version: int | None = None
+    note: str = ""
+
+
+class ConfigRestoreBody(BaseModel):
+    version: int = Field(ge=1)
+    note: str = ""
+
+
+@router.get("/config/{kind}/{key}")
+async def audit_config_get(kind: str, key: str, email: str = Depends(_require_audit_email)):
+    from src.config_store import ConfigNotFoundError, ConfigValidationError, get_active_content
+
+    try:
+        return get_active_content(kind, key)
+    except ConfigValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ConfigNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/config/{kind}/{key}/versions")
+async def audit_config_versions(
+    kind: str, key: str, limit: int = 50, email: str = Depends(_require_audit_email)
+):
+    from src.config_store import ConfigValidationError, list_versions
+
+    try:
+        return {"kind": kind, "key": key, "versions": list_versions(kind, key, limit=min(limit, 100))}
+    except ConfigValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/config/{kind}/{key}/versions/{version}")
+async def audit_config_version_detail(
+    kind: str, key: str, version: int, email: str = Depends(_require_audit_email)
+):
+    from src.config_store import ConfigValidationError
+    from src.config_store.paths import VALID_KINDS
+    from src.storage import get_repository
+
+    if kind not in VALID_KINDS:
+        raise HTTPException(status_code=400, detail=f"kind inválido: {kind}")
+    row = get_repository().get_config_version(kind, key, version)
+    if row is None:
+        raise HTTPException(status_code=404, detail=f"No existe {kind}/{key} v{version}")
+    return {
+        "kind": row.kind,
+        "key": row.key,
+        "version": row.version,
+        "content": row.content,
+        "checksum": row.checksum,
+        "author_email": row.author_email,
+        "note": row.note,
+        "created_at": row.created_at.isoformat(),
+    }
+
+
+@router.post("/config/save")
+async def audit_config_save(
+    request: Request,
+    body: ConfigSaveBody,
+    email: str = Depends(_require_audit_email),
+):
+    from src.config_store import (
+        ConfigConflictError,
+        ConfigValidationError,
+        save_version,
+    )
+    from src.gateway.audit_catalog import refresh_runtime_catalog_caches
+
+    try:
+        saved = save_version(
+            body.kind,
+            body.key,
+            body.content,
+            author_email=email,
+            note=body.note or "",
+            expected_version=body.expected_version,
+            write_file=_config_write_file_enabled(),
+        )
+    except ConfigConflictError as exc:
+        _log_access(request, action="config_save_conflict", email=email, detail=str(exc)[:300])
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ConfigValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    _log_access(
+        request,
+        action="config_save",
+        email=email,
+        detail=f"{body.kind}/{body.key} v{saved['version']}",
+    )
+    refresh_runtime_catalog_caches()
+    return {"ok": True, **saved}
+
+
+@router.post("/config/{kind}/{key}/restore")
+async def audit_config_restore(
+    kind: str,
+    key: str,
+    request: Request,
+    body: ConfigRestoreBody,
+    email: str = Depends(_require_audit_email),
+):
+    from src.config_store import (
+        ConfigNotFoundError,
+        ConfigValidationError,
+        restore_version,
+    )
+    from src.gateway.audit_catalog import refresh_runtime_catalog_caches
+
+    try:
+        saved = restore_version(
+            kind,
+            key,
+            body.version,
+            author_email=email,
+            note=body.note or "",
+            write_file=_config_write_file_enabled(),
+        )
+    except ConfigNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConfigValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    _log_access(
+        request,
+        action="config_restore",
+        email=email,
+        detail=f"{kind}/{key} from_v{body.version} -> v{saved['version']}",
+    )
+    refresh_runtime_catalog_caches()
+    return {"ok": True, **saved}
 
 
 @router.post("/config/publish")

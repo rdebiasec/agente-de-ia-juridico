@@ -342,6 +342,8 @@ Persistencia: tabla `execution_plans` (migración Alembic `0005`). Tras deploy, 
 
 **Fase 3:** plantillas de plan, dashboard en `/auditoria/`, export `.md` — ver `docs/canon/plan-fase-3-producto-auditoria.md`.
 
+**Config store (prompts · guardrails · skills):** migración Alembic `0007` (`config_versions`, `config_active`). Al arranque se siembra de forma idempotente desde archivos (`scripts/seed_config_store.py`). El portal `/auditoria/` es el editor vivo; Postgres es autoritativo en Render. Rollback de un ítem: Historial → Restaurar. Incluido en backup R2 vía `pg_dump` completo — ver `docs/operaciones/PLAN_DESASTRE.md`.
+
 ---
 
 ## Portal de auditoría (Auditoría de Instrucciones)

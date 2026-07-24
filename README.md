@@ -1,6 +1,6 @@
-# Agente Jurídico — Firma virtual (web-only)
+# Agente Jurídico — Firma virtual penal-víctimas
 
-Asistente multi-agente para despacho colombiano, modelado como una firma: un orquestador enruta hacia roles transversales y litigantes por área (civil CGP, penal Ley 906). Canal único: **web**.
+Asistente multi-agente para despacho colombiano especializado en **representación de víctimas en materia penal** (Ley 906). Un coordinador (POC) es la única voz frente al abogado; 10 especialistas operan como backoffice interno vía OpenAI Agents SDK (`agent.as_tool`).
 
 **Repo:** `agente-de-ia-juridico`  
 **Flujo:** Mac (desarrollo) → GitHub → Render (hosting)
@@ -66,26 +66,33 @@ docker compose -f deploy/docker-compose.yml up --build
 
 ## Arquitectura
 
-**Agentes (Fase A).** `orquestador` → handoffs a roles transversales (intake, estratega, comunicación, redacción, conceptos, tutela, dependiente judicial, conocimiento) y litigantes por área (civil CGP, penal Ley 906).
+**Runtime (OpenAI Agents SDK).** Un solo interlocutor:
 
+- **POC** `coordinador_expediente_penal` — responde al abogado (web / Slack)
+- **10 especialistas** como tools internas (`as_tool`), no handoffs terminales:
+  cronología, tipicidad, ruta Ley 906, víctimas, evidencia, audiencias,
+  redacción, seguimiento, tutela, calidad jurídica
+- **Guardrails nativos** del SDK en el POC (`input_guardrails` / `output_guardrails`)
+  + disclaimer / HITL post-proceso
 - Persona compartida: `agente/prompts/sistema.md`
-- Conocimiento + playbooks procesales: `agente/conocimiento/*.md`
-- Esquemas estructurados: `src/agents/schemas.py`
-- Expediente: `src/gateway/expediente.py`
+- Conocimiento + playbooks: `agente/conocimiento/*.md` (penal-víctimas)
+- Esquemas: `src/agents/schemas.py` (el redactor usa `output_type=BorradorDocumentoPenal`)
 
-**Persistencia, HITL y servicios (Fase B).**
+**Dos entradas de chat (misma orquestación POC):**
 
-- Persistencia con repositorio intercambiable (`src/storage/`): en memoria (tests/local) o Postgres/pgvector (`DATABASE_URL`). El **expediente** del caso también persiste (`Expediente`, tabla `expedientes`).
-- Migraciones con **Alembic** (`alembic.ini`, `migrations/`): la migración inicial crea la extensión `vector` y las tablas `drafts`, `expedientes`, `deadlines`, `document_chunks`. Con `DATABASE_URL`, la app ejecuta `alembic upgrade head` al arrancar (fallback a `create_all` si algo falla).
-- Revisión humana (HITL): todo borrador accionable se guarda como `Draft` y pasa por estados `propuesto → en_revision → aprobado/editado/rechazado` (`src/hitl/`).
-  - Bandeja del abogado y acciones: `GET /drafts/pendientes`, `POST /drafts/{id}/approve|reject|edit`, `GET /drafts/{id}/docx`.
-  - Aprobación desde Slack: botones Block Kit + webhook firmado `POST /slack/interactivity`.
-- Términos procesales: días hábiles con festivos de Colombia (`src/services/plazos.py`; tutela 10 días). API: `GET/POST /deadlines`, `PATCH /deadlines/{id}`. Al aprobar una tutela se crea automáticamente su término de fallo.
-- Recordatorios programados: `src/services/scheduler.py` (APScheduler) arranca en el `lifespan`, marca términos vencidos y envía alertas a Slack (job diario) más un recordatorio mensual de seguimiento. La clasificación de vencimientos es una función pura testeable (`clasificar_vencimientos`).
-- Documentos: generación de `.docx`/`.pdf` y extracción de texto de PDF/Word (`src/services/documentos.py`; `POST /documents/extract`, `GET /drafts/{id}/docx`, `GET /drafts/{id}/pdf`).
-- **RAG** (`src/services/rag.py`): chunking + embeddings (OpenAI `text-embedding-3-small`, con fallback local determinista) sobre `pgvector`, en una sola tabla `document_chunks` con dos alcances (`kb` de la firma y `expediente` del caso).
-  - Indexar la KB: `POST /rag/ingest-kb` o `scripts/ingest_kb.py`.
-  - Ingestar un adjunto a un caso: `POST /documents/extract` con `expediente_id` e `ingestar=true`.
-  - Buscar: `POST /rag/search`. Los agentes citan vía las tools `buscar_en_conocimiento` / `buscar_en_expediente`.
+| Ruta | Uso |
+|------|-----|
+| `POST /chat` | Turno directo del POC (sesión del abogado) |
+| `POST /chat/plan` → approve → execute | Plan visible al abogado; cada paso corre **vía POC + tools**, con sesión aislada (no contamina el historial del chat) |
 
-**UI web (panel "Firma").** Botón *Bandeja del abogado* en la cabecera abre el panel (`static/firma.js`, `static/index.html`) con: bandeja de borradores pendientes (aprobar/editar/rechazar, descargar `.docx`/`.pdf`), subida de documentos al expediente con ingesta RAG, búsqueda semántica y gestión de términos. Cuando el chat genera un borrador, muestra un aviso "enviado a la bandeja" y refresca el panel.
+**Persistencia, HITL y servicios.**
+
+- Persistencia intercambiable (`src/storage/`): memoria o Postgres/pgvector (`DATABASE_URL`).
+- Migraciones Alembic (`migrations/`): extensión `vector` + tablas de drafts, expedientes, deadlines, chunks.
+- HITL: borradores `propuesto → en_revision → aprobado/editado/rechazado` (`src/hitl/`).
+- RAG (`src/services/rag.py`): embeddings OpenAI; si fallan, **fallback local con warning** (calidad degradada).
+- Tools de grounding: `buscar_en_conocimiento` / `buscar_en_expediente` (`src/mcp/tools.py`).
+
+**UI web.** Panel Firma (`static/`) + portal de auditoría (`/auditoria/` y GitHub Pages).
+
+**Portal de auditoría.** Editor vivo de prompts, guardrails (texto) y skills con versionado en Postgres. Login obligatorio vía API (`/api/audit/login`) con el mismo `SITE_PASSWORD` del despacho (correo + contraseña + PIN). Local y Pages deben apuntar a la API (Pages: `AUDIT_API_BASE` en el build). Ver [audit-portal/README.md](audit-portal/README.md).

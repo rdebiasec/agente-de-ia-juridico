@@ -73,8 +73,9 @@ flowchart TB
 | Postgres local | Docker `deploy_pgdata` | No | Media | 24 h | 30–60 min |
 | Postgres prod | Render `agente-db` | No | Alta | 24 h | 1–2 h |
 | RAG (`document_chunks`) | Postgres | No | Baja | N/A | 15 min (`ingest_kb`) |
-| `audit-portal/dist` | Generado | No | Baja | N/A | 2 min |
 | Progreso auditoría | Postgres | No | Alta | 24 h | 15 min |
+| Config store (prompts/guardrails/skills) | Postgres `config_versions` + `config_active` | Seed en git | Alta | 24 h | 15 min |
+| `audit-portal/dist` | Generado | No | Baja | N/A | 2 min |
 | gh-pages | Rama GitHub | Sí | Media | 0 | 10 min |
 | OpenAI / Slack / Twilio | Proveedores | Creds en env | Media | N/A | 15 min |
 | Redis | Solo en `.env.example` | — | No usado | — | — |
@@ -203,10 +204,26 @@ DATABASE_URL='...' .venv/bin/python scripts/restore_audit_progress.py \
 
 | Qué | Frecuencia | Destino |
 |---|---|---|
-| Postgres prod + progreso auditoría | **Diario** (GitHub Actions) | Cloudflare R2 (cifrado GPG) |
+| Postgres prod + progreso auditoría + config store | **Diario** (GitHub Actions) | Cloudflare R2 (cifrado GPG) |
 | Inventario env | Mensual | `~/Backups/agente-juridico/env-inventory-*.txt` |
 | Código | Cada feature | GitHub |
 | Dump local (opcional) | Antes de `down -v` | `~/Backups/agente-juridico/postgres/` |
+
+### Config store (prompts · guardrails · skills)
+
+Tablas incluidas en el `pg_dump` completo de Postgres (R2):
+
+- `config_versions` — historial append-only (contenido completo por versión)
+- `config_active` — puntero a la versión activa + checksum
+
+**Recuperación:**
+
+1. Restaurar el dump Postgres (como en el checklist de 5 pasos).
+2. En el primer boot, `alembic upgrade head` aplica `0007_config_store` si faltaba; el seed idempotente (`scripts/seed_config_store.py` / lifespan) **no sobrescribe** activos ya presentes.
+3. Rollback de un ítem concreto sin dump: en el portal `/auditoria/` → Historial → **Restaurar** (crea nueva versión activa desde una pasada).
+4. Rollback de emergencia a baseline git: redeploy del commit anterior + `POST /api/audit/config/.../restore` o re-seed solo si la DB quedó vacía.
+
+**Autoridad en prod:** Postgres es la fuente de verdad (filesystem de Render es efímero). Los archivos en repo son seed/export.
 
 ### Backup automático (GitHub Actions → R2) — recuperación completa
 

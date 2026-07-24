@@ -7,6 +7,8 @@ un coordinador del expediente (POC) es el único interlocutor del abogado;
 
 from agents import Agent
 
+from src.agents.schemas import BorradorDocumentoPenal
+from src.agents.sdk_guardrails import poc_input_guardrails, poc_output_guardrails
 from src.config import get_settings
 from src.mcp.tools import get_knowledge_tools
 
@@ -66,14 +68,49 @@ _SPECIALIST_TOOL_DESCRIPTIONS: dict[str, str] = {
 
 
 def _load_system_prompt() -> str:
-    settings = get_settings()
-    path = settings.agente_dir / "prompts" / "sistema.md"
-    return path.read_text(encoding="utf-8")
+    from src.config_store import load_prompt_text
+
+    try:
+        return load_prompt_text("sistema")
+    except Exception:
+        path = get_settings().agente_dir / "prompts" / "sistema.md"
+        return path.read_text(encoding="utf-8")
 
 
-def _build_agent(name: str, rol_instructions: str, *, with_tools: bool = True) -> Agent:
+def _load_agent_prompt(agent_id: str) -> str:
+    from src.config_store import load_prompt_text
+
+    try:
+        return load_prompt_text(agent_id).strip()
+    except Exception:
+        path = get_settings().agente_dir / "prompts" / "agents" / f"{agent_id}.md"
+        return path.read_text(encoding="utf-8").strip()
+
+
+def _policy_block() -> str:
+    """Políticas de guardrail editables (texto) inyectadas en instrucciones."""
+    try:
+        from src.config_store import load_guardrail_policies
+
+        policies = load_guardrail_policies()
+    except Exception:
+        return ""
+    if not policies:
+        return ""
+    lines = ["Políticas obligatorias del despacho (guardrails de política):"]
+    for g in policies:
+        lines.append(f"- [{g['id']}] {g['name']}: {g['desc']}")
+    return "\n".join(lines)
+
+
+def _build_agent(name: str, *, with_tools: bool = True) -> Agent:
     base = _load_system_prompt()
-    instructions = f"{base}\n\n{rol_instructions.strip()}\n{_BACKOFFICE_VOICE.strip()}\n"
+    rol = _load_agent_prompt(name)
+    policy = _policy_block()
+    parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    if policy:
+        parts.append(policy)
+    instructions = "\n\n".join(parts) + "\n"
     kwargs: dict = {
         "name": name,
         "instructions": instructions,
@@ -85,139 +122,74 @@ def _build_agent(name: str, rol_instructions: str, *, with_tools: bool = True) -
 
 
 def build_analista_cronologia_hechos_penales_agent() -> Agent:
-    return _build_agent(
-        "analista_cronologia_hechos_penales",
-        """
-Rol: analista de cronología y hechos penales.
-Misión: transformar relatos/documentos en línea de tiempo verificable,
-identificar actores, contradicciones y vacíos fácticos.
-No decides el fondo del caso ni inventas hechos; separa claramente:
-hechos confirmados, narrados e inferidos.
-""",
-    )
+    return _build_agent("analista_cronologia_hechos_penales")
 
 
 def build_analista_tipicidad_y_responsabilidad_penal_agent() -> Agent:
-    return _build_agent(
-        "analista_tipicidad_y_responsabilidad_penal",
-        """
-Rol: penalista sustantivo.
-Misión: analizar preliminarmente tipicidad, elementos del tipo, autoría,
-participación, dolo/culpa, agravantes y riesgos de atipicidad.
-No afirmes conclusiones definitivas ni inventes normas/jurisprudencia.
-""",
-    )
+    return _build_agent("analista_tipicidad_y_responsabilidad_penal")
 
 
 def build_analista_ruta_procesal_ley906_agent() -> Agent:
-    return _build_agent(
-        "analista_ruta_procesal_ley906",
-        """
-Rol: penalista procesal Ley 906.
-Misión: identificar etapa procesal, oportunidades de intervención, términos
-preliminares, riesgos procesales y ruta recomendada para la víctima.
-No hagas seguimiento operativo diario (eso lo hace seguimiento procesal).
-""",
-    )
+    return _build_agent("analista_ruta_procesal_ley906")
 
 
 def build_analista_representacion_victimas_agent() -> Agent:
-    return _build_agent(
-        "analista_representacion_victimas",
-        """
-Rol: especialista en representación de víctimas.
-Misión: construir teoría del caso desde derechos e intereses de la víctima,
-evaluar daño/afectación, enfoque diferencial y riesgo de revictimización.
-No prometas resultados judiciales ni uses lenguaje revictimizante.
-""",
-    )
+    return _build_agent("analista_representacion_victimas")
 
 
 def build_gestor_evidencia_y_soporte_probatorio_agent() -> Agent:
-    return _build_agent(
-        "gestor_evidencia_y_soporte_probatorio",
-        """
-Rol: gestor probatorio.
-Misión: inventariar evidencia, construir matriz hecho-prueba, detectar brechas
-y proponer plan de recaudo sin alterar ni manipular evidencia.
-Cuando la evidencia requiera cadena de custodia estricta, marca escalamiento.
-""",
-    )
+    return _build_agent("gestor_evidencia_y_soporte_probatorio")
 
 
 def build_preparador_estrategico_audiencias_penales_agent() -> Agent:
-    return _build_agent(
-        "preparador_estrategico_audiencias_penales",
-        """
-Rol: preparador de audiencias.
-Misión: preparar objetivos, guiones, solicitudes, preguntas y checklist para
-audiencias penales de representación de víctimas.
-No reemplazas la intervención oral del abogado en audiencia.
-""",
-    )
+    return _build_agent("preparador_estrategico_audiencias_penales")
 
 
 def build_redactor_documentos_juridicos_penales_agent() -> Agent:
-    return _build_agent(
-        "redactor_documentos_juridicos_penales",
-        """
-Rol: redactor penal.
-Misión: convertir análisis en borradores revisables (memoriales, solicitudes,
-ampliaciones, derechos de petición, recursos preliminares y tutela preliminar).
-No inventes hechos, citas, radicados ni anexos; marca pendientes de verificación.
-""",
+    base = _load_system_prompt()
+    rol = _load_agent_prompt("redactor_documentos_juridicos_penales")
+    policy = _policy_block()
+    parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    if policy:
+        parts.append(policy)
+    instructions = "\n\n".join(parts) + "\n"
+    return Agent(
+        name="redactor_documentos_juridicos_penales",
+        instructions=instructions,
+        model=get_settings().openai_model,
+        tools=get_knowledge_tools(),
+        output_type=BorradorDocumentoPenal,
     )
 
 
 def build_gestor_seguimiento_procesal_penal_agent() -> Agent:
-    return _build_agent(
-        "gestor_seguimiento_procesal_penal",
-        """
-Rol: dependiente judicial digital.
-Misión: monitorear radicados, actuaciones, audiencias, términos operativos,
-documentos pendientes e inactividad del caso.
-Tu función es operativa; no sustituyes análisis jurídico estratégico.
-""",
-    )
+    return _build_agent("gestor_seguimiento_procesal_penal")
 
 
 def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
-    return _build_agent(
-        "evaluador_derechos_fundamentales_tutela",
-        """
-Rol: analista constitucional.
-Misión: evaluar derechos fundamentales y procedencia preliminar de tutela
-en asuntos relacionados con el caso penal.
-No conviertas todo en tutela; revisa subsidiariedad, inmediatez y riesgos.
-""",
-    )
+    return _build_agent("evaluador_derechos_fundamentales_tutela")
 
 
 def build_analista_calidad_juridica_agent() -> Agent:
-    return _build_agent(
-        "analista_calidad_juridica",
-        """
-Rol: revisor de calidad jurídica.
-Misión: verificar soporte fáctico, citas normativas, consistencia estratégica,
-confidencialidad y no revictimización antes de salida externa.
-Nunca apruebes automáticamente sin marcar hallazgos y cambios requeridos.
-""",
-    )
+    return _build_agent("analista_calidad_juridica")
 
 
 def build_coordinador_agent() -> Agent:
+    """POC sin especialistas (pasos de plan / consultas directas al coordinador)."""
     base = _load_system_prompt()
-    instructions = f"""{base}
-
-Eres el COORDINADOR DEL EXPEDIENTE PENAL y el único interlocutor (POC) del abogado.
-Clasificas la consulta, consultas al equipo interno cuando hace falta y respondes
-con una sola voz de despacho. No inventes normas, sentencias, radicados ni hechos.
-"""
+    rol = _load_agent_prompt(POC_AGENT_ID)
+    policy = _policy_block()
+    parts = [base, rol]
+    if policy:
+        parts.append(policy)
+    instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name=POC_AGENT_ID,
         instructions=instructions,
         model=get_settings().openai_model,
         tools=get_knowledge_tools(),
+        input_guardrails=poc_input_guardrails(),
+        output_guardrails=poc_output_guardrails(),
     )
 
 
@@ -262,7 +234,32 @@ SPECIALIST_AGENT_IDS = frozenset(_SPECIALIST_TOOL_DESCRIPTIONS.keys())
 def build_orchestrator() -> Agent:
     """POC coordinador con especialistas como tools internas (no handoffs terminales)."""
     base = _load_system_prompt()
+    rol = _load_agent_prompt(POC_AGENT_ID)
+    policy = _policy_block()
     specialists = [builder() for builder in _SPECIALIST_BUILDERS]
+
+    async def _tool_output_text(result: object) -> str:
+        output = getattr(result, "final_output", result)
+        if output is None:
+            return ""
+        if isinstance(output, str):
+            return output
+        if hasattr(output, "model_dump"):
+            data = output.model_dump()
+            cuerpo = data.get("cuerpo")
+            if isinstance(cuerpo, str) and cuerpo.strip():
+                titulo = str(data.get("titulo") or "").strip()
+                pendientes = data.get("pendientes_verificacion") or []
+                header = f"{titulo}\n\n" if titulo else ""
+                extras = ""
+                if pendientes:
+                    extras = "\n\nPendientes de verificación:\n- " + "\n- ".join(
+                        str(p) for p in pendientes
+                    )
+                return f"{header}{cuerpo}{extras}".strip()
+            return str(data)
+        return str(output)
+
     specialist_tools = [
         agent.as_tool(
             tool_name=agent.name,
@@ -270,44 +267,19 @@ def build_orchestrator() -> Agent:
                 agent.name,
                 f"Consulta interna al equipo {agent.name}.",
             ),
+            custom_output_extractor=_tool_output_text,
         )
         for agent in specialists
     ]
-    instructions = f"""{base}
-
-Eres el COORDINADOR DEL EXPEDIENTE PENAL del despacho y el **único interlocutor (POC)**
-frente al abogado (web y Slack).
-
-Alcance único: representación de víctimas en contexto penal colombiano.
-
-Reglas de voz:
-- Tú eres el único que responde al abogado. Entregas una sola voz de despacho.
-- Consultas especialistas como **tools de backoffice** (no cedes el control de la conversación).
-- Sintetiza hallazgos del equipo interno; no digas "yo soy el analista de tipicidad" ni listes IDs técnicos.
-- Puedes decir "consulté al equipo interno" o "el área de redacción preparó un borrador".
-
-Cuándo consultar cada tool interna:
-- Cronología y depuración factual -> analista_cronologia_hechos_penales
-- Tipicidad y responsabilidad preliminar -> analista_tipicidad_y_responsabilidad_penal
-- Etapa/ruta procesal Ley 906 -> analista_ruta_procesal_ley906
-- Derechos/objetivos de la víctima -> analista_representacion_victimas
-- Evidencia y brechas probatorias -> gestor_evidencia_y_soporte_probatorio
-- Preparación de audiencias -> preparador_estrategico_audiencias_penales
-- Redacción de piezas penales -> redactor_documentos_juridicos_penales
-- Seguimiento operativo del caso -> gestor_seguimiento_procesal_penal
-- Evaluación constitucional/tutela -> evaluador_derechos_fundamentales_tutela
-- Control de calidad y trazabilidad -> analista_calidad_juridica
-
-Si detectas un asunto fuera de penal-víctimas, acláralo explícitamente
-y redirige la consulta al componente penal-víctimas.
-
-Si faltan datos críticos (hechos, etapa, radicado, fuentes), solicítalos antes de
-concluir. Mantén la conversación abierta hasta lograr un borrador útil y trazable.
-No inventes normas, sentencias, radicados ni hechos.
-"""
+    parts = [base, rol]
+    if policy:
+        parts.append(policy)
+    instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name=POC_AGENT_ID,
         instructions=instructions,
         model=get_settings().openai_model,
         tools=[*get_knowledge_tools(), *specialist_tools],
+        input_guardrails=poc_input_guardrails(),
+        output_guardrails=poc_output_guardrails(),
     )

@@ -101,12 +101,20 @@ async def lifespan(app: FastAPI):
 
     try:
         from src.compliance.skill_config import validate_runtime_skill_config
+        from src.config_store import seed_from_filesystem, validate_config_store
         from src.storage import get_repository
         from src.storage.models import AuditPortalAccessLog
 
-        cfg_errors = validate_runtime_skill_config()
+        try:
+            seed_counts = seed_from_filesystem(author_email="system@startup")
+            logger.info("Config store seed: %s", seed_counts)
+        except Exception:
+            logger.exception("Config store seed falló (continuando)")
+
+        cfg_errors = list(validate_runtime_skill_config())
+        cfg_errors.extend(validate_config_store())
         if cfg_errors:
-            logger.warning("Validación config skills: %s", "; ".join(cfg_errors[:5]))
+            logger.warning("Validación config: %s", "; ".join(cfg_errors[:5]))
             get_repository().log_audit_portal_access(
                 AuditPortalAccessLog(
                     email=None,
@@ -123,7 +131,7 @@ async def lifespan(app: FastAPI):
                 )
             )
     except Exception:
-        logger.exception("No se pudo validar configuración de skills al arranque")
+        logger.exception("No se pudo validar configuración al arranque")
 
     yield
     if slack_task:

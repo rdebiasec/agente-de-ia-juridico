@@ -18,7 +18,7 @@ def _resolve_skills_dir() -> Path:
 SKILLS_DIR = _resolve_skills_dir()
 LISTA = ROOT / "docs" / "canon" / "lista-aprobacion-agentes-skills-pasos.md"
 
-GUARDRAILS = [
+_FALLBACK_GUARDRAILS = [
     {
         "id": "g1",
         "name": "No inventar",
@@ -70,6 +70,41 @@ GUARDRAILS = [
         "desc": "No alterar ni suprimir evidencia; cadena de custodia y preservacion digital antes de descartar prueba en estrategia.",
     },
 ]
+
+
+def _load_guardrails() -> list[dict]:
+    """Carga políticas desde config/guardrails/*.md (o DB vía config_store si disponible)."""
+    try:
+        from src.config_store import load_guardrail_policies
+
+        loaded = load_guardrail_policies()
+        if loaded:
+            return loaded
+    except Exception:
+        pass
+    guard_dir = ROOT / "config" / "guardrails"
+    if not guard_dir.is_dir():
+        return list(_FALLBACK_GUARDRAILS)
+    items: list[dict] = []
+    for path in sorted(guard_dir.glob("g*.md")):
+        text = path.read_text(encoding="utf-8")
+        name = path.stem
+        gid = path.stem
+        body_lines: list[str] = []
+        for ln in text.splitlines():
+            if ln.startswith("# "):
+                name = ln[2:].strip() or name
+            elif ln.startswith("id:"):
+                gid = ln.split(":", 1)[1].strip() or gid
+            elif ln.startswith("name:"):
+                name = ln.split(":", 1)[1].strip() or name
+            elif ln.strip():
+                body_lines.append(ln.strip())
+        items.append({"id": gid, "name": name, "desc": " ".join(body_lines).strip()})
+    return items or list(_FALLBACK_GUARDRAILS)
+
+
+GUARDRAILS = _load_guardrails()
 
 AGENT_TITULOS: dict[str, str] = {
     "coordinador_expediente_penal": "COORDINACIÓN Y ENRUTAMIENTO DEL CASO PENAL",
@@ -263,8 +298,14 @@ AGENTS = [
 ]
 
 
-def parse_skill_md(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8")
+def parse_skill_md_text(text: str) -> dict:
+    """Parsea el cuerpo de un SKILL.md (texto completo)."""
+    try:
+        from src.config_store.service import strip_header
+
+        text = strip_header(text or "")
+    except Exception:
+        pass
     body = text.split("---", 2)[-1] if text.startswith("---") else text
 
     def section(name: str) -> str:
@@ -308,6 +349,10 @@ def parse_skill_md(path: Path) -> dict:
         "riesgo": section("Riesgo si se omite"),
         "steps_md": steps_md,
     }
+
+
+def parse_skill_md(path: Path) -> dict:
+    return parse_skill_md_text(path.read_text(encoding="utf-8"))
 
 
 def parse_steps_from_content(content: str) -> list[dict]:
@@ -360,7 +405,10 @@ def parse_lista_steps() -> dict[str, dict]:
 
 
 def load_skills_catalog() -> dict[str, dict]:
-    """Carga todos los skills desde SKILL.md y lista de aprobacion."""
+    """Carga todos los skills desde SKILL.md y lista de aprobacion.
+
+    Si hay versión activa en config_store (DB), esa versión sobrescribe el archivo.
+    """
     lista = parse_lista_steps()
     skills: dict[str, dict] = {}
     for p in sorted(SKILLS_DIR.glob("*/SKILL.md")):
@@ -375,6 +423,39 @@ def load_skills_catalog() -> dict[str, dict]:
         if extra.get("tools_lista") and not data.get("tools"):
             data["tools_lista"] = extra["tools_lista"]
         skills[sid] = data
+
+    # Overlay desde config_store (DB autoritativa)
+    try:
+        from src.config_store import get_active_content
+        from src.storage import get_repository
+
+        for active in get_repository().list_config_active(kind="skill"):
+            sid = active.key
+            try:
+                active_data = get_active_content("skill", sid)
+            except Exception:
+                continue
+            content = (active_data.get("content") or "").strip()
+            if not content:
+                continue
+            parsed = parse_skill_md_text(content)
+            base = skills.get(sid, {})
+            merged = {**base, **parsed}
+            merged["path"] = active_data.get("path") or base.get("path") or f".cursor/skills/{sid}/SKILL.md"
+            merged["config_version"] = active_data.get("version")
+            merged["config_checksum"] = active_data.get("checksum")
+            extra = lista.get(sid, {})
+            if not merged.get("instruccion"):
+                merged["instruccion"] = extra.get("instruccion", "")
+            lista_steps = extra.get("steps", [])
+            if lista_steps and not merged.get("steps"):
+                merged["steps"] = lista_steps
+            elif not merged.get("steps"):
+                merged["steps"] = merged.get("steps_md", [])
+            skills[sid] = merged
+    except Exception:
+        pass
+
     try:
         from lib.approved_skill_config import apply_approved_to_skills_raw
 

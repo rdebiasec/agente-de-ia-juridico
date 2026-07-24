@@ -75,6 +75,7 @@
 
     function setSessionEmail(email) {
         sessionEmail = email || null;
+        window.__AUDIT_SESSION_EMAIL__ = sessionEmail;
         window.dispatchEvent(
             new CustomEvent('audit-session-ready', { detail: { email: sessionEmail } }),
         );

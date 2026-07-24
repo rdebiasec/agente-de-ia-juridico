@@ -1,82 +1,74 @@
-# Legal Audit Sync v2
+# Legal Audit Sync — Editor de configuración
 
-Portal web para que la abogada líder audite el sistema penal-víctimas: **10 reglas estrictas**, **11 agentes** y **cada paso** de los 90 skills.
+Portal web para que el despacho **edite y versiona** la configuración operativa del asistente:
+
+- **Prompts** (sistema + 11 agentes)
+- **Guardrails** (texto de política G1–G10)
+- **Skills** (90 × `SKILL.md`)
+
+Cada guardado escribe una versión **inmutable** en Postgres (`config_versions`) y actualiza el puntero activo (`config_active`). Se puede **restaurar** cualquier versión en un clic.
 
 ## Carpetas
 
 | Carpeta | Uso |
 |---|---|
-| `site/` | Fuente local — edita `index.html` y `app.js` |
+| `site/` | Fuente — `index.html`, `app.js`, `auth-gate.js` |
 | `dist/` | Artefacto de despliegue — generado, no commitear |
 
-## Uso local
+## Uso local (mismo login que producción)
+
+Sirva el portal **desde la app FastAPI** (recomendado):
 
 ```bash
-./scripts/start-audit-portal.sh
+# Con SITE_PASSWORD configurado en .env raíz
+.venv/bin/python -m src.main
+# Abrir http://127.0.0.1:8000/auditoria/
 ```
 
-O manualmente:
+Login: correo del auditor + **misma** `SITE_PASSWORD` del chat + PIN (primera vez se define).
+
+Tras entrar:
+
+1. Elija pestaña Prompts / Guardrails / Skills.
+2. Edite el markdown y pulse **Guardar versión**.
+3. Abra **Historial** para ver diff y **Restaurar**.
+
+Preview estático en `:8080` (debe apuntar a la API):
 
 ```bash
-python scripts/generar_audit_portal.py
-python -m http.server 8080 --directory audit-portal/dist
+AUDIT_API_BASE=http://127.0.0.1:8000 ./scripts/start-audit-portal.sh
+# Abrir http://localhost:8080
 ```
-
-Abra `http://localhost:8080` (versión **v3.1-dev** — si no ve cambios, recargue con Cmd+Shift+R).
-
-## Manual de uso (sección 0) — v3.1-dev
-
-La auditoría tiene **2 secciones**: reglas estrictas y roles del equipo. Los procedimientos y sus pasos solo aparecen **dentro de cada rol** (sin listado plano de skills). Tipografía unificada en `audit-portal.css`.
-
-## Qué audita la abogada
-
-1. **Reglas Estrictas (Guardrails)** — límites técnicos del sistema
-2. **11 agentes** — en 3 grupos: Coordinación, Especialistas, Calidad
-3. **Pasos por skill** — cada skill muestra todos sus pasos (cantidad variable según catálogo); cada paso se aprueba, ajusta o marca pendiente
-
-**Principio profesional:** La IA propone; la abogada revisa, ajusta y aprueba.
-
-### Revertir decisiones
-
-- **RESTABLECER** — borra la decisión y vuelve a estado inicial
-- **APROBAR** otra vez sobre un ítem ya aprobado — también revierte a pendiente
-
-Las decisiones se guardan automáticamente en `localStorage` (`legal-audit-sync-v3`), incluyendo reglas y pasos agregados o eliminados. Use **Respaldo JSON** / **Restaurar JSON** en el panel para otro navegador o equipo. Exporte el `.md` para el dictamen formal.
-
-## Despliegue (GitHub Pages)
-
-Push a `main` → workflow `.github/workflows/deploy-audit-portal.yml` publica `dist/`.
-
-Ver también [`DEPLOY.md`](../DEPLOY.md).
-
-### Login (desactivado temporalmente)
-
-| Entorno | Login |
-|---|---|
-| `localhost` / `127.0.0.1` | No — acceso directo |
-| GitHub Pages | No — acceso directo (hasta reactivar) |
-
-Para reactivar: `AUDIT_PORTAL_AUTH_ENABLED=1` + `AUDIT_PORTAL_PASSWORD` en el build de CI.
-
-Usuario por defecto: `auditor` (o `AUDIT_PORTAL_USERNAME`). Sesión: 8 h en `sessionStorage`.
 
 ```bash
-cp audit-portal/.env.example audit-portal/.env
-# Edite la contraseña (mín. 12 caracteres, igual que en GitHub Secrets)
-./scripts/start-audit-portal.sh
+AUDIT_API_BASE="" python scripts/generar_audit_portal.py   # mismo origen /auditoria
+AUDIT_API_BASE="http://127.0.0.1:8000" python scripts/generar_audit_portal.py  # Pages / :8080
 ```
 
-## Fuente de datos
+Abra con Cmd+Shift+R si no ve cambios.
 
-- `agente/skills/*/SKILL.md`
-- `docs/canon/lista-aprobacion-agentes-skills-pasos.md` (pasos operativos — corregidos tras auditoría gerencial)
-- `docs/auditoria/auditoria-pasos-skills-gerencia-penal.md` (matriz con reasoning)
-- `scripts/lib/pasos_gerencia_matrix.py` (fuente canónica de pasos variables)
-- `scripts/lib/catalogo_aprobacion.py`
+## API (autenticada)
 
-Regenerar tras cambios en pasos:
+| Método | Ruta | Uso |
+|---|---|---|
+| GET | `/api/audit/config/catalog` | Inventario editable |
+| GET | `/api/audit/config/{kind}/{key}` | Contenido activo |
+| GET | `/api/audit/config/{kind}/{key}/versions` | Historial |
+| POST | `/api/audit/config/save` | Guardar (lock optimista `expected_version`) |
+| POST | `/api/audit/config/{kind}/{key}/restore` | Restaurar versión |
+
+## Seed / migración
 
 ```bash
-python scripts/auditar_pasos_skills_gerencia.py --apply --regenerar
-python scripts/generar_audit_portal.py
+# Migración 0007 (tablas config_*)
+alembic upgrade head
+
+# Seed idempotente desde archivos del repo
+.venv/bin/python scripts/seed_config_store.py
 ```
+
+En Render el seed corre al arranque (lifespan) sin sobrescribir versiones ya activas.
+
+## Alcance de guardrails
+
+El portal edita el **texto de política** inyectado a los agentes. El código tripwire del SDK (`src/agents/sdk_guardrails.py`) permanece bajo control del desarrollador.

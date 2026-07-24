@@ -49,14 +49,18 @@ def write_audit_api_config(dist_dir: Path | None = None) -> None:
 
 
 def build_auth_config_js() -> str:
-    """Genera auth-config.js. Login legacy desactivado — auth vía API /api/audit/login."""
-    return "window.AUDIT_AUTH_CONFIG={enabled:false};\n"
+    """auth-config.js legado: el gate real es auth-gate.js + /api/audit/login."""
+    return (
+        "/* Gate real: auth-gate.js + /api/audit (SITE_PASSWORD). "
+        "enabled:false = sin login estático legado. */\n"
+        "window.AUDIT_AUTH_CONFIG={enabled:false,mode:\"api\"};\n"
+    )
 
 
 def write_auth_config(dist_dir: Path | None = None) -> None:
     out = (dist_dir or DIST_DIR) / "auth-config.js"
     out.write_text(build_auth_config_js(), encoding="utf-8")
-    print("  auth: login vía API /api/audit (auth-config.js legacy desactivado)")
+    print("  auth: API /api/audit (SITE_PASSWORD) — auth-config legado desactivado")
 
 
 def copy_site_to_dist() -> None:

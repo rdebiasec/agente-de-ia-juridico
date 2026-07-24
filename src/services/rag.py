@@ -25,6 +25,13 @@ CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 KB_ALLOWED_FILES = {"penal.md", "proceso-penal-906.md", "normas-clave.md"}
 
+# Se pone en True cuando el último embed usó fallback local (calidad degradada).
+_last_embed_used_local_fallback = False
+
+
+def last_embed_used_local_fallback() -> bool:
+    return _last_embed_used_local_fallback
+
 
 def _repo(repo: Repository | None) -> Repository:
     return repo or get_repository()
@@ -52,18 +59,29 @@ def _embedding_local(texto: str, dim: int = EMBED_DIM) -> list[float]:
 
 def embed_textos(textos: list[str]) -> list[list[float]]:
     """Genera embeddings para una lista de textos."""
+    global _last_embed_used_local_fallback
     if not textos:
         return []
     if not _tiene_api_key():
+        _last_embed_used_local_fallback = True
+        logger.warning(
+            "RAG embeddings: usando fallback local (sin OPENAI_API_KEY). "
+            "La calidad semántica está degradada; configure la API key en producción."
+        )
         return [_embedding_local(t) for t in textos]
     try:
         from openai import OpenAI
 
         client = OpenAI()
         resp = client.embeddings.create(model=get_settings().embedding_model, input=textos)
+        _last_embed_used_local_fallback = False
         return [d.embedding for d in resp.data]
     except Exception:
-        logger.exception("Fallo al obtener embeddings de OpenAI; uso fallback local")
+        _last_embed_used_local_fallback = True
+        logger.exception(
+            "RAG embeddings: fallo OpenAI; activo fallback local. "
+            "Revise cuota/red/modelo; la recuperación semántica queda degradada."
+        )
         return [_embedding_local(t) for t in textos]
 
 

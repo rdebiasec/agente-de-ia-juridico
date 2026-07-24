@@ -1,12 +1,13 @@
 """Esquemas estructurados de los escritos del despacho.
 
 Definen los campos obligatorios de cada tipo de documento para reducir la
-alucinación de estructura y permitir validación. Los agentes de redacción
-se instruyen para completar estos campos; los modelos también sirven como
-estructura validable (y, en una fase posterior, como output_type del SDK).
+alucinación de estructura y permitir validación. El redactor usa
+`BorradorDocumentoPenal` como `output_type` del Agents SDK.
 """
 
 from __future__ import annotations
+
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -65,6 +66,27 @@ class Tutela(BaseModel):
     pretensiones: list[str] = Field(default_factory=list, description="Pretensiones de la tutela.")
 
     @field_validator("derecho_vulnerado", "fundamentos")
+    @classmethod
+    def _validar(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class BorradorDocumentoPenal(BaseModel):
+    """Salida estructurada del redactor penal (output_type del Agents SDK)."""
+
+    tipo: Literal["memorial", "tutela", "concepto", "solicitud", "otro"] = Field(
+        ...,
+        description="Tipo de pieza jurídica borrador.",
+    )
+    titulo: str = Field(..., description="Título corto del borrador.")
+    cuerpo: str = Field(..., description="Texto completo del borrador revisable.")
+    pendientes_verificacion: list[str] = Field(
+        default_factory=list,
+        description="Hechos, citas o radicados que el abogado debe verificar.",
+    )
+    materia: str = Field(default="penal", description="Materia (penal-víctimas).")
+
+    @field_validator("titulo", "cuerpo")
     @classmethod
     def _validar(cls, v: str, info):
         return _no_vacio(v, info.field_name)

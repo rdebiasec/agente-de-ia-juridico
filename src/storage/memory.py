@@ -12,6 +12,8 @@ from src.storage.models import (
     AuditPortalUser,
     ChatSession,
     ComplianceConsent,
+    ConfigActive,
+    ConfigVersion,
     Deadline,
     DocumentChunk,
     Draft,
@@ -47,6 +49,9 @@ class InMemoryRepository:
         self._execution_plans: dict[str, ExecutionPlanRecord] = {}
         self._audit_access_logs: list[AuditPortalAccessLog] = []
         self._audit_progress_history: list[tuple[str, dict, datetime]] = []
+        self._config_versions: list[ConfigVersion] = []
+        self._config_active: dict[tuple[str, str], ConfigActive] = {}
+        self._config_version_seq = 0
         self._lock = threading.Lock()
 
     # --- Borradores ---
@@ -438,3 +443,51 @@ class InMemoryRepository:
             count = len(self._execution_plans)
             self._execution_plans.clear()
             return count
+
+    # --- Config store ---
+    def add_config_version(self, row: ConfigVersion) -> ConfigVersion:
+        with self._lock:
+            self._config_version_seq += 1
+            stored = ConfigVersion(
+                id=self._config_version_seq,
+                kind=row.kind,
+                key=row.key,
+                version=row.version,
+                content=row.content,
+                checksum=row.checksum,
+                author_email=row.author_email,
+                note=row.note,
+                created_at=row.created_at,
+            )
+            self._config_versions.append(stored)
+            return stored
+
+    def get_config_version(self, kind: str, key: str, version: int) -> ConfigVersion | None:
+        with self._lock:
+            for row in self._config_versions:
+                if row.kind == kind and row.key == key and row.version == version:
+                    return row
+            return None
+
+    def list_config_versions(self, kind: str, key: str, *, limit: int = 50) -> list[ConfigVersion]:
+        with self._lock:
+            rows = [r for r in self._config_versions if r.kind == kind and r.key == key]
+            rows.sort(key=lambda r: r.version, reverse=True)
+            return rows[:limit]
+
+    def get_config_active(self, kind: str, key: str) -> ConfigActive | None:
+        with self._lock:
+            return self._config_active.get((kind, key))
+
+    def upsert_config_active(self, row: ConfigActive) -> ConfigActive:
+        with self._lock:
+            self._config_active[(row.kind, row.key)] = row
+            return row
+
+    def list_config_active(self, *, kind: str | None = None) -> list[ConfigActive]:
+        with self._lock:
+            rows = list(self._config_active.values())
+            if kind:
+                rows = [r for r in rows if r.kind == kind]
+            rows.sort(key=lambda r: (r.kind, r.key))
+            return rows

@@ -225,6 +225,58 @@ class SessionTrace:
 
 
 @dataclass
+class ConfigVersion:
+    """Versión inmutable de un ítem de configuración (prompt/guardrail/skill)."""
+
+    kind: str
+    key: str
+    version: int
+    content: str
+    checksum: str
+    author_email: str = ""
+    note: str = ""
+    created_at: datetime = field(default_factory=_now)
+    id: int | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "kind": self.kind,
+            "key": self.key,
+            "version": self.version,
+            "content": self.content,
+            "checksum": self.checksum,
+            "author_email": self.author_email,
+            "note": self.note,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+@dataclass
+class ConfigActive:
+    """Puntero a la versión activa de un ítem de configuración."""
+
+    kind: str
+    key: str
+    active_version: int
+    checksum: str
+    path: str = ""
+    updated_by: str = ""
+    updated_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "kind": self.kind,
+            "key": self.key,
+            "active_version": self.active_version,
+            "checksum": self.checksum,
+            "path": self.path,
+            "updated_by": self.updated_by,
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+@dataclass
 class AuditPortalProgress:
     """Progreso de auditoría del portal (decisiones por correo de la abogada)."""
 
