@@ -169,6 +169,13 @@ def _verify_site_password(settings: Settings, body: AuditCredentialsBody, reques
     email = normalize_audit_email(body.email)
     if not is_valid_audit_email(email):
         raise HTTPException(status_code=400, detail="Correo electrónico inválido.")
+    allow = settings.audit_email_allowlist()
+    if allow and email not in allow:
+        _log_access(request, action="login_denied_allowlist", email=email)
+        raise HTTPException(
+            status_code=403,
+            detail="Correo no autorizado para el portal de auditoría. Contacte al administrador.",
+        )
     if not check_rate_limit(_rate_key(request, email), max_attempts=LOGIN_RATE_MAX, window_seconds=LOGIN_RATE_WINDOW):
         _log_access(request, action="login_rate_limited", email=email)
         raise HTTPException(status_code=429, detail="Demasiados intentos. Espere unos minutos.")
@@ -215,12 +222,14 @@ async def audit_catalog():
 @router.get("/config/catalog")
 async def audit_config_catalog(email: str = Depends(_require_audit_email)):
     from src.config_store import list_catalog_items, seed_from_filesystem
+    from src.storage import get_repository
 
-    # Sembrar bajo demanda si la DB aún no tiene activos (p. ej. memoria en tests).
-    try:
-        seed_from_filesystem(author_email=email or "system@seed")
-    except Exception:
-        pass
+    # Sembrar solo si la DB aún no tiene ningún activo (arranque frío / tests).
+    if not get_repository().list_config_active():
+        try:
+            seed_from_filesystem(author_email=email or "system@seed")
+        except Exception:
+            pass
     items = list_catalog_items()
     return {
         "ok": True,
@@ -230,7 +239,7 @@ async def audit_config_catalog(email: str = Depends(_require_audit_email)):
 
 
 @router.get("/config/status")
-async def audit_config_status():
+async def audit_config_status(email: str = Depends(_require_audit_email)):
     from src.compliance.skill_config import config_status
     from src.config_store import validate_config_store
     from src.storage import get_repository

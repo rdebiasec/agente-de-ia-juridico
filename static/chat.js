@@ -1934,7 +1934,7 @@ async function resetChatSession() {
     : "";
   if (
     !confirm(
-      `¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar 6 horas.${warnPending}`
+      `¿Reiniciar la conversación con el agente? Se borrará el historial en el servidor y podrá empezar de cero sin esperar a que expire la sesión.${warnPending}`
     )
   ) {
     return;

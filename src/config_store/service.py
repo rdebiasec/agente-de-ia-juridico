@@ -193,11 +193,15 @@ def save_version(
             updated_by=author_email,
         )
     )
+    file_exported = False
+    file_export_error: str | None = None
     if write_file:
         try:
             _write_file(path_for(kind, key), body, version=next_version, checksum=chk)
-        except OSError:
+            file_exported = True
+        except OSError as exc:
             logger.exception("No se pudo exportar archivo %s/%s (DB sí quedó activa)", kind, key)
+            file_export_error = str(exc)
 
     return {
         "kind": kind,
@@ -207,6 +211,8 @@ def save_version(
         "path": rel,
         "author_email": author_email,
         "source": "db",
+        "file_exported": file_exported if write_file else None,
+        "file_export_error": file_export_error,
     }
 
 

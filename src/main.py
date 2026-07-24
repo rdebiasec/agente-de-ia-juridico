@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 
@@ -68,6 +69,19 @@ async def lifespan(app: FastAPI):
         start_scheduler()
     except Exception:
         logger.exception("No se pudo iniciar el scheduler")
+
+    if settings.sentry_dsn:
+        try:
+            import sentry_sdk
+
+            sentry_sdk.init(
+                dsn=settings.sentry_dsn,
+                traces_sample_rate=0.05,
+                environment="production" if os.environ.get("RENDER") else "development",
+            )
+            logger.info("Sentry inicializado")
+        except Exception:
+            logger.exception("No se pudo inicializar Sentry (continuando)")
 
     slack_task = None
     if settings.slack_bot_token and settings.slack_signing_secret:

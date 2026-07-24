@@ -210,17 +210,28 @@
             });
             const data = await r.json().catch(() => ({}));
             if (r.status === 409) {
-                toast('Conflicto: alguien guardó antes. Recargue e intente de nuevo.');
+                toast('Conflicto: alguien guardó antes. Recargando versión activa…');
+                setDirty(false);
+                await loadCatalog();
+                await selectItem(loaded.kind, loaded.key);
                 return;
             }
             if (!r.ok) throw new Error(data.detail || `Error ${r.status}`);
-            toast(`Guardado ${data.kind}/${data.key} v${data.version}`);
+            let msg = `Guardado ${data.kind}/${data.key} v${data.version}`;
+            if (data.file_exported === false) {
+                msg += ' (DB OK; no se pudo exportar archivo)';
+            }
+            toast(msg);
             setDirty(false);
             await loadCatalog();
             await selectItem(data.kind, data.key);
         } catch (e) {
             toast(String(e.message || e));
             setDirty(true);
+        } finally {
+            if (dirty && loaded) {
+                $('cfg-btn-save').disabled = false;
+            }
         }
     }
 
@@ -243,7 +254,7 @@
         list.innerHTML = '<p class="text-sm text-slate-500">Cargando…</p>';
         try {
             const r = await fetchAuditApi(
-                `/api/audit/config/${encodeURIComponent(loaded.kind)}/${encodeURIComponent(loaded.key)}/versions?limit=40`,
+                `/api/audit/config/${encodeURIComponent(loaded.kind)}/${encodeURIComponent(loaded.key)}/versions?limit=100`,
             );
             if (!r.ok) throw new Error('No se pudo cargar historial');
             const data = await r.json();
@@ -266,7 +277,7 @@
                             <p class="text-[10px] text-slate-400 font-mono">${escapeHtml(v.checksum || '')}</p>
                         </div>
                         <div class="flex flex-col gap-1">
-                            <button type="button" class="cfg-diff-btn text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50" data-version="${v.version}">Diff</button>
+                            <button type="button" class="cfg-diff-btn text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50" data-version="${v.version}">Diff vs activa</button>
                             ${
                                 isActive
                                     ? ''
@@ -339,8 +350,13 @@
             const row = await r.json();
             const panel = $('cfg-diff-panel');
             const body = $('cfg-diff-body');
+            // '-' = líneas solo en la versión antigua; '+' = líneas solo en la activa
             const diff = simpleDiff(row.content || '', loaded.content || '');
             body.innerHTML = '';
+            const legend = document.createElement('p');
+            legend.className = 'text-[11px] text-slate-500 mb-2';
+            legend.textContent = `Diff: v${version} (antigua, líneas −) vs activa v${loaded.version} (líneas +)`;
+            body.appendChild(legend);
             diff.split('\n').forEach((line) => {
                 const div = document.createElement('div');
                 if (line.startsWith('+ ')) div.className = 'diff-add';
@@ -386,6 +402,12 @@
         $('cfg-btn-history')?.addEventListener('click', openHistory);
         $('cfg-history-close')?.addEventListener('click', closeHistory);
         $('cfg-history-backdrop')?.addEventListener('click', closeHistory);
+        document.addEventListener('keydown', (e) => {
+            if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 's') return;
+            if (!loaded || !dirty) return;
+            e.preventDefault();
+            saveCurrent();
+        });
         window.addEventListener('beforeunload', (e) => {
             if (!dirty) return;
             e.preventDefault();

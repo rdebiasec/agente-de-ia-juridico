@@ -7,7 +7,7 @@ un coordinador del expediente (POC) es el único interlocutor del abogado;
 
 from agents import Agent
 
-from src.agents.schemas import BorradorDocumentoPenal
+from src.agents.schemas import BorradorDocumentoPenal, Tutela
 from src.agents.sdk_guardrails import poc_input_guardrails, poc_output_guardrails
 from src.config import get_settings
 from src.mcp.tools import get_knowledge_tools
@@ -167,7 +167,20 @@ def build_gestor_seguimiento_procesal_penal_agent() -> Agent:
 
 
 def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
-    return _build_agent("evaluador_derechos_fundamentales_tutela")
+    base = _load_system_prompt()
+    rol = _load_agent_prompt("evaluador_derechos_fundamentales_tutela")
+    policy = _policy_block()
+    parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    if policy:
+        parts.append(policy)
+    instructions = "\n\n".join(parts) + "\n"
+    return Agent(
+        name="evaluador_derechos_fundamentales_tutela",
+        instructions=instructions,
+        model=get_settings().openai_model,
+        tools=get_knowledge_tools(),
+        output_type=Tutela,
+    )
 
 
 def build_analista_calidad_juridica_agent() -> Agent:

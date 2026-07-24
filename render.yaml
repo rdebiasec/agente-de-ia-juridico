@@ -24,7 +24,11 @@ services:
       - key: DATA_AT_REST_KEY
         sync: false
       - key: SESSION_IDLE_MINUTES
-        value: "360"
+        value: "60"
+      - key: AUDIT_ALLOWED_EMAILS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
       - key: SESSION_MAX_MESSAGES
         value: "120"
       - key: AGENT_MAX_TURNS

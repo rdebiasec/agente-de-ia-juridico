@@ -10,15 +10,18 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 **Cumplimiento Ley 1581 (2026-07-21):** consentimiento hard en `/auth/login`; ARCO web `POST /api/compliance/arco-erase`; retención mensual; términos `/legal/terminos`; cifrado en reposo (Fernet via `DATA_AT_REST_KEY`/`SESSION_SECRET`); flags `involucra_menor`/`datos_sensibles` en expediente; plantillas DPA/RNBD en `docs/operaciones/`.
 
+**Config live (2026-07-24):** editor `/auditoria/` versiona prompts, guardrails (texto) y skills en Postgres. Allowlist opcional `AUDIT_ALLOWED_EMAILS`. Idle sesión default **60 min**. Observabilidad opcional: `SENTRY_DSN`.
+
 ## Resumen ejecutivo
 
 | Bloque | Estado | Notas |
 |--------|--------|-------|
 | **Fase A — Firma sin estado** | ✅ Cerrada | Orquestador, 10 roles, KB, playbooks CGP/906, guardrails, web |
 | **Fase B — Persistencia** | ✅ Mayoría | Postgres, Alembic, RAG, HITL borradores, PDF/DOCX, plazos, scheduler |
-| **Sesiones multi-turno** | ✅ | `chat_sessions`, 6 h idle, reset chat, trazas largas + continuidad |
-| **Canales producción** | 🟡 Parcial | Web ✅ · Slack código listo, **sin token en prod** · WhatsApp **no implementado** |
-| **50 requisitos (REQ)** | 🟡 Por validar | Capacidades en agentes; falta checklist formal REQ→prueba |
+| **Sesiones multi-turno** | ✅ | `chat_sessions`, idle configurable, reset chat, historial servidor en UI |
+| **Editor de configuración** | ✅ | Prompts / guardrails / skills versionados |
+| **Canales producción** | 🟡 Parcial | Web ✅ · Slack código listo — falta `SLACK_APP_TOKEN` en Render · WhatsApp **no** |
+| **50 requisitos (REQ)** | 🟡 Por validar | Tablero: `docs/operaciones/CHECKLIST_REQ_CIERRE.md` |
 
 ## Hecho (evidencia en repo)
 
@@ -29,13 +32,13 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 ### Firma de agentes (plan Fase A)
 - `src/agents/orchestrator.py` — POC `coordinador_expediente_penal` + 10 especialistas como tools internas (backoffice)
-- Salidas estructuradas: `src/agents/schemas.py`
+- Salidas estructuradas: `src/agents/schemas.py` (incl. `Tutela` en evaluador constitucional)
 - Sin gating por fase: `src/agents/guardrails.py`
 - Runner: payload `agent` = POC; `trace.sent_to_agent` / `selected_agent` = especialista de auditoría
 
 ### Persistencia y firma operativa (plan Fase B)
 - Postgres + pgvector: `src/storage/sql.py`, `deploy/docker-compose.yml`, `render.yaml`
-- Migraciones: `0001` + `0002` (sesiones/trazas)
+- Migraciones: `0001`…`0007` (config store)
 - HITL: `src/hitl/drafts.py`, bandeja `static/firma.js`, API `src/gateway/firma_api.py`
 - Slack revisión: `src/hitl/slack_review.py`, `src/gateway/slack_interactivity.py` (requiere env)
 - RAG: `src/services/rag.py`, ingest KB, búsqueda en bandeja
@@ -49,6 +52,7 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 - Trazas enriquecidas: `src/agents/runner.py` (spans, session_flow, RAG prefetch)
 - UI: panel Workflow Trace + timeline de sesión (`static/chat.js`)
 - APIs: `POST /chat/reset`, `GET /chat/history`, `GET /debug/trace/{session_id}`
+- Historial servidor al abrir chat + toast; adjuntos indexan expediente
 
 ### Despliegue
 - Producción: `https://agente-de-ia-juridico.onrender.com` — `persistencia: postgres`
@@ -57,21 +61,21 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 ## Pendiente prioritario (siguiente sprint)
 
 ### P0 — Operación despacho
-1. **Slack HITL en producción** — Socket Mode con `SLACK_APP_TOKEN` (`xapp`), canal `#revision-abogado`, plan/`EJECUTAR` verificado; Render en plan **starter** (always-on); `/health` con `slack_socket_started`; runbook en `DEPLOY.md`. Mensajes SMOKE2 con botones ya publicados: confirmar Aprobar/Rechazar con un clic humano en Chrome DBX.
-2. **Checklist REQ-001…050** — marcar `activo` + prueba manual por requisito en `requisitos_asistente.json`.
-3. **Tutela completa (REQ-038…042)** — borrador estructurado `output_type=Tutela` + término 10 días al aprobar (parcial hoy).
+1. **Slack HITL en producción** — configurar `SLACK_APP_TOKEN` (`xapp`) en Render; verificar `/health.slack_socket_started`.
+2. **Checklist REQ-001…050** — pruebas en JSON / `docs/operaciones/CHECKLIST_REQ_CIERRE.md`.
+3. **DPA firmados** — evidencia en `docs/operaciones/ESTADO_DPA_Y_ARCO.md`.
 
-### P1 — Continuidad y datos
-4. **UI carga historial servidor** — consumir `GET /chat/history` al abrir chat (hoy solo localStorage).
-5. **Ingesta expediente desde adjuntos** en flujo chat (API existe en firma_api).
-6. **Extracción expediente con LLM** opcional cuando heurísticas no alcanzan (sin inventar).
+### P1 — Acceso
+4. Configurar `AUDIT_ALLOWED_EMAILS` en prod (ver `docs/operaciones/CUENTAS_POR_ABOGADO.md`).
+5. Opcional: `SENTRY_DSN` + `pip install '.[observability]'`.
+6. Cuentas por abogado (password individual) — roadmap, no código aún.
 
-### P2 — Fase 2 original (gestión procesal)
-7. REQ-043…047 — seguimiento radicaciones, informes mensuales (agente `dependiente_judicial` + integraciones externas).
-8. REQ-041 — seguimiento radicación tutela en línea (integración manual o scraping — no automatizar sin fuente oficial).
+### P2 — Producto restante
+7. Tutela: término 10 días al aprobar + prueba E2E.
+8. REQ-043…047 seguimiento / informes.
 
 ### P3 — Canales
-9. **WhatsApp** — reglas globales lo listan; plan lo retiró. Decisión pendiente: reintroducir `src/channels/whatsapp` o actualizar reglas a solo Slack+web.
+9. **WhatsApp** — no construir sin evaluación 1581/2300.
 
 ## Documentos históricos (no borrar, contexto)
 

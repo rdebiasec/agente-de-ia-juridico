@@ -99,3 +99,7 @@ async def test_config_save_and_restore_api(monkeypatch):
         status = await client.get("/api/audit/config/status")
         assert status.status_code == 200
         assert "config_store" in status.json()
+
+        await client.post("/api/audit/logout")
+        denied = await client.get("/api/audit/config/status")
+        assert denied.status_code in (401, 403)

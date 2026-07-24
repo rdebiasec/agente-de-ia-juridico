@@ -114,27 +114,28 @@ def security_headers() -> dict[str, str]:
 
 
 def _csp_default() -> str:
+    # Chat/desk: scripts y estilos propios. Sin CDN de terceros en la UI principal.
     return (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline'; "
+        "script-src 'self'; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data:; "
         "font-src 'self'; "
-        "connect-src 'self'; "
+        "connect-src 'self' https://*.ingest.sentry.io; "
         "frame-ancestors 'none'; "
         "base-uri 'self'"
     )
 
 
 def _csp_audit_portal() -> str:
-    """Portal /auditoria usa Tailwind y Font Awesome por CDN (paridad con dev local)."""
+    """Portal /auditoria usa Tailwind y Font Awesome por CDN (paridad con build local)."""
     return (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; "
         "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
         "font-src 'self' https://cdnjs.cloudflare.com data:; "
         "img-src 'self' data:; "
-        "connect-src 'self'; "
+        "connect-src 'self' https://*.ingest.sentry.io; "
         "frame-ancestors 'none'; "
         "base-uri 'self'"
     )

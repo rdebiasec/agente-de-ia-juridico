@@ -44,7 +44,8 @@ class Settings(BaseSettings):
     # Sin valores por defecto débiles: configurar en .env local o secretos de Render.
     site_password: str = ""
     session_secret: str = ""
-    session_idle_minutes: int = 360
+    # Default más corto para equipos compartidos; Render puede sobreescribir.
+    session_idle_minutes: int = 60
     session_max_messages: int = 120
     agent_max_turns: int = 25
     session_cookie_secure: bool = False
@@ -54,6 +55,17 @@ class Settings(BaseSettings):
     app_debug: bool = False
     # Cifrado en reposo (Fernet). Si vacío, se deriva de SESSION_SECRET cuando exista.
     data_at_rest_key: str = ""
+    # Lista CSV de correos permitidos en el portal de auditoría.
+    # Vacío = cualquier correo válido + SITE_PASSWORD (comportamiento actual).
+    audit_allowed_emails: str = ""
+    # Observabilidad opcional (Sentry). Vacío = desactivado.
+    sentry_dsn: str = ""
+
+    def audit_email_allowlist(self) -> set[str]:
+        raw = (self.audit_allowed_emails or "").strip()
+        if not raw:
+            return set()
+        return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
     @property
     def project_root(self) -> Path:

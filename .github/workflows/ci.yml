@@ -42,6 +42,11 @@ jobs:
           pip install pip-audit
           pip-audit
 
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   smoke-local:
     if: github.event_name == 'workflow_dispatch' && inputs.run_smoke_local
     runs-on: ubuntu-latest
