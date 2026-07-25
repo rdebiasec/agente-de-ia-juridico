@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: d2b0a0d9e3bb5a13 -->
 ---
 name: controlar-cadena-custodia-preliminar
 description: Skill critico penal-victimas: alertar si la evidencia puede requerir cadena de custodia. Use when the workflow requires `controlar_cadena_custodia_preliminar`.

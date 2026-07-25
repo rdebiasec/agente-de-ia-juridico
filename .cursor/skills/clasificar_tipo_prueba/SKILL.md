@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: e7cc4559aea30f4c -->
 ---
 name: clasificar-tipo-prueba
 description: Skill atomico penal-victimas: clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente. Use when the workflow requires `clasificar_tipo_prueba`.

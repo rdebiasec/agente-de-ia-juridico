@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: b09fec64cb1b42e0 -->
 ---
 name: construir-teoria-caso-victima
 description: Skill critico penal-victimas: formular teoria preliminar del caso desde la victima. Use when the workflow requires `construir_teoria_caso_victima`.

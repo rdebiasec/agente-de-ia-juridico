@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: bdf8232c47d171e7 -->
 ---
 name: construir-matriz-hecho-prueba
 description: Skill operativo penal-victimas: relacionar hechos con pruebas existentes y faltantes. Use when the workflow requires `construir_matriz_hecho_prueba`.

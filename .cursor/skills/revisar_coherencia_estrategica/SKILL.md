@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 6ee277f2d1e39567 -->
 ---
 name: revisar-coherencia-estrategica
 description: Skill estrategico penal-victimas: asegurar coherencia con teoria del caso aprobada. Use when the workflow requires `revisar_coherencia_estrategica`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2f0d5c05211ee09c -->
 ---
 name: analizar-autoria-y-participacion
 description: Skill operativo penal-victimas: evaluar posibles roles de los intervinientes de manera preliminar. Use when the workflow requires `analizar_autoria_y_participacion`.

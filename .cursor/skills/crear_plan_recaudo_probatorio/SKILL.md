@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 5f644fdda8911697 -->
 ---
 name: crear-plan-recaudo-probatorio
 description: Skill estrategico penal-victimas: proponer plan para obtener pruebas faltantes. Use when the workflow requires `crear_plan_recaudo_probatorio`.

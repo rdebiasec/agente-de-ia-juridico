@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: a5879007e79ab57d -->
 ---
 name: generar-alertas-terminos-vencimientos
 description: Skill operativo penal-victimas: crear alertas de posibles vencimientos. Use when the workflow requires `generar_alertas_terminos_vencimientos`.

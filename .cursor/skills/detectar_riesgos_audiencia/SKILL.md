@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 5824c42b7ebb517e -->
 ---
 name: detectar-riesgos-audiencia
 description: Skill atomico penal-victimas: detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion. Use when the workflow requires `detectar_riesgos_audiencia`.

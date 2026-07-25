@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: d3ca5fec1f3fc0ff -->
 ---
 name: crear-resumen-ejecutivo-litigante
 description: Skill atomico penal-victimas: crear resumen de una pagina para el abogado que interviene. Use when the workflow requires `crear_resumen_ejecutivo_litigante`.

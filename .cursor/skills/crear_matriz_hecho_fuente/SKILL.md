@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: eeedb213976e1aa0 -->
 ---
 name: crear-matriz-hecho-fuente
 description: Skill operativo penal-victimas: relacionar cada hecho con su fuente exacta. Use when the workflow requires `crear_matriz_hecho_fuente`.

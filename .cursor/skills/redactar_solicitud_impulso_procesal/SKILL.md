@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: c076cbdccb359dba -->
 ---
 name: redactar-solicitud-impulso-procesal
 description: Skill atomico penal-victimas: crear borrador para solicitar impulso procesal o actuaciones. Use when the workflow requires `redactar_solicitud_impulso_procesal`.

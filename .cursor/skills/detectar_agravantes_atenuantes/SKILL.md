@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2e4d1709eab182fc -->
 ---
 name: detectar-agravantes-atenuantes
 description: Skill operativo penal-victimas: identificar circunstancias relevantes que puedan afectar gravedad juridica. Use when the workflow requires `detectar_agravantes_atenuantes`.

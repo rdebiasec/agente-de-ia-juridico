@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 584d4f77e394a01b -->
 ---
 name: preparar-solicitudes-orales
 description: Skill operativo penal-victimas: formular solicitudes orales posibles segun etapa. Use when the workflow requires `preparar_solicitudes_orales`.

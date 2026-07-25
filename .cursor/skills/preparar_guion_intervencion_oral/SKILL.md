@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 726573b98485a3d4 -->
 ---
 name: preparar-guion-intervencion-oral
 description: Skill critico penal-victimas: estructurar intervencion oral clara y breve. Use when the workflow requires `preparar_guion_intervencion_oral`.

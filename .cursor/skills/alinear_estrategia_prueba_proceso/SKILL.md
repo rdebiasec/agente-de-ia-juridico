@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2c6a3b49aeadb80b -->
 ---
 name: alinear-estrategia-prueba-proceso
 description: Skill estrategico penal-victimas: alinear teoria de victima con ruta procesal y plan probatorio. Use when the workflow requires `alinear_estrategia_prueba_proceso`.

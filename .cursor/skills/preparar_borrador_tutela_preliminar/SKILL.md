@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 7dddcece8b6dcc54 -->
 ---
 name: preparar-borrador-tutela-preliminar
 description: Skill estrategico penal-victimas: preparar insumos para borrador de tutela. Use when the workflow requires `preparar_borrador_tutela_preliminar`.

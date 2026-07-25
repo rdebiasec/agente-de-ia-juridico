@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 30b37ac5c7d35db7 -->
 ---
 name: mapear-actuaciones-posibles-victima
 description: Skill operativo penal-victimas: indicar que puede hacer la representacion de victimas segun etapa Ley 906. Use when the workflow requires `mapear_actuaciones_posibles_victima`.

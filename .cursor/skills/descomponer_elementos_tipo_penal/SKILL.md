@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: c23729884bb8785f -->
 ---
 name: descomponer-elementos-tipo-penal
 description: Skill estrategico penal-victimas: dividir un posible delito en elementos juridicos verificables. Use when the workflow requires `descomponer_elementos_tipo_penal`.

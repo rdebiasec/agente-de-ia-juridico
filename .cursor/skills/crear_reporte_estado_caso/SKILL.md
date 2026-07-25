@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 8140b491655df29a -->
 ---
 name: crear-reporte-estado-caso
 description: Skill atomico penal-victimas: crear reporte interno periodico. Use when the workflow requires `crear_reporte_estado_caso`.

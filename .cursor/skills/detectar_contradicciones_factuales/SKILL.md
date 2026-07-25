@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 6026b7269ba0dae7 -->
 ---
 name: detectar-contradicciones-factuales
 description: Skill operativo penal-victimas: encontrar inconsistencias entre versiones, documentos, fechas, valores o actores. Use when the workflow requires `detectar_contradicciones_factuales`.

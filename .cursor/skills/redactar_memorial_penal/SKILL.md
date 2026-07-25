@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 44c6592a5173f21e -->
 ---
 name: redactar-memorial-penal
 description: Skill critico penal-victimas: crear borrador de memorial penal para firma humana. Use when the workflow requires `redactar_memorial_penal`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2a968bba02ee2146 -->
 ---
 name: identificar-conductas-punibles-preliminares
 description: Skill operativo penal-victimas: proponer posibles conductas punibles con base en hechos, sin conclusion definitiva. Use when the workflow requires `identificar_conductas_punibles_preliminares`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: b5708ccb4b785be1 -->
 ---
 name: controlar-tono-juridico-documento
 description: Skill atomico penal-victimas: asegurar tono formal, preciso, no agresivo y no especulativo. Use when the workflow requires `controlar_tono_juridico_documento`.

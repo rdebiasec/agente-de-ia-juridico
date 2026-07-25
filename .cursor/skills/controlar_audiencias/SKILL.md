@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 76dd658fe7dbf18f -->
 ---
 name: controlar-audiencias
 description: Skill atomico penal-victimas: administrar fechas, horas, enlaces y preparacion de audiencias. Use when the workflow requires `controlar_audiencias`.

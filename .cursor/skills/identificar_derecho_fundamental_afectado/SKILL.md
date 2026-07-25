@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: bb5b9c0c88e22c2a -->
 ---
 name: identificar-derecho-fundamental-afectado
 description: Skill atomico penal-victimas: identificar posibles derechos fundamentales comprometidos. Use when the workflow requires `identificar_derecho_fundamental_afectado`.

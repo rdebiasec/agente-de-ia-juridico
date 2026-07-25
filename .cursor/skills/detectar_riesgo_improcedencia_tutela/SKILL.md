@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: aa5c9c2e16a575ea -->
 ---
 name: detectar-riesgo-improcedencia-tutela
 description: Skill critico penal-victimas: detectar si tutela puede ser prematura, subsidiaria o improcedente. Use when the workflow requires `detectar_riesgo_improcedencia_tutela`.

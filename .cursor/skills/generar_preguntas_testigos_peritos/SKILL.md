@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 80bcdf4276d35313 -->
 ---
 name: generar-preguntas-testigos-peritos
 description: Skill atomico penal-victimas: preparar preguntas neutrales para testigos o peritos. Use when the workflow requires `generar_preguntas_testigos_peritos`.

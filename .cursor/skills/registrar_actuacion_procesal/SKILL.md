@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 29878467cfa6c151 -->
 ---
 name: registrar-actuacion-procesal
 description: Skill atomico penal-victimas: registrar una actuacion nueva en la bitacora del caso. Use when the workflow requires `registrar_actuacion_procesal`.

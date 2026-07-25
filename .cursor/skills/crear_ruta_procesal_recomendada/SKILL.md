@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: a2e206bdd6b5f651 -->
 ---
 name: crear-ruta-procesal-recomendada
 description: Skill estrategico penal-victimas: crear plan de proximos pasos procesales para revision del abogado. Use when the workflow requires `crear_ruta_procesal_recomendada`.

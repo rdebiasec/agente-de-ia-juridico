@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 9ca93d34f5745de9 -->
 ---
 name: analizar-dolo-culpa-elemento-subjetivo
 description: Skill operativo penal-victimas: identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo. Use when the workflow requires `analizar_dolo_culpa_elemento_subjetivo`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 036c73aa95dbfd4e -->
 ---
 name: estructurar-hechos-fundamentos-solicitudes
 description: Skill atomico penal-victimas: ordenar cualquier documento juridico. Use when the workflow requires `estructurar_hechos_fundamentos_solicitudes`.

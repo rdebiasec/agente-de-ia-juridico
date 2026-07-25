@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 6379a91c7495b328 -->
 ---
 name: preparar-preguntas-audiencia
 description: Skill operativo penal-victimas: sugerir preguntas para victima, testigos o peritos en audiencia. Use when the workflow requires `preparar_preguntas_audiencia`.

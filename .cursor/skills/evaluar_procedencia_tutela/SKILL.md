@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 391ef189d412ef24 -->
 ---
 name: evaluar-procedencia-tutela
 description: Skill critico penal-victimas: evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional. Use when the workflow requires `evaluar_procedencia_tutela`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 9a904dddfedeaaf9 -->
 ---
 name: gestionar-faltantes-expediente
 description: Skill operativo penal-victimas: identificar datos y documentos faltantes antes de analizar o redactar. Use when the workflow requires `gestionar_faltantes_expediente`.

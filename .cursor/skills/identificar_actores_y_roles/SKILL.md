@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: bd7ff965ca32b4cd -->
 ---
 name: identificar-actores-y-roles
 description: Skill operativo penal-victimas: identificar victima, presunto responsable, testigos, autoridades, terceros y entidades. Use when the workflow requires `identificar_actores_y_roles`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 89b37c75be45f2b5 -->
 ---
 name: inventariar-evidencia
 description: Skill operativo penal-victimas: crear inventario numerado de evidencia del caso. Use when the workflow requires `inventariar_evidencia`.

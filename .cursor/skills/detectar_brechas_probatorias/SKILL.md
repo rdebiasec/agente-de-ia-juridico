@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 152fa0b020fbced9 -->
 ---
 name: detectar-brechas-probatorias
 description: Skill atomico penal-victimas: identificar hechos relevantes sin soporte suficiente. Use when the workflow requires `detectar_brechas_probatorias`.

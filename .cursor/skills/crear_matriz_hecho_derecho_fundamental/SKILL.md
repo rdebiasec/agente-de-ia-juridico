@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: d4841f950efb0f46 -->
 ---
 name: crear-matriz-hecho-derecho-fundamental
 description: Skill estrategico penal-victimas: relacionar hechos con derechos afectados. Use when the workflow requires `crear_matriz_hecho_derecho_fundamental`.

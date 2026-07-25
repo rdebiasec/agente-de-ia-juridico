@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 500d622a71dd8e8a -->
 ---
 name: redactar-derecho-peticion-penal
 description: Skill atomico penal-victimas: redactar derecho de peticion relacionado con autoridad o informacion del caso. Use when the workflow requires `redactar_derecho_peticion_penal`.

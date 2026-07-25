@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 0580edb2280d3de8 -->
 ---
 name: controlar-terminos-procesales-preliminares
 description: Skill operativo penal-victimas: identificar y alertar terminos relevantes. No reemplaza calculo humano. Use when the workflow requires `controlar_terminos_procesales_preliminares`.

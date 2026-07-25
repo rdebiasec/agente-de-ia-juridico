@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: c671a2c8954f0523 -->
 ---
 name: analizar-derechos-victima
 description: Skill atomico penal-victimas: mapear derechos de victima aplicables al caso. Use when the workflow requires `analizar_derechos_victima`.

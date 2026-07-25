@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 9db08157a6f95baf -->
 ---
 name: preparar-contraargumentos
 description: Skill atomico penal-victimas: anticipar argumentos de defensa, Fiscalia u otros intervinientes. Use when the workflow requires `preparar_contraargumentos`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 549fac1cdea7df1f -->
 ---
 name: preparar-resumen-operativo-cliente
 description: Skill atomico penal-victimas: crear version simple del estado del proceso para cliente, sin estrategia sensible. Use when the workflow requires `preparar_resumen_operativo_cliente`.

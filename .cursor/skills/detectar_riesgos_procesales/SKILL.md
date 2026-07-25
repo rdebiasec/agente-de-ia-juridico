@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2cdd0f20572c51ac -->
 ---
 name: detectar-riesgos-procesales
 description: Skill estrategico penal-victimas: detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos. Use when the workflow requires `detectar_riesgos_procesales`.

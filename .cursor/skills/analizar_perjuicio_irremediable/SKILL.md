@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: c6980bcd38aee2a5 -->
 ---
 name: analizar-perjuicio-irremediable
 description: Skill estrategico penal-victimas: identificar urgencia constitucional. Use when the workflow requires `analizar_perjuicio_irremediable`.

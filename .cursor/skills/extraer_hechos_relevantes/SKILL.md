@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 4366fc25ca29a25f -->
 ---
 name: extraer-hechos-relevantes
 description: Skill operativo penal-victimas: extraer hechos relevantes de documentos, relatos, audios o comunicaciones. Use when the workflow requires `extraer_hechos_relevantes`.

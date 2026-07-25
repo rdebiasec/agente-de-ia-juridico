@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: c28c3d6a46b7d6ca -->
 ---
 name: redactar-ampliacion-denuncia
 description: Skill atomico penal-victimas: estructurar hechos nuevos, pruebas y anexos para ampliar denuncia. Use when the workflow requires `redactar_ampliacion_denuncia`.

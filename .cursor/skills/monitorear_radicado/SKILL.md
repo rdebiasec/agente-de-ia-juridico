@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 116de38cc4b8c24d -->
 ---
 name: monitorear-radicado
 description: Skill atomico penal-victimas: consultar o registrar estado de radicado. Use when the workflow requires `monitorear_radicado`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: feb0dde034ec07f1 -->
 ---
 name: identificar-intereses-victima
 description: Skill atomico penal-victimas: aclarar el objetivo real de la victima. Use when the workflow requires `identificar_intereses_victima`.

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 369479ba0233a509 -->
 ---
 name: crear-checklist-previo-audiencia
 description: Skill atomico penal-victimas: listar requisitos antes de audiencia. Use when the workflow requires `crear_checklist_previo_audiencia`.

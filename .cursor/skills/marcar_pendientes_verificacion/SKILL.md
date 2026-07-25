@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 0370336280733b57 -->
 ---
 name: marcar-pendientes-verificacion
 description: Skill atomico penal-victimas: marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`. Use when the workflow requires `marcar_pendientes_verificacion`.
