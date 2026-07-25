@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editor de configuración del asistente penal-víctimas — prompts, guardrails y skills">
+    <meta name="description" content="Editor de configuración del asistente penal-víctimas — por agente: prompts, skills y guardrails">
     <title>DBX Solutions - Editor de configuración</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,9 +26,30 @@
         #cfg-editor { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; line-height: 1.45; }
         #cfg-history-drawer.open { transform: translateX(0); }
         #cfg-history-backdrop.open { opacity: 1; pointer-events: auto; }
+        .agent-tab { border-width: 1px; }
+        .agent-tab[data-group="coordinacion"].active { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .agent-tab[data-group="especialista"].active { background: #059669; color: #fff; border-color: #059669; }
+        .agent-tab[data-group="calidad"].active { background: #d97706; color: #fff; border-color: #d97706; }
+        .agent-tab[data-group="global"].active { background: #475569; color: #fff; border-color: #475569; }
+        .agent-tab[data-group="coordinacion"] { border-color: #93c5fd; color: #bfdbfe; }
+        .agent-tab[data-group="especialista"] { border-color: #6ee7b7; color: #a7f3d0; }
+        .agent-tab[data-group="calidad"] { border-color: #fcd34d; color: #fde68a; }
+        .agent-tab[data-group="global"] { border-color: #94a3b8; color: #cbd5e1; }
+        .section-tab.active, .guard-class-tab.active, .cfg-kind-tab.active-kind {
+            background: #2563eb; color: #fff;
+        }
+        .view-mode-btn.active { background: #1e293b; color: #fff; }
+        body[data-view="catalog"] #agent-tabs-bar,
+        body[data-view="catalog"] #panel-agent-nav { display: none !important; }
+        body[data-view="agent"] #panel-catalog-nav { display: none !important; }
+        body[data-view="agent"] #agent-section-tabs-wrap { display: block; }
+        body[data-view="catalog"] #agent-section-tabs-wrap { display: none !important; }
+        body[data-view="global"] #agent-section-tabs-wrap .section-skills,
+        body[data-view="global"] #agent-section-tabs-wrap .section-guardrails,
+        body[data-view="global"] #guard-class-tabs { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen" data-view="agent">
 
     <div id="audit-auth-gate" class="fixed inset-0 z-[100] gate-checking">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
@@ -82,10 +103,14 @@
                 <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wider text-lg">dbx</div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight">Editor de configuración</h1>
-                    <p class="text-xs text-slate-400">Prompts · Guardrails · Skills · Versiones inmutables</p>
+                    <p class="text-xs text-slate-400">Por agente · Prompts · Skills · Guardrails Input/Output/Tools</p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+                <div class="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-700">
+                    <button type="button" data-view="agent" class="view-mode-btn active text-xs font-semibold px-3 py-1.5 rounded-lg">Por agente</button>
+                    <button type="button" data-view="catalog" class="view-mode-btn text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Catálogo</button>
+                </div>
                 <div id="config-status-chip" class="text-xs bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-slate-300">Cargando…</div>
                 <button type="button" id="audit-auth-logout" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-2 rounded-xl border border-slate-600 text-sm">
                     <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar sesión
@@ -93,12 +118,28 @@
             </div>
         </header>
 
+        <div id="agent-tabs-bar" class="bg-slate-900 border-b border-slate-800 px-3 md:px-4 py-3">
+            <div id="agent-tabs" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
         <div class="flex flex-1 min-h-0">
             <aside class="w-80 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col sticky top-[73px] h-[calc(100vh-73px)]">
                 <div class="p-3 border-b border-slate-800 space-y-2">
-                    <div class="flex gap-1 bg-slate-950 p-1 rounded-xl">
-                        <button type="button" data-kind="prompt" class="cfg-kind-tab flex-1 text-xs font-semibold py-2 rounded-lg bg-blue-600 text-white">Prompts</button>
-                        <button type="button" data-kind="guardrail" class="cfg-kind-tab flex-1 text-xs font-semibold py-2 rounded-lg hover:bg-slate-800">Guardrails</button>
+                    <div id="agent-section-tabs-wrap" class="space-y-2">
+                        <div id="agent-section-tabs" class="flex gap-1 bg-slate-950 p-1 rounded-xl">
+                            <button type="button" data-section="prompt" class="section-tab flex-1 text-xs font-semibold py-2 rounded-lg active">Prompt</button>
+                            <button type="button" data-section="skills" class="section-tab section-skills flex-1 text-xs font-semibold py-2 rounded-lg hover:bg-slate-800">Skills</button>
+                            <button type="button" data-section="guardrails" class="section-tab section-guardrails flex-1 text-xs font-semibold py-2 rounded-lg hover:bg-slate-800">Guardrails</button>
+                        </div>
+                        <div id="guard-class-tabs" class="hidden flex gap-1 bg-slate-950 p-1 rounded-xl">
+                            <button type="button" data-clase="input" class="guard-class-tab flex-1 text-[11px] font-semibold py-1.5 rounded-lg active">Input</button>
+                            <button type="button" data-clase="output" class="guard-class-tab flex-1 text-[11px] font-semibold py-1.5 rounded-lg hover:bg-slate-800">Output</button>
+                            <button type="button" data-clase="tools" class="guard-class-tab flex-1 text-[11px] font-semibold py-1.5 rounded-lg hover:bg-slate-800">Tools</button>
+                        </div>
+                    </div>
+                    <div id="panel-catalog-nav" class="flex gap-1 bg-slate-950 p-1 rounded-xl">
+                        <button type="button" data-kind="prompt" class="cfg-kind-tab active-kind flex-1 text-xs font-semibold py-2 rounded-lg">Prompts</button>
+                        <button type="button" data-kind="guardrail" class="cfg-kind-tab flex-1 text-xs font-semibold py-2 rounded-lg hover:bg-slate-800">G1–G10</button>
                         <button type="button" data-kind="skill" class="cfg-kind-tab flex-1 text-xs font-semibold py-2 rounded-lg hover:bg-slate-800">Skills</button>
                     </div>
                     <div class="relative">
@@ -115,6 +156,7 @@
                     <div>
                         <p id="cfg-current-label" class="text-sm font-bold text-slate-900">Seleccione un ítem</p>
                         <p id="cfg-meta" class="text-xs text-slate-500 mt-0.5">—</p>
+                        <p id="cfg-shared-badge" class="hidden text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 mt-1.5 inline-block"></p>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" id="cfg-btn-history" class="px-3 py-2 rounded-xl text-sm font-semibold border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40" disabled>
@@ -134,7 +176,7 @@
                     <span id="cfg-dirty-badge" class="hidden text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded bg-amber-100 text-amber-800">Sin guardar</span>
                 </div>
                 <div class="flex-1 p-4 md:p-6 min-h-0">
-                    <textarea id="cfg-editor" class="w-full h-full min-h-[420px] border border-slate-300 rounded-2xl p-4 bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Seleccione un prompt, guardrail o skill para editar…" disabled></textarea>
+                    <textarea id="cfg-editor" class="w-full h-full min-h-[420px] border border-slate-300 rounded-2xl p-4 bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Seleccione un ítem para editar…" disabled></textarea>
                 </div>
                 <p id="cfg-toast" class="hidden fixed bottom-4 right-4 max-w-sm bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-xl z-50" role="status"></p>
             </main>
@@ -160,6 +202,6 @@
     <script src="./audit-api-config.js?v=4.0"></script>
     <script src="./auth-config.js?v=3.0.1"></script>
     <script src="./auth-gate.js?v=3.8"></script>
-    <script src="./app.js?v=5.0.1"></script>
+    <script src="./app.js?v=6.0"></script>
 </body>
 </html>

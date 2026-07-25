@@ -103,3 +103,61 @@ async def test_config_save_and_restore_api(monkeypatch):
         await client.post("/api/audit/logout")
         denied = await client.get("/api/audit/config/status")
         assert denied.status_code in (401, 403)
+
+
+@pytest.mark.asyncio
+async def test_agent_guardrail_save_and_agents_api(monkeypatch):
+    _audit_env(monkeypatch)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        assert (await _login(client)).status_code == 200
+
+        agents = await client.get("/api/audit/config/agents")
+        assert agents.status_code == 200, agents.text
+        payload = agents.json()
+        assert payload["ok"] is True
+        assert payload["global"]["prompt_key"] == "sistema"
+        assert len(payload["agents"]) >= 11
+        coord = next(a for a in payload["agents"] if a["id"] == "coordinador_expediente_penal")
+        assert coord["grupo"] == "coordinacion"
+        assert set(coord["guardrails"].keys()) == {"input", "output", "tools"}
+        assert coord["guardrails"]["input"].endswith("__input")
+
+        key = coord["guardrails"]["input"]
+        save = await client.post(
+            "/api/audit/config/save",
+            json={
+                "kind": "agent_guardrail",
+                "key": key,
+                "content": "# Input test\n\nNo inventar en entrada.",
+                "expected_version": 0,
+                "note": "api-agent-guard",
+            },
+        )
+        assert save.status_code == 200, save.text
+        assert save.json()["version"] == 1
+
+        got = await client.get(f"/api/audit/config/agent_guardrail/{key}")
+        assert got.status_code == 200
+        assert "No inventar" in got.json()["content"]
+
+        catalog = await client.get("/api/audit/config/catalog")
+        assert catalog.status_code == 200
+        items = catalog.json()["items"]
+        assert "agent_guardrail" in items
+        assert any(it["key"] == key for it in items["agent_guardrail"])
+
+        status = await client.get("/api/audit/config/status")
+        by = status.json()["config_store"]["by_kind"]
+        assert by.get("agent_guardrail", 0) >= 1
+
+        bad = await client.post(
+            "/api/audit/config/save",
+            json={
+                "kind": "agent_guardrail",
+                "key": "agente_malo__entrada",
+                "content": "x",
+                "expected_version": 0,
+            },
+        )
+        assert bad.status_code == 400

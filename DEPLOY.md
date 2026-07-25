@@ -344,6 +344,30 @@ Persistencia: tabla `execution_plans` (migración Alembic `0005`). Tras deploy, 
 
 **Config store (prompts · guardrails · skills):** migración Alembic `0007` (`config_versions`, `config_active`). Al arranque se siembra de forma idempotente desde archivos (`scripts/seed_config_store.py`). El portal `/auditoria/` es el editor vivo; Postgres es autoritativo en Render. Rollback de un ítem: Historial → Restaurar. Incluido en backup R2 vía `pg_dump` completo — ver `docs/operaciones/PLAN_DESASTRE.md`.
 
+### Editar la configuración en un editor de texto
+
+El portal sigue siendo el camino corto, pero también se puede editar el `.md` y sincronizarlo:
+
+```bash
+python scripts/sync_config_files.py --check                       # reportar diferencias
+python scripts/sync_config_files.py --apply --author tu@correo     # archivo → DB (nueva versión)
+python scripts/sync_config_files.py --export                       # DB → archivo (tras editar en el portal)
+```
+
+Cada archivo lleva `<!-- config-version: N; checksum: X -->`. Esa marca distingue quién cambió último:
+
+| Estado | Significado | Resuelve |
+|--------|-------------|----------|
+| `in_sync` | archivo y DB coinciden | — |
+| `file_ahead` | editaste el `.md` | `--apply` |
+| `db_ahead` | el portal cambió después | `--export` |
+| `conflict` | ambos cambiaron | decisión manual |
+| `unknown` | archivo sin header (falta baseline) | `--export` una vez |
+
+Códigos de salida: `0` sincronizado · `1` hay diferencias · `2` conflicto o error (nada se escribió).
+
+**Producción (GitOps).** El workflow `.github/workflows/sync-config.yml` corre en cada push a `main` que toque `agente/prompts/**`, `config/guardrails/**` o `**/SKILL.md`: aplica los archivos a la DB de Render (`PROD_DATABASE_URL`) y commitea los headers actualizados. Ante conflicto **falla sin escribir**; resuélvalo con `--export` o editando en el portal. Los agentes se reconstruyen por turno, así que el cambio aplica al siguiente mensaje.
+
 ---
 
 ## Portal de auditoría (Auditoría de Instrucciones)

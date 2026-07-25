@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # Postgres local con paridad prod (pgvector + Alembic).
+# Dependencia del servidor web local (./scripts/start-local.sh siempre lo invoca).
 # Uso: ./scripts/local_db.sh          # solo levanta DB + migraciones
 #      ./scripts/local_db.sh --ingest  # además indexa la KB en RAG
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Corre compose desde deploy/ para no leer el .env de la raíz.
+compose() {
+  (cd "$ROOT/deploy" && docker compose --env-file /dev/null "$@")
+}
 LOCAL_URL="${DATABASE_URL:-postgresql+psycopg://agente:agente@localhost:5432/agente}"
 
 ensure_docker() {
@@ -26,21 +31,26 @@ ensure_docker() {
 
 ensure_docker
 
-echo "→ Levantando Postgres+pgvector (Docker)..."
-docker compose -f deploy/docker-compose.yml up -d db
+echo "→ Levantando Postgres+pgvector (Docker, servicio db) y esperando healthy..."
+# --wait = dependencia healthcheck (equivalente a depends_on: service_healthy).
+if ! compose up -d --wait --wait-timeout 90 db; then
+  echo "ERROR: el servicio db no quedó healthy a tiempo."
+  exit 1
+fi
 
-echo "→ Esperando que la base esté lista..."
-for _ in $(seq 1 30); do
-  docker exec deploy-db-1 pg_isready -U agente -d agente >/dev/null 2>&1 && break
-  sleep 1
-done
-docker exec deploy-db-1 pg_isready -U agente -d agente
+cid="$(compose ps -q db | head -1)"
+if [[ -z "$cid" ]]; then
+  echo "ERROR: no se encontró el contenedor del servicio db."
+  exit 1
+fi
+docker exec "$cid" pg_isready -U agente -d agente
+echo "→ Compose: db healthy (container ${cid:0:12})"
 
 echo "→ Migraciones Alembic..."
-PYTHONPATH=. .venv/bin/python -c "
+PYTHONPATH=. DATABASE_URL="$LOCAL_URL" .venv/bin/python -c "
 from src.storage.migrate import run_migrations
 run_migrations('$LOCAL_URL')
-print('OK: esquema al día (0001 + 0002 + vector)')
+print('OK: esquema al día')
 "
 
 if [[ "${1:-}" == "--ingest" ]]; then
@@ -51,4 +61,4 @@ fi
 echo ""
 echo "Listo. DATABASE_URL local:"
 echo "  $LOCAL_URL"
-echo "Verifique: curl -s http://localhost:8000/health  →  \"persistencia\":\"postgres\""
+echo "Verifique tras start-local: curl -s http://localhost:8000/health  →  \"persistencia\":\"postgres\""

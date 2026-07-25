@@ -221,7 +221,7 @@ async def audit_catalog():
 
 @router.get("/config/catalog")
 async def audit_config_catalog(email: str = Depends(_require_audit_email)):
-    from src.config_store import list_catalog_items, seed_from_filesystem
+    from src.config_store import ensure_agent_guardrail_seeds, list_catalog_items, seed_from_filesystem
     from src.storage import get_repository
 
     # Sembrar solo si la DB aún no tiene ningún activo (arranque frío / tests).
@@ -230,11 +230,64 @@ async def audit_config_catalog(email: str = Depends(_require_audit_email)):
             seed_from_filesystem(author_email=email or "system@seed")
         except Exception:
             pass
+    else:
+        # Asegurar Input/Output/Tools por agente sin tocar seeds ya existentes.
+        try:
+            ensure_agent_guardrail_seeds(author_email=email or "system@seed")
+        except Exception:
+            pass
     items = list_catalog_items()
     return {
         "ok": True,
         "counts": {k: len(v) for k, v in items.items()},
         "items": items,
+    }
+
+
+@router.get("/config/agents")
+async def audit_config_agents(email: str = Depends(_require_audit_email)):
+    """Vista por agente: prompt, skills compartidas y 3 clases de guardrails."""
+    from src.config_store.paths import AGENT_GUARDRAIL_CLASSES, agent_guardrail_key
+    from src.gateway.audit_catalog import build_live_audit_catalog
+
+    catalog = build_live_audit_catalog()
+    agents_out = []
+    for agent in catalog.get("agentes") or []:
+        agent_id = agent["id"]
+        skill_ids = list(agent.get("skill_ids") or [])
+        shared: dict[str, list[str]] = {}
+        for skill in catalog.get("skills") or []:
+            sid = skill.get("id")
+            if sid not in skill_ids:
+                continue
+            others = [a for a in (skill.get("agents") or []) if a != agent_id]
+            if others:
+                shared[sid] = others
+        agents_out.append(
+            {
+                "id": agent_id,
+                "nombre_corto": agent.get("nombre_corto") or agent_id,
+                "titulo_profesional": agent.get("titulo_profesional") or "",
+                "desc": agent.get("desc") or "",
+                "grupo": agent.get("grupo") or "especialista",
+                "prompt_key": agent_id,
+                "skill_ids": skill_ids,
+                "skills_shared_with": shared,
+                "guardrails": {
+                    clase: agent_guardrail_key(agent_id, clase)
+                    for clase in sorted(AGENT_GUARDRAIL_CLASSES)
+                },
+            }
+        )
+    return {
+        "ok": True,
+        "global": {"prompt_key": "sistema"},
+        "groups": {
+            "coordinacion": {"label": "Coordinador", "color": "blue"},
+            "especialista": {"label": "Especialistas", "color": "emerald"},
+            "calidad": {"label": "QA / Calidad", "color": "amber"},
+        },
+        "agents": agents_out,
     }
 
 
@@ -251,6 +304,7 @@ async def audit_config_status(email: str = Depends(_require_audit_email)):
         "by_kind": {
             "prompt": sum(1 for a in actives if a.kind == "prompt"),
             "guardrail": sum(1 for a in actives if a.kind == "guardrail"),
+            "agent_guardrail": sum(1 for a in actives if a.kind == "agent_guardrail"),
             "skill": sum(1 for a in actives if a.kind == "skill"),
         },
         "validation_errors": validate_config_store(),

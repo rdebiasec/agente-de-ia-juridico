@@ -1,18 +1,33 @@
-/* Editor de configuración — prompts / guardrails / skills */
+/* Editor de configuración — vista por agente + catálogo secundario */
 
 (function () {
     const KIND_LABELS = {
         prompt: 'Prompts',
-        guardrail: 'Guardrails',
+        guardrail: 'Guardrails G1–G10',
         skill: 'Skills',
+        agent_guardrail: 'Guardrails agente',
     };
 
-    let catalog = { prompt: [], guardrail: [], skill: [] };
+    const GROUP_ORDER = ['global', 'coordinacion', 'especialista', 'calidad'];
+    const GROUP_LABELS = {
+        global: 'Global',
+        coordinacion: 'Coordinador',
+        especialista: 'Especialistas',
+        calidad: 'QA / Calidad',
+    };
+
+    let catalog = { prompt: [], guardrail: [], skill: [], agent_guardrail: [] };
+    let agentsMeta = { agents: [], groups: {}, global: { prompt_key: 'sistema' } };
+    let viewMode = 'agent'; // agent | catalog
+    let currentAgentId = 'global'; // 'global' | agent_id
+    let currentSection = 'prompt'; // prompt | skills | guardrails
+    let currentGuardClass = 'input'; // input | output | tools
     let currentKind = 'prompt';
     let currentKey = null;
-    let loaded = null; // { kind, key, version, content, checksum, ... }
+    let loaded = null;
     let dirty = false;
     let sessionReady = false;
+    let sharedBadgeForKey = null;
 
     function apiConfig() {
         return window.AUDIT_API_CONFIG || { base: '' };
@@ -52,6 +67,14 @@
         toast._t = setTimeout(() => el.classList.add('hidden'), ms);
     }
 
+    function escapeHtml(s) {
+        return String(s || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     function setDirty(value) {
         dirty = Boolean(value);
         const badge = $('cfg-dirty-badge');
@@ -62,56 +85,231 @@
         if (editor) editor.classList.toggle('cfg-dirty', dirty);
     }
 
-    function setKindTabs() {
-        document.querySelectorAll('.cfg-kind-tab').forEach((btn) => {
-            const active = btn.dataset.kind === currentKind;
-            btn.classList.toggle('bg-blue-600', active);
-            btn.classList.toggle('text-white', active);
+    function agentById(id) {
+        return (agentsMeta.agents || []).find((a) => a.id === id) || null;
+    }
+
+    function shortName(agent) {
+        if (!agent) return '';
+        const name = agent.nombre_corto || agent.id;
+        return name.length > 28 ? `${name.slice(0, 26)}…` : name;
+    }
+
+    function setViewMode(mode) {
+        if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
+        viewMode = mode === 'catalog' ? 'catalog' : 'agent';
+        document.body.dataset.view = viewMode;
+        document.querySelectorAll('.view-mode-btn').forEach((btn) => {
+            const active = btn.dataset.view === viewMode;
+            btn.classList.toggle('active', active);
+            btn.classList.toggle('text-slate-400', !active);
+        });
+        setDirty(false);
+        loaded = null;
+        currentKey = null;
+        $('cfg-editor').value = '';
+        $('cfg-editor').disabled = true;
+        $('cfg-current-label').textContent = 'Seleccione un ítem';
+        $('cfg-meta').textContent = '—';
+        updateSharedBadge(null);
+        $('cfg-btn-history').disabled = true;
+        $('cfg-btn-reload').disabled = true;
+        renderNav();
+    }
+
+    function setSectionTabs() {
+        const isGlobal = currentAgentId === 'global';
+        document.querySelectorAll('.section-tab').forEach((btn) => {
+            const active = btn.dataset.section === currentSection;
+            btn.classList.toggle('active', active);
+            btn.classList.toggle('hover:bg-slate-800', !active);
+            if (isGlobal && btn.dataset.section !== 'prompt') {
+                btn.classList.add('opacity-40', 'pointer-events-none');
+            } else {
+                btn.classList.remove('opacity-40', 'pointer-events-none');
+            }
+        });
+        const guardTabs = $('guard-class-tabs');
+        if (guardTabs) {
+            guardTabs.classList.toggle('hidden', currentSection !== 'guardrails' || isGlobal);
+        }
+        document.querySelectorAll('.guard-class-tab').forEach((btn) => {
+            const active = btn.dataset.clase === currentGuardClass;
+            btn.classList.toggle('active', active);
             btn.classList.toggle('hover:bg-slate-800', !active);
         });
     }
 
-    function filteredItems() {
+    function setKindTabs() {
+        document.querySelectorAll('.cfg-kind-tab').forEach((btn) => {
+            const active = btn.dataset.kind === currentKind;
+            btn.classList.toggle('active-kind', active);
+            btn.classList.toggle('hover:bg-slate-800', !active);
+        });
+    }
+
+    function renderAgentTabs() {
+        const host = $('agent-tabs');
+        if (!host) return;
+        host.innerHTML = '';
+
+        const addGroup = (groupKey, items) => {
+            if (!items.length) return;
+            const label = document.createElement('span');
+            label.className = 'text-[10px] uppercase tracking-wide text-slate-500 px-1 self-center mr-1';
+            label.textContent = GROUP_LABELS[groupKey] || groupKey;
+            host.appendChild(label);
+            for (const item of items) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `agent-tab text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-slate-950/60 hover:bg-slate-800 transition-all ${
+                    currentAgentId === item.id ? 'active' : ''
+                }`;
+                btn.dataset.group = item.group;
+                btn.dataset.agentId = item.id;
+                btn.textContent = item.label;
+                btn.title = item.title || item.label;
+                btn.addEventListener('click', () => selectAgent(item.id));
+                host.appendChild(btn);
+            }
+        };
+
+        addGroup('global', [{ id: 'global', group: 'global', label: 'Global', title: 'Prompt sistema' }]);
+
+        const byGroup = { coordinacion: [], especialista: [], calidad: [] };
+        for (const agent of agentsMeta.agents || []) {
+            const g = agent.grupo || 'especialista';
+            if (!byGroup[g]) byGroup[g] = [];
+            byGroup[g].push({
+                id: agent.id,
+                group: g,
+                label: shortName(agent),
+                title: agent.titulo_profesional || agent.nombre_corto || agent.id,
+            });
+        }
+        for (const g of ['coordinacion', 'especialista', 'calidad']) {
+            addGroup(g, byGroup[g] || []);
+        }
+    }
+
+    function catalogItemsForKind(kind) {
+        return catalog[kind] || [];
+    }
+
+    function agentListItems() {
+        if (currentAgentId === 'global') {
+            const item = catalogItemsForKind('prompt').find((it) => it.key === 'sistema');
+            return item ? [item] : [{ kind: 'prompt', key: 'sistema', path: 'agente/prompts/sistema.md', active_version: 0 }];
+        }
+        const agent = agentById(currentAgentId);
+        if (!agent) return [];
+
+        if (currentSection === 'prompt') {
+            const item = catalogItemsForKind('prompt').find((it) => it.key === agent.prompt_key);
+            return item
+                ? [item]
+                : [{ kind: 'prompt', key: agent.prompt_key, path: `agente/prompts/agents/${agent.prompt_key}.md`, active_version: 0 }];
+        }
+        if (currentSection === 'skills') {
+            const q = String($('cfg-search')?.value || '').trim().toLowerCase();
+            return (agent.skill_ids || [])
+                .map((sid) => {
+                    const item = catalogItemsForKind('skill').find((it) => it.key === sid);
+                    return item || { kind: 'skill', key: sid, path: `.cursor/skills/${sid}/SKILL.md`, active_version: 0 };
+                })
+                .filter((it) => !q || it.key.toLowerCase().includes(q));
+        }
+        // guardrails
+        const key = (agent.guardrails || {})[currentGuardClass];
+        if (!key) return [];
+        const item = catalogItemsForKind('agent_guardrail').find((it) => it.key === key);
+        return item
+            ? [item]
+            : [{ kind: 'agent_guardrail', key, path: `config/guardrails/agents/${currentAgentId}/${currentGuardClass}.md`, active_version: 0 }];
+    }
+
+    function filteredCatalogItems() {
         const q = String($('cfg-search')?.value || '').trim().toLowerCase();
-        const items = catalog[currentKind] || [];
+        const items = catalogItemsForKind(currentKind);
         if (!q) return items;
         return items.filter((it) => it.key.toLowerCase().includes(q) || String(it.path || '').toLowerCase().includes(q));
+    }
+
+    function updateSharedBadge(skillKey) {
+        const el = $('cfg-shared-badge');
+        if (!el) return;
+        sharedBadgeForKey = skillKey;
+        if (!skillKey || currentAgentId === 'global') {
+            el.classList.add('hidden');
+            el.textContent = '';
+            return;
+        }
+        const agent = agentById(currentAgentId);
+        const others = (agent && agent.skills_shared_with && agent.skills_shared_with[skillKey]) || [];
+        if (!others.length) {
+            el.classList.add('hidden');
+            el.textContent = '';
+            return;
+        }
+        const names = others.map((id) => {
+            const a = agentById(id);
+            return a ? a.nombre_corto || id : id;
+        });
+        el.textContent = `Skill compartida (1 sola fuente). Al guardar cambia también para: ${names.join(', ')}`;
+        el.classList.remove('hidden');
     }
 
     function renderList() {
         const list = $('cfg-item-list');
         const count = $('cfg-list-count');
         if (!list) return;
-        const items = filteredItems();
-        if (count) count.textContent = `${items.length} ${KIND_LABELS[currentKind] || 'ítems'}`;
+
+        const items = viewMode === 'catalog' ? filteredCatalogItems() : agentListItems();
+        const label =
+            viewMode === 'catalog'
+                ? KIND_LABELS[currentKind] || 'ítems'
+                : currentSection === 'skills'
+                  ? 'skills'
+                  : currentSection === 'guardrails'
+                    ? `guardrail ${currentGuardClass}`
+                    : 'prompt';
+
+        if (count) count.textContent = `${items.length} ${label}`;
         list.innerHTML = '';
         if (!items.length) {
             list.innerHTML = '<p class="text-xs text-slate-500 px-2 py-4">Sin resultados.</p>';
             return;
         }
+
         for (const it of items) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `cfg-item w-full text-left px-3 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 transition-all text-sm ${
-                currentKey === it.key ? 'active' : 'bg-slate-950/40'
+                currentKey === it.key && loaded && loaded.kind === it.kind ? 'active' : 'bg-slate-950/40'
             }`;
             const ver = it.active_version ? `v${it.active_version}` : 'seed';
+            let extra = '';
+            if (viewMode === 'agent' && currentSection === 'skills') {
+                const agent = agentById(currentAgentId);
+                const shared = agent && agent.skills_shared_with && agent.skills_shared_with[it.key];
+                if (shared && shared.length) {
+                    extra = `<div class="text-[10px] text-amber-300/90 mt-0.5">Compartida · ${shared.length} otro(s)</div>`;
+                }
+            }
             btn.innerHTML = `<div class="font-semibold truncate">${escapeHtml(it.key)}</div>
                 <div class="text-[10px] text-slate-400 mt-0.5 flex justify-between gap-2">
                     <span class="truncate">${escapeHtml(it.path || '')}</span>
                     <span>${ver}</span>
-                </div>`;
-            btn.addEventListener('click', () => selectItem(currentKind, it.key));
+                </div>${extra}`;
+            btn.addEventListener('click', () => selectItem(it.kind, it.key));
             list.appendChild(btn);
         }
     }
 
-    function escapeHtml(s) {
-        return String(s || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+    function renderNav() {
+        setSectionTabs();
+        setKindTabs();
+        renderList();
     }
 
     async function refreshStatusChip() {
@@ -123,7 +321,7 @@
             const data = await r.json();
             const cs = data.config_store || {};
             const by = cs.by_kind || {};
-            chip.textContent = `Activos: ${cs.active_items || 0} (P${by.prompt || 0}/G${by.guardrail || 0}/S${by.skill || 0})`;
+            chip.textContent = `Activos: ${cs.active_items || 0} (P${by.prompt || 0}/G${by.guardrail || 0}/AG${by.agent_guardrail || 0}/S${by.skill || 0})`;
             const errs = cs.validation_errors || [];
             chip.title = errs.length ? errs.join('; ') : 'Config store OK';
             chip.classList.toggle('text-amber-300', errs.length > 0);
@@ -136,17 +334,46 @@
         const r = await fetchAuditApi('/api/audit/config/catalog');
         if (!r.ok) throw new Error('No se pudo cargar el catálogo');
         const data = await r.json();
-        catalog = data.items || { prompt: [], guardrail: [], skill: [] };
+        catalog = data.items || { prompt: [], guardrail: [], skill: [], agent_guardrail: [] };
         renderList();
         await refreshStatusChip();
+    }
+
+    async function loadAgents() {
+        const r = await fetchAuditApi('/api/audit/config/agents');
+        if (!r.ok) throw new Error('No se pudo cargar agentes');
+        agentsMeta = await r.json();
+        renderAgentTabs();
+    }
+
+    async function selectAgent(agentId) {
+        if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
+        currentAgentId = agentId;
+        currentSection = 'prompt';
+        currentGuardClass = 'input';
+        setDirty(false);
+        loaded = null;
+        currentKey = null;
+        $('cfg-editor').value = '';
+        $('cfg-editor').disabled = true;
+        $('cfg-current-label').textContent = 'Seleccione un ítem';
+        $('cfg-meta').textContent = '—';
+        updateSharedBadge(null);
+        $('cfg-btn-history').disabled = true;
+        $('cfg-btn-reload').disabled = true;
+        renderAgentTabs();
+        renderNav();
+        const items = agentListItems();
+        if (items.length === 1) {
+            await selectItem(items[0].kind, items[0].key);
+        }
     }
 
     async function selectItem(kind, key) {
         if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
         currentKind = kind;
         currentKey = key;
-        setKindTabs();
-        renderList();
+        renderNav();
         $('cfg-btn-history').disabled = true;
         $('cfg-btn-reload').disabled = true;
         $('cfg-btn-save').disabled = true;
@@ -167,6 +394,12 @@
             $('cfg-note').value = '';
             updateMeta();
             setDirty(false);
+            if (kind === 'skill' && viewMode === 'agent') {
+                updateSharedBadge(key);
+            } else {
+                updateSharedBadge(null);
+            }
+            renderList();
         } catch (e) {
             loaded = null;
             $('cfg-editor').value = '';
@@ -220,6 +453,9 @@
             let msg = `Guardado ${data.kind}/${data.key} v${data.version}`;
             if (data.file_exported === false) {
                 msg += ' (DB OK; no se pudo exportar archivo)';
+            }
+            if (loaded.kind === 'skill' && sharedBadgeForKey) {
+                msg += ' · skill compartida actualizada para todos';
             }
             toast(msg);
             setDirty(false);
@@ -350,7 +586,6 @@
             const row = await r.json();
             const panel = $('cfg-diff-panel');
             const body = $('cfg-diff-body');
-            // '-' = líneas solo en la versión antigua; '+' = líneas solo en la activa
             const diff = simpleDiff(row.content || '', loaded.content || '');
             body.innerHTML = '';
             const legend = document.createElement('p');
@@ -371,6 +606,43 @@
     }
 
     function bindUi() {
+        document.querySelectorAll('.view-mode-btn').forEach((btn) => {
+            btn.addEventListener('click', () => setViewMode(btn.dataset.view));
+        });
+
+        document.querySelectorAll('.section-tab').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
+                currentSection = btn.dataset.section;
+                setDirty(false);
+                loaded = null;
+                currentKey = null;
+                $('cfg-editor').value = '';
+                $('cfg-editor').disabled = true;
+                $('cfg-current-label').textContent = 'Seleccione un ítem';
+                $('cfg-meta').textContent = '—';
+                updateSharedBadge(null);
+                $('cfg-btn-history').disabled = true;
+                $('cfg-btn-reload').disabled = true;
+                renderNav();
+                const items = agentListItems();
+                if (items.length === 1 || (currentSection === 'guardrails' && items.length)) {
+                    await selectItem(items[0].kind, items[0].key);
+                }
+            });
+        });
+
+        document.querySelectorAll('.guard-class-tab').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
+                currentGuardClass = btn.dataset.clase;
+                setDirty(false);
+                renderNav();
+                const items = agentListItems();
+                if (items[0]) await selectItem(items[0].kind, items[0].key);
+            });
+        });
+
         document.querySelectorAll('.cfg-kind-tab').forEach((btn) => {
             btn.addEventListener('click', () => {
                 if (dirty && !confirm('Hay cambios sin guardar. ¿Descartarlos?')) return;
@@ -382,12 +654,14 @@
                 $('cfg-editor').disabled = true;
                 $('cfg-current-label').textContent = 'Seleccione un ítem';
                 $('cfg-meta').textContent = '—';
+                updateSharedBadge(null);
                 $('cfg-btn-history').disabled = true;
                 $('cfg-btn-reload').disabled = true;
                 setKindTabs();
                 renderList();
             });
         });
+
         $('cfg-search')?.addEventListener('input', renderList);
         $('cfg-editor')?.addEventListener('input', () => {
             if (!loaded) return;
@@ -417,12 +691,16 @@
 
     async function boot() {
         bindUi();
-        setKindTabs();
+        document.body.dataset.view = 'agent';
         if (!sessionReady) return;
         try {
-            await loadCatalog();
-            const first = (catalog.prompt || [])[0];
-            if (first) await selectItem('prompt', first.key);
+            await Promise.all([loadCatalog(), loadAgents()]);
+            const firstAgent = (agentsMeta.agents || []).find((a) => a.grupo === 'coordinacion');
+            if (firstAgent) {
+                await selectAgent(firstAgent.id);
+            } else {
+                await selectAgent('global');
+            }
         } catch (e) {
             toast(String(e.message || e));
         }
@@ -433,7 +711,6 @@
         if (sessionReady) boot();
     });
 
-    // Si la sesión ya estaba lista antes de registrar el listener
     if (window.__AUDIT_SESSION_EMAIL__) {
         sessionReady = true;
         boot();

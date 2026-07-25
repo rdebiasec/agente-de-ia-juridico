@@ -1,3 +1,14 @@
+# Paridad local/prod.
+#
+# Desarrollo típico (servidor en el Mac, DB en Docker):
+#   ./scripts/start-local.sh
+#   → scripts/local_db.sh levanta `db` y espera healthcheck
+#   → luego uvicorn en :8000 con DATABASE_URL=...@localhost:5432
+#
+# Todo en Docker:
+#   docker compose -f deploy/docker-compose.yml up --build
+#   → `app` depende de `db` (service_healthy)
+
 services:
   db:
     image: pgvector/pgvector:pg16
@@ -14,6 +25,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+      start_period: 10s
 
   app:
     build:
@@ -21,11 +33,13 @@ services:
       dockerfile: deploy/Dockerfile
     ports:
       - "8000:8000"
-    env_file:
-      - ../.env
+    # No usar env_file: ../.env aquí: Compose interpola `$` del hash SITE_PASSWORD
+    # y emite warnings. Pase secretos con --env-file al hacer `compose up app`,
+    # o exporte las vars en el shell. start-local.sh (host) carga .env vía load_dotenv.
     environment:
       # Paridad dev==prod: la app habla con el Postgres del compose.
       - DATABASE_URL=postgresql+psycopg://agente:agente@db:5432/agente
+      - SESSION_COOKIE_SECURE=false
     depends_on:
       db:
         condition: service_healthy

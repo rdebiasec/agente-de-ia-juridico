@@ -1,0 +1,70 @@
+name: Sync config (archivos → DB)
+
+# Edita prompts/guardrails/skills en un editor de texto, haz commit a main y este
+# job los lleva al config store de producción. Si el portal de auditoría cambió el
+# mismo ítem (conflicto), el job falla sin escribir nada.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "agente/prompts/**"
+      - "config/guardrails/**"
+      - ".cursor/skills/**/SKILL.md"
+      - "agente/skills/**/SKILL.md"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Solo reportar diferencias, sin escribir a la DB"
+        type: boolean
+        default: true
+
+concurrency:
+  group: sync-config
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # El propio job commitea los headers de versión; ese commit no debe re-disparar.
+    if: ${{ !contains(github.event.head_commit.message, '[skip-config-sync]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Reportar diferencias archivo ↔ DB
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: python scripts/sync_config_files.py --check || true
+
+      - name: Importar archivos a la DB
+        if: ${{ github.event_name == 'push' || !inputs.dry_run }}
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          python scripts/sync_config_files.py \
+            --apply \
+            --author "${{ github.actor }}@users.noreply.github.com" \
+            --note "commit ${GITHUB_SHA::7}"
+
+      - name: Commitear headers de versión
+        if: ${{ github.event_name == 'push' || !inputs.dry_run }}
+        run: |
+          if git diff --quiet; then
+            echo "Sin cambios de header."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A agente/prompts config/guardrails .cursor/skills agente/skills
+          git commit -m "chore(config): sincronizar headers de versión [skip-config-sync]"
+          git push

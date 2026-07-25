@@ -2,9 +2,9 @@
 
 Portal web para que el despacho **edite y versiona** la configuración operativa del asistente:
 
-- **Prompts** (sistema + 11 agentes)
-- **Guardrails** (texto de política G1–G10)
-- **Skills** (90 × `SKILL.md`)
+- **Vista por agente** (principal): 11 tabs (Coordinador / Especialistas / QA) + tab **Global** (`sistema`)
+  - Por agente: **Prompt**, **Skills** (fuente única compartida) y **Guardrails** en 3 clases: Input / Output / Tools
+- **Vista catálogo** (secundaria): inventario plano Prompts · G1–G10 legacy · Skills
 
 Cada guardado escribe una versión **inmutable** en Postgres (`config_versions`) y actualiza el puntero activo (`config_active`). Se puede **restaurar** cualquier versión en un clic.
 
@@ -29,9 +29,11 @@ Login: correo del auditor + **misma** `SITE_PASSWORD` del chat + PIN (primera ve
 
 Tras entrar:
 
-1. Elija pestaña Prompts / Guardrails / Skills.
-2. Edite el markdown y pulse **Guardar versión**.
-3. Abra **Historial** para ver diff y **Restaurar**.
+1. Elija un agente (o **Global**) en la barra superior.
+2. Use las subsecciones Prompt / Skills / Guardrails (Input · Output · Tools).
+3. Edite el markdown y pulse **Guardar versión**.
+4. Abra **Historial** para ver diff y **Restaurar**.
+5. Opcional: cambie a vista **Catálogo** para el inventario plano (incluye G1–G10 legacy).
 
 Preview estático en `:8080` (debe apuntar a la API):
 
@@ -52,10 +54,13 @@ Abra con Cmd+Shift+R si no ve cambios.
 | Método | Ruta | Uso |
 |---|---|---|
 | GET | `/api/audit/config/catalog` | Inventario editable |
+| GET | `/api/audit/config/agents` | Agentes + skills + keys Input/Output/Tools |
 | GET | `/api/audit/config/{kind}/{key}` | Contenido activo |
 | GET | `/api/audit/config/{kind}/{key}/versions` | Historial |
 | POST | `/api/audit/config/save` | Guardar (lock optimista `expected_version`) |
 | POST | `/api/audit/config/{kind}/{key}/restore` | Restaurar versión |
+
+Kinds: `prompt`, `guardrail` (G1–G10 legacy), `skill`, `agent_guardrail` (keys `{agent_id}__{input|output|tools}`).
 
 ## Seed / migración
 
@@ -71,4 +76,5 @@ En Render el seed corre al arranque (lifespan) sin sobrescribir versiones ya act
 
 ## Alcance de guardrails
 
-El portal edita el **texto de política** inyectado a los agentes. El código tripwire del SDK (`src/agents/sdk_guardrails.py`) permanece bajo control del desarrollador.
+- **Por agente (nuevo):** políticas editables Input / Output / Tools (`agent_guardrail`). El enforcement en runtime del SDK queda como tarea aparte.
+- **Legacy G1–G10:** siguen en la vista Catálogo; el portal edita el **texto de política**. El código tripwire (`src/agents/sdk_guardrails.py`) permanece bajo control del desarrollador.

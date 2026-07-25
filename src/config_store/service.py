@@ -11,12 +11,17 @@ from pathlib import Path
 from typing import Any
 
 from src.config_store.paths import (
+    AGENT_GUARDRAIL_CLASSES,
+    KIND_AGENT_GUARDRAIL,
     KIND_GUARDRAIL,
     KIND_PROMPT,
     KIND_SKILL,
     VALID_KINDS,
+    agent_guardrail_key,
+    agent_guardrails_dir,
     agent_prompts_dir,
     guardrails_dir,
+    parse_agent_guardrail_key,
     path_for,
     relative_path_for,
     skills_dir,
@@ -52,6 +57,14 @@ def strip_header(content: str) -> str:
     return _HEADER_RE.sub("", content or "", count=1)
 
 
+def parse_header(content: str) -> tuple[int | None, str | None]:
+    """Devuelve (version, checksum) del header, o (None, None) si no lo tiene."""
+    match = _HEADER_RE.match(content or "")
+    if not match:
+        return None, None
+    return int(match.group(1)), match.group(2)
+
+
 def with_header(content: str, *, version: int, checksum: str) -> str:
     body = strip_header(content).rstrip() + "\n"
     return f"<!-- config-version: {version}; checksum: {checksum} -->\n{body}"
@@ -71,6 +84,13 @@ def _validate_kind_key(kind: str, key: str) -> None:
         raise ConfigValidationError(f"prompt key inválida: {key}")
     if kind == KIND_GUARDRAIL and not re.fullmatch(r"g\d+", key):
         raise ConfigValidationError(f"guardrail key inválida: {key}")
+    if kind == KIND_AGENT_GUARDRAIL:
+        try:
+            agent_id, _clase = parse_agent_guardrail_key(key)
+        except ValueError as exc:
+            raise ConfigValidationError(str(exc)) from exc
+        if not re.fullmatch(r"[a-z0-9_]+", agent_id):
+            raise ConfigValidationError(f"agent_guardrail key inválida: {key}")
     if kind == KIND_SKILL and not re.fullmatch(r"[a-z0-9_]+", key):
         raise ConfigValidationError(f"skill key inválida: {key}")
 
@@ -107,6 +127,12 @@ def get_active_content(kind: str, key: str, *, prefer_db: bool = True) -> dict[s
             }
     path = path_for(kind, key)
     body = _read_file_body(path)
+    if not body and kind == KIND_AGENT_GUARDRAIL:
+        try:
+            agent_id, clase = parse_agent_guardrail_key(key)
+            body = default_agent_guardrail_content(agent_id, clase)
+        except ValueError:
+            body = ""
     if not body and kind != KIND_SKILL:
         raise ConfigNotFoundError(f"{kind}/{key}")
     if not body and kind == KIND_SKILL and not path.is_file():
@@ -291,16 +317,94 @@ def _parse_guardrail_markdown(content: str, *, fallback_id: str) -> dict[str, st
     return {"id": gid, "name": name, "desc": desc}
 
 
+def _agent_ids_from_prompts() -> list[str]:
+    return sorted(p.stem for p in agent_prompts_dir().glob("*.md"))
+
+
+def _legacy_guardrail_bundle() -> str:
+    """Concatena G1–G10 como punto de partida para políticas input por agente."""
+    parts: list[str] = []
+    for path in sorted(guardrails_dir().glob("g*.md"), key=lambda p: int(re.sub(r"\D", "", p.stem) or 0)):
+        body = _read_file_body(path).strip()
+        if body:
+            parts.append(body)
+    return "\n\n---\n\n".join(parts).strip()
+
+
+def default_agent_guardrail_content(agent_id: str, clase: str) -> str:
+    """Plantilla seed para Input/Output/Tools por agente."""
+    if clase == "input":
+        bundle = _legacy_guardrail_bundle()
+        header = (
+            f"# Guardrails de entrada — {agent_id}\n\n"
+            "Políticas aplicadas al input del agente. "
+            "Punto de partida: texto legacy G1–G10 (editable por agente).\n\n"
+        )
+        return f"{header}{bundle}" if bundle else (
+            f"{header}(Sin políticas G1–G10 en disco; complete esta sección.)\n"
+        )
+    if clase == "output":
+        return (
+            f"# Guardrails de salida — {agent_id}\n\n"
+            "Políticas aplicadas a la salida del agente.\n\n"
+            "- No inventar normas, radicados ni jurisprudencia.\n"
+            "- Separar hecho de inferencia.\n"
+            "- Marcar pendientes de verificación.\n"
+            "- No prometer resultados judiciales.\n"
+        )
+    if clase == "tools":
+        return (
+            f"# Guardrails de tools — {agent_id}\n\n"
+            "Políticas aplicadas al uso de tools / agentes-como-tools.\n\n"
+            "- Solo invocar tools pertinentes a la consulta.\n"
+            "- No exponer datos sensibles en argumentos de tools.\n"
+            "- Si falta contexto, pedir aclaración antes de invocar.\n"
+        )
+    raise ValueError(f"clase de agent_guardrail desconocida: {clase}")
+
+
+def ensure_agent_guardrail_seeds(
+    *, author_email: str = "system@seed", write_file: bool = False
+) -> int:
+    """Crea seed v1 de Input/Output/Tools por agente si aún no existen en DB."""
+    repo = get_repository()
+    created = 0
+    for agent_id in _agent_ids_from_prompts():
+        for clase in sorted(AGENT_GUARDRAIL_CLASSES):
+            key = agent_guardrail_key(agent_id, clase)
+            if repo.get_config_active(KIND_AGENT_GUARDRAIL, key):
+                continue
+            path = path_for(KIND_AGENT_GUARDRAIL, key)
+            body = _read_file_body(path).strip() or default_agent_guardrail_content(agent_id, clase)
+            save_version(
+                KIND_AGENT_GUARDRAIL,
+                key,
+                body,
+                author_email=author_email,
+                note="seed v1 agent_guardrail",
+                expected_version=0,
+                write_file=write_file,
+            )
+            created += 1
+    return created
+
+
 def seed_from_filesystem(*, author_email: str = "system@seed", write_file: bool = False) -> dict[str, int]:
     """Siembra version=1 desde archivos cuando no hay activo en DB.
 
     Por defecto no reescribe archivos (evita ensuciar el working tree en local).
     """
-    counts = {"prompt": 0, "guardrail": 0, "skill": 0, "skipped": 0}
+    counts = {
+        "prompt": 0,
+        "guardrail": 0,
+        "agent_guardrail": 0,
+        "skill": 0,
+        "skipped": 0,
+    }
     repo = get_repository()
 
     # sistema + agents
-    prompt_keys = ["sistema"] + sorted(p.stem for p in agent_prompts_dir().glob("*.md"))
+    prompt_keys = ["sistema"] + _agent_ids_from_prompts()
     for key in prompt_keys:
         path = path_for(KIND_PROMPT, key)
         if not path.is_file():
@@ -351,6 +455,9 @@ def seed_from_filesystem(*, author_email: str = "system@seed", write_file: bool 
         )
         counts["skill"] += 1
 
+    counts["agent_guardrail"] = ensure_agent_guardrail_seeds(
+        author_email=author_email, write_file=write_file
+    )
     return counts
 
 
@@ -373,18 +480,42 @@ def validate_config_store() -> list[str]:
     return errors
 
 
+def list_agent_guardrail_keys() -> list[str]:
+    """Keys conocidas: archivos en disco + activos DB + 11 agentes × 3 clases."""
+    keys: set[str] = set()
+    root = agent_guardrails_dir()
+    if root.is_dir():
+        for path in root.glob("*/*.md"):
+            if path.stem in AGENT_GUARDRAIL_CLASSES:
+                keys.add(agent_guardrail_key(path.parent.name, path.stem))
+    for agent_id in _agent_ids_from_prompts():
+        for clase in AGENT_GUARDRAIL_CLASSES:
+            keys.add(agent_guardrail_key(agent_id, clase))
+    return sorted(keys)
+
+
 def list_catalog_items() -> dict[str, list[dict[str, Any]]]:
-    """Inventario editable: prompts, guardrails y skills (DB + seed files)."""
+    """Inventario editable: prompts, guardrails, agent_guardrails y skills."""
     repo = get_repository()
     actives = {(a.kind, a.key): a for a in repo.list_config_active()}
 
-    prompt_keys = ["sistema"] + sorted(p.stem for p in agent_prompts_dir().glob("*.md"))
+    prompt_keys = ["sistema"] + _agent_ids_from_prompts()
     for kind_key, a in list(actives.items()):
         if kind_key[0] == KIND_PROMPT and kind_key[1] not in prompt_keys:
             prompt_keys.append(kind_key[1])
 
-    guard_keys = sorted({p.stem for p in guardrails_dir().glob("g*.md")} | {k for (knd, k) in actives if knd == KIND_GUARDRAIL})
-    skill_keys = sorted({p.parent.name for p in skills_dir().glob("*/SKILL.md")} | {k for (knd, k) in actives if knd == KIND_SKILL})
+    guard_keys = sorted(
+        {p.stem for p in guardrails_dir().glob("g*.md")}
+        | {k for (knd, k) in actives if knd == KIND_GUARDRAIL}
+    )
+    skill_keys = sorted(
+        {p.parent.name for p in skills_dir().glob("*/SKILL.md")}
+        | {k for (knd, k) in actives if knd == KIND_SKILL}
+    )
+    agent_guard_keys = sorted(
+        set(list_agent_guardrail_keys())
+        | {k for (knd, k) in actives if knd == KIND_AGENT_GUARDRAIL}
+    )
 
     def _item(kind: str, key: str) -> dict[str, Any]:
         active = actives.get((kind, key))
@@ -401,6 +532,7 @@ def list_catalog_items() -> dict[str, list[dict[str, Any]]]:
     return {
         "prompt": [_item(KIND_PROMPT, k) for k in prompt_keys],
         "guardrail": [_item(KIND_GUARDRAIL, k) for k in guard_keys],
+        "agent_guardrail": [_item(KIND_AGENT_GUARDRAIL, k) for k in agent_guard_keys],
         "skill": [_item(KIND_SKILL, k) for k in skill_keys],
     }
 
@@ -409,11 +541,14 @@ def list_catalog_items() -> dict[str, list[dict[str, Any]]]:
 __all__ = [
     "KIND_PROMPT",
     "KIND_GUARDRAIL",
+    "KIND_AGENT_GUARDRAIL",
     "KIND_SKILL",
     "ConfigConflictError",
     "ConfigNotFoundError",
     "ConfigValidationError",
     "checksum_content",
+    "default_agent_guardrail_content",
+    "ensure_agent_guardrail_seeds",
     "get_active_content",
     "list_catalog_items",
     "list_versions",

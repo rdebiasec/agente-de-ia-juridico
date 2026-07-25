@@ -12,13 +12,14 @@ Ver [DEPLOY.md](DEPLOY.md) para el flujo completo.
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
-cp .env.example .env   # OPENAI_API_KEY, Slack, DATABASE_URL (opcional)
+cp .env.example .env   # OPENAI_API_KEY, Slack, DATABASE_URL (local Docker)
 .venv/bin/python scripts/validate_fase0.py
-.venv/bin/python -m src.main
+./scripts/start-local.sh   # levanta Docker DB + migraciones + servidor en :8000
 # POST http://localhost:8000/chat  {"message": "¿Qué áreas del derecho cubre?"}
 ```
 
-Sin `DATABASE_URL` la app usa un repositorio en memoria (ideal para tests rápidos).
+`./scripts/start-local.sh` **siempre** depende de Postgres en Docker (`deploy/docker-compose.yml` → servicio `db`). Si Docker no está disponible, el script falla (ya no cae a repositorio en memoria).
+
 Con Postgres local o Render usa el mismo esquema (Alembic + pgvector).
 
 ### Postgres local + producción (paridad)
@@ -60,10 +61,12 @@ PDF se omite automáticamente si las libs no están disponibles.
 ## Docker (local — paridad dev==prod)
 
 ```bash
-docker compose -f deploy/docker-compose.yml up --build
-# Levanta Postgres+pgvector (db) y la app con DATABASE_URL apuntando a ella.
+docker compose -f deploy/docker-compose.yml --env-file .env up --build
+# Levanta Postgres+pgvector (db) y la app; `app` espera healthcheck de `db`.
+# --env-file .env inyecta secretos (OPENAI_API_KEY, SITE_PASSWORD, …).
 ```
 
+Para desarrollo en el Mac (recomendado): `./scripts/start-local.sh` — la app corre en el host y **siempre** depende del servicio `db` en Docker.
 ## Arquitectura
 
 **Runtime (OpenAI Agents SDK).** Un solo interlocutor:

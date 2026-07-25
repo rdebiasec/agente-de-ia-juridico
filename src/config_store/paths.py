@@ -9,7 +9,10 @@ from src.config import get_settings
 KIND_PROMPT = "prompt"
 KIND_GUARDRAIL = "guardrail"
 KIND_SKILL = "skill"
-VALID_KINDS = frozenset({KIND_PROMPT, KIND_GUARDRAIL, KIND_SKILL})
+KIND_AGENT_GUARDRAIL = "agent_guardrail"
+VALID_KINDS = frozenset({KIND_PROMPT, KIND_GUARDRAIL, KIND_SKILL, KIND_AGENT_GUARDRAIL})
+
+AGENT_GUARDRAIL_CLASSES = frozenset({"input", "output", "tools"})
 
 
 def project_root() -> Path:
@@ -28,12 +31,30 @@ def guardrails_dir() -> Path:
     return project_root() / "config" / "guardrails"
 
 
+def agent_guardrails_dir() -> Path:
+    return guardrails_dir() / "agents"
+
+
 def skills_dir() -> Path:
     root = project_root()
     for candidate in (root / ".cursor" / "skills", root / "agente" / "skills"):
         if candidate.is_dir() and any(candidate.glob("*/SKILL.md")):
             return candidate
     return root / ".cursor" / "skills"
+
+
+def agent_guardrail_key(agent_id: str, clase: str) -> str:
+    return f"{agent_id}__{clase}"
+
+
+def parse_agent_guardrail_key(key: str) -> tuple[str, str]:
+    """Devuelve (agent_id, clase) o lanza ValueError."""
+    if "__" not in (key or ""):
+        raise ValueError(f"agent_guardrail key inválida: {key}")
+    agent_id, clase = key.rsplit("__", 1)
+    if not agent_id or clase not in AGENT_GUARDRAIL_CLASSES:
+        raise ValueError(f"agent_guardrail key inválida: {key}")
+    return agent_id, clase
 
 
 def path_for(kind: str, key: str) -> Path:
@@ -43,6 +64,9 @@ def path_for(kind: str, key: str) -> Path:
         return agent_prompts_dir() / f"{key}.md"
     if kind == KIND_GUARDRAIL:
         return guardrails_dir() / f"{key}.md"
+    if kind == KIND_AGENT_GUARDRAIL:
+        agent_id, clase = parse_agent_guardrail_key(key)
+        return agent_guardrails_dir() / agent_id / f"{clase}.md"
     if kind == KIND_SKILL:
         return skills_dir() / key / "SKILL.md"
     raise ValueError(f"kind desconocido: {kind}")
