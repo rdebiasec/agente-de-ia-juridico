@@ -44,7 +44,7 @@ flowchart TB
 
   subgraph render [Render]
     Web[agente-de-ia-juridico]
-    PGprod[(agente-db)]
+    PGprod[(agente-ia-juridico-db)]
   end
 
   subgraph external [Externos]
@@ -71,7 +71,7 @@ flowchart TB
 | Código | GitHub `main` | Sí | Alta | 0 | 15–30 min |
 | Secretos | Mac + Render | **No** | Crítica | Manual | 30–60 min |
 | Postgres local | Docker `deploy_pgdata` | No | Media | 24 h | 30–60 min |
-| Postgres prod | Render `agente-db` | No | Alta | 24 h | 1–2 h |
+| Postgres prod | Render `agente-ia-juridico-db` | No | Alta | 24 h | 1–2 h |
 | RAG (`document_chunks`) | Postgres | No | Baja | N/A | 15 min (`ingest_kb`) |
 | Progreso auditoría | Postgres | No | Alta | 24 h | 15 min |
 | Config store (prompts/guardrails/skills) | Postgres `config_versions` + `config_active` | Seed en git | Alta | 24 h | 15 min |

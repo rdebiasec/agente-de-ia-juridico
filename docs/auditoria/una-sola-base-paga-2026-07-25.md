@@ -34,8 +34,8 @@ Wipe de emergencia (ops): [`.github/workflows/ops-wipe-schema.yml`](../../.githu
 
 ## Pendiente humano
 
-Borrar la base gratis huérfana en el dashboard (el API/MCP no la elimina):
+Borrar la base gratis huérfana en el dashboard (requiere login en Render; el API/MCP no la elimina):
 
 https://dashboard.render.com/d/dpg-d9cpmge1a83c739j60dg-a
 
-Nombre: `agente-db`. Ya no está referenciada por el blueprint ni por el servicio.
+Nombre: `agente-db`. Ya no está en `render.yaml`, ni en el servicio, ni en runbooks. Tras borrarla, esta sección se puede tachar.

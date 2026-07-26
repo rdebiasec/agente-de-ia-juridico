@@ -16,7 +16,7 @@ Acción de log: `put_progress_rejected` con detalle `regression_blocked:N->M`.
 
 ## 1. Listar progreso (producción)
 
-Obtener **External Database URL** en Render → Postgres **`agente-db`** → Connect.
+Obtener **External Database URL** en Render → Postgres **`agente-ia-juridico-db`** → Connect.
 Convertir `postgres://` → `postgresql+psycopg://` si hace falta.
 
 ```bash
@@ -57,7 +57,7 @@ Ver también DR D10 en [`docs/operaciones/PLAN_DESASTRE.md`](../operaciones/PLAN
 
 Con [Render MCP](https://render.com/docs/mcp-server) configurado en Cursor (`~/.cursor/mcp.json`) y workspace **DBX Solutions**:
 
-1. `list_postgres_instances` → id de `agente-db` (p. ej. `dpg-…`).
+1. `list_postgres_instances` → id de `agente-ia-juridico-db` (p. ej. `dpg-…`).
 2. `query_render_postgres` (solo lectura), ejemplos:
 
 ```sql

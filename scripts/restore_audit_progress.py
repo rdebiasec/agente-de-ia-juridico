@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Lista o restaura progreso del portal de auditoría desde audit_portal_progress_history.
 
-Uso (producción: External Database URL desde Render → agente-db):
+Uso (producción: External Database URL desde Render → agente-ia-juridico-db):
   DATABASE_URL='postgresql+psycopg://...' python scripts/restore_audit_progress.py \\
     --email michele.aguilar@dbx-solutions.com --list
 
