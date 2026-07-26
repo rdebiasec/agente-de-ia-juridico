@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 8f394133a2bae7a0 -->
 ---
 name: construir-cronologia-penal
 description: Skill estrategico penal-victimas: ordenar hechos en linea de tiempo. Use when the workflow requires `construir_cronologia_penal`.

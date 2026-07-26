@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 2a3c9fd70cffcad4 -->
 ---
 name: generar-preguntas-aclaracion
 description: Skill operativo penal-victimas: crear preguntas para victima, testigos o abogado humano sin inducir respuestas. Use when the workflow requires `generar_preguntas_aclaracion`.

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: e6388f266e03a960 -->
 ---
 name: redactar-recurso-o-intervencion-preliminar
 description: Skill operativo penal-victimas: evaluar y preparar insumos para recurso o intervencion; redaccion final en redactor. Use when the workflow requires `redactar_recurso_o_intervencion_preliminar`.

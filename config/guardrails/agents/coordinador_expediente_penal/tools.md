@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 623bba9c1977ac9d -->
+<!-- config-version: 2; checksum: 623bba9c1977ac9d -->
 # Guardrails de tools — coordinador_expediente_penal
 
 ## allowed_tools_policy

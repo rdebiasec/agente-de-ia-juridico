@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 1d1b772ebaccba72 -->
 ---
 name: detectar-alucinaciones-legales
 description: Skill operativo penal-victimas: detectar fuentes, hechos, conclusiones o citas inventadas. Use when the workflow requires `detectar_alucinaciones_legales`.

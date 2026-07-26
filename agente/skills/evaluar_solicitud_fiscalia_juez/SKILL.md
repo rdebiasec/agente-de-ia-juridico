@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: cd0b2cb6a658300a -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Skill operativo penal-victimas: evaluar si una solicitud a Fiscalia o juez es procedente y conveniente. Use when the workflow requires `evaluar_solicitud_fiscalia_juez`.

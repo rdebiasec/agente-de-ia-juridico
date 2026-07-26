@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4a6f7b75dbd7622b -->
 ---
 name: analizar-intervencion-victima
 description: Skill estrategico penal-victimas: definir intervencion posible de la victima en una actuacion o audiencia. Use when the workflow requires `analizar_intervencion_victima`.

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 60ac8fb70bc57b36 -->
 ---
 name: mapear-tipo-penal-hecho-prueba
 description: Skill estrategico penal-victimas: relacionar elementos del tipo con hechos y pruebas. Use when the workflow requires `mapear_tipo_penal_hecho_prueba`.

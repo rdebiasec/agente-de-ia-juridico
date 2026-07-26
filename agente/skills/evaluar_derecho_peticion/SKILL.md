@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 386849bac40da393 -->
 ---
 name: evaluar-derecho-peticion
 description: Skill estrategico penal-victimas: revisar si existe derecho de peticion incumplido. Use when the workflow requires `evaluar_derecho_peticion`.

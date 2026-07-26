@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 8aeeb5b91b6a041b -->
 ---
 name: preservar-evidencia-digital
 description: Skill critico penal-victimas: definir medidas para proteger evidencia digital sin alterarla. Use when the workflow requires `preservar_evidencia_digital`.

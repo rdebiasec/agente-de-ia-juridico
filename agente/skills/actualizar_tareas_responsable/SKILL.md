@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 72e22328967617a2 -->
+<!-- config-version: 2; checksum: 72e22328967617a2 -->
 ---
 name: actualizar-tareas-responsable
 description: Skill atomico penal-victimas: mantener lista de tareas por agente o abogado. Use when the workflow requires `actualizar_tareas_responsable`.

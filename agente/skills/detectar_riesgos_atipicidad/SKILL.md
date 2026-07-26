@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 5c1b57f7dcc68555 -->
 ---
 name: detectar-riesgos-atipicidad
 description: Skill operativo penal-victimas: detectar cuando un caso puede ser atipico o tener naturaleza no penal. Use when the workflow requires `detectar_riesgos_atipicidad`.

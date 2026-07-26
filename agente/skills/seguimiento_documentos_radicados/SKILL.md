@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 832d683f212ba195 -->
 ---
 name: seguimiento-documentos-radicados
 description: Skill atomico penal-victimas: controlar documentos enviados y respuestas pendientes. Use when the workflow requires `seguimiento_documentos_radicados`.

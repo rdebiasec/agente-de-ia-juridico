@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: ffb4c2564fd747a4 -->
 ---
 name: redactar-tutela-penal-preliminar
 description: Skill critico penal-victimas: crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente. Use when the workflow requires `redactar_tutela_penal_preliminar`.

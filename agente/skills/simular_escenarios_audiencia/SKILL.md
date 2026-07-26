@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 90508181b21c5e11 -->
 ---
 name: simular-escenarios-audiencia
 description: Skill estrategico penal-victimas: plantear escenarios probables y preparacion del abogado. Use when the workflow requires `simular_escenarios_audiencia`.

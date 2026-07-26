@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 1245aecd690206e4 -->
+<!-- config-version: 2; checksum: 2bdff98055ebae51 -->
 ---
 name: detectar-vacios-factuales
 description: Skill operativo penal-victimas: identificar lo que falta para comprender o probar el caso. Use when the workflow requires `detectar_vacios_factuales`.

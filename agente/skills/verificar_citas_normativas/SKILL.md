@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0b578bd89e2be08f -->
 ---
 name: verificar-citas-normativas
 description: Skill atomico penal-victimas: verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes. Use when the workflow requires `verificar_citas_normativas`.

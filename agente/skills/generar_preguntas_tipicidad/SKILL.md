@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4ef35bfb3be27a69 -->
 ---
 name: generar-preguntas-tipicidad
 description: Skill operativo penal-victimas: crear preguntas para completar elementos del tipo penal. Use when the workflow requires `generar_preguntas_tipicidad`.

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: b7ed0df8fbeecbb9 -->
+<!-- config-version: 2; checksum: b7ed0df8fbeecbb9 -->
 ---
 name: clasificar-tarea-y-etapa
 description: Skill operativo penal-victimas: clasificar la solicitud del usuario interno y detectar la etapa aparente del caso. Use when the workflow requires `clasificar_tarea_y_etapa`.

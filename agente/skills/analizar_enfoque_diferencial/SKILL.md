@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: d18696736c9367df -->
 ---
 name: analizar-enfoque-diferencial
 description: Skill atomico penal-victimas: identificar sujetos de especial proteccion y necesidades diferenciadas. Use when the workflow requires `analizar_enfoque_diferencial`.

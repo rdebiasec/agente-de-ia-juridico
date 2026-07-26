@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 6d5310d61a026d2d -->
 ---
 name: verificar-jurisprudencia
 description: Skill atomico penal-victimas: revisar sentencias, radicados, fechas y organos judiciales. Use when the workflow requires `verificar_jurisprudencia`.

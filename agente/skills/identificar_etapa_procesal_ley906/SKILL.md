@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: b09c0f9dcb35cd33 -->
+<!-- config-version: 2; checksum: 7501fbcae3060eb9 -->
 ---
 name: identificar-etapa-procesal-ley906
 description: Skill estrategico penal-victimas: determinar etapa del caso segun Ley 906. Use when the workflow requires `identificar_etapa_procesal_ley906`.

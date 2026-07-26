@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4b6bc89ee678382f -->
 ---
 name: controlar-separacion-hecho-inferencia
 description: Skill atomico penal-victimas: verificar que no se confundan hechos probados, narrados, inferidos y pendientes. Use when the workflow requires `controlar_separacion_hecho_inferencia`.

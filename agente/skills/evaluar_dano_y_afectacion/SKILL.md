@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: db220061159d9492 -->
 ---
 name: evaluar-dano-y-afectacion
 description: Skill atomico penal-victimas: organizar danos y afectaciones alegadas. Use when the workflow requires `evaluar_dano_y_afectacion`.

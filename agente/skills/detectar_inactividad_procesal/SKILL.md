@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0b2ea6c6662243a8 -->
 ---
 name: detectar-inactividad-procesal
 description: Skill operativo penal-victimas: alertar falta de movimientos por periodo relevante. Use when the workflow requires `detectar_inactividad_procesal`.

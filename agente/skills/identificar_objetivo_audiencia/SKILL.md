@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: cd98e7348a29dcdf -->
 ---
 name: identificar-objetivo-audiencia
 description: Skill estrategico penal-victimas: definir objetivo juridico y tactico de la audiencia para la victima. Use when the workflow requires `identificar_objetivo_audiencia`.

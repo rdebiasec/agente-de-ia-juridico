@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4fb48d2762c6816b -->
 ---
 name: revisar-mecanismos-ordinarios
 description: Skill estrategico penal-victimas: verificar si hay vias ordinarias antes de tutela. Use when the workflow requires `revisar_mecanismos_ordinarios`.

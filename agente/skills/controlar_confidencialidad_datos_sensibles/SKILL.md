@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 5f134c76d4182cfa -->
 ---
 name: controlar-confidencialidad-datos-sensibles
 description: Skill atomico penal-victimas: detectar datos sensibles o innecesarios. Use when the workflow requires `controlar_confidencialidad_datos_sensibles`.

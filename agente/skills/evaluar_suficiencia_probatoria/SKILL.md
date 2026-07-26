@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: eb7b485a65190d41 -->
 ---
 name: evaluar-suficiencia-probatoria
 description: Skill estrategico penal-victimas: evaluar preliminarmente fuerza de soporte probatorio. Use when the workflow requires `evaluar_suficiencia_probatoria`.

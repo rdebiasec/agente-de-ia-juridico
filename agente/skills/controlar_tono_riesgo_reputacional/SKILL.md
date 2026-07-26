@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 09a4fee7817169f0 -->
 ---
 name: controlar-tono-riesgo-reputacional
 description: Skill atomico penal-victimas: revisar tono profesional y evitar lenguaje riesgoso. Use when the workflow requires `controlar_tono_riesgo_reputacional`.

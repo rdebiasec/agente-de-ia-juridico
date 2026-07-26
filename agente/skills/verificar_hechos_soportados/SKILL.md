@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: b2b037d073029466 -->
 ---
 name: verificar-hechos-soportados
 description: Skill operativo penal-victimas: revisar si cada afirmacion factual tiene fuente. Use when the workflow requires `verificar_hechos_soportados`.
