@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 6aa2fd4871e65eee -->
+<!-- config-version: 1; checksum: 62c3fdf503946c5b -->
 ---
 name: priorizar-objetivos-representacion
 description: Skill operativo penal-victimas: ordenar objetivos de la representacion. Use when the workflow requires `priorizar_objetivos_representacion`.
@@ -14,13 +14,13 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_representacion_victimas`
-- `coordinador_expediente_penal`
 
 ## Purpose
 Listar y ordenar objetivos posibles de la representación de la víctima según urgencia, viabilidad y alineación con sus intereses, documentando trade-offs para decisión del abogado.
 
 ## Rol en coordinador
-Priorización **preliminar** en triage (ej. el abogado pregunta “¿qué atacamos primero?”). El análisis completo de intereses y teoría del caso corresponde a `analista_representacion_victimas`.
+**MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
+
 
 ## Inputs
 - Intereses declarados por la víctima o el abogado (justicia, reparación, celeridad, protección, no confrontación).

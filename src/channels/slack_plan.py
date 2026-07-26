@@ -80,9 +80,20 @@ def _clear_pending(thread_key: str, plan_id: str | None = None) -> None:
 
 
 def _format_plan_message(plan_dict: dict) -> str:
+    if plan_dict.get("status") == "awaiting_input":
+        missing = (plan_dict.get("triage_snapshot") or {}).get(
+            "datos_faltantes_bloqueantes", []
+        )
+        bullets = "\n".join(f"• {item}" for item in missing)
+        return (
+            "*Verificación del expediente incompleta*\n"
+            "Como Gerente del Caso Penal, no delegaré todavía. Envíe:\n"
+            f"{bullets}\n\n"
+            "Cuando aporte los datos, volveré a verificar y propondré el plan."
+        )
     kind = plan_dict.get("template_kind") or "generico"
     lines = [
-        "*Plan de ejecución propuesto* (voz del coordinador del expediente)",
+        "*Plan de ejecución propuesto* (voz del Gerente del Caso Penal)",
         f"*Plantilla:* {template_label(kind)} (`{kind}`)",
         f"*Objetivo:* {plan_dict.get('objective', '')}",
         "",
@@ -179,6 +190,9 @@ async def handle_slack_plan_message(
     )
     if err or not plan:
         return False
+    if plan.status == "awaiting_input":
+        await say(_format_plan_message(plan.to_dict()), thread_ts=thread_ts)
+        return True
 
     _pending_plans[key] = plan.plan_id
     _attach_slack_thread_key(plan.plan_id, key)

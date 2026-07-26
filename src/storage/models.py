@@ -28,6 +28,12 @@ class Expediente:
     etapa_actual: str | None = None
     partes: list[dict] = field(default_factory=list)
     terminos: list[dict] = field(default_factory=list)
+    hechos_minimos_confirmados: bool = False
+    poder_acreditado: bool = False
+    ultima_actuacion_confirmada: bool = False
+    faltantes_gerencia: list[str] = field(default_factory=list)
+    tareas_gerencia: list[dict] = field(default_factory=list)
+    metricas_gerencia: dict = field(default_factory=dict)
     involucra_menor: bool = False
     datos_sensibles: bool = False
     actualizado_en: float = field(default_factory=time.time)
@@ -44,6 +50,11 @@ class Expediente:
             partes.append(f"- Radicado: {self.radicado}")
         if self.etapa_actual:
             partes.append(f"- Etapa actual: {self.etapa_actual}")
+        if self.faltantes_gerencia:
+            partes.append(f"- Faltantes bloqueantes: {', '.join(self.faltantes_gerencia)}")
+        tareas_pendientes = [t for t in self.tareas_gerencia if t.get("estado") == "pendiente"]
+        if tareas_pendientes:
+            partes.append(f"- Tareas de gerencia pendientes: {len(tareas_pendientes)}")
         if self.involucra_menor:
             partes.append("- Atención: involucra menor de edad — minimización y no revictimización reforzada.")
         if self.datos_sensibles:

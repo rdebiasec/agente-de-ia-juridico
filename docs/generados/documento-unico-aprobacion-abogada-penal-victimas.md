@@ -26,7 +26,7 @@ Este sistema tiene **11 agentes** y **90 skills** para apoyar la representacion 
 
 ### Los 11 agentes
 
-1. `coordinador_expediente_penal` — Coordinador del expediente
+1. `coordinador_expediente_penal` — Gerente del Caso Penal
 2. `analista_cronologia_hechos_penales` — Analista de cronologia y hechos
 3. `analista_tipicidad_y_responsabilidad_penal` — Analista de tipicidad y responsabilidad
 4. `analista_ruta_procesal_ley906` — Analista de ruta procesal Ley 906
@@ -257,13 +257,13 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ### 8.1 `coordinador_expediente_penal`
 
-**Nombre corto:** Coordinador del expediente
+**Nombre corto:** Gerente del Caso Penal
 
-**Proposito:** Recibe la consulta de la abogada, entiende que necesita y la envia al especialista correcto.
+**Proposito:** Verifica la completitud del expediente, prioriza, delega al especialista correcto y controla los pendientes del caso.
 
-**Problema que resuelve:** Evita perder tiempo en respuestas generales o mal enfocadas; ordena el trabajo por prioridad legal.
+**Problema que resuelve:** Evita delegar o redactar sobre expedientes incompletos y ordena el trabajo por prioridad legal.
 
-**Por que es necesario en Colombia:** En penal-victimas la estrategia cambia por etapa Ley 906; este coordinador reduce errores de enfoque.
+**Por que es necesario en Colombia:** En penal-victimas la estrategia cambia por etapa Ley 906; esta gerencia reduce errores de enfoque y pérdida de términos.
 
 **No reemplaza:** El analisis de fondo por especialidad ni la aprobacion final.
 

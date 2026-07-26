@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 88b89d661a87326e -->
 ---
 name: gestionar-faltantes-expediente
 description: Skill operativo penal-victimas: identificar datos y documentos faltantes antes de analizar o redactar. Use when the workflow requires `gestionar_faltantes_expediente`.
@@ -10,6 +11,9 @@ disable-model-invocation: true
 - Category: `Skills transversales`
 - Skill ID: `gestionar_faltantes_expediente`
 - Tier: `operativo`
+
+## Index Blurb
+Gate documental del POC: lista faltantes bloqueantes/deseables y decide si puede continuar.
 
 ## Used By Agents
 - `coordinador_expediente_penal`
@@ -51,10 +55,18 @@ Gate de completitud documental exclusivo del coordinador. Se ejecuta tras `clasi
 - **g6:** No listar datos sensibles innecesarios en la solicitud de completitud.
 - **g8:** Aviso de revisión profesional.
 
+## Handoff
+- `puede_continuar=sí` → tool del especialista según `tipo_tarea`.
+- `puede_continuar=no` → `actualizar_tareas_responsable` con tareas de recolección + mensaje al abogado.
+
 ## No duplicar
-- **vs `detectar_vacios_factuales`:** este skill es **checklist documental/administrativo**; vacíos factuales son lagunas en la narrativa o prueba del hecho.
+- **vs `detectar_vacios_factuales`:** este skill es **checklist documental/administrativo**; vacíos factuales son lagunas en la narrativa o prueba del hecho (especialista cronología).
 - No inventariar evidencia probatoria (`inventariar_evidencia`).
 - No clasificar fuentes (`clasificar_fuente_factual`).
+
+## Best Practices
+- Pedir 3–5 faltantes concretos, no un cuestionario largo.
+- Separar bloqueantes de deseables en el mensaje al abogado.
 
 ## Riesgo si se omite
 Memoriales o solicitudes con anexos inexistentes, poder inválido o radicado errado → rechazo o nulidad.

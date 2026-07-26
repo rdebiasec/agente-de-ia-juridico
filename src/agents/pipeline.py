@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.storage.models import Expediente
 
 _TUTELA_FIELDS = (
     ("accionante", re.compile(r"\baccionante\b", re.I)),
@@ -118,6 +122,8 @@ def run_pre_validations(
     history: list[dict],
     expediente_resumen: str | None,
     trace: dict,
+    expediente: Expediente | None = None,
+    destination: str | None = None,
 ) -> tuple[bool, str | None]:
     """Validaciones encadenadas antes de llamar al coordinador penal."""
     if not message or not message.strip():
@@ -146,6 +152,41 @@ def run_pre_validations(
             "pending",
             "Expediente aún sin datos estructurados; el agente debe solicitar rol de víctima, etapa y radicado.",
             kind="context",
+        )
+
+    if expediente is not None and destination:
+        from src.agents.completeness import (
+            assess_completeness,
+            format_missing_request,
+            persist_verification,
+        )
+
+        verification = assess_completeness(
+            message,
+            destination=destination,
+            expediente=expediente,
+        )
+        persist_verification(expediente, verification, destination=destination)
+        trace["gerencia_verification"] = {
+            "puede_continuar": verification.puede_continuar,
+            "faltantes": verification.faltantes,
+            "destination": destination,
+        }
+        if not verification.puede_continuar:
+            _span(
+                trace,
+                "Gerencia: verificación de completitud",
+                "blocked",
+                f"Delegación detenida; faltan: {', '.join(verification.faltantes)}.",
+                kind="guardrail",
+            )
+            return False, format_missing_request(verification.faltantes)
+        _span(
+            trace,
+            "Gerencia: verificación de completitud",
+            "done",
+            "El expediente cumple los mínimos para el destino solicitado.",
+            kind="guardrail",
         )
 
     if turn > 1:

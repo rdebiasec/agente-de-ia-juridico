@@ -2632,8 +2632,8 @@
 
 ## Resumen por agente
 
-### `coordinador_expediente_penal` — Coordinador del expediente
-- **Skills:** 11 · **Flujo:** Recibe la consulta del despacho, entiende que necesita y la envia al especialista correcto.
+### `coordinador_expediente_penal` — Gerente del Caso Penal
+- **Skills:** 11 · **Flujo:** Verifica completitud, prioriza, delega y mantiene faltantes, tareas y responsables hasta su cierre.
 
 ### `analista_cronologia_hechos_penales` — Analista de cronologia y hechos
 - **Skills:** 9 · **Flujo:** Convierte relatos y documentos en una historia factual ordenada y verificable.

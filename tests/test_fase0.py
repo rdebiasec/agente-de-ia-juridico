@@ -103,7 +103,7 @@ async def test_chat_mixed_scope_reconduces_to_penal():
 
 
 @pytest.mark.asyncio
-async def test_chat_seguimiento_capability_is_active():
+async def test_chat_seguimiento_requires_complete_expediente():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -114,12 +114,13 @@ async def test_chat_seguimiento_capability_is_active():
     data = r.json()
     lowered = data["text"].lower()
     assert "no está activa" not in lowered
-    assert data["pending_review"] is True
-    assert data["trace"].get("sent_to_agent") == "gestor_seguimiento_procesal_penal"
+    assert data["pending_review"] is False
+    assert data["trace"]["blocked"] is True
+    assert "número de radicado" in lowered
 
 
 @pytest.mark.asyncio
-async def test_chat_tutela_capability_is_active():
+async def test_chat_tutela_requires_complete_expediente():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
@@ -130,8 +131,9 @@ async def test_chat_tutela_capability_is_active():
     data = r.json()
     lowered = data["text"].lower()
     assert "no está activa" not in lowered
-    assert data["pending_review"] is True
-    assert data["trace"].get("sent_to_agent") == "evaluador_derechos_fundamentales_tutela"
+    assert data["pending_review"] is False
+    assert data["trace"]["blocked"] is True
+    assert "completar el expediente" in lowered
 
 
 @pytest.mark.asyncio

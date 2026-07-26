@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 46f10c55aeaded52 -->
+<!-- config-version: 1; checksum: 1245aecd690206e4 -->
 ---
 name: detectar-vacios-factuales
 description: Skill operativo penal-victimas: identificar lo que falta para comprender o probar el caso. Use when the workflow requires `detectar_vacios_factuales`.
@@ -14,7 +14,6 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_cronologia_hechos_penales`
-- `coordinador_expediente_penal`
 
 ## Purpose
 Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero.
@@ -23,7 +22,8 @@ Identificar información factual ausente que impide comprender el caso o sostene
 Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `generar_preguntas_aclaracion`. Prioriza vacíos que afectan cronología y teoría factual.
 
 ## Rol en coordinador
-Detección rápida de vacíos en el relato o expediente al recibir el caso. No sustituye el análisis cronológico profundo de este agente.
+**MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
+
 
 ## Inputs
 - Relato disponible (víctima, abogado, documentos).

@@ -2,6 +2,15 @@
 
 .desk-page {
   padding: 0.45rem 0.65rem 0.35rem;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.desk-abogado {
+  height: 100%;
+  overflow: hidden;
 }
 
 .desk-header {

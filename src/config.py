@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     session_cookie_secure: bool = False
     # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
     dev_auto_login: bool = False
+    # Correo con el que /auditoria abre sesión sola cuando DEV_AUTO_LOGIN=true.
+    # Úselo con su correo habitual para conservar el progreso guardado en local.
+    dev_audit_email: str = ""
     # Telemetría de depuración (middleware /debug/*). Nunca activar en producción.
     app_debug: bool = False
     # Cifrado en reposo (Fernet). Si vacío, se deriva de SESSION_SECRET cuando exista.

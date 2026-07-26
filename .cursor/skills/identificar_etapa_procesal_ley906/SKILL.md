@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: f0831071ca0aac72 -->
+<!-- config-version: 1; checksum: b09c0f9dcb35cd33 -->
 ---
 name: identificar-etapa-procesal-ley906
 description: Skill estrategico penal-victimas: determinar etapa del caso segun Ley 906. Use when the workflow requires `identificar_etapa_procesal_ley906`.
@@ -14,7 +14,6 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_ruta_procesal_ley906` (skill primario del agente)
-- `coordinador_expediente_penal`
 
 ## Purpose
 Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres.
@@ -23,7 +22,8 @@ Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en act
 Primer paso del agente tras recibir caso del coordinador. Toda actuación posterior depende de etapa confirmada o `[PENDIENTE DE VERIFICAR]`.
 
 ## Rol en coordinador
-Hipótesis de etapa para enrutamiento cuando el abogado no la indica. Derivar al analista ruta 906 para determinación definitiva.
+**MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
+
 
 ## Inputs
 - Radicado y últimas actuaciones procesales (auto, informe, audiencia, imputación).

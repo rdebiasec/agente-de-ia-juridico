@@ -30,7 +30,7 @@ async def test_trace_allowed_drafting_sets_pending_review():
 
 
 @pytest.mark.asyncio
-async def test_trace_followup_capability_is_active():
+async def test_trace_followup_is_blocked_until_complete():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         res = await client.post(
@@ -39,16 +39,15 @@ async def test_trace_followup_capability_is_active():
         )
     assert res.status_code == 200
     data = res.json()
-    assert data["pending_review"] is True
+    assert data["pending_review"] is False
     trace = data.get("trace") or {}
-    assert trace.get("blocked") is False
-    assert trace.get("human_review_required") is True
-    assert trace.get("sent_to_agent") == "gestor_seguimiento_procesal_penal"
-    assert trace.get("skill_kan") == "PEN-SEGUIMIENTO"
+    assert trace.get("blocked") is True
+    assert trace.get("sent_to_agent") == "none"
+    assert trace["gerencia_verification"]["puede_continuar"] is False
     assert isinstance(trace.get("completion"), dict)
     assert any(
-        step.get("step") in {"Consulté al equipo interno", "Enruté al especialista"}
-        and step.get("status") == "done"
+        step.get("step") == "Gerencia: verificación de completitud"
+        and step.get("status") == "blocked"
         for step in trace.get("steps", [])
     )
 

@@ -82,7 +82,7 @@ def agent_display_name(agent_id: str) -> str:
 def desk_label(agent_id: str) -> str:
     """Etiqueta de despacho para planes/chat (sin IDs técnicos como interlocutor)."""
     if agent_id == "coordinador_expediente_penal":
-        return "Coordinador del expediente"
+        return "Gerente del Caso Penal"
     name = agent_display_name(agent_id)
     if name == agent_id:
         return "Equipo interno"

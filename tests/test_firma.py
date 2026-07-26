@@ -61,10 +61,9 @@ def test_orquestador_tiene_roster_completo():
 
 
 @pytest.mark.asyncio
-async def test_run_agent_voz_poc_conserva_backoffice_en_traza():
-    """Cara al abogado = POC; especialista queda en traza (sent_to_agent)."""
+async def test_run_agent_gate_conserva_destino_sin_delegar():
+    """El gate conserva el destino solicitado, pero no invoca al especialista."""
     from src.agents import runner as runner_mod
-    from src.agents.orchestrator import POC_AGENT_ID
 
     result = await runner_mod.run_agent(
         "Evalúe procedencia de tutela por vulneración de derecho fundamental",
@@ -72,12 +71,12 @@ async def test_run_agent_voz_poc_conserva_backoffice_en_traza():
         session_id="web:poc-voice-test",
         user_id="poc-voice-test",
     )
-    assert result["agent"] == POC_AGENT_ID
-    assert result["trace"]["sent_to_agent"] == "evaluador_derechos_fundamentales_tutela"
-    assert result["trace"].get("selected_agent") in {
-        "evaluador_derechos_fundamentales_tutela",
-        "fallback",
-    }
+    assert result["agent"] == "guardrail"
+    assert result["trace"]["sent_to_agent"] == "none"
+    assert result["trace"]["gerencia_verification"]["destination"] == (
+        "evaluador_derechos_fundamentales_tutela"
+    )
+    assert result["trace"]["blocked"] is True
 
 
 def test_ensure_poc_voice_envuelve_especialista_residual():
@@ -88,7 +87,7 @@ def test_ensure_poc_voice_envuelve_especialista_residual():
         last_agent_name="analista_tipicidad_y_responsabilidad_penal",
         backoffice_agent="analista_tipicidad_y_responsabilidad_penal",
     )
-    assert wrapped.lower().startswith("como coordinador del expediente")
+    assert wrapped.lower().startswith("como gerente del caso penal")
     assert "Hallazgo interno de tipicidad." in wrapped
     assert (
         _ensure_poc_voice(

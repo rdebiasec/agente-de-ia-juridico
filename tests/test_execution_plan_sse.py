@@ -11,6 +11,24 @@ from src.agents.plan_executor import schedule_execute_async, wait_for_plan_compl
 from src.agents.planner import approve_plan
 from src.main import app
 
+FACTS_MESSAGE = (
+    "Cronología: la víctima denunció lesiones ocurridas el 3 de junio y la "
+    "Fiscalía recibió el relato con sus anexos."
+)
+ROUTE_MESSAGE = (
+    "Evalúe ruta procesal Ley 906. Radicado 11001-60-00-2026-123456. "
+    "La víctima denunció lesiones; etapa actual: indagación."
+)
+FOLLOWUP_MESSAGE = (
+    "Haga seguimiento del radicado 11001-60-00-2026-123456. La víctima denunció "
+    "lesiones. Última actuación: audiencia de imputación."
+)
+MEMORIAL_MESSAGE = (
+    "Redacte solicitud de impulso. Radicado 11001-60-00-2026-123456. "
+    "La víctima denunció lesiones. Tengo poder firmado. Última actuación: "
+    "audiencia de imputación. Partes: víctima y procesado."
+)
+
 
 @pytest.fixture(autouse=True)
 def reset_broker():
@@ -26,7 +44,7 @@ async def test_execute_returns_202():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Cronología de hechos del caso penal.",
+                "message": FACTS_MESSAGE,
                 "channel": "web",
                 "user_id": "sse-user-1",
             },
@@ -51,7 +69,7 @@ async def test_broker_emits_terminal_events():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Evalúe ruta procesal Ley 906.",
+                "message": ROUTE_MESSAGE,
                 "channel": "web",
                 "user_id": "sse-user-2",
             },
@@ -77,7 +95,7 @@ async def test_sse_replays_events_after_execution():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Evalúe ruta procesal Ley 906.",
+                "message": ROUTE_MESSAGE,
                 "channel": "web",
                 "user_id": "sse-user-2b",
             },
@@ -121,7 +139,7 @@ async def test_plan_result_after_execution():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Seguimiento de radicado penal.",
+                "message": FOLLOWUP_MESSAGE,
                 "channel": "web",
                 "user_id": "sse-user-3",
             },
@@ -153,7 +171,7 @@ async def test_legacy_approve_and_execute_still_works():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Redacte solicitud de impulso procesal.",
+                "message": MEMORIAL_MESSAGE,
                 "channel": "web",
                 "user_id": "sse-legacy",
             },
@@ -175,7 +193,7 @@ async def test_web_flow_no_regression():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Cronología y vacíos probatorios del caso.",
+                "message": FACTS_MESSAGE,
                 "channel": "web",
                 "user_id": "flow-user",
             },
@@ -218,7 +236,7 @@ async def test_execute_retry_after_failed():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Evalúe ruta procesal.",
+                "message": ROUTE_MESSAGE,
                 "channel": "web",
                 "user_id": "retry-user",
             },
@@ -270,7 +288,7 @@ async def test_slack_plan_handler_execute_keyword():
         messages.append(text)
 
     handled = await handle_slack_plan_message(
-        text="Necesito cronología de hechos",
+        text=FACTS_MESSAGE,
         user_id="U123",
         say=say,
         thread_ts="T1",
@@ -316,7 +334,10 @@ async def test_slack_plan_execute_survives_memory_cache_clear(monkeypatch):
         messages.append(text)
 
     await handle_slack_plan_message(
-        text="Necesito matriz hecho-prueba del caso",
+        text=(
+            "Necesito matriz hecho-prueba: la víctima denunció lesiones ocurridas "
+            "el 3 de junio y aportó fotografías y testigos."
+        ),
         user_id="U999",
         say=say,
         thread_ts="T-RESTART",

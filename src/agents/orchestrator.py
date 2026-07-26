@@ -87,26 +87,55 @@ def _load_agent_prompt(agent_id: str) -> str:
         return path.read_text(encoding="utf-8").strip()
 
 
-def _policy_block() -> str:
-    """Políticas de guardrail editables (texto) inyectadas en instrucciones."""
+_APPROVAL_REQUIRED_TOOLS = frozenset(
+    {
+        "redactor_documentos_juridicos_penales",
+        "evaluador_derechos_fundamentales_tutela",
+    }
+)
+
+
+def _policy_block(agent_id: str | None = None) -> str:
+    """Políticas G1–G10 + agent_guardrail Input/Output/Tools inyectadas en instrucciones."""
+    parts: list[str] = []
     try:
         from src.config_store import load_guardrail_policies
 
         policies = load_guardrail_policies()
     except Exception:
-        return ""
-    if not policies:
-        return ""
-    lines = ["Políticas obligatorias del despacho (guardrails de política):"]
-    for g in policies:
-        lines.append(f"- [{g['id']}] {g['name']}: {g['desc']}")
-    return "\n".join(lines)
+        policies = []
+    if policies:
+        lines = ["Políticas obligatorias del despacho (guardrails de política):"]
+        for g in policies:
+            lines.append(f"- [{g['id']}] {g['name']}: {g['desc']}")
+        parts.append("\n".join(lines))
+
+    if agent_id:
+        try:
+            from src.config_store import KIND_AGENT_GUARDRAIL, get_active_content
+            from src.config_store.paths import agent_guardrail_key
+            from src.config_store.service import strip_header
+        except Exception:
+            return "\n\n".join(parts)
+
+        labels = {"input": "INPUT", "output": "OUTPUT", "tools": "TOOLS"}
+        for clase, label in labels.items():
+            try:
+                data = get_active_content(
+                    KIND_AGENT_GUARDRAIL, agent_guardrail_key(agent_id, clase)
+                )
+                body = strip_header((data.get("content") or "")).strip()
+                if body:
+                    parts.append(f"### Guardrails de agente ({label})\n{body}")
+            except Exception:
+                continue
+    return "\n\n".join(parts)
 
 
 def _build_agent(name: str, *, with_tools: bool = True) -> Agent:
     base = _load_system_prompt()
     rol = _load_agent_prompt(name)
-    policy = _policy_block()
+    policy = _policy_block(name)
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
     if policy:
         parts.append(policy)
@@ -148,7 +177,7 @@ def build_preparador_estrategico_audiencias_penales_agent() -> Agent:
 def build_redactor_documentos_juridicos_penales_agent() -> Agent:
     base = _load_system_prompt()
     rol = _load_agent_prompt("redactor_documentos_juridicos_penales")
-    policy = _policy_block()
+    policy = _policy_block("redactor_documentos_juridicos_penales")
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
     if policy:
         parts.append(policy)
@@ -169,7 +198,7 @@ def build_gestor_seguimiento_procesal_penal_agent() -> Agent:
 def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
     base = _load_system_prompt()
     rol = _load_agent_prompt("evaluador_derechos_fundamentales_tutela")
-    policy = _policy_block()
+    policy = _policy_block("evaluador_derechos_fundamentales_tutela")
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
     if policy:
         parts.append(policy)
@@ -191,7 +220,7 @@ def build_coordinador_agent() -> Agent:
     """POC sin especialistas (pasos de plan / consultas directas al coordinador)."""
     base = _load_system_prompt()
     rol = _load_agent_prompt(POC_AGENT_ID)
-    policy = _policy_block()
+    policy = _policy_block(POC_AGENT_ID)
     parts = [base, rol]
     if policy:
         parts.append(policy)
@@ -244,11 +273,15 @@ _SPECIALIST_BUILDERS = (
 SPECIALIST_AGENT_IDS = frozenset(_SPECIALIST_TOOL_DESCRIPTIONS.keys())
 
 
-def build_orchestrator() -> Agent:
-    """POC coordinador con especialistas como tools internas (no handoffs terminales)."""
+def build_orchestrator(*, require_tool_approval: bool = True) -> Agent:
+    """POC coordinador con especialistas como tools internas (no handoffs terminales).
+
+    require_tool_approval: si True, redactor/tutela pausan el runner hasta HITL.
+    En ejecución de plan ya aprobado se pasa False (el abogado ya autorizó).
+    """
     base = _load_system_prompt()
     rol = _load_agent_prompt(POC_AGENT_ID)
-    policy = _policy_block()
+    policy = _policy_block(POC_AGENT_ID)
     specialists = [builder() for builder in _SPECIALIST_BUILDERS]
 
     async def _tool_output_text(result: object) -> str:
@@ -281,6 +314,7 @@ def build_orchestrator() -> Agent:
                 f"Consulta interna al equipo {agent.name}.",
             ),
             custom_output_extractor=_tool_output_text,
+            needs_approval=require_tool_approval and agent.name in _APPROVAL_REQUIRED_TOOLS,
         )
         for agent in specialists
     ]

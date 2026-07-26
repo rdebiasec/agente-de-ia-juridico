@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: f35d464059401e1e -->
+<!-- config-version: 1; checksum: b57befa6491630f7 -->
 ---
 name: recomendar-via-constitucional-o-alternativa
 description: Skill operativo penal-victimas: recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta. Use when the workflow requires `recomendar_via_constitucional_o_alternativa`.
@@ -14,13 +14,13 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `evaluador_derechos_fundamentales_tutela`
-- `coordinador_expediente_penal`
 
 ## Purpose
 Inventariar vías disponibles (tutela, petición, solicitud Ley 906, queja, etc.), compararlas preliminarmente y recomendar ruta preferente con riesgos.
 
 ## Rol en coordinador
-**Solo triage constitucional-procesal:** orientar si conviene escalar a `evaluador_derechos_fundamentales_tutela` o usar vía ordinaria penal. **No** sustituye `evaluar_procedencia_tutela` ni autoriza redacción de tutela.
+**MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
+
 
 ## Inputs
 - Hechos que motivan la acción (verificados o `[PENDIENTE DE VERIFICAR]`).

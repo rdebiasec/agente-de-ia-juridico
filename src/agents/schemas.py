@@ -90,3 +90,60 @@ class BorradorDocumentoPenal(BaseModel):
     @classmethod
     def _validar(cls, v: str, info):
         return _no_vacio(v, info.field_name)
+
+
+class TriageResult(BaseModel):
+    """Salida estructurada de triage del coordinador (planner / skill primario).
+
+    No se usa como output_type del POC conversacional (chat/Slack siguen en prosa).
+    """
+
+    tipo_tarea: Literal[
+        "redaccion",
+        "analisis_factual",
+        "tipicidad",
+        "ruta_906",
+        "representacion_victima",
+        "evidencia",
+        "audiencia",
+        "tutela_constitucional",
+        "seguimiento",
+        "fuera_de_alcance",
+    ] = Field(..., description="Clasificación de la tarea del turno.")
+    etapa_aparente: Literal[
+        "indagacion",
+        "investigacion",
+        "imputacion",
+        "juicio",
+        "ejecucion",
+        "desconocida",
+        "pendiente_verificar",
+    ] = Field(
+        default="desconocida",
+        description="Etapa procesal aparente para enrutamiento (no dictamen definitivo).",
+    )
+    agente_destino: str = Field(
+        ...,
+        description="Agent id recomendado (coordinador o especialista).",
+    )
+    datos_faltantes_bloqueantes: list[str] = Field(
+        default_factory=list,
+        description="Insumos que bloquean continuar sin pedir datos al abogado.",
+    )
+    puede_continuar: bool = Field(
+        default=True,
+        description="False impide delegar a especialistas hasta completar el expediente.",
+    )
+    urgencia_preliminar: bool = Field(
+        default=False,
+        description="True si conviene disparar detectar_urgencia_penal antes del fondo.",
+    )
+    resumen_triage: str = Field(
+        default="",
+        description="Resumen corto del triage para el plan HITL.",
+    )
+
+    @field_validator("agente_destino")
+    @classmethod
+    def _validar_destino(cls, v: str, info):
+        return _no_vacio(v, info.field_name)

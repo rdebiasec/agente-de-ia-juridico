@@ -9,3 +9,9 @@ __pycache__/
 audit-portal/dist/
 backups/
 *.dump
+
+# Material de curso de terceros: no se publica
+documentos/udemy_transcripts/
+
+# Herramienta local de edición visual, ajena al producto
+tools/visual-ui-editor/

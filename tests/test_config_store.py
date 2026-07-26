@@ -44,7 +44,7 @@ def test_orchestrator_loads_external_prompts():
 
     poc = build_orchestrator()
     assert poc.name == POC_AGENT_ID
-    assert "COORDINADOR DEL EXPEDIENTE PENAL" in (poc.instructions or "")
+    assert "GERENTE DEL CASO PENAL" in (poc.instructions or "")
     specialist = get_agent_by_id("analista_cronologia_hechos_penales")
     assert specialist is not None
     assert "cronología" in (specialist.instructions or "").lower()

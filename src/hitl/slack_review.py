@@ -24,7 +24,7 @@ def _bloques_revision(draft: Draft) -> list[dict]:
         cuerpo = cuerpo[:2800] + "\n…(truncado)"
     encabezado = (
         "*Borrador para revisión* · preparado por el equipo interno · presentado por el "
-        f"coordinador del expediente · {draft.tipo}"
+        f"Gerente del Caso Penal · {draft.tipo}"
     )
     if draft.materia:
         encabezado += f" · {draft.materia}"

@@ -15,6 +15,7 @@ def _audit_env(monkeypatch) -> None:
     monkeypatch.setenv("SESSION_SECRET", "audit-test-session-secret-key-32chars")
     monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
     monkeypatch.setenv("DATABASE_URL", "")
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
     monkeypatch.delenv("RENDER", raising=False)
     from src.config import get_settings
 
@@ -190,6 +191,47 @@ async def test_audit_progress_delete_archives_history(monkeypatch):
         assert r.status_code == 200
         assert r.json()["archived"] is True
         assert (await client.get("/api/audit/progress")).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_audit_session_dev_auto_login(monkeypatch):
+    _audit_env(monkeypatch)
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
+    monkeypatch.setenv("DEV_AUDIT_EMAIL", "abogada@despacho.com")
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/api/audit/session")
+        assert r.json() == {
+            "authenticated": True,
+            "email": "abogada@despacho.com",
+            "auth_enabled": True,
+            "policy_version": r.json()["policy_version"],
+            "dev_auto_login": True,
+        }
+
+        # La cookie emitida sirve para las rutas protegidas: sin PIN ni consentimiento.
+        r = await client.get("/api/audit/progress")
+        assert r.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_audit_session_dev_auto_login_blocked_in_production_like_env(monkeypatch):
+    _audit_env(monkeypatch)
+    monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
+    monkeypatch.setenv("DEV_AUDIT_EMAIL", "abogada@despacho.com")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "true")
+    monkeypatch.setenv("RENDER", "true")
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/api/audit/session")
+        assert r.json()["authenticated"] is False
+        assert r.cookies.get("audit_session") is None
 
 
 @pytest.mark.asyncio

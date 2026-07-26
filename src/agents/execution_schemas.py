@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 PLAN_STATUSES = (
     "draft",
+    "awaiting_input",
     "pending_approval",
     "approved",
     "rejected",
@@ -16,7 +17,14 @@ PLAN_STATUSES = (
     "failed",
 )
 PlanStatus = Literal[
-    "draft", "pending_approval", "approved", "rejected", "executing", "done", "failed"
+    "draft",
+    "awaiting_input",
+    "pending_approval",
+    "approved",
+    "rejected",
+    "executing",
+    "done",
+    "failed",
 ]
 StepStatus = Literal["pending", "in_progress", "done", "blocked", "skipped"]
 RiskLevel = Literal["bajo", "medio", "alto"]
@@ -72,6 +80,7 @@ class ExecutionPlan(BaseModel):
     rejection_reason: str | None = None
     template_kind: str | None = None
     pattern_reused: bool = False
+    triage_snapshot: dict | None = None
 
     def to_dict(self) -> dict:
         return self.model_dump()

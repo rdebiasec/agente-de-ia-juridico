@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: f7ee466b1d45a80c -->
+<!-- config-version: 1; checksum: 1a8c7374f6b82dcd -->
 ---
 name: actualizar-tareas-responsable
 description: Skill atomico penal-victimas: mantener lista de tareas por agente o abogado. Use when the workflow requires `actualizar_tareas_responsable`.
@@ -11,6 +11,9 @@ disable-model-invocation: true
 - Category: `Skills de seguimiento procesal`
 - Skill ID: `actualizar_tareas_responsable`
 - Tier: `atomico`
+
+## Index Blurb
+Registra tareas del triage (faltantes, urgencias, derivaciones) con responsable y plazo.
 
 ## Used By Agents
 - `coordinador_expediente_penal`
@@ -50,9 +53,17 @@ Registrar o actualizar tareas surgidas del triage inicial (derivación, faltante
 - **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **g8:** Cerrar con aviso de que la asignación y plazos requieren revisión profesional.
 
+## Handoff
+- Seguimiento continuo de radicado/términos → `gestor_seguimiento_procesal_penal`.
+- Tareas de recolección documental → permanecen visibles para el abogado vía POC.
+
 ## No duplicar
 - No calcular términos procesales (`controlar_terminos_procesales_preliminares`, `generar_alertas_terminos_vencimientos`).
 - No definir la ruta estratégica del caso (`crear_ruta_procesal_recomendada`).
+
+## Best Practices
+- Toda tarea crítica sin responsable queda `bloqueada`, no `abierta`.
+- Descripciones cortas y sin PII innecesaria.
 
 ## Riesgo si se omite
 Tareas sin dueño ni plazo generan extemporaneidad y pérdida de oportunidad procesal en Ley 906.

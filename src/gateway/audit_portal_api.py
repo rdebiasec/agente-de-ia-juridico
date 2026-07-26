@@ -14,6 +14,7 @@ from src.auth.audit_gate import (
     refresh_audit_session_token,
 )
 from src.auth.deps import cookie_secure, idle_seconds
+from src.auth.dev import dev_audit_email
 from src.auth.gate import auth_enabled, verify_password
 from src.compliance.pin import hash_pin, validate_pin_format, verify_pin
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
@@ -283,7 +284,7 @@ async def audit_config_agents(email: str = Depends(_require_audit_email)):
         "ok": True,
         "global": {"prompt_key": "sistema"},
         "groups": {
-            "coordinacion": {"label": "Coordinador", "color": "blue"},
+            "coordinacion": {"label": "Gerencia", "color": "blue"},
             "especialista": {"label": "Especialistas", "color": "emerald"},
             "calidad": {"label": "QA / Calidad", "color": "amber"},
         },
@@ -599,7 +600,22 @@ async def audit_session(
         idle_seconds=idle_seconds(settings),
     )
     if not refreshed:
-        return {"authenticated": False, "email": None, "auth_enabled": True}
+        dev_email = dev_audit_email(settings)
+        if not dev_email:
+            return {"authenticated": False, "email": None, "auth_enabled": True}
+        _apply_audit_cookie(
+            response,
+            create_audit_session_token(settings.session_secret, dev_email),
+            settings,
+        )
+        _log_access(request, action="login_dev_auto", email=dev_email)
+        return {
+            "authenticated": True,
+            "email": dev_email,
+            "auth_enabled": True,
+            "policy_version": CURRENT_POLICY_VERSION,
+            "dev_auto_login": True,
+        }
     _apply_audit_cookie(response, refreshed, settings)
     email = audit_email_from_token(
         settings.session_secret,

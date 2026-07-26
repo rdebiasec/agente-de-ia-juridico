@@ -7,6 +7,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from datetime import date
+import time
 
 from src.auth.deps import require_web_session
 from src.hitl import drafts as hitl
@@ -25,6 +26,10 @@ _DOCX_MEDIA = "application/vnd.openxmlformats-officedocument.wordprocessingml.do
 class AprobarRequest(BaseModel):
     revisor: str = "abogado"
     comentario: str | None = None
+
+
+class RadicacionTutelaRequest(BaseModel):
+    fecha_radicacion: date
 
 
 class RechazarRequest(BaseModel):
@@ -101,16 +106,72 @@ def _aplicar(accion, draft_id: str, **kwargs):
 @router.post("/drafts/{draft_id}/approve")
 async def aprobar_borrador(draft_id: str, req: AprobarRequest):
     draft = _aplicar(hitl.aprobar, draft_id, revisor=req.revisor, comentario=req.comentario)
-    termino = None
-    # Al aprobar una tutela, registrar automáticamente el término de fallo (10 días hábiles).
+    resultado = draft.to_dict()
+    # Aprobar un borrador no equivale a radicarlo. El término empieza con la
+    # presentación real, cuya fecha debe confirmar el abogado.
     if draft.tipo == "tutela":
+        from src.gateway.expediente import expediente_store
+
+        exp = expediente_store.get_or_create(draft.session_id)
+        title = "Registrar fecha real de radicación de la tutela"
+        if not any(
+            task.get("titulo") == title and task.get("estado") == "pendiente"
+            for task in exp.tareas_gerencia
+        ):
+            exp.tareas_gerencia.append(
+                {
+                    "id": f"radicacion-tutela-{draft.id}",
+                    "tipo": "plazo",
+                    "titulo": title,
+                    "responsable": req.revisor,
+                    "estado": "pendiente",
+                    "draft_id": draft.id,
+                    "creada_en": int(time.time()),
+                }
+            )
+            expediente_store.update(
+                draft.session_id,
+                tareas_gerencia=exp.tareas_gerencia,
+            )
+        resultado["requiere_fecha_radicacion"] = True
+    return resultado
+
+
+@router.post("/drafts/{draft_id}/filed")
+async def registrar_radicacion_tutela(draft_id: str, req: RadicacionTutelaRequest):
+    """Registra la presentación real y recién entonces calcula el término de fallo."""
+    draft = get_repository().get_draft(draft_id)
+    if draft is None:
+        raise HTTPException(status_code=404, detail="Borrador no encontrado.")
+    if draft.tipo != "tutela" or draft.estado not in {"aprobado", "editado"}:
+        raise HTTPException(
+            status_code=409,
+            detail="Solo una tutela aprobada o editada puede marcarse como radicada.",
+        )
+
+    existing = [
+        d
+        for d in get_repository().list_deadlines(session_id=draft.session_id)
+        if d.tipo == "tutela_fallo" and d.fecha_base == req.fecha_radicacion
+    ]
+    if existing:
+        termino = existing[0]
+    else:
         from src.services.plazos import termino_fallo_tutela
 
-        termino = get_repository().add_deadline(termino_fallo_tutela(draft.session_id))
-    resultado = draft.to_dict()
-    if termino is not None:
-        resultado["termino_creado"] = termino.to_dict()
-    return resultado
+        termino = get_repository().add_deadline(
+            termino_fallo_tutela(draft.session_id, fecha_base=req.fecha_radicacion)
+        )
+
+    from src.gateway.expediente import expediente_store
+
+    exp = expediente_store.get_or_create(draft.session_id)
+    for task in exp.tareas_gerencia:
+        if task.get("draft_id") == draft.id and task.get("tipo") == "plazo":
+            task["estado"] = "cerrada"
+            task["cerrada_en"] = int(time.time())
+    expediente_store.update(draft.session_id, tareas_gerencia=exp.tareas_gerencia)
+    return {"draft": draft.to_dict(), "termino_creado": termino.to_dict()}
 
 
 @router.post("/drafts/{draft_id}/reject")

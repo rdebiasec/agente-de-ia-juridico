@@ -97,7 +97,12 @@ def test_templated_steps_indagacion_impulso_chain_order():
 
 def test_create_plan_indagacion_impulso_smoke():
     plan, err = create_execution_plan(
-        message="Solicitar impulso procesal: el caso lleva meses en indagación con riesgo de archivo.",
+        message=(
+            "Solicitar impulso procesal. Radicado 11001-60-00-2026-123456. "
+            "La víctima denunció lesiones; el caso lleva meses en indagación con riesgo "
+            "de archivo. Tengo poder firmado. Última actuación: audiencia de imputación. "
+            "Partes: víctima y procesado."
+        ),
         channel="web",
         session_id="web:smoke-impulso",
         user_id="smoke-impulso",
@@ -111,7 +116,10 @@ def test_create_plan_indagacion_impulso_smoke():
 
 def test_remember_pattern_reused_on_second_plan():
     plan1, err = create_execution_plan(
-        message="Cronología de hechos del expediente.",
+        message=(
+            "Cronología: la víctima denunció lesiones ocurridas el 3 de junio y la "
+            "Fiscalía recibió el relato y sus anexos."
+        ),
         channel="web",
         session_id="web:pattern-user",
         user_id="pattern-user",

@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 8e22322646082cdd -->
 ---
 name: clasificar-fuente-factual
 description: Skill estrategico penal-victimas: distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente. Use when the workflow requires `clasificar_fuente_factual`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `coordinador_expediente_penal`
 
 ## Purpose
 Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados.
 
 ## Rol en coordinador
-Primer filtro factual al recibir insumos nuevos (consulta, documentos, relato). No construye cronología completa ni matriz hecho-prueba; solo matriz hecho-fuente preliminar.
+**MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
+
 
 ## Inputs
 - Texto del turno: consulta del abogado, relato de víctima, extractos documentales.

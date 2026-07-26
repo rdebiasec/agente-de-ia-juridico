@@ -354,12 +354,12 @@ def _infer_destination_agent(message: str) -> str:
         return "gestor_evidencia_y_soporte_probatorio"
     if _TIPICIDAD_RE.search(message):
         return "analista_tipicidad_y_responsabilidad_penal"
+    if _CRONOLOGIA_RE.search(message):
+        return "analista_cronologia_hechos_penales"
     if _RUTA906_RE.search(message):
         return "analista_ruta_procesal_ley906"
     if _VICTIMAS_RE.search(message):
         return "analista_representacion_victimas"
-    if _CRONOLOGIA_RE.search(message):
-        return "analista_cronologia_hechos_penales"
     if _REDACCION_RE.search(message):
         return "redactor_documentos_juridicos_penales"
     if _PROFILE_RE.search(message):
@@ -516,14 +516,14 @@ def _fallback_response(message: str) -> str:
         )
     elif any(w in lower for w in ("perfil", "experiencia", "quien eres", "quién eres")):
         body = (
-            "Soy el coordinador del expediente penal-víctimas del despacho: tu único interlocutor. "
+            "Soy el Gerente del Caso Penal del despacho: tu único interlocutor. "
             "Cuando hace falta, consulto al equipo interno (cronología, tipicidad, ruta Ley 906, "
             "evidencia, audiencias, redacción, seguimiento, tutela y calidad) y te entrego una sola "
             "voz de despacho para tu revisión."
         )
     else:
         body = (
-            "Como coordinador del despacho puedo apoyar estrategia penal de víctimas de extremo a "
+            "Como Gerente del Caso Penal puedo apoyar estrategia de víctimas de extremo a "
             "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
             "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
         )
@@ -556,10 +556,10 @@ def _ensure_poc_voice(text: str, *, last_agent_name: str | None, backoffice_agen
         return text
     label = agent_display_name(backoffice_agent or last_agent_name)
     stripped = (text or "").strip()
-    if stripped.lower().startswith("como coordinador del expediente"):
+    if stripped.lower().startswith("como gerente del caso"):
         return text
     return (
-        f"Como coordinador del expediente, consolidé el trabajo del equipo interno "
+        f"Como Gerente del Caso Penal, consolidé el trabajo del equipo interno "
         f"({label}):\n\n{stripped}"
     )
 
@@ -584,9 +584,15 @@ async def run_agent(
     sync_expediente_from_chat(session_id, message, history, trace=trace)
     expediente = expediente_store.get_or_create(session_id)
     exp_resumen = expediente.resumen()
+    requested_destination = _infer_destination_agent(message)
 
     ok_pre, pre_err = run_pre_validations(
-        message, history=history, expediente_resumen=exp_resumen, trace=trace
+        message,
+        history=history,
+        expediente_resumen=exp_resumen,
+        trace=trace,
+        expediente=expediente,
+        destination=requested_destination,
     )
     prior_traces = get_repository().list_session_traces(session_id, limit=40)
     attach_session_continuity(trace, history=history, session_id=session_id, prior_traces=prior_traces)
@@ -597,12 +603,51 @@ async def run_agent(
         trace["selected_agent"] = "guardrail"
         text = err or pre_err or "Entrada no válida."
         _finalize_trace(trace, text)
+        get_repository().append_chat_message(
+            session_id,
+            channel=channel,
+            user_id=uid,
+            role="user",
+            content=message,
+            max_messages=settings.session_max_messages,
+        )
+        get_repository().append_chat_message(
+            session_id,
+            channel=channel,
+            user_id=uid,
+            role="assistant",
+            content=text,
+            max_messages=settings.session_max_messages,
+        )
         return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace, "session_id": session_id}
+
+    if requested_destination in {
+        "redactor_documentos_juridicos_penales",
+        "evaluador_derechos_fundamentales_tutela",
+    }:
+        text = (
+            "La verificación del expediente pasó. Por tratarse de una actuación de alto "
+            "riesgo, continúe mediante el plan de ejecución y apruébelo antes de usar al "
+            "equipo de redacción o tutela."
+        )
+        trace["route"] = "plan_required"
+        trace["blocked"] = True
+        trace["selected_agent"] = POC_AGENT_ID
+        trace["sent_to_agent"] = "none"
+        trace["human_review_required"] = True
+        _finalize_trace(trace, text)
+        return {
+            "text": text,
+            "agent": POC_AGENT_ID,
+            "pending_review": True,
+            "trace": trace,
+            "session_id": session_id,
+        }
 
     if not has_key:
         text = _fallback_response(message)
         pending_review = needs_human_review(text, channel, message)
-        inferred_destination = _infer_destination_agent(message)
+        inferred_destination = requested_destination
         trace["route"] = "fallback_no_api_key"
         trace["blocked"] = False
         trace["selected_agent"] = "fallback"
@@ -669,7 +714,9 @@ async def run_agent(
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 
-    orchestrator = build_orchestrator()
+    # El HITL de tools se unifica en el plan aprobado; este path nunca llega a
+    # herramientas de alto riesgo porque se bloquean arriba.
+    orchestrator = build_orchestrator(require_tool_approval=False)
     destination_agent = trace["received_by_agent"]
     trace_hooks = _TraceRunHooks(trace)
     agent_session = RepositoryAgentSession(session_id, channel=channel, user_id=uid)
@@ -763,6 +810,67 @@ async def run_agent(
         raw_out = result.final_output or ""
         if raw_out and not isinstance(raw_out, str):
             raw_out = str(raw_out)
+
+        interruptions = list(getattr(result, "interruptions", []) or [])
+        if interruptions:
+            tool_names: list[str] = []
+            for item in interruptions:
+                name = getattr(item, "tool_name", None) or getattr(
+                    getattr(item, "raw_item", None), "name", None
+                )
+                if not name:
+                    # ToolApprovalItem: try common accessors
+                    try:
+                        name = item.raw_item.get("name")  # type: ignore[union-attr]
+                    except Exception:
+                        name = None
+                tool_names.append(str(name or "herramienta_critica"))
+            tools_label = ", ".join(dict.fromkeys(tool_names))
+            text = apply_output_guardrails(
+                "Para continuar necesito su aprobación humana: el despacho está a punto de "
+                f"consultar al equipo de alto riesgo ({tools_label}). "
+                "Apruebe el plan de ejecución en el chat (web) o confirme con EJECUTAR en Slack "
+                "para autorizar redacción o evaluación de tutela.",
+                channel,
+            )
+            text = _ensure_poc_voice(
+                text,
+                last_agent_name=POC_AGENT_ID,
+                backoffice_agent=POC_AGENT_ID,
+            )
+            trace["route"] = "tool_approval"
+            trace["blocked"] = True
+            trace["selected_agent"] = POC_AGENT_ID
+            trace["sent_to_agent"] = "none"
+            trace["skill_kan"] = "KAN-HITL-TOOL"
+            trace["skill_reason"] = (
+                f"POC pausó por needs_approval en tool(s): {tools_label}."
+            )
+            trace["pending_tool_approvals"] = tool_names
+            _append_action(
+                trace,
+                action_type="tool_approval",
+                status="blocked",
+                actor=POC_AGENT_ID,
+                detail=f"Interrupción HITL: {tools_label}",
+            )
+            trace["steps"].append(
+                _trace_step(
+                    "Aprobación de herramienta",
+                    "blocked",
+                    f"Se requiere aprobación para: {tools_label}.",
+                )
+            )
+            trace["human_review_required"] = True
+            _finalize_trace(trace, text)
+            return {
+                "text": text,
+                "agent": POC_AGENT_ID,
+                "pending_review": True,
+                "session_id": session_id,
+                "trace": trace,
+            }
+
         text = apply_output_guardrails(raw_out, channel)
         text = _ensure_poc_voice(
             text,
@@ -816,11 +924,20 @@ async def run_agent(
             trace["completion"]["note"] = "No se recibieron eventos de completion en hooks."
     except (InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered) as exc:
         logger.warning("Guardrail tripwire channel=%s: %s", channel, exc)
-        text = apply_output_guardrails(
-            "No puedo procesar esa consulta en el alcance del despacho penal-víctimas. "
-            "Reformule con el componente penal o de representación de víctimas.",
-            channel,
-        )
+        exc_name = type(exc).__name__
+        if "Output" in exc_name:
+            msg = (
+                "No puedo entregar esa salida: activó un límite de seguridad del despacho "
+                "(posible dato sensible o respuesta vacía). Reformule sin PII innecesaria "
+                "o solicite el dato por canal seguro."
+            )
+        else:
+            msg = (
+                "No puedo procesar esa consulta en el alcance del despacho penal-víctimas. "
+                "Reformule con el componente penal o de representación de víctimas "
+                "(sin intentos de override de instrucciones)."
+            )
+        text = apply_output_guardrails(msg, channel)
         trace["route"] = "sdk_guardrail"
         trace["blocked"] = True
         trace["selected_agent"] = "guardrail"

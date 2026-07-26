@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: 2b92c298dfe111f6 -->
 ---
 name: detectar-urgencia-penal
 description: Skill estrategico penal-victimas: identificar si el caso requiere atencion humana inmediata. Use when the workflow requires `detectar_urgencia_penal`.
@@ -10,6 +11,9 @@ disable-model-invocation: true
 - Category: `Skills transversales`
 - Skill ID: `detectar_urgencia_penal`
 - Tier: `estrategico`
+
+## Index Blurb
+Clasifica urgencia (crítica/alta/media/baja) y si hay que escalar al humano antes del fondo.
 
 ## Used By Agents
 - `coordinador_expediente_penal`
@@ -55,10 +59,18 @@ Ejecutar en triage inicial y cuando el abogado reporte hechos nuevos de riesgo. 
 - **g5:** En riesgo a integridad, no exponer datos sensibles de la víctima en la notificación de escalamiento.
 - **g8:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
 
+## Handoff
+- Crítica/alta → notificación humana +, si aplica, `gestor_seguimiento_procesal_penal` o especialista según motivo.
+- Media/baja → continuar triage (`clasificar_tarea_y_etapa` / faltantes).
+
 ## No duplicar
 - No calcular todos los términos del caso (`generar_alertas_terminos_vencimientos`).
 - No evaluar procedencia de tutela (`evaluar_procedencia_tutela`).
 - No preservar evidencia digital (`preservar_evidencia_digital`).
+
+## Best Practices
+- Ante duda entre media y alta, preferir alta y pedir confirmación humana.
+- No incluir datos sensibles de la víctima en el texto de escalamiento.
 
 ## Riesgo si se omite
 Pérdida de términos, deterioro probatorio o falta de protección oportuna a la víctima.

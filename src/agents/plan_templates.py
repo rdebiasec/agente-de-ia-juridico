@@ -157,7 +157,7 @@ def build_templated_steps(
             agent_id="coordinador_expediente_penal",
             title="Clasificar consulta y contexto del caso",
             user_summary=(
-                "Como coordinador del expediente, identificaré la tarea, la etapa procesal "
+                "Como Gerente del Caso Penal, identificaré la tarea, la etapa procesal "
                 "aparente y pediré apoyo al equipo interno según esta plantilla."
             ),
         )
@@ -178,7 +178,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Control de calidad — cronología",
-                    "Como coordinador, pediré al equipo de calidad revisar coherencia factual "
+                    "Como gerente, pediré al equipo de calidad revisar coherencia factual "
                     "y separación hecho/inferencia antes de entregarle el resultado.",
                 ),
             ],
@@ -203,7 +203,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Control de calidad — tutela",
-                    "Como coordinador, pediré verificar tono, soporte normativo y riesgos "
+                    "Como gerente, pediré verificar tono, soporte normativo y riesgos "
                     "de improcedencia antes de entregarle el borrador.",
                 ),
             ],
@@ -222,7 +222,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Checklist previo a audiencia",
-                    "Como coordinador, pediré revisar riesgos procesales y coherencia "
+                    "Como gerente, pediré revisar riesgos procesales y coherencia "
                     "estratégica antes de la intervención.",
                 ),
             ],
@@ -265,7 +265,7 @@ def build_templated_steps(
                 (
                     "gestor_seguimiento_procesal_penal",
                     "Alertas de seguimiento post-impulso",
-                    "Como coordinador, pediré alertas de radicado, términos y seguimiento "
+                    "Como gerente, pediré alertas de radicado, términos y seguimiento "
                     "operativo tras el impulso.",
                 ),
                 (
@@ -308,7 +308,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Control de calidad — VIF",
-                    "Como coordinador, pediré verificar confidencialidad, tono y "
+                    "Como gerente, pediré verificar confidencialidad, tono y "
                     "coherencia estratégica antes de entregarle la salida.",
                 ),
             ],
@@ -338,7 +338,7 @@ def build_templated_steps(
                 (
                     "gestor_seguimiento_procesal_penal",
                     "Seguimiento de audiencia concentrada",
-                    "Como coordinador, pediré plan de seguimiento (términos, audiencia "
+                    "Como gerente, pediré plan de seguimiento (términos, audiencia "
                     "concentrada y alertas operativas).",
                 ),
             ],
@@ -352,7 +352,7 @@ def build_templated_steps(
                 agent_id=destination,
                 title=f"Consulta adicional — {desk_label(destination)}",
                 user_summary=(
-                    f"Como coordinador, pediré al equipo interno ({desk_label(destination)}) "
+                    f"Como gerente, pediré al equipo interno ({desk_label(destination)}) "
                     f"el análisis adicional que requiere su consulta."
                 ),
                 depends_on=[steps[-1].step_id],

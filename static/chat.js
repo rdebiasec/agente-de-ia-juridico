@@ -414,7 +414,7 @@ function formatAgentRoute(agent) {
     agent === "fallback" ||
     agent === "orquestador"
   ) {
-    return "Coordinador del expediente";
+    return "Gerente del Caso Penal";
   }
   // Compatibilidad con trazas legacy previas al rediseño penal.
   if (agent === "intake") return "Especialista intake (legacy)";
@@ -796,7 +796,7 @@ function hideTyping() {
 }
 
 function agentLabel(agentId) {
-  if (agentId === "coordinador_expediente_penal") return "Coordinador del expediente";
+  if (agentId === "coordinador_expediente_penal") return "Gerente del Caso Penal";
   const labels = {
     analista_cronologia_hechos_penales: "Cronología y hechos",
     analista_tipicidad_y_responsabilidad_penal: "Tipicidad y responsabilidad",
@@ -856,19 +856,18 @@ function showPlanCard(plan, userEntryId, epochAtSend) {
           plan.pattern_reused ? " · patrón reutilizado de la sesión" : ""
         }</p>`
       : "";
-
-  const el = document.createElement("div");
-  el.className = "message assistant plan-card-message";
-  el.dataset.planId = planId;
-  el.innerHTML = `
-    <span class="message-meta">Plan de ejecución · pendiente de su aprobación</span>
-    <article class="plan-card" data-plan-id="${escapeHtml(planId)}">
-      <h3 class="plan-title">Plan propuesto</h3>
-      ${templateLine}
-      <p class="plan-objective"><strong>Objetivo:</strong> ${escapeHtml(plan.objective || "")}</p>
-      <p class="plan-agents"><strong>Agentes:</strong> ${escapeHtml((plan.agents_involved || []).map(agentLabel).join(" → "))}</p>
-      ${renderPlanStepsHtml(plan.steps)}
-      <p class="plan-note">La IA no ejecutará ningún paso hasta que usted apruebe este plan.</p>
+  const awaitingInput = plan.status === "awaiting_input";
+  const triageMissing = plan.triage_snapshot?.datos_faltantes_bloqueantes || [];
+  const statusLabel = awaitingInput
+    ? "Verificación del expediente · faltan datos"
+    : "Plan de ejecución · pendiente de su aprobación";
+  const cardTitle = awaitingInput ? "Expediente incompleto" : "Plan propuesto";
+  const gateNote = awaitingInput
+    ? `No delegaré a especialistas todavía. Envíe en el chat: ${escapeHtml(triageMissing.join("; "))}.`
+    : "La IA no ejecutará ningún paso hasta que usted apruebe este plan.";
+  const approvalControls = awaitingInput
+    ? ""
+    : `
       <label class="plan-remember">
         <input type="checkbox" class="plan-remember-pattern" />
         Recordar este patrón para la sesión
@@ -876,7 +875,21 @@ function showPlanCard(plan, userEntryId, epochAtSend) {
       <div class="plan-actions">
         <button type="button" class="btn-plan-approve">Aprobar y ejecutar</button>
         <button type="button" class="btn-plan-reject">Solicitar cambios</button>
-      </div>
+      </div>`;
+
+  const el = document.createElement("div");
+  el.className = "message assistant plan-card-message";
+  el.dataset.planId = planId;
+  el.innerHTML = `
+    <span class="message-meta">${statusLabel}</span>
+    <article class="plan-card" data-plan-id="${escapeHtml(planId)}">
+      <h3 class="plan-title">${cardTitle}</h3>
+      ${templateLine}
+      <p class="plan-objective"><strong>Objetivo:</strong> ${escapeHtml(plan.objective || "")}</p>
+      <p class="plan-agents"><strong>Agentes:</strong> ${escapeHtml((plan.agents_involved || []).map(agentLabel).join(" → "))}</p>
+      ${renderPlanStepsHtml(plan.steps)}
+      <p class="plan-note">${gateNote}</p>
+      ${approvalControls}
       <p class="plan-status" aria-live="polite"></p>
     </article>
   `;
@@ -2094,42 +2107,12 @@ async function sendMessage(text) {
     hideTyping();
   }
 
-  let assistantText =
-    "No pude generar el plan de ejecución. Intente de nuevo en unos segundos.";
+  const assistantText =
+    "No pude generar el plan de ejecución. No ejecutaré por una ruta alterna sin aprobación; intente de nuevo en unos segundos.";
   let assistantAgent = "error";
   let assistantPendingReview = false;
   let assistantTrace = null;
   let assistantDraftId = null;
-
-  try {
-    const res = await authFetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: trimmed,
-        channel: "web",
-        user_id: getUserId(),
-      }),
-    });
-
-    if (abortIfStale()) return;
-
-    hideTyping();
-
-    if (res.ok) {
-      const data = await res.json();
-      assistantText = data.text;
-      assistantAgent = data.agent || assistantAgent;
-      assistantPendingReview = Boolean(data.pending_review);
-      assistantTrace = data.trace || null;
-      assistantDraftId = data.draft_id || null;
-    }
-  } catch {
-    if (abortIfStale()) return;
-    hideTyping();
-    assistantText =
-      "Error de conexión. Verifique su red o espere si el servicio estaba inactivo.";
-  }
 
   if (abortIfStale()) return;
 

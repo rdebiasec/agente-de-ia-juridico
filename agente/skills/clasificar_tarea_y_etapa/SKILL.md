@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: d8404fd3e497fa33 -->
 ---
 name: clasificar-tarea-y-etapa
 description: Skill operativo penal-victimas: clasificar la solicitud del usuario interno y detectar la etapa aparente del caso. Use when the workflow requires `clasificar_tarea_y_etapa`.
@@ -10,6 +11,9 @@ disable-model-invocation: true
 - Category: `Skills transversales`
 - Skill ID: `clasificar_tarea_y_etapa`
 - Tier: `operativo`
+
+## Index Blurb
+Triage del turno: tipo de tarea + etapa aparente + agente destino o faltantes.
 
 ## Used By Agents
 - `coordinador_expediente_penal` (skill primario del agente)
@@ -53,10 +57,7 @@ Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o sol
 - **g7:** Consultas no penales o ajenas a representación de víctimas en Colombia → declarar fuera de alcance y no derivar a redactor.
 - **g8:** Cerrar con aviso de revisión profesional.
 
-## Rol en analista_ruta_procesal
-Clasificación de tarea cuando la consulta es procesal (etapa, oportunidad, actuación). Comparte skill con coordinador; aquí profundiza etapa aparente.
-
-## Handoff (derivación típica)
+## Handoff
 - Análisis factual → `analista_cronologia_hechos_penales` (`extraer_hechos_relevantes`).
 - Tipicidad / calificación → `analista_tipicidad_y_responsabilidad_penal` (solo con hechos mínimos).
 - Ruta Ley 906 → `analista_ruta_procesal_ley906`.
@@ -67,6 +68,11 @@ Clasificación de tarea cuando la consulta es procesal (etapa, oportunidad, actu
 - No determinar etapa con rigor procesal (`identificar_etapa_procesal_ley906` → especialista ruta 906).
 - No inventariar faltantes documentales (`gestionar_faltantes_expediente`).
 - No evaluar urgencia en detalle (`detectar_urgencia_penal`).
+
+## Best Practices
+- Preferir `etapa_aparente=desconocida` + pregunta concreta antes que inventar etapa.
+- Una sola `agente_destino` primaria; secuencia solo si el turno lo exige explícitamente.
+- Si `urgencia_preliminar=sí`, no saltar a redacción.
 
 ## Riesgo si se omite
 Derivación errónea retrasa actuaciones, mezcla competencias y puede hacer perder términos en Ley 906.

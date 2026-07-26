@@ -1,3 +1,4 @@
+<!-- config-version: 1; checksum: b8ea283e530ff582 -->
 ---
 name: marcar-pendientes-verificacion
 description: Skill atomico penal-victimas: marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`. Use when the workflow requires `marcar_pendientes_verificacion`.
@@ -10,6 +11,9 @@ disable-model-invocation: true
 - Category: `Skills transversales`
 - Skill ID: `marcar_pendientes_verificacion`
 - Tier: `atomico`
+
+## Index Blurb
+Etiqueta todo dato no verificado antes de entregar la voz del despacho.
 
 ## Used By Agents
 - `coordinador_expediente_penal`
@@ -43,10 +47,18 @@ Control de calidad transversal antes de entregar cualquier salida del coordinado
 - **g4:** Si impacto alto (etapa, tutela, término), bloquear uso externo hasta revisión humana.
 - **g8:** Incluir aviso estándar de revisión profesional al final.
 
+## Handoff
+- Impacto alto → retener en despacho / HITL antes de uso externo.
+- Impacto medio/bajo → entregar con marcadores visibles al abogado.
+
 ## No duplicar
 - No validar existencia de normas (`verificar_citas_normativas` → calidad/redactor).
 - No cruzar hechos con expediente en profundidad (`verificar_hechos_soportados`).
 - No clasificar tipo de fuente (`clasificar_fuente_factual`).
+
+## Best Practices
+- Preferir sobre-marcar a afirmar sin soporte.
+- No borrar el contenido dudoso: marcar y dejar visible.
 
 ## Riesgo si se omite
 Uso de afirmaciones sin soporte en comunicaciones del despacho → responsabilidad profesional y daño al caso.

@@ -57,7 +57,11 @@ async def test_approve_and_execute_trace_v5():
         created = await client.post(
             "/chat/plan",
             json={
-                "message": "Redacte memorial de impulso procesal con radicado 12345.",
+                "message": (
+                    "Redacte memorial de impulso. Radicado 11001-60-00-2026-123456. "
+                    "La víctima denunció lesiones y solicita impulso. Tengo el poder firmado. "
+                    "Última actuación: audiencia de imputación. Partes: víctima y procesado."
+                ),
                 "channel": "web",
                 "user_id": "plan-user-3",
             },
@@ -102,8 +106,8 @@ async def test_reject_plan():
 
 
 @pytest.mark.asyncio
-async def test_legacy_chat_still_works():
-    """Slack y regresión: POST /chat directo sigue operativo."""
+async def test_legacy_chat_enforces_completeness_gate():
+    """POST /chat se conserva, pero no puede saltarse el gate de gerencia."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         res = await client.post(
@@ -115,4 +119,6 @@ async def test_legacy_chat_still_works():
             },
         )
     assert res.status_code == 200
-    assert res.json().get("text")
+    data = res.json()
+    assert "completar el expediente" in data["text"].lower()
+    assert data["trace"]["blocked"] is True

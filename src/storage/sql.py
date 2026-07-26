@@ -85,6 +85,12 @@ class ExpedienteRow(Base):
     etapa_actual: Mapped[str | None] = mapped_column(String(120), nullable=True)
     partes: Mapped[list] = mapped_column(JSON, default=list)
     terminos: Mapped[list] = mapped_column(JSON, default=list)
+    hechos_minimos_confirmados: Mapped[bool] = mapped_column(Boolean, default=False)
+    poder_acreditado: Mapped[bool] = mapped_column(Boolean, default=False)
+    ultima_actuacion_confirmada: Mapped[bool] = mapped_column(Boolean, default=False)
+    faltantes_gerencia: Mapped[list] = mapped_column(JSON, default=list)
+    tareas_gerencia: Mapped[list] = mapped_column(JSON, default=list)
+    metricas_gerencia: Mapped[dict] = mapped_column(JSON, default=dict)
     involucra_menor: Mapped[bool] = mapped_column(Boolean, default=False)
     datos_sensibles: Mapped[bool] = mapped_column(Boolean, default=False)
     actualizado_en: Mapped[float] = mapped_column(Float, default=0.0)
@@ -279,6 +285,12 @@ def _to_expediente(row: ExpedienteRow) -> Expediente:
         etapa_actual=row.etapa_actual,
         partes=row.partes or [],
         terminos=row.terminos or [],
+        hechos_minimos_confirmados=bool(getattr(row, "hechos_minimos_confirmados", False)),
+        poder_acreditado=bool(getattr(row, "poder_acreditado", False)),
+        ultima_actuacion_confirmada=bool(getattr(row, "ultima_actuacion_confirmada", False)),
+        faltantes_gerencia=getattr(row, "faltantes_gerencia", None) or [],
+        tareas_gerencia=getattr(row, "tareas_gerencia", None) or [],
+        metricas_gerencia=getattr(row, "metricas_gerencia", None) or {},
         involucra_menor=bool(getattr(row, "involucra_menor", False)),
         datos_sensibles=bool(getattr(row, "datos_sensibles", False)),
         actualizado_en=row.actualizado_en or 0.0,
@@ -580,6 +592,12 @@ class SqlRepository:
             row.etapa_actual = expediente.etapa_actual
             row.partes = expediente.partes
             row.terminos = expediente.terminos
+            row.hechos_minimos_confirmados = bool(expediente.hechos_minimos_confirmados)
+            row.poder_acreditado = bool(expediente.poder_acreditado)
+            row.ultima_actuacion_confirmada = bool(expediente.ultima_actuacion_confirmada)
+            row.faltantes_gerencia = expediente.faltantes_gerencia
+            row.tareas_gerencia = expediente.tareas_gerencia
+            row.metricas_gerencia = expediente.metricas_gerencia
             row.involucra_menor = bool(expediente.involucra_menor)
             row.datos_sensibles = bool(expediente.datos_sensibles)
             row.actualizado_en = expediente.actualizado_en

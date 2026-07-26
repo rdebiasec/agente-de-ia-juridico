@@ -6,10 +6,12 @@ import time
 import uuid
 
 from src.agents.execution_schemas import ExecutionPlan, PlanStep
+from src.agents.completeness import assess_completeness, persist_verification
 from src.agents.guardrails import check_input
 from src.agents.plan_patterns import build_steps_from_pattern, remember_from_plan
 from src.agents.plan_templates import build_templated_steps, classify_plan_template, template_label
 from src.agents.runner import _infer_destination_agent, _summarize_input
+from src.agents.schemas import TriageResult
 from src.agents.skill_catalog import (
     HITL_OUTPUT_AGENTS,
     HIGH_RISK_AGENTS,
@@ -19,12 +21,67 @@ from src.agents.skill_catalog import (
     valid_skill_ids,
 )
 from src.storage import get_repository
-from src.storage.models import ExecutionPlanRecord
+from src.storage.models import ExecutionPlanRecord, Expediente
 
 
 def _new_plan_id() -> str:
     return f"pl-{uuid.uuid4().hex[:12]}"
 
+
+_DEST_TO_TAREA: dict[str, str] = {
+    "analista_cronologia_hechos_penales": "analisis_factual",
+    "analista_tipicidad_y_responsabilidad_penal": "tipicidad",
+    "analista_ruta_procesal_ley906": "ruta_906",
+    "analista_representacion_victimas": "representacion_victima",
+    "gestor_evidencia_y_soporte_probatorio": "evidencia",
+    "preparador_estrategico_audiencias_penales": "audiencia",
+    "redactor_documentos_juridicos_penales": "redaccion",
+    "gestor_seguimiento_procesal_penal": "seguimiento",
+    "evaluador_derechos_fundamentales_tutela": "tutela_constitucional",
+    "analista_calidad_juridica": "seguimiento",
+    "coordinador_expediente_penal": "seguimiento",
+}
+
+
+def _triage_snapshot(
+    message: str,
+    destination: str,
+    expediente: Expediente | None = None,
+) -> dict:
+    """Construye TriageResult determinista para el plan (sin LLM)."""
+    lower = (message or "").lower()
+    urgencia = any(
+        k in lower
+        for k in (
+            "urgente",
+            "vencimiento",
+            "audiencia mañana",
+            "audiencia manana",
+            "término",
+            "termino",
+            "inminente",
+            "amenaza",
+        )
+    )
+    fuera = any(
+        k in lower for k in ("divorcio", "custodia", "arrendamiento", "despido laboral")
+    ) and not any(k in lower for k in ("penal", "víctima", "victima", "fiscalía", "fiscalia"))
+    tipo = "fuera_de_alcance" if fuera else _DEST_TO_TAREA.get(destination, "seguimiento")
+    completeness = assess_completeness(
+        message,
+        destination=destination,
+        expediente=expediente,
+    )
+    triage = TriageResult(
+        tipo_tarea=tipo,  # type: ignore[arg-type]
+        etapa_aparente=completeness.etapa_aparente,  # type: ignore[arg-type]
+        agente_destino=destination,
+        datos_faltantes_bloqueantes=completeness.faltantes,
+        puede_continuar=completeness.puede_continuar,
+        urgencia_preliminar=urgencia,
+        resumen_triage=_summarize_input(message)[:240],
+    )
+    return triage.model_dump()
 
 def _risk_for_agent(agent_id: str) -> str:
     if agent_id in HIGH_RISK_AGENTS:
@@ -48,7 +105,7 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
             skill_id=coord_skill,
             title="Clasificar consulta y etapa aparente",
             user_summary=(
-                "Como coordinador del expediente, revisaré su consulta, identificaré la tarea "
+                "Como Gerente del Caso Penal, revisaré su consulta, identificaré la tarea "
                 "y la etapa procesal aparente, y pediré apoyo al equipo interno cuando haga falta."
             ),
             inputs_expected=cin or ["solicitud del despacho", "resumen de caso", "documentos disponibles"],
@@ -95,7 +152,7 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
                     skill_id=cal_skill,
                     title="Control de calidad jurídica",
                     user_summary=(
-                        "Como coordinador, pediré al equipo de calidad revisar coherencia "
+                        "Como gerente, pediré al equipo de calidad revisar coherencia "
                         "estratégica, soporte fáctico y riesgos antes de entregarte la salida."
                     ),
                     inputs_expected=cin2 or ["borrador del especialista", "fuentes citadas"],
@@ -122,21 +179,46 @@ def create_execution_plan(
         return None, err
 
     destination = _infer_destination_agent(message)
+    repo = get_repository()
+    chat = repo.get_chat_session(session_id)
+    history = list(chat.messages) if chat else []
+    from src.services.expediente_sync import sync_expediente_from_chat
+
+    sync_expediente_from_chat(session_id, message, history)
+    expediente = repo.get_expediente(session_id) or Expediente(session_id=session_id)
+    triage_snapshot = _triage_snapshot(message, destination, expediente)
+    completeness = assess_completeness(
+        message,
+        destination=destination,
+        expediente=expediente,
+    )
+    persist_verification(expediente, completeness, destination=destination)
+
     pattern_reused = False
     template_kind = classify_plan_template(message)
     steps: list[PlanStep] | None = None
 
-    pattern_hit = build_steps_from_pattern(session_id)
-    if pattern_hit:
-        steps, remembered_kind = pattern_hit
-        pattern_reused = True
-        if remembered_kind:
-            template_kind = remembered_kind  # type: ignore[assignment]
+    if not completeness.puede_continuar:
+        steps = _build_plan_steps("coordinador_expediente_penal", message)
+        steps[0].title = "Completar verificación del expediente"
+        steps[0].user_summary = (
+            "Como Gerente del Caso Penal, detendré la delegación hasta recibir: "
+            + ", ".join(completeness.faltantes)
+            + "."
+        )
+        steps[0].inputs_expected = list(completeness.faltantes)
+    else:
+        pattern_hit = build_steps_from_pattern(session_id)
+        if pattern_hit:
+            steps, remembered_kind = pattern_hit
+            pattern_reused = True
+            if remembered_kind:
+                template_kind = remembered_kind  # type: ignore[assignment]
 
-    if steps is None:
-        steps = build_templated_steps(template_kind, message, destination_agent=destination)
-    if steps is None:
-        steps = _build_plan_steps(destination, message)
+        if steps is None:
+            steps = build_templated_steps(template_kind, message, destination_agent=destination)
+        if steps is None:
+            steps = _build_plan_steps(destination, message)
 
     agents = list(dict.fromkeys(s.agent_id for s in steps))
     objective = _summarize_input(message)
@@ -144,6 +226,8 @@ def create_execution_plan(
         objective = f"Atender consulta penal-víctimas: {objective}"
     if template_kind != "generico":
         objective = f"[{template_label(template_kind)}] {objective}"
+    if not completeness.puede_continuar:
+        objective = f"[EXPEDIENTE INCOMPLETO] {objective}"
 
     plan = ExecutionPlan(
         plan_id=_new_plan_id(),
@@ -154,10 +238,11 @@ def create_execution_plan(
         objective=objective,
         agents_involved=agents,
         steps=steps,
-        status="pending_approval",
+        status="pending_approval" if completeness.puede_continuar else "awaiting_input",
         created_at_ms=int(time.time() * 1000),
         template_kind=template_kind,
         pattern_reused=pattern_reused,
+        triage_snapshot=triage_snapshot,
     )
 
     record = ExecutionPlanRecord(
@@ -212,8 +297,8 @@ def reject_plan(plan_id: str, user_id: str, reason: str = "") -> tuple[Execution
     plan = ExecutionPlan.model_validate(record.payload)
     if plan.initiator_user_id != user_id:
         return None, "Solo el iniciador puede rechazar este plan."
-    if plan.status != "pending_approval":
-        return None, f"El plan no está pendiente de aprobación (estado: {plan.status})."
+    if plan.status not in {"pending_approval", "awaiting_input"}:
+        return None, f"El plan no se puede rechazar en su estado actual ({plan.status})."
     plan.status = "rejected"
     plan.rejected_at_ms = int(time.time() * 1000)
     plan.rejection_reason = (reason or "").strip() or "Sin motivo indicado."

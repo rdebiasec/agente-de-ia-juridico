@@ -107,7 +107,7 @@ def _load_guardrails() -> list[dict]:
 GUARDRAILS = _load_guardrails()
 
 AGENT_TITULOS: dict[str, str] = {
-    "coordinador_expediente_penal": "COORDINACIÓN Y ENRUTAMIENTO DEL CASO PENAL",
+    "coordinador_expediente_penal": "GERENCIA OPERATIVA DEL CASO PENAL — VÍCTIMAS",
     "analista_cronologia_hechos_penales": "RECONSTRUCCIÓN CRONOLÓGICA DEL HECHO PENAL",
     "analista_tipicidad_y_responsabilidad_penal": "ANÁLISIS DE TIPICIDAD Y RESPONSABILIDAD PENAL",
     "analista_ruta_procesal_ley906": "ESTRATEGIA PROCESAL BAJO LA LEY 906 DE 2004",
@@ -132,14 +132,15 @@ DESTINATARIO_BY_AGENT: dict[str, str] = {
 AGENTS = [
     {
         "id": "coordinador_expediente_penal",
-        "nombre_corto": "Coordinador del expediente",
-        "titulo_profesional": "COORDINACIÓN Y ENRUTAMIENTO DEL CASO PENAL",
-        "proposito": "Recibe la consulta del despacho, entiende que necesita y la envia al especialista correcto.",
-        "problema": "Evita perder tiempo en respuestas generales o mal enfocadas; ordena el trabajo por prioridad legal.",
-        "necesidad": "En penal-victimas la estrategia cambia por etapa Ley 906; este coordinador reduce errores de enfoque.",
-        "no_reemplaza": "El analisis de fondo por especialidad ni la aprobacion final.",
+        "nombre_corto": "Gerente del Caso Penal",
+        "titulo_profesional": "GERENCIA OPERATIVA DEL CASO PENAL — VÍCTIMAS",
+        "proposito": "Gerencia el caso: recibe la consulta, verifica completitud y prioridad, asigna al especialista correcto y responde con una sola voz de despacho.",
+        "problema": "Evita respuestas mal enfocadas y actuaciones sobre expedientes incompletos; ordena el trabajo por prioridad legal y urgencia.",
+        "necesidad": "En penal-victimas la estrategia cambia por etapa Ley 906; esta gerencia reduce errores de enfoque y pérdida de términos.",
+        "no_reemplaza": "El analisis de fondo por especialidad ni la aprobacion y firma final del abogado titular.",
         "prompt_simple": [
             "Solo trabaja en casos de penal-victimas en Colombia.",
+            "Antes de todo, verifica que el caso tenga los datos y documentos minimos.",
             "Decide a que especialista enviar cada consulta segun necesidad del caso.",
             "Si faltan datos importantes, primero los pide antes de dar una conclusion.",
             "No inventa normas, sentencias, radicados ni hechos.",

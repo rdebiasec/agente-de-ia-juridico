@@ -75,7 +75,7 @@ def _poc_step_prompt(
         )
     else:
         tool_directive = (
-            "Responde como coordinador del expediente con la información disponible."
+            "Responde como Gerente del Caso Penal con la información disponible."
         )
 
     return (
@@ -287,6 +287,14 @@ async def _run_single_step(
         if not has_key:
             text = _step_fallback(step, user_message)
             text = apply_output_guardrails(text, channel)
+            from src.agents.completeness import record_specialist_result
+
+            ledger_result = record_specialist_result(
+                session_id,
+                agent_id=step.agent_id,
+                text=text,
+                status="done",
+            )
             report = AgentIOReport(
                 step_id=step.step_id,
                 agent_id=step.agent_id,
@@ -300,12 +308,13 @@ async def _run_single_step(
                         classification="inferencia",
                     )
                 ],
+                structured_output=ledger_result,
                 user_update=f"↳ Completé: {step.title}.",
                 status="done",
             )
             return text, report
 
-        agent = build_orchestrator()
+        agent = build_orchestrator(require_tool_approval=False)
         prompt = _poc_step_prompt(
             step,
             user_message=user_message,
@@ -360,6 +369,14 @@ async def _run_single_step(
             )
             status = "blocked"
 
+        from src.agents.completeness import record_specialist_result
+
+        ledger_result = record_specialist_result(
+            session_id,
+            agent_id=step.agent_id,
+            text=text,
+            status=status,
+        )
         report = AgentIOReport(
             step_id=step.step_id,
             agent_id=step.agent_id,
@@ -373,6 +390,7 @@ async def _run_single_step(
                     classification="inferencia",
                 )
             ],
+            structured_output=ledger_result,
             user_update=(
                 f"↳ Completé: {step.title}."
                 if status == "done"
@@ -443,9 +461,18 @@ async def execute_approved_plan(
     from src.services.expediente_sync import sync_expediente_from_chat
 
     sync_expediente_from_chat(session_id, message, history, trace=trace)
-    exp_resumen = expediente_store.get_or_create(session_id).resumen()
+    expediente = expediente_store.get_or_create(session_id)
+    exp_resumen = expediente.resumen()
+    requested_destination = (plan.triage_snapshot or {}).get(
+        "agente_destino", "coordinador_expediente_penal"
+    )
     ok_pre, pre_err = run_pre_validations(
-        message, history=history, expediente_resumen=exp_resumen, trace=trace
+        message,
+        history=history,
+        expediente_resumen=exp_resumen,
+        trace=trace,
+        expediente=expediente,
+        destination=requested_destination,
     )
     prior_traces = get_repository().list_session_traces(session_id, limit=40)
     attach_session_continuity(trace, history=history, session_id=session_id, prior_traces=prior_traces)
