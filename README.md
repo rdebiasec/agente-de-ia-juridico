@@ -28,7 +28,7 @@ Con Postgres local o Render usa el mismo esquema (Alembic + pgvector).
 |---------|------|----------------|
 | **Local — app en Mac** | `docker compose -f deploy/docker-compose.yml up -d db` + en `.env`: `postgresql+psycopg://agente:agente@localhost:5432/agente` | `localhost:5432` |
 | **Local — todo en Docker** | `docker compose -f deploy/docker-compose.yml up -d` | compose usa `@db:5432` (automático) |
-| **Producción (Render)** | `render.yaml` → base `agente-db` | inyectada por Render |
+| **Producción (Render)** | `render.yaml` → base `agente-ia-juridico-db` | inyectada por Render |
 
 Atajo local (DB + migraciones, opcional `--ingest` para RAG):
 

@@ -1,4 +1,4 @@
-# Smoke producción — 2026-07-25 20:35
+# Smoke producción — 2026-07-25 21:27
 
 **Render:** https://agente-de-ia-juridico.onrender.com
 **Pages:** https://rdebiasec.github.io/agente-de-ia-juridico

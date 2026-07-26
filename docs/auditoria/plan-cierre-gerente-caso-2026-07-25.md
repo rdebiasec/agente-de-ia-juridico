@@ -131,21 +131,23 @@ Dos cosas lo impedían:
 
 1. **El sync abortaba.** La base de producción se recreó y quedó reseeded en `v1`, mientras los headers de archivo declaraban el historial de la base local (hasta `v9`). El script no podía determinar de qué lado venía el cambio y no escribía nada. Corregido alineando los headers al baseline real (`6a8243d`).
 
-2. **El CI escribe en una base distinta de la que usa la aplicación.** El secreto `DATABASE_URL` de GitHub Actions apunta a `agente-ia-juridico-db` (plan básico), mientras el servicio de Render lee `agente-db` (plan gratuito). El sync quedó en verde y publicó `v2`… en la base que nadie lee.
+2. **El CI escribía en una base distinta de la que usaba la aplicación.** El secreto `PROD_DATABASE_URL` apuntaba a `agente-ia-juridico-db` (plan básico), mientras el servicio leía `agente-db` (plan gratuito).
 
-Evidencia: las escrituras del smoke HTTP aterrizaron en `agente-db`, y el sync del CI creó `v2` en `agente-ia-juridico-db` en el mismo minuto.
+**Resuelto el 2026-07-25 (arranque de cero en la paga):**
 
-**Resuelto para el contenido:** el prompt y los tres guardrails del Gerente se publicaron en la base viva por la vía auditada del portal (`POST /api/audit/config/save`), quedando en `v2`, versionados y reversibles. Script reutilizable: `scripts/publicar_config_gerente.py`. Quedaron registrados a nombre de la cuenta de smoke, no de la abogada; conviene republicar con autoría real si esa traza importa.
+- Wipe de `agente-ia-juridico-db` + reseed desde archivos.
+- `render.yaml` apunta el servicio a `agente-ia-juridico-db` (blueprint sync `dep-d9im3nhbip4c73csn2qg` live).
+- CI y servicio leen/escriben la **misma** base.
+- Mecanismo archivo → DB: editar en el repo → push a `main` → workflow `Sync config` → nueva versión en Postgres.
+- Smoke PASS sobre la paga (infra, gerencia, login auditoría). Expedientes de la era gratis no se migraron a propósito.
 
-El contenido quedó idéntico en ambas bases y los checksums de los headers coinciden con la base viva. Lo que no puede coincidir es la numeración: los headers solo pueden seguir el historial de una base, y hoy siguen la del CI. Por eso los guardrails quedaron como `v1` en el header y `v2` en la base viva.
-
-**Sin resolver, porque es una decisión del dueño:** cuál de las dos bases es la autoritativa. Mientras sigan desalineadas, cada publicación por CI se va a la base equivocada y hay que publicar a mano con el script. Además `agente-db`, que es la que hoy tiene los datos del caso, **expira el 2026-08-16** por ser plan gratuito.
+**Pendiente humano residual:** borrar `agente-db` (gratis) en el dashboard de Render. Ya no está en el blueprint; el MCP no puede borrarla. URL: https://dashboard.render.com/d/dpg-d9cpmge1a83c739j60dg-a
 
 ## 6. Pendiente humano
 
 Estos puntos no se pueden cerrar con código y quedan abiertos a propósito.
 
-- **Decidir la base autoritativa de producción** y alinear `DATABASE_URL` del servicio de Render y del secreto de GitHub Actions a la misma. Hoy divergen. Si se elige `agente-db`, hay que salir del plan gratuito antes del 2026-08-16; si se elige `agente-ia-juridico-db`, hay que migrar los datos del caso primero. Ver la sección anterior.
+- **Borrar `agente-db` (gratis)** en el dashboard de Render (ver sección 5). Ya no la usa el servicio.
 - **DPA y contratos de tratamiento de datos:** sin firmar. Requiere decisión y firma del despacho.
 - **Cuentas individuales por abogado:** hoy el acceso es por contraseña compartida. Falta identidad por persona para trazabilidad real de quién aprueba.
 - **WhatsApp y Twilio:** integración inactiva a propósito. No se habilita sin evaluación previa frente a la Ley 1581 y la Ley 2300.

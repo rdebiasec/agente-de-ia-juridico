@@ -177,7 +177,7 @@ Buenas prácticas:
 
 ## Persistencia y Slack (Fase B)
 
-- `render.yaml` provisiona una base de datos administrada `agente-db` e inyecta `DATABASE_URL`.
+- `render.yaml` adopta la base administrada `agente-ia-juridico-db` (plan básico) e inyecta `DATABASE_URL`.
 - El esquema se gestiona con **Alembic**: al arrancar con `DATABASE_URL`, la app ejecuta
   `alembic upgrade head` (migración inicial: extensión `vector` + tablas `drafts`, `expedientes`,
   `deadlines`, `document_chunks`). Si Alembic falla, hay fallback a `create_all`.
@@ -414,7 +414,7 @@ Páginas legales públicas: `/legal/privacidad`, `/legal/tratamiento-datos-casos
 | URL portal | `http://127.0.0.1:8000/auditoria/` | `https://agente-de-ia-juridico.onrender.com/auditoria/` |
 | `AUDIT_API_BASE` en build | `""` (mismo origen) | `""` (mismo origen, en Dockerfile) |
 | Login auditoría | correo + `SITE_PASSWORD` | correo + `SITE_PASSWORD` |
-| Persistencia | Postgres si `DATABASE_URL` en `.env` | Postgres (`agente-db`) |
+| Persistencia | Postgres si `DATABASE_URL` en `.env` | Postgres (`agente-ia-juridico-db`) |
 | Chat auto-login | `DEV_AUTO_LOGIN=true` en `.env` | `false` en `render.yaml` |
 | Cookie segura | `SESSION_COOKIE_SECURE=false` | `true` |
 
