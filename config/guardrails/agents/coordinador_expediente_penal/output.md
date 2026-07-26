@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: fff4d998a6bb2f9f -->
+<!-- config-version: 1; checksum: 5901fde6d797fffa -->
 # Guardrails de salida — coordinador_expediente_penal
 
 ## no_invention_policy

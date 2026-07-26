@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8a9440c0f348e548 -->
+<!-- config-version: 1; checksum: 6ea6b9a2b2b9ee4b -->
 # Guardrails de entrada — coordinador_expediente_penal
 
 ## scope_policy
