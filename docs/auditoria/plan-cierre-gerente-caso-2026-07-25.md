@@ -141,13 +141,12 @@ Dos cosas lo impedían:
 - Mecanismo archivo → DB: editar en el repo → push a `main` → workflow `Sync config` → nueva versión en Postgres.
 - Smoke PASS sobre la paga (infra, gerencia, login auditoría). Expedientes de la era gratis no se migraron a propósito.
 
-**Pendiente humano residual:** borrar `agente-db` (gratis) en Render con login en el dashboard. Configs y runbooks ya apuntan solo a `agente-ia-juridico-db`. URL: https://dashboard.render.com/d/dpg-d9cpmge1a83c739j60dg-a
+**Resuelto:** `agente-db` (gratis) fue borrada el 2026-07-26 vía API de Render. Configs y runbooks apuntan solo a `agente-ia-juridico-db`.
 
 ## 6. Pendiente humano
 
 Estos puntos no se pueden cerrar con código y quedan abiertos a propósito.
 
-- **Borrar `agente-db` (gratis)** en el dashboard de Render (login requerido). Configs ya limpiadas.
 - **DPA y contratos de tratamiento de datos:** sin firmar. Requiere decisión y firma del despacho.
 - **Cuentas individuales por abogado:** hoy el acceso es por contraseña compartida. Falta identidad por persona para trazabilidad real de quién aprueba.
 - **WhatsApp y Twilio:** integración inactiva a propósito. No se habilita sin evaluación previa frente a la Ley 1581 y la Ley 2300.

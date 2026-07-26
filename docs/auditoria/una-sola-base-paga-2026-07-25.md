@@ -32,10 +32,8 @@ El portal de auditoría sigue siendo otra vía válida (`POST /api/audit/config/
 
 Wipe de emergencia (ops): [`.github/workflows/ops-wipe-schema.yml`](../../.github/workflows/ops-wipe-schema.yml) con input `WIPE`.
 
-## Pendiente humano
+## Base gratis retirada
 
-Borrar la base gratis huérfana en el dashboard (requiere login en Render; el API/MCP no la elimina):
+`agente-db` (plan free, `dpg-d9cpmge1a83c739j60dg-a`) fue **borrada** el 2026-07-26 vía API de Render (HTTP 204).
 
-https://dashboard.render.com/d/dpg-d9cpmge1a83c739j60dg-a
-
-Nombre: `agente-db`. Ya no está en `render.yaml`, ni en el servicio, ni en runbooks. Tras borrarla, esta sección se puede tachar.
+La única base de producción es `agente-ia-juridico-db` (plan básico).
