@@ -32,9 +32,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          # Historial completo: el job hace pull --rebase antes de empujar headers.
+          fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -67,4 +70,22 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A agente/prompts config/guardrails .cursor/skills agente/skills
           git commit -m "chore(config): sincronizar headers de versión [skip-config-sync]"
-          git push
+
+          # Evitar carrera si main avanzó mientras el sync corría.
+          push_headers() {
+            git pull --rebase origin main && git push
+          }
+
+          if push_headers; then
+            exit 0
+          fi
+
+          echo "::warning::Rebase/push de headers falló; reintentando una vez..."
+          git rebase --abort 2>/dev/null || true
+          git fetch origin main
+          if push_headers; then
+            exit 0
+          fi
+
+          echo "::error::No se pudo empujar headers tras rebase (conflicto o carrera con main). Revisar main y reintentar el workflow."
+          exit 1
