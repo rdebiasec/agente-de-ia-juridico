@@ -94,12 +94,17 @@ def smoke_login(base: str, *, email: str, password: str, pin: str) -> dict:
         after = client.get("/api/audit/session")
         out["session_after_logout"] = after.json() if after.status_code == 200 else {}
 
+        after_body = out.get("session_after_logout", {})
+        # Con DEV_AUTO_LOGIN el servidor local re-abre sesión sola tras el logout;
+        # eso es intencional en desarrollo y no debe contar como fallo.
+        logout_ok = not after_body.get("authenticated") or bool(after_body.get("dev_auto_login"))
+
         out["ok"] = bool(
             out.get("gate_html")
             and out.get("authenticated")
             and out.get("progress") in (200, 404)
             and out.get("logout") == 200
-            and not out.get("session_after_logout", {}).get("authenticated")
+            and logout_ok
         )
     return out
 

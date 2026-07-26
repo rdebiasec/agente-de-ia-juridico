@@ -99,22 +99,51 @@ Un FAIL no se oculta: se documenta con su causa y su bloqueo.
 
 ---
 
-## 4. Pendiente humano
+## 4. Resultado del cierre
+
+Ejecutado el 2026-07-25. Commit `bb82c50` en `main`, deploy `dep-d9ilavsvikkc73cv1670` en vivo.
+
+| Verificación | Resultado |
+|---|---|
+| Suite sin smoke en vivo | PASS — 222 aprobadas, 1 omitida |
+| Salud de producción | PASS — `status: ok`, persistencia `postgres` |
+| Migración | PASS — esquema en `0008`, seis columnas del ledger presentes |
+| Smoke de infraestructura | PASS — 0 fallos |
+| Gate incompleto en producción | PASS — `awaiting_input`, solo el gerente, faltantes reportados |
+| Aprobación de plan incompleto | PASS — rechazada con HTTP 400 |
+| Gate completo en producción | PASS — `pending_approval` con el redactor incluido |
+| Ledger en producción | PASS — bloqueo registrado y tarea cerrada al llegar el dato |
+| Login del portal, local y producción | PASS en ambos, con el mismo login |
+| Slack | PASS — 6 pruebas verdes, socket activo, `awaiting_input` manejado |
+
+Detalle y evidencia en [`smoke-gerencia-2026-07-25.md`](smoke-gerencia-2026-07-25.md) y [`smoke-produccion-reporte.md`](smoke-produccion-reporte.md).
+
+Dos checks de smoke daban falso FAIL por estar desactualizados frente al rediseño del portal y frente a `DEV_AUTO_LOGIN`. Se corrigieron los scripts, no el producto.
+
+## 5. Riesgo detectado en el smoke
+
+La base que producción usa hoy es `agente-db` (plan gratuito) y tiene fecha de expiración **2026-08-16**. El workspace además conserva una segunda base, `agente-ia-juridico-db` (plan básico), que ya no recibe escrituras.
+
+Sin acción, los datos del caso en producción desaparecen en pocas semanas. La decisión de a cuál base apuntar y con qué plan es del dueño del proyecto, no del código.
+
+## 6. Pendiente humano
 
 Estos puntos no se pueden cerrar con código y quedan abiertos a propósito.
 
+- **Base de datos de producción:** migrar a un plan que no expire y retirar la base que quedó sin uso. Ver la sección anterior.
 - **DPA y contratos de tratamiento de datos:** sin firmar. Requiere decisión y firma del despacho.
 - **Cuentas individuales por abogado:** hoy el acceso es por contraseña compartida. Falta identidad por persona para trazabilidad real de quién aprueba.
 - **WhatsApp y Twilio:** integración inactiva a propósito. No se habilita sin evaluación previa frente a la Ley 1581 y la Ley 2300.
 - **Checklist regulatorio REQ-001 a REQ-050:** sin validación humana registrada.
+- **HITL de Slack de punta a punta:** `scripts/smoke_slack_hitl_drafts.py` publica borradores reales en `#revision-abogado` y exige que una persona pulse Aprobar y Rechazar. No se ejecutó para no dejar ruido en el canal del despacho.
 
 ---
 
-## 5. Criterio de hecho de este cierre
+## 7. Criterio de hecho de este cierre
 
-- Este documento publicado en `docs/auditoria/`.
-- Commit en `main` con el trabajo de gerencia, sin secretos ni material de terceros.
-- Push a `origin` completado.
-- Deploy de Render en vivo, con salud correcta y migración `0008` aplicada.
-- Smoke de producción ejecutado, con resultado PASS o con FAIL documentado.
-- Pendiente humano listado sin declararlo cerrado.
+- [x] Este documento publicado en `docs/auditoria/`.
+- [x] Commit en `main` con el trabajo de gerencia, sin secretos ni material de terceros.
+- [x] Push a `origin` completado.
+- [x] Deploy de Render en vivo, con salud correcta y migración `0008` aplicada.
+- [x] Smoke de producción ejecutado, con resultado PASS.
+- [x] Pendiente humano listado sin declararlo cerrado.

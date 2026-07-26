@@ -1,4 +1,4 @@
-# Smoke producción — 2026-07-19 00:01
+# Smoke producción — 2026-07-25 20:35
 
 **Render:** https://agente-de-ia-juridico.onrender.com
 **Pages:** https://rdebiasec.github.io/agente-de-ia-juridico
@@ -11,7 +11,7 @@
 | Pages audit-data skills | PASS | 90 |
 | CSP Tailwind en /auditoria/ | PASS | content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 's |
 | CORS Pages → Render | PASS | access-control-allow-origin: https://rdebiasec.github.io |
-| UI «10 reglas estrictas» | PASS | coincidencias=3 |
+| UI editor por agente (tab Guardrails) | PASS | coincidencias=1 |
 | Pages AUDIT_API_BASE → Render | PASS | https://agente-de-ia-juridico.onrender.com |
 | /health Render | INFO | postgres production True |
 

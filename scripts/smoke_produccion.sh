@@ -29,7 +29,8 @@ pages_skills=$(curl -sfL "$PAGES/audit-data.json" | python3 -c "import sys,json;
 csp=$(curl -sI "$RENDER/auditoria/" | grep -i content-security-policy || true)
 health=$(curl -sf "$RENDER/health" | python3 -c "import sys,json;h=json.load(sys.stdin);print(h.get('persistencia','?'),h.get('environment','?'),h.get('web_auth_enabled','?'))" 2>/dev/null || echo "error")
 cors=$(curl -sI -X OPTIONS "$RENDER/api/audit/catalog" -H "Origin: https://rdebiasec.github.io" -H "Access-Control-Request-Method: GET" | grep -i access-control-allow-origin || true)
-ui_text=$(curl -sfL "$RENDER/auditoria/index.html" | grep -c "10 reglas estrictas" || echo 0)
+ui_text=$(curl -sfL "$RENDER/auditoria/index.html" | grep -c 'data-section="guardrails"' 2>/dev/null || true)
+ui_text=${ui_text:-0}
 api_base=$(curl -sfL "$PAGES/audit-api-config.js" | grep -o 'https://[^"]*' | head -1 || echo "")
 
 {
@@ -53,7 +54,7 @@ api_base=$(curl -sfL "$PAGES/audit-api-config.js" | grep -o 'https://[^"]*' | he
   echo "$cors" | grep -qi github.io && cors_ok=1 || cors_ok=0
   check "CORS Pages → Render" "$cors_ok" "$(echo "$cors" | tr -d '\r')"
   [[ "$ui_text" -ge 1 ]] && ui_ok=1 || ui_ok=0
-  check "UI «10 reglas estrictas»" "$ui_ok" "coincidencias=$ui_text"
+  check "UI editor por agente (tab Guardrails)" "$ui_ok" "coincidencias=$ui_text"
   echo "$api_base" | grep -q onrender.com && ab_ok=1 || ab_ok=0
   check "Pages AUDIT_API_BASE → Render" "$ab_ok" "$api_base"
   echo "| /health Render | INFO | $health |"
