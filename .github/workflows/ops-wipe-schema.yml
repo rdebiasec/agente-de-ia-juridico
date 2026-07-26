@@ -1,0 +1,29 @@
+name: Ops wipe public schema
+
+# Arranque de cero en la base de PROD_DATABASE_URL.
+# Manual only. No corre en push.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escriba WIPE para confirmar el borrado total del schema public'
+        required: true
+        type: string
+
+jobs:
+  wipe:
+    if: ${{ inputs.confirm == 'WIPE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -e .
+      - name: Wipe schema public
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: python scripts/ops_wipe_public_schema.py --confirm WIPE

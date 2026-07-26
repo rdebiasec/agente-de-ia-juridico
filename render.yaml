@@ -47,7 +47,7 @@ services:
         value: text-embedding-3-small
       - key: DATABASE_URL
         fromDatabase:
-          name: agente-db
+          name: agente-ia-juridico-db
           property: connectionString
       - key: SLACK_BOT_TOKEN
         sync: false
@@ -70,8 +70,12 @@ services:
       - key: TWILIO_STATUS_CALLBACK
         sync: false
 
+# Base autoritativa única (plan básico, sin expiración).
+# Adopta la instancia existente agente-ia-juridico-db; no declarar la gratis.
 databases:
-  - name: agente-db
-    plan: free
-    databaseName: agente
+  - name: agente-ia-juridico-db
+    plan: basic-256mb
+    region: oregon
+    postgresMajorVersion: "18"
+    databaseName: agente_b427
     user: agente
