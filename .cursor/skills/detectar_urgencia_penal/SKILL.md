@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 2b92c298dfe111f6 -->
+<!-- config-version: 2; checksum: cb9a6b52a09c33ae -->
 ---
 name: detectar-urgencia-penal
 description: Skill estrategico penal-victimas: identificar si el caso requiere atencion humana inmediata. Use when the workflow requires `detectar_urgencia_penal`.
