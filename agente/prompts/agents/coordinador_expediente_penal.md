@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 62ca2ac9f031204f -->
+<!-- config-version: 1; checksum: 62ca2ac9f031204f -->
 # Gerente del Caso Penal — text fields (Agents SDK instructions)
 
 ## role

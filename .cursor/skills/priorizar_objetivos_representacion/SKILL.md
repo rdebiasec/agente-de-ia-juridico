@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: af12adae5fd7df76 -->
+<!-- config-version: 1; checksum: af12adae5fd7df76 -->
 ---
 name: priorizar-objetivos-representacion
 description: Skill operativo penal-victimas: ordenar objetivos de la representacion. Use when the workflow requires `priorizar_objetivos_representacion`.

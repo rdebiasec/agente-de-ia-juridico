@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 775fbd4932a9754d -->
+<!-- config-version: 1; checksum: 775fbd4932a9754d -->
 ---
 name: recomendar-via-constitucional-o-alternativa
 description: Skill operativo penal-victimas: recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta. Use when the workflow requires `recomendar_via_constitucional_o_alternativa`.

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: a36c460d0edbb112 -->
+<!-- config-version: 1; checksum: a36c460d0edbb112 -->
 ---
 name: clasificar-fuente-factual
 description: Skill estrategico penal-victimas: distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente. Use when the workflow requires `clasificar_fuente_factual`.
