@@ -5,13 +5,12 @@ from __future__ import annotations
 import time
 import uuid
 
+from src.agents.completeness import persist_verification
 from src.agents.execution_schemas import ExecutionPlan, PlanStep
-from src.agents.completeness import assess_completeness, persist_verification
 from src.agents.guardrails import check_input
 from src.agents.plan_patterns import build_steps_from_pattern, remember_from_plan
 from src.agents.plan_templates import build_templated_steps, classify_plan_template, template_label
-from src.agents.runner import _infer_destination_agent, _summarize_input
-from src.agents.schemas import TriageResult
+from src.agents.runner import _summarize_input
 from src.agents.skill_catalog import (
     HITL_OUTPUT_AGENTS,
     HIGH_RISK_AGENTS,
@@ -20,6 +19,7 @@ from src.agents.skill_catalog import (
     skill_io_lists,
     valid_skill_ids,
 )
+from src.agents.triage import build_triage, infer_destination_agent
 from src.storage import get_repository
 from src.storage.models import ExecutionPlanRecord, Expediente
 
@@ -27,61 +27,6 @@ from src.storage.models import ExecutionPlanRecord, Expediente
 def _new_plan_id() -> str:
     return f"pl-{uuid.uuid4().hex[:12]}"
 
-
-_DEST_TO_TAREA: dict[str, str] = {
-    "analista_cronologia_hechos_penales": "analisis_factual",
-    "analista_tipicidad_y_responsabilidad_penal": "tipicidad",
-    "analista_ruta_procesal_ley906": "ruta_906",
-    "analista_representacion_victimas": "representacion_victima",
-    "gestor_evidencia_y_soporte_probatorio": "evidencia",
-    "preparador_estrategico_audiencias_penales": "audiencia",
-    "redactor_documentos_juridicos_penales": "redaccion",
-    "gestor_seguimiento_procesal_penal": "seguimiento",
-    "evaluador_derechos_fundamentales_tutela": "tutela_constitucional",
-    "analista_calidad_juridica": "seguimiento",
-    "coordinador_expediente_penal": "seguimiento",
-}
-
-
-def _triage_snapshot(
-    message: str,
-    destination: str,
-    expediente: Expediente | None = None,
-) -> dict:
-    """Construye TriageResult determinista para el plan (sin LLM)."""
-    lower = (message or "").lower()
-    urgencia = any(
-        k in lower
-        for k in (
-            "urgente",
-            "vencimiento",
-            "audiencia mañana",
-            "audiencia manana",
-            "término",
-            "termino",
-            "inminente",
-            "amenaza",
-        )
-    )
-    fuera = any(
-        k in lower for k in ("divorcio", "custodia", "arrendamiento", "despido laboral")
-    ) and not any(k in lower for k in ("penal", "víctima", "victima", "fiscalía", "fiscalia"))
-    tipo = "fuera_de_alcance" if fuera else _DEST_TO_TAREA.get(destination, "seguimiento")
-    completeness = assess_completeness(
-        message,
-        destination=destination,
-        expediente=expediente,
-    )
-    triage = TriageResult(
-        tipo_tarea=tipo,  # type: ignore[arg-type]
-        etapa_aparente=completeness.etapa_aparente,  # type: ignore[arg-type]
-        agente_destino=destination,
-        datos_faltantes_bloqueantes=completeness.faltantes,
-        puede_continuar=completeness.puede_continuar,
-        urgencia_preliminar=urgencia,
-        resumen_triage=_summarize_input(message)[:240],
-    )
-    return triage.model_dump()
 
 def _risk_for_agent(agent_id: str) -> str:
     if agent_id in HIGH_RISK_AGENTS:
@@ -178,7 +123,7 @@ def create_execution_plan(
     if not ok:
         return None, err
 
-    destination = _infer_destination_agent(message)
+    destination = infer_destination_agent(message)
     repo = get_repository()
     chat = repo.get_chat_session(session_id)
     history = list(chat.messages) if chat else []
@@ -186,7 +131,11 @@ def create_execution_plan(
 
     sync_expediente_from_chat(session_id, message, history)
     expediente = repo.get_expediente(session_id) or Expediente(session_id=session_id)
-    triage_snapshot = _triage_snapshot(message, destination, expediente)
+    triage = build_triage(message, expediente=expediente, destination=destination)
+    triage_snapshot = triage.model_dump()
+    completeness_ok = triage.puede_continuar
+    from src.agents.completeness import assess_completeness
+
     completeness = assess_completeness(
         message,
         destination=destination,
@@ -198,15 +147,15 @@ def create_execution_plan(
     template_kind = classify_plan_template(message)
     steps: list[PlanStep] | None = None
 
-    if not completeness.puede_continuar:
+    if not completeness_ok:
         steps = _build_plan_steps("coordinador_expediente_penal", message)
         steps[0].title = "Completar verificación del expediente"
         steps[0].user_summary = (
             "Como Gerente del Caso Penal, detendré la delegación hasta recibir: "
-            + ", ".join(completeness.faltantes)
+            + ", ".join(triage.datos_faltantes_bloqueantes)
             + "."
         )
-        steps[0].inputs_expected = list(completeness.faltantes)
+        steps[0].inputs_expected = list(triage.datos_faltantes_bloqueantes)
     else:
         pattern_hit = build_steps_from_pattern(session_id)
         if pattern_hit:
@@ -226,7 +175,7 @@ def create_execution_plan(
         objective = f"Atender consulta penal-víctimas: {objective}"
     if template_kind != "generico":
         objective = f"[{template_label(template_kind)}] {objective}"
-    if not completeness.puede_continuar:
+    if not completeness_ok:
         objective = f"[EXPEDIENTE INCOMPLETO] {objective}"
 
     plan = ExecutionPlan(
@@ -238,7 +187,7 @@ def create_execution_plan(
         objective=objective,
         agents_involved=agents,
         steps=steps,
-        status="pending_approval" if completeness.puede_continuar else "awaiting_input",
+        status="pending_approval" if completeness_ok else "awaiting_input",
         created_at_ms=int(time.time() * 1000),
         template_kind=template_kind,
         pattern_reused=pattern_reused,

@@ -410,9 +410,14 @@ def aggregate_execution_plan_stats(records: list[ExecutionPlanRecord]) -> dict:
         "approved": by_status.get("approved", 0),
         "executing": by_status.get("executing", 0),
         "done": by_status.get("done", 0),
+        "partial": by_status.get("partial", 0),
         "failed": by_status.get("failed", 0),
         "rejected": by_status.get("rejected", 0),
-        "executed": by_status.get("done", 0) + by_status.get("failed", 0),
+        "executed": (
+            by_status.get("done", 0)
+            + by_status.get("partial", 0)
+            + by_status.get("failed", 0)
+        ),
         "recent": recent,
         "generated_at": _now().isoformat(),
     }

@@ -8,7 +8,18 @@ un coordinador del expediente (POC) es el único interlocutor del abogado;
 from agents import Agent
 
 from src.agents.schemas import BorradorDocumentoPenal, Tutela
-from src.agents.sdk_guardrails import poc_input_guardrails, poc_output_guardrails
+from src.agents.sdk_guardrails import (
+    poc_input_guardrails,
+    poc_output_guardrails,
+    poc_tool_input_guardrails,
+    poc_tool_output_guardrails,
+    specialist_output_guardrails,
+)
+from src.agents.skill_catalog import (
+    HIGH_RISK_AGENTS,
+    primary_skill_for_agent,
+    skill_contract_brief,
+)
 from src.config import get_settings
 from src.mcp.tools import get_knowledge_tools
 
@@ -87,12 +98,7 @@ def _load_agent_prompt(agent_id: str) -> str:
         return path.read_text(encoding="utf-8").strip()
 
 
-_APPROVAL_REQUIRED_TOOLS = frozenset(
-    {
-        "redactor_documentos_juridicos_penales",
-        "evaluador_derechos_fundamentales_tutela",
-    }
-)
+_APPROVAL_REQUIRED_TOOLS = frozenset(HIGH_RISK_AGENTS)
 
 
 def _policy_block(agent_id: str | None = None) -> str:
@@ -132,18 +138,36 @@ def _policy_block(agent_id: str | None = None) -> str:
     return "\n\n".join(parts)
 
 
+def _model_for_agent(agent_id: str) -> str:
+    """Modelo por criticidad: alto riesgo usa openai_model_high_risk (Ch2 selection)."""
+    settings = get_settings()
+    if agent_id in HIGH_RISK_AGENTS:
+        return settings.openai_model_high_risk or settings.openai_model
+    return settings.openai_model
+
+
+def _capability_anchor(agent_id: str) -> str:
+    """Ancla el contrato primario del agente (Instruction Anchoring / Registry)."""
+    return skill_contract_brief(primary_skill_for_agent(agent_id))
+
+
 def _build_agent(name: str, *, with_tools: bool = True) -> Agent:
     base = _load_system_prompt()
     rol = _load_agent_prompt(name)
     policy = _policy_block(name)
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    anchor = _capability_anchor(name)
+    if anchor:
+        parts.append(anchor)
     if policy:
         parts.append(policy)
     instructions = "\n\n".join(parts) + "\n"
     kwargs: dict = {
         "name": name,
         "instructions": instructions,
-        "model": get_settings().openai_model,
+        "model": _model_for_agent(name),
+        # Defense-in-depth: todo especialista valida salida (Agent Mesh Defense / Ch7).
+        "output_guardrails": specialist_output_guardrails(),
     }
     if with_tools:
         kwargs["tools"] = get_knowledge_tools()
@@ -179,15 +203,19 @@ def build_redactor_documentos_juridicos_penales_agent() -> Agent:
     rol = _load_agent_prompt("redactor_documentos_juridicos_penales")
     policy = _policy_block("redactor_documentos_juridicos_penales")
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    anchor = _capability_anchor("redactor_documentos_juridicos_penales")
+    if anchor:
+        parts.append(anchor)
     if policy:
         parts.append(policy)
     instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name="redactor_documentos_juridicos_penales",
         instructions=instructions,
-        model=get_settings().openai_model,
+        model=_model_for_agent("redactor_documentos_juridicos_penales"),
         tools=get_knowledge_tools(),
         output_type=BorradorDocumentoPenal,
+        output_guardrails=specialist_output_guardrails(),
     )
 
 
@@ -200,15 +228,19 @@ def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
     rol = _load_agent_prompt("evaluador_derechos_fundamentales_tutela")
     policy = _policy_block("evaluador_derechos_fundamentales_tutela")
     parts = [base, rol, _BACKOFFICE_VOICE.strip()]
+    anchor = _capability_anchor("evaluador_derechos_fundamentales_tutela")
+    if anchor:
+        parts.append(anchor)
     if policy:
         parts.append(policy)
     instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name="evaluador_derechos_fundamentales_tutela",
         instructions=instructions,
-        model=get_settings().openai_model,
+        model=_model_for_agent("evaluador_derechos_fundamentales_tutela"),
         tools=get_knowledge_tools(),
         output_type=Tutela,
+        output_guardrails=specialist_output_guardrails(),
     )
 
 
@@ -222,13 +254,16 @@ def build_coordinador_agent() -> Agent:
     rol = _load_agent_prompt(POC_AGENT_ID)
     policy = _policy_block(POC_AGENT_ID)
     parts = [base, rol]
+    anchor = _capability_anchor(POC_AGENT_ID)
+    if anchor:
+        parts.append(anchor)
     if policy:
         parts.append(policy)
     instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name=POC_AGENT_ID,
         instructions=instructions,
-        model=get_settings().openai_model,
+        model=_model_for_agent(POC_AGENT_ID),
         tools=get_knowledge_tools(),
         input_guardrails=poc_input_guardrails(),
         output_guardrails=poc_output_guardrails(),
@@ -273,16 +308,26 @@ _SPECIALIST_BUILDERS = (
 SPECIALIST_AGENT_IDS = frozenset(_SPECIALIST_TOOL_DESCRIPTIONS.keys())
 
 
-def build_orchestrator(*, require_tool_approval: bool = True) -> Agent:
+def build_orchestrator(
+    *,
+    require_tool_approval: bool = True,
+    include_high_risk_tools: bool = True,
+) -> Agent:
     """POC coordinador con especialistas como tools internas (no handoffs terminales).
 
     require_tool_approval: si True, redactor/tutela pausan el runner hasta HITL.
-    En ejecución de plan ya aprobado se pasa False (el abogado ya autorizó).
+    include_high_risk_tools: el chat normal lo pasa False; así una clasificación
+    heurística imperfecta no puede exponer redacción/tutela. El plan aprobado
+    instancia esos agentes directamente y no depende de este orquestador.
     """
     base = _load_system_prompt()
     rol = _load_agent_prompt(POC_AGENT_ID)
     policy = _policy_block(POC_AGENT_ID)
     specialists = [builder() for builder in _SPECIALIST_BUILDERS]
+    if not include_high_risk_tools:
+        specialists = [
+            agent for agent in specialists if agent.name not in _APPROVAL_REQUIRED_TOOLS
+        ]
 
     async def _tool_output_text(result: object) -> str:
         output = getattr(result, "final_output", result)
@@ -306,8 +351,9 @@ def build_orchestrator(*, require_tool_approval: bool = True) -> Agent:
             return str(data)
         return str(output)
 
-    specialist_tools = [
-        agent.as_tool(
+    specialist_tools = []
+    for agent in specialists:
+        tool = agent.as_tool(
             tool_name=agent.name,
             tool_description=_SPECIALIST_TOOL_DESCRIPTIONS.get(
                 agent.name,
@@ -316,16 +362,21 @@ def build_orchestrator(*, require_tool_approval: bool = True) -> Agent:
             custom_output_extractor=_tool_output_text,
             needs_approval=require_tool_approval and agent.name in _APPROVAL_REQUIRED_TOOLS,
         )
-        for agent in specialists
-    ]
+        # Tool guardrails viven en FunctionTool (SDK), no en Agent.
+        tool.tool_input_guardrails = poc_tool_input_guardrails()
+        tool.tool_output_guardrails = poc_tool_output_guardrails()
+        specialist_tools.append(tool)
     parts = [base, rol]
+    anchor = _capability_anchor(POC_AGENT_ID)
+    if anchor:
+        parts.append(anchor)
     if policy:
         parts.append(policy)
     instructions = "\n\n".join(parts) + "\n"
     return Agent(
         name=POC_AGENT_ID,
         instructions=instructions,
-        model=get_settings().openai_model,
+        model=_model_for_agent(POC_AGENT_ID),
         tools=[*get_knowledge_tools(), *specialist_tools],
         input_guardrails=poc_input_guardrails(),
         output_guardrails=poc_output_guardrails(),

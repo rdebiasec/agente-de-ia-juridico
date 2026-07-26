@@ -20,7 +20,11 @@ PLAN_EVENT_TYPES = frozenset(
 
 
 class PlanEventBroker:
-    """Broker in-process (un worker). Multi-instancia requeriría Redis en el futuro."""
+    """Broker local con replay/polling durable para despliegues multi-worker.
+
+    La entrega inmediata usa colas in-process. Si el productor vive en otro
+    worker, el suscriptor recupera eventos persistidos en `execution_plans`.
+    """
 
     _instance: PlanEventBroker | None = None
 
@@ -114,8 +118,10 @@ class PlanEventBroker:
         async with self._lock:
             self._queues.setdefault(plan_id, []).append(queue)
             backlog = [e for e in self._history.get(plan_id, []) if int(e.get("seq", 0)) > after_seq]
+        cursor = after_seq
         for item in backlog:
             yield item
+            cursor = max(cursor, int(item.get("seq", 0)))
             if item.get("event") in ("plan_done", "plan_failed"):
                 return
         if self.is_terminal(plan_id):
@@ -123,8 +129,33 @@ class PlanEventBroker:
         try:
             while True:
                 try:
-                    item = await asyncio.wait_for(queue.get(), timeout=5.0)
+                    item = await asyncio.wait_for(queue.get(), timeout=2.0)
                 except asyncio.TimeoutError:
+                    # Otro worker puede estar ejecutando. La DB es el replay
+                    # durable y evita depender de afinidad de instancia.
+                    from src.storage import get_repository
+
+                    record = get_repository().get_execution_plan(plan_id)
+                    persisted = (
+                        list((record.payload or {}).get("stream_events") or [])
+                        if record
+                        else []
+                    )
+                    fresh = sorted(
+                        (
+                            event
+                            for event in persisted
+                            if int(event.get("seq", 0)) > cursor
+                        ),
+                        key=lambda event: int(event.get("seq", 0)),
+                    )
+                    for event in fresh:
+                        yield event
+                        cursor = max(cursor, int(event.get("seq", 0)))
+                        if event.get("event") in ("plan_done", "plan_failed"):
+                            return
+                    if record and record.status in {"done", "failed", "partial"}:
+                        return
                     if self.is_terminal(plan_id):
                         return
                     yield {
@@ -139,6 +170,7 @@ class PlanEventBroker:
                 if item is None:
                     return
                 yield item
+                cursor = max(cursor, int(item.get("seq", 0)))
                 if item.get("event") in ("plan_done", "plan_failed"):
                     return
         finally:

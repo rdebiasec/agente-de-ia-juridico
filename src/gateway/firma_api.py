@@ -265,7 +265,16 @@ async def rag_search(req: BuscarRequest):
         incluir_kb=req.incluir_kb,
         k=max(1, min(req.k, 20)),
     )
-    return {"resultados": [c.to_dict() for c in chunks]}
+    degraded = rag.last_embed_used_local_fallback()
+    return {
+        "resultados": [] if degraded else [c.to_dict() for c in chunks],
+        "grounding_status": "degraded" if degraded else "available",
+        "degraded_reason": (
+            "embedding_service_unavailable; local hash results suppressed"
+            if degraded
+            else None
+        ),
+    }
 
 
 @router.post("/rag/ingest-kb")

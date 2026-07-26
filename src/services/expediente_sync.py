@@ -148,9 +148,31 @@ def sync_expediente_from_chat(
         import time
 
         exp.actualizado_en = time.time()
-        from src.storage import get_repository
 
-        get_repository().save_expediente(exp)
+        def _merge(current) -> None:
+            for field in (
+                "materia",
+                "tipo_proceso",
+                "radicado",
+                "etapa_actual",
+            ):
+                value = getattr(exp, field)
+                if value is not None:
+                    setattr(current, field, value)
+            merged = list(current.partes)
+            for parte in exp.partes:
+                merged = _merge_partes(
+                    merged,
+                    str(parte.get("rol") or ""),
+                    str(parte.get("nombre") or ""),
+                    parte.get("documento"),
+                )
+            current.partes = merged
+            current.involucra_menor = current.involucra_menor or exp.involucra_menor
+            current.datos_sensibles = current.datos_sensibles or exp.datos_sensibles
+            current.actualizado_en = exp.actualizado_en
+
+        exp = expediente_store.mutate(session_id, _merge)
 
     if trace is not None:
         if cambios:

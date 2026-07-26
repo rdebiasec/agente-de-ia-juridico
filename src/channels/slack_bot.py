@@ -15,7 +15,20 @@ from src.channels.slack_plan import handle_slack_plan_message
 from src.channels.slack_status import mark_slack_socket_started
 from src.config import get_settings
 from src.gateway.router import InboundMessage, handle_message
-from src.gateway.slack_interactivity import aplicar_accion_borrador
+from src.gateway.slack_interactivity import (
+    SlackAuthError,
+    aplicar_accion_borrador,
+    aplicar_edicion_borrador,
+    ensure_slack_approver,
+)
+from src.hitl.drafts import TransicionInvalida
+from src.hitl.slack_review import (
+    DRAFT_COMMENT_ACTION,
+    DRAFT_CONTENT_ACTION,
+    DRAFT_EDIT_CALLBACK,
+    build_edit_modal,
+)
+from src.storage import get_repository
 
 logger = logging.getLogger(__name__)
 
@@ -70,11 +83,19 @@ def create_slack_app() -> AsyncApp | None:
         if not actions:
             return
         action = actions[0]
-        revisor = (body.get("user") or {}).get("username") or "slack"
+        try:
+            revisor = ensure_slack_approver(body.get("user"))
+        except SlackAuthError as exc:
+            await respond(text=f":no_entry: {exc}", replace_original=False)
+            return
+        channel = (body.get("channel") or {}).get("id")
+        message_ts = (body.get("message") or {}).get("ts")
         texto = aplicar_accion_borrador(
             action_id=action.get("action_id"),
             draft_id=action.get("value"),
             revisor=revisor,
+            channel=channel,
+            message_ts=message_ts,
         )
         if texto:
             await respond(text=texto, replace_original=False)
@@ -86,6 +107,83 @@ def create_slack_app() -> AsyncApp | None:
     @app.action("draft_rechazar")
     async def on_draft_rechazar(body, ack, respond):
         await _on_draft_action(body, ack, respond)
+
+    @app.action("draft_editar")
+    async def on_draft_editar(body, ack, client, respond):
+        await ack()
+        try:
+            ensure_slack_approver(body.get("user"))
+        except SlackAuthError as exc:
+            await respond(text=f":no_entry: {exc}", replace_original=False)
+            return
+        actions = body.get("actions") or []
+        if not actions:
+            return
+        draft_id = actions[0].get("value")
+        draft = get_repository().get_draft(draft_id) if draft_id else None
+        if draft is None:
+            await respond(
+                text=f":warning: Borrador {draft_id} no encontrado.",
+                replace_original=False,
+            )
+            return
+        trigger_id = body.get("trigger_id")
+        if not trigger_id:
+            await respond(text=":warning: No pude abrir el editor.", replace_original=False)
+            return
+        await client.views_open(trigger_id=trigger_id, view=build_edit_modal(draft))
+
+    @app.view(DRAFT_EDIT_CALLBACK)
+    async def on_draft_edit_submit(ack, body, view):
+        try:
+            revisor = ensure_slack_approver(body.get("user"))
+        except SlackAuthError as exc:
+            await ack(
+                response_action="errors",
+                errors={"contenido_block": str(exc)},
+            )
+            return
+
+        draft_id = str(view.get("private_metadata") or "").strip()
+        values = (view.get("state") or {}).get("values") or {}
+        contenido = (
+            ((values.get("contenido_block") or {}).get(DRAFT_CONTENT_ACTION) or {}).get(
+                "value"
+            )
+            or ""
+        ).strip()
+        comentario = (
+            ((values.get("comentario_block") or {}).get(DRAFT_COMMENT_ACTION) or {}).get(
+                "value"
+            )
+            or ""
+        ).strip() or None
+        if not draft_id or not contenido:
+            await ack(
+                response_action="errors",
+                errors={"contenido_block": "El contenido no puede estar vacío."},
+            )
+            return
+        try:
+            aplicar_edicion_borrador(
+                draft_id,
+                revisor=revisor,
+                nuevo_contenido=contenido,
+                comentario=comentario,
+            )
+        except KeyError:
+            await ack(
+                response_action="errors",
+                errors={"contenido_block": "Borrador no encontrado."},
+            )
+            return
+        except TransicionInvalida as exc:
+            await ack(
+                response_action="errors",
+                errors={"contenido_block": str(exc)},
+            )
+            return
+        await ack(response_action="clear")
 
     return app
 

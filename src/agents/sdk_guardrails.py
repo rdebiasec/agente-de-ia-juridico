@@ -1,4 +1,4 @@
-"""Guardrails nativos del OpenAI Agents SDK para el POC."""
+"""Guardrails nativos del OpenAI Agents SDK para el POC y especialistas."""
 
 from __future__ import annotations
 
@@ -8,12 +8,18 @@ from typing import Any
 from agents import (
     GuardrailFunctionOutput,
     RunContextWrapper,
+    ToolGuardrailFunctionOutput,
+    ToolInputGuardrailData,
+    ToolOutputGuardrailData,
     TResponseInputItem,
     input_guardrail,
     output_guardrail,
+    tool_input_guardrail,
+    tool_output_guardrail,
 )
 
 from src.agents.guardrails import check_input
+from src.agents.pii import mask_pii, pii_flags, sensitive_pii_flags
 
 _OUT_OF_SCOPE_HARD_RE = re.compile(
     r"\b("
@@ -45,13 +51,12 @@ _INJECTION_RE = re.compile(
     r")",
     re.IGNORECASE,
 )
-# Cédula colombiana típica / email / teléfono — señales de PII en salida.
-_PII_RE = re.compile(
-    r"("
-    r"\b\d{6,10}\b|"  # documento numérico largo
-    r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|"
-    r"\b(?:\+?57[\s-]?)?(?:3\d{2}|60\d)[\s-]?\d{3}[\s-]?\d{4}\b"
-    r")",
+_TUTELA_RE = re.compile(
+    r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b",
+    re.IGNORECASE,
+)
+_CITATION_HINT_RE = re.compile(
+    r"\b(art\.?\s*\d+|ley\s+\d+|sentencia|radicado\s+\d+|jurisprudencia)\b",
     re.IGNORECASE,
 )
 
@@ -86,26 +91,32 @@ def _user_portion(text: str) -> str:
     ):
         if sep in text:
             return text.split(sep, 1)[-1].strip()
-    # Chat path: contexto + mensaje crudo al final.
-    for marker in ("[Base de conocimiento — fragmentos relevantes]", "[Expediente del caso]", "[Expediente]"):
+    for marker in (
+        "[Base de conocimiento — fragmentos relevantes]",
+        "[Expediente del caso]",
+        "[Expediente]",
+    ):
         if marker in text:
-            # último bloque tras el contexto suele ser el mensaje
             tail = text.rsplit("\n\n", 1)[-1].strip()
             if tail and not tail.startswith("["):
                 return tail
     return text.strip()
 
 
-def _pii_flags(text: str) -> list[str]:
-    flags: list[str] = []
-    if re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text, re.I):
-        flags.append("email")
-    if re.search(r"\b(?:\+?57[\s-]?)?(?:3\d{2}|60\d)[\s-]?\d{3}[\s-]?\d{4}\b", text):
-        flags.append("phone")
-    # Documento solo si aparece etiquetado (evita falsos positivos con radicados).
-    if re.search(r"\b(c[eé]dula|cc|nit|documento\s+de\s+identidad)\b.{0,20}\d{6,10}", text, re.I):
-        flags.append("document_id")
-    return flags
+def _turn_text(data: ToolInputGuardrailData) -> str:
+    ctx = data.context
+    chunks: list[str] = [str(getattr(ctx, "tool_arguments", "") or "")]
+    turn_input = getattr(ctx, "turn_input", None) or []
+    for item in turn_input:
+        if isinstance(item, dict):
+            content = item.get("content", "")
+            if isinstance(content, str):
+                chunks.append(content)
+            else:
+                chunks.append(str(content))
+        else:
+            chunks.append(str(item))
+    return "\n".join(chunks)
 
 
 @input_guardrail(name="poc_input_guardrail", run_in_parallel=False)
@@ -114,7 +125,7 @@ async def poc_input_guardrail(
     agent: Any,
     input: str | list[TResponseInputItem],
 ) -> GuardrailFunctionOutput:
-    """Bloquea entradas inválidas, injection o fuera de alcance sin ancla penal."""
+    """Bloquea entradas invalidas, injection o fuera de alcance sin ancla penal."""
     full = _input_text(input).strip()
     text = _user_portion(full)
     anchors_found = bool(_PENAL_ANCHOR_RE.search(text))
@@ -165,18 +176,20 @@ async def poc_output_guardrail(
     agent: Any,
     output: Any,
 ) -> GuardrailFunctionOutput:
-    """Tripwire si salida vacía o con PII etiquetada (cédula/email/teléfono)."""
+    """Tripwire solo para salida vacía; la PII se minimiza después del run.
+
+    Email y teléfono pueden ser datos operativos legítimos. Documento,
+    dirección y nombres protegidos se enmascaran en `apply_output_guardrails`
+    salvo que el flujo haya sido aprobado.
+    """
     text = (output if isinstance(output, str) else str(output or "")).strip()
     empty = not text
-    flags = [] if empty else _pii_flags(text)
+    flags = [] if empty else pii_flags(text)
     if empty:
         reason = "salida_vacia"
         trip = True
-    elif flags:
-        reason = "pii_detected"
-        trip = True
     else:
-        reason = "ok"
+        reason = "sensitive_pii_pending_mask" if sensitive_pii_flags(text) else "ok"
         trip = False
     return GuardrailFunctionOutput(
         output_info={
@@ -189,9 +202,124 @@ async def poc_output_guardrail(
     )
 
 
+@output_guardrail(name="specialist_output_guardrail")
+async def specialist_output_guardrail(
+    ctx: RunContextWrapper[Any],
+    agent: Any,
+    output: Any,
+) -> GuardrailFunctionOutput:
+    """Output guardrail para especialistas de alto riesgo (redactor/tutela)."""
+    if output is None:
+        text = ""
+    elif isinstance(output, str):
+        text = output.strip()
+    elif hasattr(output, "model_dump"):
+        data = output.model_dump()
+        text = str(data.get("cuerpo") or data.get("fundamentos") or data).strip()
+    else:
+        text = str(output).strip()
+    flags = pii_flags(text) if text else []
+    empty = not text
+    trip = empty
+    return GuardrailFunctionOutput(
+        output_info={
+            "reason": (
+                "salida_vacia"
+                if empty
+                else ("sensitive_pii_pending_policy" if sensitive_pii_flags(text) else "ok")
+            ),
+            "chars": len(text),
+            "pii_flags": flags,
+            "agent": getattr(agent, "name", None),
+        },
+        tripwire_triggered=trip,
+    )
+
+
+@tool_input_guardrail(name="poc_tool_input_guardrail")
+def poc_tool_input_guardrail(data: ToolInputGuardrailData) -> ToolGuardrailFunctionOutput:
+    """Bloquea routing ilegal, PII sensible y payloads excesivos."""
+    tool_name = getattr(data.context, "tool_name", "") or ""
+    blob = _turn_text(data)
+    if len(blob) > 12000:
+        return ToolGuardrailFunctionOutput.reject_content(
+            message=(
+                "El pedido interno a la tool es demasiado largo. "
+                "Resuma hechos, etapa y pedido concreto antes de consultar al equipo."
+            ),
+            output_info={
+                "reason": "payload_too_large",
+                "tool_name": tool_name,
+                "chars": len(blob),
+            },
+        )
+    flags = sensitive_pii_flags(blob)
+    if flags:
+        return ToolGuardrailFunctionOutput.reject_content(
+            message=(
+                "No invoque esa tool con PII sensible (documento, dirección o nombre "
+                "etiquetado de víctima/menor). "
+                "Reformule el pedido interno sin datos sensibles innecesarios."
+            ),
+            output_info={"reason": "pii_in_args", "tool_name": tool_name, "pii_flags": flags},
+        )
+    if tool_name == "redactor_documentos_juridicos_penales" and _TUTELA_RE.search(blob):
+        return ToolGuardrailFunctionOutput.reject_content(
+            message=(
+                "Routing bloqueado: para tutela/derechos fundamentales debe consultar "
+                "primero `evaluador_derechos_fundamentales_tutela`, no al redactor."
+            ),
+            output_info={"reason": "blocked_routing", "tool_name": tool_name},
+        )
+    return ToolGuardrailFunctionOutput.allow(
+        output_info={"reason": "ok", "tool_name": tool_name}
+    )
+
+
+@tool_output_guardrail(name="poc_tool_output_guardrail")
+def poc_tool_output_guardrail(data: ToolOutputGuardrailData) -> ToolGuardrailFunctionOutput:
+    """Si el especialista devuelve PII, rechaza el contenido y pide reformulacion."""
+    tool_name = getattr(data.context, "tool_name", "") or ""
+    raw = data.output
+    text = raw if isinstance(raw, str) else str(raw or "")
+    flags = sensitive_pii_flags(text)
+    if flags:
+        return ToolGuardrailFunctionOutput.reject_content(
+            message=(
+                f"La tool `{tool_name}` devolvio PII etiquetada. "
+                f"Resumen enmascarado: {mask_pii(text)[:500]}"
+            ),
+            output_info={"reason": "pii_in_tool_output", "tool_name": tool_name, "pii_flags": flags},
+        )
+    return ToolGuardrailFunctionOutput.allow(
+        output_info={"reason": "ok", "tool_name": tool_name, "chars": len(text)}
+    )
+
+
 def poc_input_guardrails() -> list:
     return [poc_input_guardrail]
 
 
 def poc_output_guardrails() -> list:
     return [poc_output_guardrail]
+
+
+def specialist_output_guardrails() -> list:
+    return [specialist_output_guardrail]
+
+
+def poc_tool_input_guardrails() -> list:
+    return [poc_tool_input_guardrail]
+
+
+def poc_tool_output_guardrails() -> list:
+    return [poc_tool_output_guardrail]
+
+
+def citation_hints_without_pending(text: str) -> bool:
+    """True si hay indicios de citas/radicados sin marca de pendiente."""
+    if not text:
+        return False
+    if "[PENDIENTE DE VERIFICAR]" in text or "[PENDIENTE]" in text:
+        return False
+    return bool(_CITATION_HINT_RE.search(text))

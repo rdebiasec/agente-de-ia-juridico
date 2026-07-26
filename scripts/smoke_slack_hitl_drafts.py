@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Smoke HITL: publica 2 borradores de prueba en #revision-abogado (Aprobar / Rechazar).
+"""Smoke HITL: publica 3 borradores de prueba en #revision-abogado.
 
 Uso (con .env o variables de entorno de producción locales):
   .venv/bin/python scripts/smoke_slack_hitl_drafts.py
 
-Luego en Chrome (perfil DBX), en #revision-abogado:
+Luego en Slack, en #revision-abogado:
   1) Pulse Aprobar en el primer mensaje
-  2) Pulse Rechazar en el segundo
+  2) Pulse Editar en el segundo (modal → Guarde)
+  3) Pulse Rechazar en el tercero
 """
 
 from __future__ import annotations
@@ -30,47 +31,67 @@ def main() -> int:
         print("FAIL: SLACK_BOT_TOKEN no configurado")
         return 1
     print(f"Canal: {settings.slack_review_channel}")
+    allow = settings.slack_approver_allowlist()
+    if allow:
+        print(f"Allowlist activa: {sorted(allow)}")
+    else:
+        print("Allowlist vacía (cualquier usuario del canal puede revisar)")
 
     repo = get_repository()
-    # id DB: varchar(12)
-    d_ok = Draft(
-        id="smk-apr-001",
-        session_id="slack:smoke",
-        tipo="memorial",
-        titulo="[SMOKE] Borrador para APROBAR",
-        contenido=(
-            "Texto de prueba HITL. Pulse **Aprobar** en Slack.\n"
-            "Borrador informativo — requiere revisión del abogado."
+    drafts = [
+        Draft(
+            id="smk-apr-001",
+            session_id="slack:smoke",
+            tipo="memorial",
+            titulo="[SMOKE] Borrador para APROBAR",
+            contenido=(
+                "Texto de prueba HITL. Pulse **Aprobar** en Slack.\n"
+                "Borrador informativo — requiere revisión del abogado."
+            ),
+            estado=ESTADO_EN_REVISION,
+            materia="penal",
         ),
-        estado=ESTADO_EN_REVISION,
-        materia="penal",
-    )
-    d_no = Draft(
-        id="smk-rej-001",
-        session_id="slack:smoke",
-        tipo="memorial",
-        titulo="[SMOKE] Borrador para RECHAZAR",
-        contenido=(
-            "Texto de prueba HITL. Pulse **Rechazar** en Slack.\n"
-            "Borrador informativo — requiere revisión del abogado."
+        Draft(
+            id="smk-edt-001",
+            session_id="slack:smoke",
+            tipo="memorial",
+            titulo="[SMOKE] Borrador para EDITAR",
+            contenido=(
+                "Texto de prueba HITL. Pulse **Editar** en Slack y guarde el modal.\n"
+                "Borrador informativo — requiere revisión del abogado."
+            ),
+            estado=ESTADO_EN_REVISION,
+            materia="penal",
         ),
-        estado=ESTADO_EN_REVISION,
-        materia="penal",
-    )
-    for d in (d_ok, d_no):
+        Draft(
+            id="smk-rej-001",
+            session_id="slack:smoke",
+            tipo="memorial",
+            titulo="[SMOKE] Borrador para RECHAZAR",
+            contenido=(
+                "Texto de prueba HITL. Pulse **Rechazar** en Slack.\n"
+                "Borrador informativo — requiere revisión del abogado."
+            ),
+            estado=ESTADO_EN_REVISION,
+            materia="penal",
+        ),
+    ]
+    for d in drafts:
         if repo.get_draft(d.id):
             repo.update_draft(d.id, titulo=d.titulo, contenido=d.contenido, estado=d.estado)
         else:
             repo.add_draft(d)
 
-    ts1 = notificar_borrador(d_ok)
-    ts2 = notificar_borrador(d_no)
-    print(f"Aprobar draft id={d_ok.id} ts={ts1}")
-    print(f"Rechazar draft id={d_no.id} ts={ts2}")
-    if not ts1 or not ts2:
+    results = []
+    for d in drafts:
+        ts = notificar_borrador(d)
+        results.append((d.id, d.titulo, ts))
+        print(f"{d.titulo} id={d.id} ts={ts}")
+
+    if any(ts is None for _, _, ts in results):
         print("FAIL: no se pudo publicar en Slack (revise token/canal/invite bot)")
         return 2
-    print("OK: mensajes publicados. Complete Aprobar/Rechazar en Chrome DBX.")
+    print("OK: mensajes publicados. Complete Aprobar / Editar / Rechazar en Slack.")
     return 0
 
 

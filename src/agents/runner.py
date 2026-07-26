@@ -21,7 +21,16 @@ from src.agents.guardrails import (
 )
 from src.agents.orchestrator import POC_AGENT_ID, SPECIALIST_AGENT_IDS, build_orchestrator
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
+from src.agents.pii import mask_pii
+from src.agents.resilience import run_with_retries
+from src.agents.session_context import bind_active_session
 from src.agents.skill_catalog import agent_display_name
+from src.agents.triage import (
+    has_penal_context,
+    infer_destination_agent,
+    is_non_penal_scope_request,
+    requires_execution_plan,
+)
 from src.config import get_settings
 from src.gateway.agent_session import RepositoryAgentSession, reconcile_turn_messages
 from src.gateway.expediente import expediente_store
@@ -29,31 +38,9 @@ from src.storage import get_repository
 
 logger = logging.getLogger(__name__)
 
-_TUTELA_RE = re.compile(r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b", re.IGNORECASE)
-_SEGUIMIENTO_RE = re.compile(r"\b(seguimiento|radicado|actuaci[oó]n|vencimiento|t[eé]rmino|inactividad)\b", re.IGNORECASE)
-_AUDIENCIA_RE = re.compile(r"\b(audiencia|interrogatorio|contrainterrogatorio|juicio|alegato)\b", re.IGNORECASE)
-_EVIDENCIA_RE = re.compile(r"\b(evidencia|prueba|cadena de custodia|perit[oa]|testig)\b", re.IGNORECASE)
-_TIPICIDAD_RE = re.compile(
-    r"\b(tipicidad|tipo penal|autor[ií]a|participaci[oó]n|dolo|culpa|agravante|atenuante|conducta punible|delito)\b",
-    re.IGNORECASE,
-)
-_RUTA906_RE = re.compile(
-    r"\b(ley 906|imputaci[oó]n|acusaci[oó]n|preparatoria|control de garant[ií]as|etapa procesal|oportunidad procesal|fiscal[ií]a)\b",
-    re.IGNORECASE,
-)
-_VICTIMAS_RE = re.compile(
-    r"\b(v[ií]ctima|revictimizaci[oó]n|reparaci[oó]n integral|enfoque diferencial|derechos de la v[ií]ctima)\b",
-    re.IGNORECASE,
-)
-_CRONOLOGIA_RE = re.compile(r"\b(cronolog[ií]a|linea de tiempo|hechos|narrativa factual|relato)\b", re.IGNORECASE)
-_REDACCION_RE = re.compile(r"\b(memorial|solicitud|recurso|derecho de petici[oó]n|redact|escrito|borrador)\b", re.IGNORECASE)
-_CALIDAD_RE = re.compile(r"\b(calidad|verificar|auditar|alucinaci[oó]n|coherencia|confidencialidad)\b", re.IGNORECASE)
-_OUT_OF_SCOPE_RE = re.compile(
-    r"\b(civil|familia|societari[oa]|comercial|laboral|consumidor|contractual|contrato|divorcio|custodia|alimentos|arrendamiento)\b",
-    re.IGNORECASE,
-)
-_KNOWLEDGE_RE = re.compile(r"\b(ley 906|proceso penal|despacho penal|rutas penales)\b", re.IGNORECASE)
-_PROFILE_RE = re.compile(r"\b(perfil|experiencia|qu[ií]en eres|quien eres)\b", re.IGNORECASE)
+
+class AgentBudgetExceeded(RuntimeError):
+    """El workflow consumió más tokens que el presupuesto configurado."""
 
 _AGENT_SKILL_MAP = {
     "coordinador_expediente_penal": "PEN-COORD",
@@ -95,9 +82,9 @@ def _truncate(value: str | None, limit: int = 600) -> str:
 def _safe_json_preview(payload: Any, limit: int = 900) -> str:
     try:
         dumped = json.dumps(payload, ensure_ascii=False, default=str)
-        return _truncate(dumped, limit=limit)
+        return _truncate(mask_pii(dumped), limit=limit)
     except Exception:
-        return _truncate(str(payload), limit=limit)
+        return _truncate(mask_pii(str(payload)), limit=limit)
 
 
 def _extract_input_preview(input_items: list[Any], limit: int = 900) -> str:
@@ -225,7 +212,7 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             "model": str(model_name),
             "started_at_ms": started_at_ms,
             "started_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started_at_ms / 1000)),
-            "system_prompt": _truncate(system_prompt, limit=1400),
+            "system_prompt": _truncate(mask_pii(system_prompt or ""), limit=1400),
             "input_preview": _extract_input_preview(input_items, limit=1200),
             "status": "in_progress",
             "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "cached_input_tokens": 0, "reasoning_tokens": 0},
@@ -251,6 +238,16 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
         call["duration_ms"] = max(0, ended_at_ms - int(call.get("started_at_ms", ended_at_ms)))
         call["status"] = "done"
         self.trace["completion"]["available"] = True
+        token_budget = get_settings().agent_max_total_tokens
+        consumed = sum(
+            int(item.get("usage", {}).get("total_tokens", 0) or 0)
+            for item in calls
+        )
+        if token_budget > 0 and consumed > token_budget:
+            self.trace["completion"]["budget_exceeded"] = True
+            raise AgentBudgetExceeded(
+                f"Presupuesto de tokens excedido ({consumed}>{token_budget})."
+            )
         self._span(
             f"llm:{getattr(agent, 'name', 'unknown')}",
             "llm",
@@ -283,25 +280,10 @@ def _draft_tipo(destination_agent: str) -> str:
     return _AGENT_DRAFT_TIPO.get(destination_agent, "documento")
 
 
-_PENAL_CONTEXT_PATTERNS = (
-    _TUTELA_RE,
-    _SEGUIMIENTO_RE,
-    _AUDIENCIA_RE,
-    _EVIDENCIA_RE,
-    _TIPICIDAD_RE,
-    _RUTA906_RE,
-    _VICTIMAS_RE,
-    _CRONOLOGIA_RE,
-    _KNOWLEDGE_RE,
-)
-
-
-def _has_penal_context(message: str) -> bool:
-    return any(pattern.search(message) for pattern in _PENAL_CONTEXT_PATTERNS)
-
-
-def _is_non_penal_scope_request(message: str) -> bool:
-    return bool(_OUT_OF_SCOPE_RE.search(message)) and not _has_penal_context(message)
+# Compat: reexporta triage como API interna del runner.
+_has_penal_context = has_penal_context
+_is_non_penal_scope_request = is_non_penal_scope_request
+_infer_destination_agent = infer_destination_agent
 
 
 def _maybe_create_draft(
@@ -337,36 +319,6 @@ def _maybe_create_draft(
     except Exception:
         logger.exception("No se pudo registrar el borrador HITL")
         return None
-
-
-def _infer_destination_agent(message: str) -> str:
-    if _is_non_penal_scope_request(message):
-        return "coordinador_expediente_penal"
-    if _CALIDAD_RE.search(message):
-        return "analista_calidad_juridica"
-    if _TUTELA_RE.search(message):
-        return "evaluador_derechos_fundamentales_tutela"
-    if _SEGUIMIENTO_RE.search(message):
-        return "gestor_seguimiento_procesal_penal"
-    if _AUDIENCIA_RE.search(message):
-        return "preparador_estrategico_audiencias_penales"
-    if _EVIDENCIA_RE.search(message):
-        return "gestor_evidencia_y_soporte_probatorio"
-    if _TIPICIDAD_RE.search(message):
-        return "analista_tipicidad_y_responsabilidad_penal"
-    if _CRONOLOGIA_RE.search(message):
-        return "analista_cronologia_hechos_penales"
-    if _RUTA906_RE.search(message):
-        return "analista_ruta_procesal_ley906"
-    if _VICTIMAS_RE.search(message):
-        return "analista_representacion_victimas"
-    if _REDACCION_RE.search(message):
-        return "redactor_documentos_juridicos_penales"
-    if _PROFILE_RE.search(message):
-        return "coordinador_expediente_penal"
-    if _KNOWLEDGE_RE.search(message):
-        return "analista_ruta_procesal_ley906"
-    return "coordinador_expediente_penal"
 
 
 def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> dict[str, str]:
@@ -461,60 +413,60 @@ def _finalize_trace(trace: dict, text: str) -> dict:
 
 def _fallback_response(message: str) -> str:
     """Respuesta offline determinista cuando no hay OPENAI_API_KEY."""
-    lower = message.lower()
-    if _TUTELA_RE.search(lower):
-        body = (
+    dest = infer_destination_agent(message)
+    bodies = {
+        "evaluador_derechos_fundamentales_tutela": (
             "Puedo evaluar la procedencia preliminar de tutela en un contexto penal. "
             "Compárteme accionante, accionado, hechos, derecho fundamental vulnerado y por qué "
             "las vías ordinarias no son suficientes en este caso."
-        )
-    elif _SEGUIMIENTO_RE.search(lower):
-        body = (
+        ),
+        "gestor_seguimiento_procesal_penal": (
             "Puedo estructurar el seguimiento procesal penal: estado del radicado, últimas actuaciones, "
             "audiencias próximas y alertas operativas de términos."
-        )
-    elif _AUDIENCIA_RE.search(lower):
-        body = (
+        ),
+        "preparador_estrategico_audiencias_penales": (
             "Puedo preparar la audiencia penal: objetivo de intervención, guion, solicitudes, "
             "preguntas clave y riesgos tácticos para representación de víctimas."
-        )
-    elif _EVIDENCIA_RE.search(lower):
-        body = (
+        ),
+        "gestor_evidencia_y_soporte_probatorio": (
             "Puedo construir el plan probatorio: inventario de evidencia, matriz hecho-prueba, "
             "brechas y plan de recaudo sin comprometer cadena de custodia."
-        )
-    elif _TIPICIDAD_RE.search(lower):
-        body = (
+        ),
+        "analista_tipicidad_y_responsabilidad_penal": (
             "Puedo hacer análisis preliminar de tipicidad y responsabilidad penal. "
             "Compárteme hechos cronológicos, actores y soportes para mapear elementos del tipo."
-        )
-    elif _RUTA906_RE.search(lower):
-        body = (
+        ),
+        "analista_ruta_procesal_ley906": (
             "Puedo analizar ruta procesal Ley 906: etapa, actuaciones posibles para la víctima, "
             "riesgos procesales y próximos pasos."
-        )
-    elif _VICTIMAS_RE.search(lower):
-        body = (
+        ),
+        "analista_representacion_victimas": (
             "Puedo estructurar la estrategia de representación de víctimas: intereses, derechos, "
             "riesgos de revictimización y enfoque diferencial."
-        )
-    elif _CRONOLOGIA_RE.search(lower):
-        body = (
+        ),
+        "analista_cronologia_hechos_penales": (
             "Puedo ordenar la cronología penal del caso, identificar contradicciones y vacíos de información "
             "para fortalecer el análisis posterior."
-        )
-    elif _is_non_penal_scope_request(lower):
+        ),
+        "redactor_documentos_juridicos_penales": (
+            "Puedo redactar un borrador penal revisable (memorial, solicitud, recurso preliminar, "
+            "derecho de petición o pieza de tutela preliminar). Comparte radicado, hechos y petición."
+        ),
+        "analista_calidad_juridica": (
+            "Puedo revisar calidad jurídica: soporte fáctico, citas, coherencia estratégica "
+            "y riesgos de confidencialidad o revictimización antes de salida externa."
+        ),
+    }
+    if is_non_penal_scope_request(message):
         body = (
             "Esta solicitud está fuera de alcance penal-víctimas. Solo atiendo representación de víctimas "
             "en contexto penal colombiano. Si existe componente penal, compárteme hechos, etapa Ley 906 "
             "y objetivo procesal para continuar."
         )
-    elif _REDACCION_RE.search(lower):
-        body = (
-            "Puedo redactar un borrador penal revisable (memorial, solicitud, recurso preliminar, "
-            "derecho de petición o pieza de tutela preliminar). Comparte radicado, hechos y petición."
-        )
-    elif any(w in lower for w in ("perfil", "experiencia", "quien eres", "quién eres")):
+    elif any(
+        w in (message or "").lower()
+        for w in ("perfil", "experiencia", "quien eres", "quién eres")
+    ):
         body = (
             "Soy el Gerente del Caso Penal del despacho: tu único interlocutor. "
             "Cuando hace falta, consulto al equipo interno (cronología, tipicidad, ruta Ley 906, "
@@ -522,10 +474,13 @@ def _fallback_response(message: str) -> str:
             "voz de despacho para tu revisión."
         )
     else:
-        body = (
-            "Como Gerente del Caso Penal puedo apoyar estrategia de víctimas de extremo a "
-            "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
-            "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
+        body = bodies.get(
+            dest,
+            (
+                "Como Gerente del Caso Penal puedo apoyar estrategia de víctimas de extremo a "
+                "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
+                "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
+            ),
         )
     return apply_output_guardrails(body)
 
@@ -621,10 +576,7 @@ async def run_agent(
         )
         return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace, "session_id": session_id}
 
-    if requested_destination in {
-        "redactor_documentos_juridicos_penales",
-        "evaluador_derechos_fundamentales_tutela",
-    }:
+    if requires_execution_plan(requested_destination):
         text = (
             "La verificación del expediente pasó. Por tratarse de una actuación de alto "
             "riesgo, continúe mediante el plan de ejecución y apruébelo antes de usar al "
@@ -714,15 +666,26 @@ async def run_agent(
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 
-    # El HITL de tools se unifica en el plan aprobado; este path nunca llega a
-    # herramientas de alto riesgo porque se bloquean arriba.
-    orchestrator = build_orchestrator(require_tool_approval=False)
+    # Defensa estructural: el chat no recibe tools de redacción/tutela. Aunque
+    # falle el clasificador, solo un plan aprobado puede instanciar esos agentes.
+    orchestrator = build_orchestrator(
+        require_tool_approval=True,
+        include_high_risk_tools=False,
+    )
     destination_agent = trace["received_by_agent"]
     trace_hooks = _TraceRunHooks(trace)
     agent_session = RepositoryAgentSession(session_id, channel=channel, user_id=uid)
+    from src.agents.context_security import wrap_untrusted_context
+
     context_block = ""
     if exp_resumen and "sin datos" not in exp_resumen.lower():
-        context_block = f"[Expediente del caso]\n{exp_resumen}\n\n"
+        exp_context, exp_flags = wrap_untrusted_context(
+            exp_resumen,
+            label="EXPEDIENTE DEL CASO",
+        )
+        context_block = f"[Expediente del caso]\n{exp_context}\n\n"
+        if exp_flags:
+            trace["context_security_flags"] = exp_flags
     try:
         from src.services.rag import buscar, contexto_para_prompt
 
@@ -732,21 +695,39 @@ async def run_agent(
             from src.services.rag import last_embed_used_local_fallback
 
             degraded = last_embed_used_local_fallback()
-            context_block += f"[Base de conocimiento — fragmentos relevantes]\n{rag_text}\n\n"
-            detail = f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno."
             if degraded:
-                detail += " ADVERTENCIA: embeddings en fallback local (calidad degradada)."
+                detail = (
+                    "Recuperación descartada: embeddings locales no semánticos. "
+                    "El turno continúa sin grounding RAG."
+                )
                 logger.warning("RAG prefetch con embedding local fallback session=%s", session_id)
+                trace["grounding_degraded"] = True
+                trace["rag_chunks_count"] = 0
+            else:
+                rag_context, rag_flags = wrap_untrusted_context(
+                    rag_text,
+                    label="BASE DE CONOCIMIENTO",
+                )
+                context_block += (
+                    "[Base de conocimiento — fragmentos relevantes]\n"
+                    f"{rag_context}\n\n"
+                )
+                detail = f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno."
+                trace["rag_chunks_count"] = len(rag_chunks)
+                if rag_flags:
+                    existing_flags = list(trace.get("context_security_flags") or [])
+                    trace["context_security_flags"] = sorted(
+                        set(existing_flags + rag_flags)
+                    )
             trace.setdefault("spans", []).append(
                 {
                     "name": "RAG: recuperación KB",
                     "kind": "context",
-                    "status": "done",
+                    "status": "pending" if degraded else "done",
                     "detail": detail,
                     "at_ms": int(time.time() * 1000),
                 }
             )
-            trace["rag_chunks_count"] = len(rag_chunks)
             trace["rag_embed_fallback"] = degraded
     except Exception:
         logger.exception("RAG prefetch falló")
@@ -759,7 +740,11 @@ async def run_agent(
                 "at_ms": int(time.time() * 1000),
             }
         )
-    agent_input = f"{context_block}{message}" if context_block else message
+    agent_input = (
+        f"{context_block}[Consulta del despacho]\n{message}"
+        if context_block
+        else message
+    )
     trace.setdefault("spans", []).append(
         {
             "name": "runner:inicio",
@@ -784,14 +769,47 @@ async def run_agent(
             OutputGuardrailTripwireTriggered,
         )
 
-        result = await Runner.run(
-            orchestrator,
-            agent_input,
-            session=agent_session,
-            max_turns=settings.agent_max_turns,
-            hooks=trace_hooks,
-            run_config=run_config,
-        )
+        result = None
+
+        async def _on_retry(attempt: int, exc: BaseException, delay: float) -> None:
+            fallback_model = (settings.openai_model_fallback or "").strip()
+            if fallback_model:
+                orchestrator.model = fallback_model
+            trace.setdefault("spans", []).append(
+                {
+                    "name": "runner:reintento",
+                    "kind": "resilience",
+                    "status": "pending",
+                    "detail": (
+                        f"Intento {attempt + 1} falló ({type(exc).__name__}); "
+                        f"reintento en {delay:.2f}s"
+                        + (f" con {fallback_model}." if fallback_model else ".")
+                    ),
+                    "at_ms": int(time.time() * 1000),
+                }
+            )
+
+        with bind_active_session(session_id):
+            result = await run_with_retries(
+                lambda: Runner.run(
+                    orchestrator,
+                    agent_input,
+                    session=agent_session,
+                    max_turns=settings.agent_max_turns,
+                    hooks=trace_hooks,
+                    run_config=run_config,
+                ),
+                max_retries=settings.agent_max_retries,
+                timeout_seconds=settings.agent_run_timeout_seconds,
+                on_retry=_on_retry,
+                non_retryable=(
+                    InputGuardrailTripwireTriggered,
+                    OutputGuardrailTripwireTriggered,
+                    AgentBudgetExceeded,
+                ),
+            )
+        if result is None:  # pragma: no cover - defensa de invariantes
+            raise RuntimeError("El runner terminó sin resultado.")
         trace.setdefault("spans", []).append(
             {
                 "name": "runner:fin",
@@ -922,6 +940,35 @@ async def run_agent(
             )
         else:
             trace["completion"]["note"] = "No se recibieron eventos de completion en hooks."
+    except AgentBudgetExceeded as exc:
+        logger.warning("Presupuesto de agente excedido channel=%s: %s", channel, exc)
+        text = apply_output_guardrails(
+            "Detuve la ejecución porque alcanzó el presupuesto operativo del turno. "
+            "Divida la consulta o continúe mediante un plan por pasos.",
+            channel,
+        )
+        trace["route"] = "budget_exceeded"
+        trace["blocked"] = True
+        trace["selected_agent"] = "guardrail"
+        trace["sent_to_agent"] = "none"
+        trace["skill_kan"] = "KAN-GUARDRAIL"
+        trace["skill_reason"] = "Watchdog de presupuesto de tokens."
+        trace["human_review_required"] = False
+        _append_action(
+            trace,
+            action_type="cost_budget",
+            status="blocked",
+            actor="watchdog",
+            detail=str(exc),
+        )
+        _finalize_trace(trace, text)
+        return {
+            "text": text,
+            "agent": "guardrail",
+            "pending_review": False,
+            "session_id": session_id,
+            "trace": trace,
+        }
     except (InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered) as exc:
         logger.warning("Guardrail tripwire channel=%s: %s", channel, exc)
         exc_name = type(exc).__name__

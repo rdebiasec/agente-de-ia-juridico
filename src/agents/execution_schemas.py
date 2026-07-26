@@ -14,6 +14,7 @@ PLAN_STATUSES = (
     "rejected",
     "executing",
     "done",
+    "partial",
     "failed",
 )
 PlanStatus = Literal[
@@ -24,6 +25,7 @@ PlanStatus = Literal[
     "rejected",
     "executing",
     "done",
+    "partial",
     "failed",
 ]
 StepStatus = Literal["pending", "in_progress", "done", "blocked", "skipped"]

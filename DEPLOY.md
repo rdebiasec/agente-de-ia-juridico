@@ -197,6 +197,7 @@ En Render (secretos `sync:false` salvo el canal):
 | `SLACK_APP_TOKEN` | App-level token `xapp-…` con scope `connections:write` (Socket Mode) |
 | `SLACK_SIGNING_SECRET` | Signing Secret (Basic Information) |
 | `SLACK_REVIEW_CHANNEL` | Canal de revisión, p. ej. `#revision-abogado` |
+| `SLACK_APPROVER_IDS` | CSV de user IDs (`U…`) autorizados a Aprobar/Editar/Rechazar; vacío = cualquiera (solo local) |
 
 Pasos en [api.slack.com/apps](https://api.slack.com/apps):
 
@@ -281,6 +282,7 @@ Socket Mode mantiene un WebSocket permanente. En plan **free** el sleep corta es
 | `SLACK_APP_TOKEN` | `xapp-` (scope `connections:write`) |
 | `SLACK_SIGNING_SECRET` | cadena del Basic Information |
 | `SLACK_REVIEW_CHANNEL` | `#revision-abogado` |
+| `SLACK_APPROVER_IDS` | CSV `U…` (opcional; vacío = cualquiera) |
 
 Rotación: regenerar token en api.slack.com → pegar en Render → Manual Deploy. Nunca subir `.env` a git.
 

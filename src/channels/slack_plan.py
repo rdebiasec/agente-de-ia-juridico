@@ -40,7 +40,10 @@ def _attach_slack_thread_key(plan_id: str, thread_key: str) -> None:
 
 
 def _find_pending_plan_id(thread_key: str, user_id: str) -> str | None:
-    """Resuelve plan pendiente: caché RAM, luego repositorio (sobrevive redeploy)."""
+    """Resuelve plan pendiente por hilo (caché RAM + repositorio).
+
+    No hace fallback a «cualquier plan de la sesión»: eso mezclaba hilos distintos.
+    """
     cached = _pending_plans.get(thread_key)
     if cached:
         record = get_repository().get_execution_plan(cached)
@@ -49,26 +52,16 @@ def _find_pending_plan_id(thread_key: str, user_id: str) -> str | None:
         _pending_plans.pop(thread_key, None)
 
     session_id = _session_id(user_id)
-    match_thread: str | None = None
-    match_session: str | None = None
     for record in get_repository().list_execution_plans(limit=80):
         if record.status != "pending_approval":
-            continue
-        if record.session_id != session_id and record.channel != "slack":
             continue
         if record.session_id != session_id:
             continue
         payload = record.payload or {}
         if payload.get("slack_thread_key") == thread_key:
-            match_thread = record.plan_id
-            break
-        if match_session is None:
-            match_session = record.plan_id
-
-    plan_id = match_thread or match_session
-    if plan_id:
-        _pending_plans[thread_key] = plan_id
-    return plan_id
+            _pending_plans[thread_key] = record.plan_id
+            return record.plan_id
+    return None
 
 
 def _clear_pending(thread_key: str, plan_id: str | None = None) -> None:
@@ -161,7 +154,17 @@ async def handle_slack_plan_message(
             _clear_pending(key, plan_id)
             return True
 
-        payload = await wait_for_plan_completion(plan_id, user_id, timeout=90.0)
+        # Alinear con presupuestos de plan (pasos × timeout) + margen operativo.
+        from src.config import get_settings
+
+        settings = get_settings()
+        wait_s = max(
+            90.0,
+            float(settings.agent_plan_step_timeout_seconds)
+            * max(1, int(settings.agent_max_turns_plan_step))
+            + 30.0,
+        )
+        payload = await wait_for_plan_completion(plan_id, user_id, timeout=wait_s)
         if payload:
             if payload.get("trace"):
                 trace_store.add(payload["session_id"], payload["trace"])

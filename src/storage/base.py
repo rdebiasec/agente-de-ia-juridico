@@ -6,7 +6,7 @@ Postgres/pgvector para paridad dev==prod) sin tocar la lógica de negocio.
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import Callable, Protocol, runtime_checkable
 
 from src.storage.models import (
     AuditPortalAccessLog,
@@ -81,6 +81,12 @@ class Repository(Protocol):
     def get_expediente(self, session_id: str) -> Expediente | None: ...
 
     def save_expediente(self, expediente: Expediente) -> Expediente: ...
+
+    def mutate_expediente(
+        self,
+        session_id: str,
+        mutator: Callable[[Expediente], None],
+    ) -> Expediente: ...
 
     # --- Conversación y trazas ---
     def get_chat_session(self, session_id: str) -> ChatSession | None: ...

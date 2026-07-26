@@ -21,11 +21,14 @@ _DISCLAIMER_LINE_RE = re.compile(
 _PHASE_DRAFT_RE = re.compile(r"\n*\s*Fase\s*\d+\s*·\s*Borrador\s*", re.IGNORECASE)
 
 # Intenciones accionables que deben quedar pendientes de aprobación del abogado.
+# Acotado a salidas con efecto externo (evita fatiga HITL — Ch8 calibration).
 DRAFT_REVIEW_INTENT = re.compile(
     r"\b("
-    r"redact|proyect|escrito|recurso|solicitud|correo|mensaje profesional|"
-    r"memorial|tutela|concepto|estrategia|riesgo|teor[ií]a del caso|"
-    r"seguimiento|informe|radicaci[oó]n|audiencia|interrogatorio|entrevista"
+    r"redact(?:ar|e|ó|o)?|proyect(?:ar|e|ó)?|"
+    r"memorial|tutela|recurso|derecho\s+de\s+petici[oó]n|"
+    r"ampliaci[oó]n\s+de\s+denuncia|escrito\s+(?:para\s+)?(?:juzgado|fiscal[ií]a)|"
+    r"estrategia|teor[ií]a\s+del\s+caso|riesgo(?:s)?\s+(?:jur[ií]dicos?|procesales?)|"
+    r"guion\s+de\s+audiencia|interrogatorio|contrainterrogatorio"
     r")\w*",
     re.IGNORECASE,
 )
@@ -44,9 +47,22 @@ def check_phase_scope(text: str, active_phase: int | None = None) -> str | None:
     return None
 
 
-def apply_output_guardrails(text: str, channel: str = "web") -> str:
-    """Añade un único disclaimer y normaliza salida."""
+def apply_output_guardrails(
+    text: str,
+    channel: str = "web",
+    *,
+    allow_sensitive_pii: bool = False,
+) -> str:
+    """Normaliza la salida, minimiza PII y añade un único disclaimer.
+
+    Los datos sensibles completos solo se conservan cuando la salida proviene
+    de un plan explícitamente aprobado por el abogado.
+    """
+    from src.agents.pii import mask_sensitive_pii
+
     normalized = text or ""
+    if not allow_sensitive_pii:
+        normalized = mask_sensitive_pii(normalized)
     normalized = _DISCLAIMER_BLOCK_RE.sub("\n", normalized)
     normalized = _DISCLAIMER_LINE_RE.sub("\n", normalized)
     normalized = _PHASE_DRAFT_RE.sub("\n", normalized)

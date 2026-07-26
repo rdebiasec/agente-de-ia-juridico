@@ -195,13 +195,21 @@ def ingestar_kb_directorio(*, reindexar: bool = False, repo: Repository | None =
 
 def contexto_para_prompt(chunks: list[DocumentChunk], *, max_chars: int = 3000) -> str:
     """Formatea los fragmentos recuperados como contexto citable para el agente."""
+    from src.agents.context_security import sanitize_untrusted_context
+
     if not chunks:
         return "No se encontraron fragmentos relevantes en la base de conocimiento."
     partes: list[str] = []
     total = 0
     for i, chunk in enumerate(chunks, start=1):
         encabezado = f"[Fuente {i}: {chunk.fuente or chunk.scope}]"
-        bloque = f"{encabezado}\n{chunk.chunk_text.strip()}"
+        clean, flags = sanitize_untrusted_context(chunk.chunk_text)
+        warning = (
+            "\n[Contenido con instrucciones sospechosas omitidas]"
+            if flags
+            else ""
+        )
+        bloque = f"{encabezado}{warning}\n{clean}"
         if total + len(bloque) > max_chars and partes:
             break
         partes.append(bloque)

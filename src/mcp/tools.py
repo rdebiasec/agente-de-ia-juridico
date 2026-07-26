@@ -70,21 +70,47 @@ def buscar_en_conocimiento(consulta: str) -> str:
     Devuelve fragmentos citables para fundamentar la respuesta. Úsala antes de
     afirmar normas o criterios; cita las fuentes y no inventes.
     """
-    from src.services.rag import buscar, contexto_para_prompt
+    from src.services.rag import (
+        buscar,
+        contexto_para_prompt,
+        last_embed_used_local_fallback,
+    )
 
     chunks = buscar(consulta, incluir_kb=True, k=5)
+    if last_embed_used_local_fallback():
+        return (
+            "Grounding no disponible: el servicio de embeddings está degradado. "
+            "No use resultados locales hash como fuente jurídica."
+        )
     return contexto_para_prompt(chunks)
 
 
 @function_tool
-def buscar_en_expediente(consulta: str, expediente_id: str) -> str:
-    """Busca por similitud (RAG) en los documentos subidos de un expediente.
+def buscar_en_expediente(consulta: str, expediente_id: str = "") -> str:
+    """Busca por similitud (RAG) en los documentos del expediente de la sesión.
 
-    Útil para responder con base en las pruebas y escritos del caso concreto.
+    El ID solicitado por el modelo se valida contra la sesión activa; no se
+    permite lectura cruzada de otros casos.
     """
-    from src.services.rag import buscar, contexto_para_prompt
+    from src.agents.session_context import resolve_expediente_id
+    from src.services.rag import (
+        buscar,
+        contexto_para_prompt,
+        last_embed_used_local_fallback,
+    )
 
-    chunks = buscar(consulta, expediente_id=expediente_id, incluir_kb=False, k=5)
+    bound_id = resolve_expediente_id(expediente_id)
+    if not bound_id:
+        return (
+            "Búsqueda de expediente denegada: no hay sesión activa o el "
+            "identificador no corresponde al caso en curso."
+        )
+    chunks = buscar(consulta, expediente_id=bound_id, incluir_kb=False, k=5)
+    if last_embed_used_local_fallback():
+        return (
+            "Grounding del expediente no disponible: embeddings degradados. "
+            "Solicite reintento; no se inyectaron coincidencias no semánticas."
+        )
     return contexto_para_prompt(chunks)
 
 

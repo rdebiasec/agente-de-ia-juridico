@@ -235,6 +235,16 @@ class InMemoryRepository:
             self._expedientes[expediente.session_id] = expediente
         return expediente
 
+    def mutate_expediente(self, session_id: str, mutator) -> Expediente:
+        """Read-modify-write atómico dentro del backend en memoria."""
+        with self._lock:
+            expediente = self._expedientes.get(session_id)
+            if expediente is None:
+                expediente = Expediente(session_id=session_id)
+            mutator(expediente)
+            self._expedientes[session_id] = expediente
+            return expediente
+
     # --- Conversación y trazas ---
     def get_chat_session(self, session_id: str) -> ChatSession | None:
         from src.compliance.crypto_at_rest import decrypt_messages

@@ -62,6 +62,18 @@ async def lifespan(app: FastAPI):
         except Exception:
             logger.exception("No se pudo inicializar el repositorio Postgres")
 
+    try:
+        from src.agents.plan_executor import recover_stale_executions
+
+        recovered = recover_stale_executions()
+        if recovered:
+            logger.warning(
+                "Planes huérfanos recuperados para reanudación: %s",
+                recovered,
+            )
+    except Exception:
+        logger.exception("No se pudieron recuperar planes huérfanos")
+
     # Scheduler de plazos (vigilancia de términos y recordatorios).
     try:
         from src.services.scheduler import start_scheduler

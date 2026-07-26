@@ -30,19 +30,23 @@ class ExpedienteStore:
     def get_or_create(self, session_id: str) -> Expediente:
         exp = self._repo().get_expediente(session_id)
         if exp is None:
-            exp = Expediente(session_id=session_id)
-            self._repo().save_expediente(exp)
+            exp = self._repo().mutate_expediente(session_id, lambda _: None)
         return exp
 
     def update(self, session_id: str, **campos) -> Expediente:
-        exp = self.get_or_create(session_id)
-        for clave, valor in campos.items():
-            if hasattr(exp, clave) and valor is not None:
-                setattr(exp, clave, valor)
         import time
 
-        exp.actualizado_en = time.time()
-        return self._repo().save_expediente(exp)
+        def _apply(exp: Expediente) -> None:
+            for clave, valor in campos.items():
+                if hasattr(exp, clave) and valor is not None:
+                    setattr(exp, clave, valor)
+            exp.actualizado_en = time.time()
+
+        return self._repo().mutate_expediente(session_id, _apply)
+
+    def mutate(self, session_id: str, mutator) -> Expediente:
+        """Actualización atómica para listas/métricas compartidas."""
+        return self._repo().mutate_expediente(session_id, mutator)
 
 
 expediente_store = ExpedienteStore()

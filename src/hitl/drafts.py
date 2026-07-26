@@ -87,10 +87,48 @@ def enviar_a_revision(draft_id: str, *, slack_ts: str | None = None, repo: Repos
     return _transicionar(draft_id, ESTADO_EN_REVISION, repo=repo, **changes)
 
 
+def _publish_review_outcome(draft: Draft, *, repo: Repository | None) -> None:
+    """Cierra el loop HITL en la conversación que originó el borrador."""
+    repository = _repo(repo)
+    marker = f"[HITL:{draft.id}:{draft.estado}]"
+    session = repository.get_chat_session(draft.session_id)
+    if session and any(
+        marker in str(message.get("content") or "")
+        for message in session.messages
+    ):
+        return
+    if draft.estado == ESTADO_EDITADO:
+        detail = (
+            f"{marker} El abogado editó y aprobó el borrador «{draft.titulo}». "
+            f"El artefacto {draft.id} está listo para descarga o uso controlado."
+        )
+    elif draft.estado == ESTADO_APROBADO:
+        detail = (
+            f"{marker} El abogado aprobó el borrador «{draft.titulo}». "
+            f"El artefacto {draft.id} está listo para descarga o uso controlado."
+        )
+    else:
+        feedback = f" Motivo: {draft.comentario}" if draft.comentario else ""
+        detail = (
+            f"{marker} El abogado rechazó el borrador «{draft.titulo}». "
+            f"Debe corregirse antes de cualquier uso externo.{feedback}"
+        )
+    repository.append_chat_message(
+        draft.session_id,
+        channel=(session.channel if session else "web"),
+        user_id=(session.user_id if session else draft.revisor or "hitl"),
+        role="assistant",
+        content=detail,
+        max_messages=120,
+    )
+
+
 def aprobar(draft_id: str, *, revisor: str, comentario: str | None = None, repo: Repository | None = None) -> Draft:
-    return _transicionar(
+    draft = _transicionar(
         draft_id, ESTADO_APROBADO, repo=repo, revisor=revisor, comentario=comentario
     )
+    _publish_review_outcome(draft, repo=repo)
+    return draft
 
 
 def editar(
@@ -101,7 +139,7 @@ def editar(
     comentario: str | None = None,
     repo: Repository | None = None,
 ) -> Draft:
-    return _transicionar(
+    draft = _transicionar(
         draft_id,
         ESTADO_EDITADO,
         repo=repo,
@@ -109,12 +147,16 @@ def editar(
         contenido=nuevo_contenido,
         comentario=comentario,
     )
+    _publish_review_outcome(draft, repo=repo)
+    return draft
 
 
 def rechazar(draft_id: str, *, revisor: str, comentario: str, repo: Repository | None = None) -> Draft:
-    return _transicionar(
+    draft = _transicionar(
         draft_id, ESTADO_RECHAZADO, repo=repo, revisor=revisor, comentario=comentario
     )
+    _publish_review_outcome(draft, repo=repo)
+    return draft
 
 
 def es_final(draft: Draft) -> bool:

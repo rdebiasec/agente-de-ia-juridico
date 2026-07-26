@@ -20,7 +20,7 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 | **Fase B — Persistencia** | ✅ Mayoría | Postgres, Alembic, RAG, HITL borradores, PDF/DOCX, plazos, scheduler |
 | **Sesiones multi-turno** | ✅ | `chat_sessions`, idle configurable, reset chat, historial servidor en UI |
 | **Editor de configuración** | ✅ | Prompts / guardrails / skills versionados |
-| **Canales producción** | 🟡 Parcial | Web ✅ · Slack código listo — falta `SLACK_APP_TOKEN` en Render · WhatsApp **no** |
+| **Canales producción** | 🟡 Parcial | Web ✅ · Slack HITL (Aprobar/Editar/Rechazar + allowlist) — falta `SLACK_APP_TOKEN`/`SLACK_APPROVER_IDS` en Render · WhatsApp **no** |
 | **50 requisitos (REQ)** | 🟡 Por validar | Tablero: `docs/operaciones/CHECKLIST_REQ_CIERRE.md` |
 
 ## Hecho (evidencia en repo)

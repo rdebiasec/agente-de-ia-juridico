@@ -604,6 +604,40 @@ class SqlRepository:
             s.commit()
         return expediente
 
+    def mutate_expediente(self, session_id: str, mutator) -> Expediente:
+        """Read-modify-write transaccional con bloqueo de fila en Postgres."""
+        with self._session() as s:
+            row = s.scalar(
+                select(ExpedienteRow)
+                .where(ExpedienteRow.session_id == session_id)
+                .with_for_update()
+            )
+            if row is None:
+                row = ExpedienteRow(session_id=session_id)
+                s.add(row)
+                s.flush()
+            expediente = _to_expediente(row)
+            mutator(expediente)
+            row.materia = expediente.materia
+            row.tipo_proceso = expediente.tipo_proceso
+            row.rol_despacho = expediente.rol_despacho
+            row.radicado = expediente.radicado
+            row.despacho_judicial = expediente.despacho_judicial
+            row.etapa_actual = expediente.etapa_actual
+            row.partes = expediente.partes
+            row.terminos = expediente.terminos
+            row.hechos_minimos_confirmados = bool(expediente.hechos_minimos_confirmados)
+            row.poder_acreditado = bool(expediente.poder_acreditado)
+            row.ultima_actuacion_confirmada = bool(expediente.ultima_actuacion_confirmada)
+            row.faltantes_gerencia = expediente.faltantes_gerencia
+            row.tareas_gerencia = expediente.tareas_gerencia
+            row.metricas_gerencia = expediente.metricas_gerencia
+            row.involucra_menor = bool(expediente.involucra_menor)
+            row.datos_sensibles = bool(expediente.datos_sensibles)
+            row.actualizado_en = expediente.actualizado_en
+            s.commit()
+            return expediente
+
     # --- Conversación y trazas ---
     def get_chat_session(self, session_id: str) -> ChatSession | None:
         with self._session() as s:

@@ -15,12 +15,19 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+    # Modelo mas capaz para redaccion/tutela (alto riesgo). Vacio = usa openai_model.
+    openai_model_high_risk: str = "gpt-4o"
+    # Respaldo operacional; vacío desactiva cambio de modelo en reintento.
+    openai_model_fallback: str = ""
 
     slack_bot_token: str = ""
     # App-level token (xapp-…) for Socket Mode — see docs.slack.dev Socket Mode / Bolt.
     slack_app_token: str = ""
     slack_signing_secret: str = ""
     slack_review_channel: str = "#revision-abogado"
+    # CSV de Slack user IDs (U…) autorizados a aprobar/editar/rechazar borradores.
+    # Vacío = cualquier miembro del workspace con acceso al canal (solo para local/dev).
+    slack_approver_ids: str = ""
 
     # Twilio SMS — alertas transaccionales de plazos (complemento a Slack).
     twilio_account_sid: str = ""
@@ -48,6 +55,15 @@ class Settings(BaseSettings):
     session_idle_minutes: int = 60
     session_max_messages: int = 120
     agent_max_turns: int = 25
+    # Tope de turnos por paso de plan (Watchdog Timeout / control de costo).
+    agent_max_turns_plan_step: int = 6
+    agent_run_timeout_seconds: float = 90.0
+    agent_plan_step_timeout_seconds: float = 75.0
+    agent_max_retries: int = 1
+    # Presupuesto por ejecución; 0 desactiva el límite.
+    agent_max_total_tokens: int = 30000
+    # Un plan executing sin checkpoint reciente se considera huérfano.
+    plan_stale_after_seconds: int = 300
     session_cookie_secure: bool = False
     # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
     dev_auto_login: bool = False
@@ -69,6 +85,12 @@ class Settings(BaseSettings):
         if not raw:
             return set()
         return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+    def slack_approver_allowlist(self) -> set[str]:
+        raw = (self.slack_approver_ids or "").strip()
+        if not raw:
+            return set()
+        return {uid.strip() for uid in raw.split(",") if uid.strip()}
 
     @property
     def project_root(self) -> Path:

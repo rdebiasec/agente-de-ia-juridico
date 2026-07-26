@@ -1,4 +1,13 @@
-"""Catálogo de skills en runtime (compartido con scripts de build del portal)."""
+"""Catalogo de contratos de capacidad (skills) — Tool/Agent Registry (industria).
+
+En este producto un "skill" NO es una tool que el LLM invoca
+(`disable-model-invocation: true`). Es un **contrato de capacidad** del
+registry (Patron Tool and Agent Registry / Ch10 Packt): declara inputs,
+outputs, guardrails y agente responsable para planes HITL y auditoria.
+
+Usar `skill_contract_brief()` al ejecutar un paso para anclar la fidelidad
+de instrucciones (Persistent Instruction Anchoring / Ch6).
+"""
 
 from __future__ import annotations
 
@@ -19,10 +28,13 @@ from lib.catalogo_aprobacion import (  # noqa: E402
 )
 
 VALID_AGENT_IDS = {a["id"] for a in AGENTS}
+
+# Alto riesgo: salida con efecto externo (memorial/tutela) — needs_approval + modelo fuerte.
 HIGH_RISK_AGENTS = {
     "redactor_documentos_juridicos_penales",
     "evaluador_derechos_fundamentales_tutela",
 }
+# Salidas que siempre pasan por revision humana en planes (HITL calibration / Ch8).
 HITL_OUTPUT_AGENTS = HIGH_RISK_AGENTS | {
     "preparador_estrategico_audiencias_penales",
     "gestor_seguimiento_procesal_penal",
@@ -40,7 +52,7 @@ def valid_skill_ids() -> frozenset[str]:
 
 
 def primary_skill_for_agent(agent_id: str) -> str | None:
-    """Primer skill del catálogo que lista al agente."""
+    """Contrato primario del agente (para plan y anclaje de instrucciones)."""
     preferred = {
         "coordinador_expediente_penal": "clasificar_tarea_y_etapa",
         "analista_cronologia_hechos_penales": "construir_cronologia_penal",
@@ -75,12 +87,45 @@ def skill_io_lists(skill_id: str | None) -> tuple[list[str], list[str]]:
     return inputs, outputs
 
 
+def skill_contract_brief(skill_id: str | None, *, max_chars: int = 900) -> str:
+    """Resumen del contrato para anclar el paso (no es tool invocable)."""
+    if not skill_id:
+        return ""
+    data = get_skills_catalog().get(skill_id) or {}
+    purpose = ""
+    if data:
+        purpose = (
+            data.get("purpose")
+            or data.get("blurb")
+            or data.get("description")
+            or ""
+        ).strip()
+    inputs, outputs = skill_io_lists(skill_id)
+    lines = [
+        "### Contrato de capacidad (registry — no invocable por el modelo)",
+        f"- ID: `{skill_id}`",
+    ]
+    if purpose:
+        lines.append(f"- Proposito: {purpose[:280]}")
+    if inputs:
+        lines.append("- Inputs esperados: " + "; ".join(inputs[:6]))
+    if outputs:
+        lines.append("- Outputs prometidos: " + "; ".join(outputs[:6]))
+    lines.append(
+        "- Regla: no inventar datos; marcar [PENDIENTE DE VERIFICAR] lo no soportado."
+    )
+    text = chr(10).join(lines)
+    if len(text) > max_chars:
+        return text[: max_chars - 3] + "..."
+    return text
+
+
 def agent_display_name(agent_id: str) -> str:
     return agent_titulo(agent_id) if agent_id in VALID_AGENT_IDS else agent_id
 
 
 def desk_label(agent_id: str) -> str:
-    """Etiqueta de despacho para planes/chat (sin IDs técnicos como interlocutor)."""
+    """Etiqueta de despacho para planes/chat (sin IDs tecnicos como interlocutor)."""
     if agent_id == "coordinador_expediente_penal":
         return "Gerente del Caso Penal"
     name = agent_display_name(agent_id)

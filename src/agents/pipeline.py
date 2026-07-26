@@ -202,7 +202,7 @@ def run_pre_validations(
 
 
 def run_post_validations(message: str, text: str, trace: dict) -> str:
-    """Validaciones posteriores: completitud y preguntas de seguimiento."""
+    """Validaciones posteriores: completitud, groundedness blanda y seguimiento."""
     lower_msg = message.lower()
     missing: list[str] = []
 
@@ -243,6 +243,43 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
             )
             if "radicado" in missing and "radicado" not in text.lower():
                 text = text.rstrip() + "\n\n¿Cuál es el número de radicado del proceso?"
+
+    # C6 — gate blando de calidad/groundedness en el path de chat
+    from src.agents.sdk_guardrails import citation_hints_without_pending
+    from src.agents.skill_catalog import HITL_OUTPUT_AGENTS, HIGH_RISK_AGENTS
+
+    sent = str(trace.get("sent_to_agent") or "")
+    actionable = sent in (HIGH_RISK_AGENTS | HITL_OUTPUT_AGENTS) or bool(
+        re.search(r"\b(memorial|tutela|recurso|guion)\b", lower_msg, re.I)
+    )
+    needs_pending = citation_hints_without_pending(text) and actionable
+    if needs_pending:
+        _span(
+            trace,
+            "Calidad: groundedness",
+            "pending",
+            "Hay indicios de citas/radicados sin [PENDIENTE DE VERIFICAR]; se marca para revision.",
+            kind="guardrail",
+        )
+        if "[PENDIENTE DE VERIFICAR]" not in text:
+            text = (
+                text.rstrip()
+                + "\n\n[PENDIENTE DE VERIFICAR] Citas, normas o radicados mencionados "
+                "requieren confirmacion del abogado antes de uso externo."
+            )
+        if "control de calidad" not in text.lower():
+            text = (
+                text.rstrip()
+                + "\n\nRecomendación del Gerente: antes de uso externo, solicite un paso "
+                "de control de calidad jurídica en el plan de ejecución."
+            )
+        trace["quality_check"] = {
+            "status": "pending_markers_added",
+            "reason": "citation_hints_without_pending",
+        }
+    else:
+        _span(trace, "Calidad: groundedness", "done", "Sin indicios de citas sin ancla de pendiente.")
+        trace["quality_check"] = {"status": "ok"}
 
     _span(trace, "Validación: salida", "done", "Guardrails y completitud revisados.")
     trace["conversation_continues"] = bool(missing) or trace.get("turn_index", 1) < 5

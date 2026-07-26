@@ -147,55 +147,56 @@ def persist_verification(
 ) -> Expediente:
     """Actualiza ledger y métricas; las tareas se cierran cuando llega el dato."""
     now = int(time.time())
-    previous = {
-        str(task.get("titulo")): task
-        for task in expediente.tareas_gerencia
-        if task.get("tipo") == "faltante"
-    }
-    tasks: list[dict] = [
-        task for task in expediente.tareas_gerencia if task.get("tipo") != "faltante"
-    ]
-    for title, old in previous.items():
-        if title not in result.faltantes:
-            tasks.append({**old, "estado": "cerrada", "cerrada_en": now})
-    for title in result.faltantes:
-        old = previous.get(title, {})
-        tasks.append(
-            {
-                "id": old.get("id")
-                or f"faltante-{hashlib.sha256(title.encode()).hexdigest()[:10]}",
-                "tipo": "faltante",
-                "titulo": title,
-                "responsable": "abogado_titular",
-                "estado": "pendiente",
-                "creada_en": old.get("creada_en") or now,
-            }
-        )
-
-    metrics = dict(expediente.metricas_gerencia or {})
-    metrics["verificaciones"] = int(metrics.get("verificaciones", 0)) + 1
-    if result.faltantes:
-        metrics["bloqueos_por_faltantes"] = int(metrics.get("bloqueos_por_faltantes", 0)) + 1
-    else:
-        metrics["verificaciones_aprobadas"] = int(metrics.get("verificaciones_aprobadas", 0)) + 1
-    metrics["ultimo_destino_evaluado"] = destination
-    metrics["ultima_verificacion_en"] = now
-
-    expediente.faltantes_gerencia = list(result.faltantes)
-    expediente.tareas_gerencia = tasks
-    expediente.metricas_gerencia = metrics
-    expediente.hechos_minimos_confirmados = (
-        expediente.hechos_minimos_confirmados or result.hechos_minimos
-    )
-    expediente.poder_acreditado = expediente.poder_acreditado or result.poder_acreditado
-    expediente.ultima_actuacion_confirmada = (
-        expediente.ultima_actuacion_confirmada or result.ultima_actuacion
-    )
-    expediente.actualizado_en = time.time()
-
     from src.storage import get_repository
 
-    return get_repository().save_expediente(expediente)
+    def _apply(current: Expediente) -> None:
+        previous = {
+            str(task.get("titulo")): task
+            for task in current.tareas_gerencia
+            if task.get("tipo") == "faltante"
+        }
+        tasks: list[dict] = [
+            task for task in current.tareas_gerencia if task.get("tipo") != "faltante"
+        ]
+        for title, old in previous.items():
+            if title not in result.faltantes:
+                tasks.append({**old, "estado": "cerrada", "cerrada_en": now})
+        for title in result.faltantes:
+            old = previous.get(title, {})
+            tasks.append(
+                {
+                    "id": old.get("id")
+                    or f"faltante-{hashlib.sha256(title.encode()).hexdigest()[:10]}",
+                    "tipo": "faltante",
+                    "titulo": title,
+                    "responsable": "abogado_titular",
+                    "estado": "pendiente",
+                    "creada_en": old.get("creada_en") or now,
+                }
+            )
+        metrics = dict(current.metricas_gerencia or {})
+        metrics["verificaciones"] = int(metrics.get("verificaciones", 0)) + 1
+        metric = (
+            "bloqueos_por_faltantes"
+            if result.faltantes
+            else "verificaciones_aprobadas"
+        )
+        metrics[metric] = int(metrics.get(metric, 0)) + 1
+        metrics["ultimo_destino_evaluado"] = destination
+        metrics["ultima_verificacion_en"] = now
+        current.faltantes_gerencia = list(result.faltantes)
+        current.tareas_gerencia = tasks
+        current.metricas_gerencia = metrics
+        current.hechos_minimos_confirmados = (
+            current.hechos_minimos_confirmados or result.hechos_minimos
+        )
+        current.poder_acreditado = current.poder_acreditado or result.poder_acreditado
+        current.ultima_actuacion_confirmada = (
+            current.ultima_actuacion_confirmada or result.ultima_actuacion
+        )
+        current.actualizado_en = time.time()
+
+    return get_repository().mutate_expediente(expediente.session_id, _apply)
 
 
 def record_specialist_result(
@@ -209,16 +210,6 @@ def record_specialist_result(
     from src.storage import get_repository
 
     repo = get_repository()
-    expediente = repo.get_expediente(session_id) or Expediente(session_id=session_id)
-    metrics = dict(expediente.metricas_gerencia or {})
-    if agent_id != POC_AGENT_ID:
-        metrics["delegaciones"] = int(metrics.get("delegaciones", 0)) + 1
-        if status != "done":
-            metrics["delegaciones_bloqueadas"] = int(
-                metrics.get("delegaciones_bloqueadas", 0)
-            ) + 1
-    metrics["ultimo_especialista"] = agent_id
-
     pending: list[str] = []
     for line in (text or "").splitlines():
         if re.search(r"\[(?:PENDIENTE(?:\s+DE\s+VERIFICAR)?|FALTANTE)\]", line, re.I):
@@ -226,26 +217,37 @@ def record_specialist_result(
             if cleaned:
                 pending.append(cleaned[:240])
 
-    existing = {
-        str(task.get("titulo")): task for task in expediente.tareas_gerencia
-    }
     now = int(time.time())
-    for title in pending:
-        existing[title] = {
-            **existing.get(title, {}),
-            "id": existing.get(title, {}).get("id")
-            or f"pendiente-{hashlib.sha256(title.encode()).hexdigest()[:10]}",
-            "tipo": "verificacion_especialista",
-            "titulo": title,
-            "responsable": "abogado_titular",
-            "origen": agent_id,
-            "estado": "pendiente",
-            "creada_en": existing.get(title, {}).get("creada_en") or now,
+
+    def _apply(expediente: Expediente) -> None:
+        metrics = dict(expediente.metricas_gerencia or {})
+        if agent_id != POC_AGENT_ID:
+            metrics["delegaciones"] = int(metrics.get("delegaciones", 0)) + 1
+            if status != "done":
+                metrics["delegaciones_bloqueadas"] = int(
+                    metrics.get("delegaciones_bloqueadas", 0)
+                ) + 1
+        metrics["ultimo_especialista"] = agent_id
+        existing = {
+            str(task.get("titulo")): task for task in expediente.tareas_gerencia
         }
-    expediente.tareas_gerencia = list(existing.values())
-    expediente.metricas_gerencia = metrics
-    expediente.actualizado_en = time.time()
-    repo.save_expediente(expediente)
+        for title in pending:
+            existing[title] = {
+                **existing.get(title, {}),
+                "id": existing.get(title, {}).get("id")
+                or f"pendiente-{hashlib.sha256(title.encode()).hexdigest()[:10]}",
+                "tipo": "verificacion_especialista",
+                "titulo": title,
+                "responsable": "abogado_titular",
+                "origen": agent_id,
+                "estado": "pendiente",
+                "creada_en": existing.get(title, {}).get("creada_en") or now,
+            }
+        expediente.tareas_gerencia = list(existing.values())
+        expediente.metricas_gerencia = metrics
+        expediente.actualizado_en = time.time()
+
+    repo.mutate_expediente(session_id, _apply)
     return {
         "faltantes_detectados": pending,
         "responsable_verificacion": "abogado_titular" if pending else None,
