@@ -5,7 +5,9 @@ description = "Asistente jurídico multi-agente — firma virtual web-only"
 requires-python = ">=3.11"
 dependencies = [
     "openai-agents>=0.16,<0.18",
-    "openai>=1.68.0",
+    # openai>=2.45 añade cache_write_tokens requerido en InputTokensDetails;
+    # agents 0.17.x aún construye InputTokensDetails(cached_tokens=0) y rompe el chat.
+    "openai>=1.68.0,<2.45",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",
     "slack-bolt>=1.22.0",
