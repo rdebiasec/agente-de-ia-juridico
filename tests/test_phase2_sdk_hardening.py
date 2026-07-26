@@ -42,13 +42,11 @@ def test_orchestrator_has_sdk_guardrails_and_redactor_output_type():
     from src.agents.orchestrator import build_orchestrator, get_agent_by_id
     from src.config import get_settings
 
-    poc = build_orchestrator()
+    poc = build_orchestrator(use_cache=False)
     assert poc.input_guardrails
     assert poc.output_guardrails
-    # Políticas del agente deben estar en instructions
-    assert "Guardrails de agente" in (poc.instructions or "") or "Políticas obligatorias" in (
-        poc.instructions or ""
-    )
+    # Slim: hint de políticas (cuerpos largos viven en guardrails SDK/código)
+    assert "Políticas obligatorias" in (poc.instructions or "")
     # Tools críticas con needs_approval en path conversacional
     by_name = {getattr(t, "name", None): t for t in (poc.tools or [])}
     assert by_name["redactor_documentos_juridicos_penales"].needs_approval is True
@@ -59,13 +57,14 @@ def test_orchestrator_has_sdk_guardrails_and_redactor_output_type():
     assert red_tool.tool_input_guardrails
     assert red_tool.tool_output_guardrails
 
-    poc_plan = build_orchestrator(require_tool_approval=False)
+    poc_plan = build_orchestrator(require_tool_approval=False, use_cache=False)
     by_name_plan = {getattr(t, "name", None): t for t in (poc_plan.tools or [])}
     assert by_name_plan["redactor_documentos_juridicos_penales"].needs_approval is False
 
     poc_chat = build_orchestrator(
         require_tool_approval=True,
         include_high_risk_tools=False,
+        use_cache=False,
     )
     chat_names = {getattr(t, "name", None) for t in (poc_chat.tools or [])}
     assert "redactor_documentos_juridicos_penales" not in chat_names

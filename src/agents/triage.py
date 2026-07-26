@@ -10,6 +10,7 @@ import re
 
 from src.agents.completeness import assess_completeness, infer_stage
 from src.agents.schemas import TriageResult
+from src.agents.urgency import assess_urgency
 from src.storage.models import Expediente
 
 POC_AGENT_ID = "coordinador_expediente_penal"
@@ -148,6 +149,49 @@ def _summarize(message: str, limit: int = 240) -> str:
     return f"{normalized[: limit - 3]}..."
 
 
+_OPERATIONAL_HINT = re.compile(
+    r"\b(redact|memorial|tutela|audiencia|tipicidad|cronolog|evidencia|"
+    r"radicado|impulso|recurso|vencimiento|urgente)\w*",
+    re.I,
+)
+
+
+def is_trivial_consultation(message: str, *, destination: str | None = None) -> bool:
+    """Consultas donde no conviene interrumpir con escalamiento de urgencia."""
+    dest = destination or infer_destination_agent(message)
+    if is_non_penal_scope_request(message):
+        return True
+    if _PROFILE_RE.search(message or ""):
+        return True
+    if dest == POC_AGENT_ID and not _OPERATIONAL_HINT.search(message or ""):
+        return True
+    return False
+
+
+def format_triage_sistema(triage: TriageResult) -> str:
+    """Bloque pre-LLM con triage/urgencia/faltantes (el LLM no debe re-clasificar)."""
+    faltantes = (
+        ", ".join(triage.datos_faltantes_bloqueantes)
+        if triage.datos_faltantes_bloqueantes
+        else "(ninguno)"
+    )
+    motivos = (
+        "; ".join(triage.motivos_urgencia) if triage.motivos_urgencia else "(ninguno)"
+    )
+    return (
+        "[TRIAGE_SISTEMA — evaluación determinista; no re-clasificar]\n"
+        f"- tipo_tarea: {triage.tipo_tarea}\n"
+        f"- etapa_aparente: {triage.etapa_aparente}\n"
+        f"- agente_destino: {triage.agente_destino}\n"
+        f"- puede_continuar: {triage.puede_continuar}\n"
+        f"- faltantes_bloqueantes: {faltantes}\n"
+        f"- nivel_urgencia: {triage.nivel_urgencia}\n"
+        f"- urgencia_preliminar: {triage.urgencia_preliminar}\n"
+        f"- escalar_humano: {triage.escalar_humano}\n"
+        f"- motivos_urgencia: {motivos}\n"
+    )
+
+
 def build_triage(
     message: str,
     *,
@@ -156,20 +200,7 @@ def build_triage(
 ) -> TriageResult:
     """Construye TriageResult determinista (sin LLM) como contrato unico de ruteo."""
     dest = destination or infer_destination_agent(message)
-    lower = (message or "").lower()
-    urgencia = any(
-        k in lower
-        for k in (
-            "urgente",
-            "vencimiento",
-            "audiencia mañana",
-            "audiencia manana",
-            "término",
-            "termino",
-            "inminente",
-            "amenaza",
-        )
-    )
+    urgency = assess_urgency(message, expediente)
     fuera = is_non_penal_scope_request(message)
     tipo = "fuera_de_alcance" if fuera else _DEST_TO_TAREA.get(dest, "seguimiento")
     completeness = assess_completeness(
@@ -184,7 +215,11 @@ def build_triage(
         agente_destino=dest,
         datos_faltantes_bloqueantes=list(completeness.faltantes),
         puede_continuar=completeness.puede_continuar,
-        urgencia_preliminar=urgencia,
+        urgencia_preliminar=urgency.urgencia_preliminar,
+        nivel_urgencia=urgency.nivel_urgencia,
+        motivos_urgencia=list(urgency.motivos),
+        escalar_humano=urgency.escalar_humano,
+        accion_inmediata_urgencia=urgency.accion_inmediata_sugerida,
         resumen_triage=_summarize(message),
     )
 

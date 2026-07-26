@@ -9,10 +9,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def _resolve_skills_dir() -> Path:
-    for candidate in (ROOT / ".cursor" / "skills", ROOT / "agente" / "skills"):
-        if candidate.is_dir() and any(candidate.glob("*/SKILL.md")):
-            return candidate
-    return ROOT / ".cursor" / "skills"
+    """Fuente canónica: `agente/skills` (runtime/CI). `.cursor/skills` es espejo IDE."""
+    canonical = ROOT / "agente" / "skills"
+    if canonical.is_dir() and any(canonical.glob("*/SKILL.md")):
+        return canonical
+    mirror = ROOT / ".cursor" / "skills"
+    if mirror.is_dir() and any(mirror.glob("*/SKILL.md")):
+        return mirror
+    return canonical
 
 
 SKILLS_DIR = _resolve_skills_dir()
@@ -315,7 +319,23 @@ def parse_skill_md_text(text: str) -> dict:
 
     agents_raw = section("Used By Agents")
     agents = re.findall(r"`([^`]+)`", agents_raw)
-    tools = [t.strip("- ").strip() for t in section("Tools").splitlines() if t.strip().startswith("-")]
+    tools_section = section("Tools")
+    # Preferir solo function tools reales; ignorar Planned capabilities / Side-effects.
+    ft = re.search(
+        r"### Function tools[^\n]*\n(.*?)(?=\n### |\Z)",
+        tools_section,
+        re.S,
+    )
+    tools_src = ft.group(1) if ft else tools_section
+    tools: list[str] = []
+    for line in tools_src.splitlines():
+        line = line.strip()
+        if not line.startswith("-"):
+            continue
+        for name in re.findall(r"`([^`]+)`", line):
+            name = name.strip()
+            if name and name not in tools:
+                tools.append(name)
     guardrails = [g.strip("- ").strip() for g in section("Guardrails").splitlines() if g.strip().startswith("-")]
     category = ""
     cm = re.search(r"Category:\s*`([^`]+)`", body)
@@ -415,8 +435,8 @@ def load_skills_catalog() -> dict[str, dict]:
     for p in sorted(SKILLS_DIR.glob("*/SKILL.md")):
         sid = p.parent.name
         data = parse_skill_md(p)
-        rel = p.relative_to(ROOT).as_posix()
-        data["path"] = rel
+        # Siempre reportar ruta canónica agente/skills (aunque el loader use espejo).
+        data["path"] = f"agente/skills/{sid}/SKILL.md"
         extra = lista.get(sid, {})
         data["instruccion"] = extra.get("instruccion", "")
         lista_steps = extra.get("steps", [])
@@ -442,7 +462,12 @@ def load_skills_catalog() -> dict[str, dict]:
             parsed = parse_skill_md_text(content)
             base = skills.get(sid, {})
             merged = {**base, **parsed}
-            merged["path"] = active_data.get("path") or base.get("path") or f".cursor/skills/{sid}/SKILL.md"
+            # Preferir canónico en disco; DB puede aún tener path .cursor legacy.
+            disk = base.get("path") or f"agente/skills/{sid}/SKILL.md"
+            db_path = (active_data.get("path") or "").replace("\\", "/")
+            if db_path.startswith(".cursor/skills/"):
+                db_path = "agente/skills/" + db_path.split("/", 2)[-1]
+            merged["path"] = disk if disk.startswith("agente/skills/") else (db_path or disk)
             merged["config_version"] = active_data.get("version")
             merged["config_checksum"] = active_data.get("checksum")
             extra = lista.get(sid, {})

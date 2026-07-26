@@ -29,6 +29,31 @@ from lib.catalogo_aprobacion import (  # noqa: E402
 
 VALID_AGENT_IDS = {a["id"] for a in AGENTS}
 
+POC_AGENT_ID = "coordinador_expediente_penal"
+
+# Ownership real del Gerente (resto marcado MOVE → especialista).
+POC_OWNED_SKILLS = frozenset(
+    {
+        "clasificar_tarea_y_etapa",
+        "gestionar_faltantes_expediente",
+        "detectar_urgencia_penal",
+        "marcar_pendientes_verificacion",
+        "actualizar_tareas_responsable",
+    }
+)
+
+# Dueños canónicos tras MOVE (si el archivo/DB aún listan al POC).
+_MOVED_SKILL_OWNERS: dict[str, list[str]] = {
+    "clasificar_fuente_factual": ["analista_cronologia_hechos_penales"],
+    "detectar_vacios_factuales": ["analista_cronologia_hechos_penales"],
+    "identificar_etapa_procesal_ley906": ["analista_ruta_procesal_ley906"],
+    "crear_ruta_procesal_recomendada": ["analista_ruta_procesal_ley906"],
+    "priorizar_objetivos_representacion": ["analista_representacion_victimas"],
+    "recomendar_via_constitucional_o_alternativa": [
+        "evaluador_derechos_fundamentales_tutela"
+    ],
+}
+
 # Alto riesgo: salida con efecto externo (memorial/tutela) — needs_approval + modelo fuerte.
 HIGH_RISK_AGENTS = {
     "redactor_documentos_juridicos_penales",
@@ -41,9 +66,24 @@ HITL_OUTPUT_AGENTS = HIGH_RISK_AGENTS | {
 }
 
 
+def _normalize_skill_agents(skills: dict[str, dict]) -> dict[str, dict]:
+    """Alinea ownership POC vs MOVE aunque DB/archivo estén desfasados."""
+    for sid, data in skills.items():
+        agents = [a for a in (data.get("agents") or []) if a in VALID_AGENT_IDS]
+        if sid in POC_OWNED_SKILLS:
+            if POC_AGENT_ID not in agents:
+                agents.insert(0, POC_AGENT_ID)
+        else:
+            agents = [a for a in agents if a != POC_AGENT_ID]
+            if not agents and sid in _MOVED_SKILL_OWNERS:
+                agents = list(_MOVED_SKILL_OWNERS[sid])
+        data["agents"] = agents
+    return skills
+
+
 @lru_cache(maxsize=1)
 def get_skills_catalog() -> dict[str, dict]:
-    return load_skills_catalog()
+    return _normalize_skill_agents(load_skills_catalog())
 
 
 @lru_cache(maxsize=1)
@@ -115,6 +155,74 @@ def skill_contract_brief(skill_id: str | None, *, max_chars: int = 900) -> str:
         "- Regla: no inventar datos; marcar [PENDIENTE DE VERIFICAR] lo no soportado."
     )
     text = chr(10).join(lines)
+    if len(text) > max_chars:
+        return text[: max_chars - 3] + "..."
+    return text
+
+
+# Anclas secundarias cortas (primario + 2–3) sin explotar tokens.
+_SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
+    "analista_cronologia_hechos_penales": (
+        "extraer_hechos_relevantes",
+        "detectar_contradicciones_factuales",
+        "detectar_vacios_factuales",
+    ),
+    "analista_tipicidad_y_responsabilidad_penal": (
+        "identificar_conductas_punibles_preliminares",
+        "detectar_riesgos_atipicidad",
+        "mapear_tipo_penal_hecho_prueba",
+    ),
+    "gestor_evidencia_y_soporte_probatorio": (
+        "detectar_brechas_probatorias",
+        "construir_matriz_hecho_prueba",
+        "crear_plan_recaudo_probatorio",
+    ),
+    "redactor_documentos_juridicos_penales": (
+        "estructurar_hechos_fundamentos_solicitudes",
+        "marcar_pendientes_verificacion",
+        "controlar_tono_juridico_documento",
+    ),
+    "evaluador_derechos_fundamentales_tutela": (
+        "identificar_derecho_fundamental_afectado",
+        "detectar_riesgo_improcedencia_tutela",
+        "recomendar_via_constitucional_o_alternativa",
+    ),
+    "analista_calidad_juridica": (
+        "detectar_alucinaciones_legales",
+        "controlar_confidencialidad_datos_sensibles",
+        "clasificar_aprobacion_juridica",
+    ),
+    "analista_ruta_procesal_ley906": (
+        "evaluar_oportunidad_procesal",
+        "crear_ruta_procesal_recomendada",
+    ),
+    "analista_representacion_victimas": (
+        "analizar_derechos_victima",
+        "detectar_riesgo_revictimizacion",
+    ),
+    "preparador_estrategico_audiencias_penales": (
+        "identificar_objetivo_audiencia",
+        "preparar_guion_intervencion_oral",
+    ),
+    "gestor_seguimiento_procesal_penal": (
+        "generar_alertas_terminos_vencimientos",
+        "detectar_inactividad_procesal",
+    ),
+}
+
+
+def agent_capability_anchor(agent_id: str, *, max_chars: int = 1100) -> str:
+    """Ancla multi-skill: primario + hasta 3 secundarios (briefs cortos)."""
+    primary = primary_skill_for_agent(agent_id)
+    parts = [skill_contract_brief(primary, max_chars=520)]
+    valid = valid_skill_ids()
+    for sid in _SECONDARY_SKILLS.get(agent_id, ())[:3]:
+        if sid not in valid or sid == primary:
+            continue
+        data = get_skills_catalog().get(sid) or {}
+        purpose = (data.get("purpose") or data.get("blurb") or "").strip()[:160]
+        parts.append(f"- Ancilar `{sid}`: {purpose}" if purpose else f"- Ancilar `{sid}`")
+    text = "\n".join(p for p in parts if p)
     if len(text) > max_chars:
         return text[: max_chars - 3] + "..."
     return text

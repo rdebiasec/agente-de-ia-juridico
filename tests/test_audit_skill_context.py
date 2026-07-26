@@ -29,7 +29,7 @@ def test_build_audit_data_skill_context_fields():
     assert sample["tools_text"]
     assert isinstance(sample["guardrails"], list)
     assert len(sample["guardrails"]) >= 1
-    assert sample["source_path"] == ".cursor/skills/extraer_hechos_relevantes/SKILL.md"
+    assert sample["source_path"] == "agente/skills/extraer_hechos_relevantes/SKILL.md"
     assert sample["audit_keys"] == {
         "instruccion": guia_audit_key("extraer_hechos_relevantes", "instruccion"),
         "tools": guia_audit_key("extraer_hechos_relevantes", "tools"),

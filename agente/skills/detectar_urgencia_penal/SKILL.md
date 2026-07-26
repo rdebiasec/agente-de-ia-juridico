@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 2b92c298dfe111f6 -->
+<!-- config-version: 3; checksum: 4171e562a65d48f3 -->
 ---
 name: detectar-urgencia-penal
 description: Skill estrategico penal-victimas: identificar si el caso requiere atencion humana inmediata. Use when the workflow requires `detectar_urgencia_penal`.
@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Index Blurb
-Clasifica urgencia (crítica/alta/media/baja) y si hay que escalar al humano antes del fondo.
+Clasifica urgencia (critica/alta/media/baja) y si hay que escalar al humano antes del fondo.
 
 ## Used By Agents
 - `coordinador_expediente_penal`
@@ -24,7 +24,7 @@ Clasifica urgencia (crítica/alta/media/baja) y si hay que escalar al humano ant
 Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria.
 
 ## Rol en coordinador
-Ejecutar en triage inicial y cuando el abogado reporte hechos nuevos de riesgo. Prioriza escalamiento antes de análisis de fondo.
+Contrato materializado por `assess_urgency` (`src/agents/urgency.py` → `UrgencyResult`) e integrado en `build_triage` / `[TRIAGE_SISTEMA]`. El LLM no re-clasifica el nivel.
 
 ## Inputs
 - Solicitud del turno y hechos reportados.
@@ -33,35 +33,43 @@ Ejecutar en triage inicial y cuando el abogado reporte hechos nuevos de riesgo. 
 - Estado del radicado y última actuación (si existe).
 
 ## Outputs
-- `nivel_urgencia`: crítica | alta | media | baja.
+Alineados a `UrgencyResult` / campos de `TriageResult`:
+- `nivel_urgencia`: `critica` | `alta` | `media` | `baja`.
 - `motivos` (lista verificable o `[PENDIENTE DE VERIFICAR]`).
 - `accion_inmediata_sugerida` (ej. contactar abogado titular, preservar evidencia, verificar término).
-- `escalamiento`: sí/no y destino (humano responsable / agente especialista).
-- Timestamp de la evaluación preliminar.
+- `escalar_humano`: bool (true si critica|alta).
+- `urgencia_preliminar`: bool derivado (`critica`|`alta` → true).
+- `evaluada_en`: unix timestamp.
 
 ## Steps
 1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
 2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
-3. Escalar con notificación si aplica.
-4. Documentar motivo de escalamiento y agente destino.
+3. Escalar con notificación si aplica (span + mensaje pre-LLM; no bloquea consultas triviales).
+4. Documentar motivo de escalamiento (`metricas_gerencia["ultima_urgencia"]`).
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `calendar_terms_calculator`
-- `case_state_reader`
-- `notification_create`
+Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_urgencia_*`.
+
+### Function tools (LLM, si aplica en el turno)
+- `buscar_en_expediente` (sesión activa vinculada; contexto, no reclasifica)
+
+### Side-effects de código (no son function_tools)
+- `assess_urgency` — `src/agents/urgency.py` (niveles critica|alta|media|baja)
+- `gerencia_ledger` — `metricas_gerencia["ultima_urgencia"]` vía `persist_verification`
+- `audit_trace` — span de escalamiento en runner cuando critica/alta (no trivial)
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar vencimientos ni amenazas no reportadas.
 - **g2:** Si falta fecha de audiencia o término crítico, marcar urgencia `[PENDIENTE DE VERIFICAR]` y pedir dato.
 - **g3:** Distinguir riesgo reportado de inferencia de la IA.
-- **g4:** Nivel crítica/alta siempre requiere confirmación humana antes de actuar.
+- **g4:** Nivel critica/alta siempre requiere confirmación humana antes de actuar.
 - **g5:** En riesgo a integridad, no exponer datos sensibles de la víctima en la notificación de escalamiento.
 - **g8:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
 
 ## Handoff
-- Crítica/alta → notificación humana +, si aplica, `gestor_seguimiento_procesal_penal` o especialista según motivo.
-- Media/baja → continuar triage (`clasificar_tarea_y_etapa` / faltantes).
+- critica/alta → notificación humana +, si aplica, `gestor_seguimiento_procesal_penal` o especialista según motivo.
+- media/baja → continuar triage (`clasificar_tarea_y_etapa` / faltantes).
 
 ## No duplicar
 - No calcular todos los términos del caso (`generar_alertas_terminos_vencimientos`).

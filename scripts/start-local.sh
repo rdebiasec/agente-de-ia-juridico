@@ -39,5 +39,24 @@ echo "Iniciando asistente jurídico en http://localhost:8000"
 echo "  Chat:       http://localhost:8000/abogado"
 echo "  Auditoría:  http://localhost:8000/auditoria/"
 echo "  Persistencia: Postgres (Docker) — ${DATABASE_URL}"
+
+WATCH_PID=""
+cleanup_local() {
+  if [[ -n "${WATCH_PID}" ]]; then
+    kill "${WATCH_PID}" 2>/dev/null || true
+  fi
+}
+trap cleanup_local EXIT INT TERM
+
+# Auto: editar .md en text editor → nueva versión en DB (desactivar: CONFIG_FILE_SYNC_WATCH=0).
+if [[ "${CONFIG_FILE_SYNC_WATCH:-1}" != "0" ]]; then
+  AUTHOR="${CONFIG_SYNC_AUTHOR:-local.dev@localhost}"
+  echo "  Config watch: archivo→DB ON (author=${AUTHOR}; off: CONFIG_FILE_SYNC_WATCH=0)"
+  "$ROOT/.venv/bin/python" "$ROOT/scripts/watch_config_sync.py" --author "${AUTHOR}" &
+  WATCH_PID=$!
+else
+  echo "  Config watch: OFF"
+fi
+
 echo "Ctrl+C para detener (la DB Docker sigue corriendo; para bajarla: (cd deploy && docker compose --env-file /dev/null stop db))."
-exec "$ROOT/.venv/bin/python" -m src.main
+"$ROOT/.venv/bin/python" -m src.main

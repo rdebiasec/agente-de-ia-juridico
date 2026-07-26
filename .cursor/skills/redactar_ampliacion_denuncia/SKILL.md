@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: c28c3d6a46b7d6ca -->
 ---
 name: redactar-ampliacion-denuncia
 description: Skill atomico penal-victimas: estructurar hechos nuevos, pruebas y anexos para ampliar denuncia. Use when the workflow requires `redactar_ampliacion_denuncia`.
@@ -37,8 +36,19 @@ Borrador de ampliación; HITL y radicación son del despacho.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_expediente_search`
-- `rag_plantillas_search`
+Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_ampliacion_denuncia`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar radicados ni hechos.

@@ -37,8 +37,19 @@ Emitir dictamen final de aprobación sobre salidas destinadas a uso externo o co
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `approval_gate_decision`
-- `audit_log_write`
+Skills = contratos (no function_tools invocables). No existe tool LLM `clasificar_aprobacion_juridica`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `approval_gate_decision` — no implementada
+- `audit_log_write` — no implementada
 
 ## Guardrails (g1–g10)
 - **g4:** Nunca aprobar automáticamente con hallazgos críticos sin marcar `con_cambios` o `rechazar`.

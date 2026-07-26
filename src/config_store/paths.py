@@ -36,11 +36,15 @@ def agent_guardrails_dir() -> Path:
 
 
 def skills_dir() -> Path:
+    """Fuente canónica: `agente/skills`. `.cursor/skills` es espejo para el IDE."""
     root = project_root()
-    for candidate in (root / ".cursor" / "skills", root / "agente" / "skills"):
-        if candidate.is_dir() and any(candidate.glob("*/SKILL.md")):
-            return candidate
-    return root / ".cursor" / "skills"
+    canonical = root / "agente" / "skills"
+    if canonical.is_dir() and any(canonical.glob("*/SKILL.md")):
+        return canonical
+    mirror = root / ".cursor" / "skills"
+    if mirror.is_dir() and any(mirror.glob("*/SKILL.md")):
+        return mirror
+    return canonical
 
 
 def agent_guardrail_key(agent_id: str, clase: str) -> str:
@@ -74,3 +78,34 @@ def path_for(kind: str, key: str) -> Path:
 
 def relative_path_for(kind: str, key: str) -> str:
     return str(path_for(kind, key).relative_to(project_root()))
+
+
+def kind_key_for_path(path: Path) -> tuple[str, str] | None:
+    """Resuelve (kind, key) para un archivo del config store, o None si no aplica."""
+    try:
+        resolved = path.resolve()
+        root = project_root().resolve()
+        rel = resolved.relative_to(root)
+    except (OSError, ValueError):
+        return None
+    parts = rel.parts
+    if parts == ("agente", "prompts", "sistema.md"):
+        return KIND_PROMPT, "sistema"
+    if len(parts) == 4 and parts[:3] == ("agente", "prompts", "agents") and parts[3].endswith(".md"):
+        return KIND_PROMPT, parts[3][:-3]
+    if (
+        len(parts) == 5
+        and parts[:3] == ("config", "guardrails", "agents")
+        and parts[4] in {f"{c}.md" for c in AGENT_GUARDRAIL_CLASSES}
+    ):
+        return KIND_AGENT_GUARDRAIL, agent_guardrail_key(parts[3], parts[4][:-3])
+    if len(parts) == 3 and parts[:2] == ("config", "guardrails") and parts[2].endswith(".md"):
+        return KIND_GUARDRAIL, parts[2][:-3]
+    if (
+        len(parts) == 4
+        and parts[0] in {".cursor", "agente"}
+        and parts[1] == "skills"
+        and parts[3] == "SKILL.md"
+    ):
+        return KIND_SKILL, parts[2]
+    return None

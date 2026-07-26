@@ -160,17 +160,34 @@ def run_pre_validations(
             format_missing_request,
             persist_verification,
         )
+        from src.agents.urgency import assess_urgency
 
         verification = assess_completeness(
             message,
             destination=destination,
             expediente=expediente,
         )
-        persist_verification(expediente, verification, destination=destination)
+        urgency = assess_urgency(message, expediente)
+        persist_verification(
+            expediente,
+            verification,
+            destination=destination,
+            urgency=urgency.model_dump(),
+        )
         trace["gerencia_verification"] = {
             "puede_continuar": verification.puede_continuar,
             "faltantes": verification.faltantes,
+            "faltantes_detalle": [
+                {
+                    "elemento": f.elemento,
+                    "prioridad": f.prioridad,
+                    "motivo": f.motivo,
+                    "responsable_sugerido": f.responsable_sugerido,
+                }
+                for f in verification.faltantes_detalle
+            ],
             "destination": destination,
+            "urgencia": urgency.model_dump(),
         }
         if not verification.puede_continuar:
             _span(

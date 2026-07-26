@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 6ee277f2d1e39567 -->
 ---
 name: revisar-coherencia-estrategica
 description: Skill estrategico penal-victimas: asegurar coherencia con teoria del caso aprobada. Use when the workflow requires `revisar_coherencia_estrategica`.
@@ -37,8 +36,19 @@ Skill primario del agente; primer filtro de coherencia estratégica.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `strategy_consistency_checker`
-- `case_state_reader`
+Skills = contratos (no function_tools invocables). No existe tool LLM `revisar_coherencia_estrategica`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `strategy_consistency_checker` — no implementada
+- `case_state_reader` — no implementada
 
 ## Guardrails (g1–g10)
 - **g4:** No aprobar salida desalineada para uso externo.

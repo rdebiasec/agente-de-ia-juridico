@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: b8ea283e530ff582 -->
+<!-- config-version: 3; checksum: 357b631e5822d06e -->
 ---
 name: marcar-pendientes-verificacion
 description: Skill atomico penal-victimas: marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`. Use when the workflow requires `marcar_pendientes_verificacion`.
@@ -22,7 +22,7 @@ Etiqueta todo dato no verificado antes de entregar la voz del despacho.
 Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
 
 ## Rol en coordinador
-Control de calidad transversal antes de entregar cualquier salida del coordinador o de ensamblar respuestas de subagentes.
+Control de calidad transversal antes de entregar cualquier salida del coordinador o de ensamblar respuestas de subagentes. Persistencia estructurada vía `record_specialist_result`.
 
 ## Inputs
 - Texto o estructura de salida a revisar (del turno actual o borrador consolidado).
@@ -31,7 +31,8 @@ Control de calidad transversal antes de entregar cualquier salida del coordinado
 
 ## Outputs
 - Texto con marcadores `[PENDIENTE DE VERIFICAR]` insertados.
-- Registro de pendientes: `elemento`, `tipo` (hecho | cita | radicado | fecha | otro), `impacto_juridico` (alto | medio | bajo).
+- Registro de pendientes: `elemento`, `tipo` (`hecho` | `cita` | `radicado` | `fecha` | `otro`), `impacto_juridico` (`alto` | `medio` | `bajo`).
+- En ledger: tareas `verificacion_especialista` con `pendiente_tipo` e `impacto_juridico`.
 - Conteo de pendientes y recomendación de no uso externo si hay impacto alto.
 
 ## Steps
@@ -39,7 +40,14 @@ Control de calidad transversal antes de entregar cualquier salida del coordinado
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `audit_log_write`
+Skills = contratos (no function_tools invocables). No existe tool LLM `marcar_pendientes_*`.
+
+### Function tools (LLM)
+- (ninguna específica de este skill)
+
+### Side-effects de código (no son function_tools)
+- `audit_trace` — marcadores en síntesis del Gerente y post-validación
+- `record_specialist_result` — parsea `[PENDIENTE DE VERIFICAR]` / `[FALTANTE]` y persiste `pendiente_tipo` + `impacto_juridico` en `tareas_gerencia`
 
 ## Guardrails (g1–g10)
 - **g1:** Implementación directa de g1 — todo sin fuente queda marcado, nunca inventado.

@@ -121,23 +121,35 @@ def _resolve_step_agent(step: PlanStep):
 
 
 def _final_output_text(result: Any) -> str:
+    from src.agents.structured_render import render_structured_output
+
     output = getattr(result, "final_output", None)
-    if output is None:
-        return ""
-    if isinstance(output, str):
-        return output
-    if hasattr(output, "model_dump"):
-        data = output.model_dump()
-        cuerpo = data.get("cuerpo")
-        if isinstance(cuerpo, str) and cuerpo.strip():
-            titulo = data.get("titulo") or ""
-            pendientes = data.get("pendientes_verificacion") or []
-            extra = ""
-            if pendientes:
-                extra = "\n\nPendientes de verificación:\n- " + "\n- ".join(str(p) for p in pendientes)
-            return f"{titulo}\n\n{cuerpo}{extra}".strip()
-        return str(data)
-    return str(output)
+    return render_structured_output(output)
+
+
+def _quality_gate_blocks(result: Any, step: PlanStep) -> tuple[bool, str]:
+    """Gate duro: DictamenCalidad rechazado/escalar bloquea entrega accionable."""
+    if step.agent_id != "analista_calidad_juridica":
+        return False, ""
+    from src.agents.structured_render import extract_dictamen_calidad
+
+    raw = getattr(result, "final_output", None)
+    dictamen = extract_dictamen_calidad(raw)
+    if not dictamen:
+        # Sin estructura: no bloquear por falso negativo; el guardrail de calidad ya tripwirea.
+        return False, ""
+    veredicto = str(dictamen.get("veredicto") or "").strip().lower()
+    if veredicto not in ("rechazado", "escalar"):
+        return False, ""
+    resumen = str(dictamen.get("resumen") or "").strip()
+    hallazgos = dictamen.get("hallazgos") or []
+    detalle = resumen or "; ".join(str(h) for h in hallazgos[:5]) or "sin detalle"
+    msg = (
+        f"⛔ Control de calidad jurídica: veredicto **{veredicto}**. "
+        "No se entrega salida final accionable hasta revisión del abogado. "
+        f"Detalle: {detalle}"
+    )
+    return True, msg
 
 
 def _mask_sensitive(text: str) -> str:
@@ -475,8 +487,9 @@ async def _run_single_step(
                 )
             if result is None:  # pragma: no cover
                 raise RuntimeError("El paso terminó sin resultado.")
+            blocked_quality, quality_msg = _quality_gate_blocks(result, step)
             text = apply_output_guardrails(
-                _final_output_text(result),
+                quality_msg if blocked_quality else _final_output_text(result),
                 channel,
                 allow_sensitive_pii=True,
             )
@@ -488,7 +501,22 @@ async def _run_single_step(
                 last_agent_name=last_agent_name,
                 backoffice_agent=step.agent_id if step.agent_id in SPECIALIST_AGENT_IDS else POC_AGENT_ID,
             )
-            status: str = "done"
+            status: str = "blocked" if blocked_quality else "done"
+            if blocked_quality:
+                trace.setdefault("spans", []).append(
+                    {
+                        "name": f"plan:{step.step_id}:quality_gate",
+                        "kind": "quality_gate",
+                        "status": "blocked",
+                        "detail": quality_msg,
+                        "at_ms": int(time.time() * 1000),
+                    }
+                )
+                trace["quality_gate"] = {
+                    "blocked": True,
+                    "step_id": step.step_id,
+                    "message": quality_msg,
+                }
         except AgentBudgetExceeded as exc:
             logger.warning("Presupuesto excedido en paso %s: %s", step.step_id, exc)
             text = apply_output_guardrails(

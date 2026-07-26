@@ -136,7 +136,23 @@ class TriageResult(BaseModel):
     )
     urgencia_preliminar: bool = Field(
         default=False,
-        description="True si conviene disparar detectar_urgencia_penal antes del fondo.",
+        description="True si nivel_urgencia es critica|alta (derivado de assess_urgency).",
+    )
+    nivel_urgencia: Literal["critica", "alta", "media", "baja"] = Field(
+        default="baja",
+        description="Nivel de urgencia del turno (contrato detectar_urgencia_penal).",
+    )
+    motivos_urgencia: list[str] = Field(
+        default_factory=list,
+        description="Motivos verificables de la urgencia preliminar.",
+    )
+    escalar_humano: bool = Field(
+        default=False,
+        description="True cuando conviene escalar al abogado antes del fondo.",
+    )
+    accion_inmediata_urgencia: str = Field(
+        default="",
+        description="Acción inmediata sugerida cuando hay urgencia preliminar.",
     )
     resumen_triage: str = Field(
         default="",
@@ -147,3 +163,144 @@ class TriageResult(BaseModel):
     @classmethod
     def _validar_destino(cls, v: str, info):
         return _no_vacio(v, info.field_name)
+
+
+class EventoCronologia(BaseModel):
+    """Evento de una cronología penal preliminar."""
+
+    fecha_o_momento: str = Field(..., description="Fecha, periodo o ancla temporal.")
+    descripcion: str = Field(..., description="Hecho o actuación descrita.")
+    actores: list[str] = Field(default_factory=list, description="Actores involucrados.")
+    fuente: str = Field(
+        default="",
+        description="Fuente o documento que soporta el evento (o pendiente).",
+    )
+    clasificacion: Literal["confirmado", "narrado", "inferido", "pendiente_verificar"] = Field(
+        default="narrado",
+        description="Clasificación fáctica del evento.",
+    )
+
+
+class CronologiaPenal(BaseModel):
+    """Salida estructurada del analista de cronología (output_type)."""
+
+    titulo: str = Field(default="Cronología penal preliminar", description="Título corto.")
+    eventos: list[EventoCronologia] = Field(
+        default_factory=list,
+        description="Eventos ordenados temporalmente.",
+    )
+    contradicciones: list[str] = Field(
+        default_factory=list,
+        description="Contradicciones detectadas entre fuentes/relatos.",
+    )
+    vacios_factuales: list[str] = Field(
+        default_factory=list,
+        description="Vacíos o lagunas fácticas relevantes.",
+    )
+    pendientes_verificacion: list[str] = Field(
+        default_factory=list,
+        description="Datos a verificar con el abogado o el expediente.",
+    )
+
+    @field_validator("titulo")
+    @classmethod
+    def _validar_titulo(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class ElementoTipoPenal(BaseModel):
+    """Elemento del tipo penal mapeado a hechos/prueba."""
+
+    elemento: str = Field(..., description="Elemento objetivo/subjetivo del tipo.")
+    hechos_que_soportan: list[str] = Field(default_factory=list)
+    prueba_disponible: list[str] = Field(default_factory=list)
+    riesgo_o_brecha: str = Field(default="", description="Riesgo de atipicidad o brecha.")
+
+
+class MatrizTipicidad(BaseModel):
+    """Salida estructurada del analista de tipicidad (output_type)."""
+
+    hipotesis_tipica: str = Field(
+        ...,
+        description="Hipótesis tipica preliminar (no calificación definitiva).",
+    )
+    tipo_penal_sugerido: str = Field(
+        default="",
+        description="Tipo penal tentativo o [PENDIENTE DE VERIFICAR].",
+    )
+    elementos: list[ElementoTipoPenal] = Field(default_factory=list)
+    autoria_participacion: str = Field(default="", description="Autoría/participación preliminar.")
+    dolo_culpa: str = Field(default="", description="Elemento subjetivo preliminar.")
+    agravantes_atenuantes: list[str] = Field(default_factory=list)
+    riesgos_atipicidad: list[str] = Field(default_factory=list)
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("hipotesis_tipica")
+    @classmethod
+    def _validar_hipotesis(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class ItemEvidencia(BaseModel):
+    """Ítem del inventario probatorio."""
+
+    descripcion: str = Field(..., description="Qué es la evidencia.")
+    tipo: str = Field(default="otro", description="documental|testimonial|pericial|digital|otro.")
+    fuente_o_ubicacion: str = Field(default="", description="Dónde está o de dónde proviene.")
+    hechos_que_soporta: list[str] = Field(default_factory=list)
+    cadena_custodia: Literal["ok", "dudosa", "desconocida", "pendiente_verificar"] = Field(
+        default="desconocida",
+    )
+    notas: str = Field(default="")
+
+
+class InventarioEvidencia(BaseModel):
+    """Salida estructurada del gestor de evidencia (output_type)."""
+
+    titulo: str = Field(default="Inventario de evidencia preliminar", description="Título.")
+    items: list[ItemEvidencia] = Field(default_factory=list)
+    brechas_probatorias: list[str] = Field(default_factory=list)
+    plan_recaudo_sugerido: list[str] = Field(default_factory=list)
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("titulo")
+    @classmethod
+    def _validar_titulo(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class DictamenCalidad(BaseModel):
+    """Salida estructurada del analista de calidad (gate duro en planes alto riesgo)."""
+
+    veredicto: Literal["aprobable", "con_cambios", "rechazado", "escalar"] = Field(
+        ...,
+        description=(
+            "aprobable=puede entregarse con revisión humana; "
+            "con_cambios=ajustes menores; "
+            "rechazado=no entregar salida accionable; "
+            "escalar=requiere abogado antes de continuar."
+        ),
+    )
+    hallazgos: list[str] = Field(
+        default_factory=list,
+        description="Hallazgos de calidad (alucinación, coherencia, PII, tono, etc.).",
+    )
+    cambios_requeridos: list[str] = Field(
+        default_factory=list,
+        description="Ajustes concretos si veredicto=con_cambios.",
+    )
+    riesgos: list[str] = Field(default_factory=list, description="Riesgos jurídicos/operativos.")
+    resumen: str = Field(
+        default="",
+        description="Resumen ejecutivo del dictamen para el gerente/abogado.",
+    )
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("veredicto")
+    @classmethod
+    def _validar_veredicto(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+    @property
+    def bloquea_entrega(self) -> bool:
+        return self.veredicto in ("rechazado", "escalar")

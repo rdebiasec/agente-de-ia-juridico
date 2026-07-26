@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 96d9ff44af136889 -->
 ---
 name: generar-preguntas-tipicidad
 description: Skill operativo penal-victimas: crear preguntas para completar elementos del tipo penal. Use when the workflow requires `generar_preguntas_tipicidad`.
@@ -42,7 +41,15 @@ Formular preguntas para completar elementos del tipo penal, sin presuponer culpa
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- Sin herramientas obligatorias
+Skills = contratos (no function_tools invocables). No existe tool LLM `generar_preguntas_tipicidad`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
 ## Guardrails (g1–g10)
 - **g1:** No asumir que el tipo penal está configurado.

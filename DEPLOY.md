@@ -356,6 +356,16 @@ python scripts/sync_config_files.py --apply --author tu@correo     # archivo →
 python scripts/sync_config_files.py --export                       # DB → archivo (tras editar en el portal)
 ```
 
+**Local — automático al guardar.** `./scripts/start-local.sh` arranca por defecto un watcher
+(`scripts/watch_config_sync.py`) que, al guardar un prompt/guardrail/skill, crea una nueva
+versión en Postgres (misma fila de historial que el portal). Autor: `CONFIG_SYNC_AUTHOR` o
+`local.dev@localhost`. Desactivar: `CONFIG_FILE_SYNC_WATCH=0`.
+
+```bash
+# Solo el watcher (si el server ya corre):
+.venv/bin/python scripts/watch_config_sync.py --author tu@correo.com
+```
+
 Cada archivo lleva `<!-- config-version: N; checksum: X -->`. Esa marca distingue quién cambió último:
 
 | Estado | Significado | Resuelve |

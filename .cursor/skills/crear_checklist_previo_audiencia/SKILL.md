@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 369479ba0233a509 -->
 ---
 name: crear-checklist-previo-audiencia
 description: Skill atomico penal-victimas: listar requisitos antes de audiencia. Use when the workflow requires `crear_checklist_previo_audiencia`.
@@ -42,8 +41,19 @@ Verificar completitud del paquete de audiencia.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `hearing_template_loader`
-- `calendar_event_reader`
+Skills = contratos (no function_tools invocables). No existe tool LLM `crear_checklist_previo_audiencia`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `hearing_template_loader` — no implementada
+- `calendar_event_reader` — no implementada
 
 ## Guardrails (g1–g10)
 - **g4:** HITL antes de audiencia.

@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: d3ca5fec1f3fc0ff -->
 ---
 name: crear-resumen-ejecutivo-litigante
 description: Skill atomico penal-victimas: crear resumen de una pagina para el abogado que interviene. Use when the workflow requires `crear_resumen_ejecutivo_litigante`.
@@ -34,8 +33,19 @@ Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no 
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `case_state_reader`
-- `rag_expediente_search`
+Skills = contratos (no function_tools invocables). No existe tool LLM `crear_resumen_ejecutivo_litigante`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `case_state_reader` — no implementada
+- `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g4:** HITL obligatorio; uso interno del abogado — no envío a cliente ni terceros.

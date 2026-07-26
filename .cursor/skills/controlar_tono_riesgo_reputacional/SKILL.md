@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 2a5b5a99514a8a67 -->
 ---
 name: controlar-tono-riesgo-reputacional
 description: Skill atomico penal-victimas: revisar tono profesional y evitar lenguaje riesgoso. Use when the workflow requires `controlar_tono_riesgo_reputacional`.
@@ -41,7 +40,15 @@ Control en comunicaciones sensibles.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- Sin herramientas obligatorias
+Skills = contratos (no function_tools invocables). No existe tool LLM `controlar_tono_riesgo_reputacional`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
 ## Guardrails (g1–g10)
 - **g6:** No amplificar datos sensibles en comunicaciones.

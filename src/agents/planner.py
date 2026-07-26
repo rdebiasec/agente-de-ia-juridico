@@ -135,13 +135,20 @@ def create_execution_plan(
     triage_snapshot = triage.model_dump()
     completeness_ok = triage.puede_continuar
     from src.agents.completeness import assess_completeness
+    from src.agents.urgency import assess_urgency
 
     completeness = assess_completeness(
         message,
         destination=destination,
         expediente=expediente,
     )
-    persist_verification(expediente, completeness, destination=destination)
+    urgency = assess_urgency(message, expediente)
+    persist_verification(
+        expediente,
+        completeness,
+        destination=destination,
+        urgency=urgency.model_dump(),
+    )
 
     pattern_reused = False
     template_kind = classify_plan_template(message)
