@@ -137,7 +137,9 @@ Evidencia: las escrituras del smoke HTTP aterrizaron en `agente-db`, y el sync d
 
 **Resuelto para el contenido:** el prompt y los tres guardrails del Gerente se publicaron en la base viva por la vía auditada del portal (`POST /api/audit/config/save`), quedando en `v2`, versionados y reversibles. Script reutilizable: `scripts/publicar_config_gerente.py`. Quedaron registrados a nombre de la cuenta de smoke, no de la abogada; conviene republicar con autoría real si esa traza importa.
 
-**Sin resolver, porque es una decisión del dueño:** cuál de las dos bases es la autoritativa. Mientras sigan desalineadas, cada publicación por CI se va a la base equivocada. Además `agente-db`, que es la que hoy tiene los datos del caso, **expira el 2026-08-16** por ser plan gratuito.
+El contenido quedó idéntico en ambas bases y los checksums de los headers coinciden con la base viva. Lo que no puede coincidir es la numeración: los headers solo pueden seguir el historial de una base, y hoy siguen la del CI. Por eso los guardrails quedaron como `v1` en el header y `v2` en la base viva.
+
+**Sin resolver, porque es una decisión del dueño:** cuál de las dos bases es la autoritativa. Mientras sigan desalineadas, cada publicación por CI se va a la base equivocada y hay que publicar a mano con el script. Además `agente-db`, que es la que hoy tiene los datos del caso, **expira el 2026-08-16** por ser plan gratuito.
 
 ## 6. Pendiente humano
 
