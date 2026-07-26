@@ -2858,6 +2858,7 @@
     function renderList() {
         const list = $('cfg-item-list');
         const count = $('cfg-list-count');
+        const header = $('cfg-list-header');
         if (!list) return;
 
         const items = agentListItems();
@@ -2873,10 +2874,11 @@
 
         if (count) count.textContent = `${items.length} ${label}`;
         list.innerHTML = '';
-        if (!items.length) {
-            list.innerHTML = '<p class="text-sm text-slate-500 px-2 py-4 uppercase tracking-wide">Sin resultados.</p>';
-            return;
-        }
+        // Con la lista vacía y sin búsqueda activa el panel queda solo fondo;
+        // si hay búsqueda se conserva el campo para poder borrarla.
+        const hasQuery = Boolean(String($('cfg-search')?.value || '').trim());
+        if (header) header.classList.toggle('hidden', !items.length && !hasQuery);
+        if (!items.length) return;
 
         for (const it of items) {
             const btn = document.createElement('button');

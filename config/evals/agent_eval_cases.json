@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -91,6 +91,27 @@
       "expected_can_continue": true
     },
     {
+      "id": "urgency-alta-audiencia",
+      "category": "urgency",
+      "message": "Es urgente: la audiencia es mañana y hay vencimiento del término.",
+      "expected_nivel_urgencia": "alta",
+      "expected_escalar_humano": true
+    },
+    {
+      "id": "urgency-critica-integridad",
+      "category": "urgency",
+      "message": "Hay amenaza de muerte contra la víctima y destrucción inminente de evidencia.",
+      "expected_nivel_urgencia": "critica",
+      "expected_escalar_humano": true
+    },
+    {
+      "id": "urgency-baja-perfil",
+      "category": "urgency",
+      "message": "¿Quién eres y cuál es tu experiencia?",
+      "expected_nivel_urgencia": "baja",
+      "expected_escalar_humano": false
+    },
+    {
       "id": "groundedness-unsupported-citation",
       "category": "groundedness",
       "output": "La Sentencia C-999 de 2099 y el artículo 999 obligan a conceder la solicitud.",
@@ -137,6 +158,82 @@
     {
       "id": "chat-without-high-risk-tools",
       "category": "high_risk_boundary"
+    },
+    {
+      "id": "tool-surface-cronologia",
+      "category": "tool_surface",
+      "message": "Ordene la cronología de los hechos y detecte contradicciones del relato.",
+      "expected_enabled_contains": [
+        "analista_cronologia_hechos_penales",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "preparador_estrategico_audiencias_penales"
+      ],
+      "include_kb_search_tool": false
+    },
+    {
+      "id": "tool-surface-evidencia",
+      "category": "tool_surface",
+      "message": "Construya el inventario de evidencia y señale brechas probatorias.",
+      "expected_enabled_contains": [
+        "gestor_evidencia_y_soporte_probatorio"
+      ],
+      "expected_enabled_excludes": [
+        "preparador_estrategico_audiencias_penales"
+      ],
+      "include_kb_search_tool": false
+    },
+    {
+      "id": "instruction-budget-gerente",
+      "category": "instruction_budget",
+      "agent_id": "coordinador_expediente_penal",
+      "max_chars": 12000
+    },
+    {
+      "id": "instruction-budget-cronologia",
+      "category": "instruction_budget",
+      "agent_id": "analista_cronologia_hechos_penales",
+      "max_chars": 12000
+    },
+    {
+      "id": "instruction-budget-calidad",
+      "category": "instruction_budget",
+      "agent_id": "analista_calidad_juridica",
+      "max_chars": 12000
+    },
+    {
+      "id": "tool-surface-tipicidad",
+      "category": "tool_surface",
+      "message": "Analice preliminarmente tipicidad, dolo y autoría en el caso penal.",
+      "expected_enabled_contains": [
+        "analista_tipicidad_y_responsabilidad_penal",
+        "gestor_evidencia_y_soporte_probatorio",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "preparador_estrategico_audiencias_penales"
+      ],
+      "include_kb_search_tool": false
+    },
+    {
+      "id": "route-calidad-via-plan",
+      "category": "routing",
+      "message": "Necesito control de calidad jurídica del borrador del memorial antes de entregarlo.",
+      "expected_destination": "analista_calidad_juridica",
+      "expected_plan_required": false
+    },
+    {
+      "id": "quality-gate-contract",
+      "category": "quality_gate",
+      "veredicto": "rechazado",
+      "expected_blocks": true
+    },
+    {
+      "id": "quality-gate-aprobable",
+      "category": "quality_gate",
+      "veredicto": "aprobable",
+      "expected_blocks": false
     }
   ]
 }

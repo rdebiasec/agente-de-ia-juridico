@@ -13,10 +13,14 @@ def test_eval_suite_has_full_score():
         "groundedness",
         "high_risk_boundary",
         "context_security",
+        "instruction_budget",
         "pii",
         "pii_policy",
+        "quality_gate",
         "routing",
         "scope",
+        "tool_surface",
+        "urgency",
     }
 
 

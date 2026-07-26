@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 50442cc8e673f12a -->
 ---
 name: detectar-inactividad-procesal
 description: Skill operativo penal-victimas: alertar falta de movimientos por periodo relevante. Use when the workflow requires `detectar_inactividad_procesal`.
@@ -44,8 +43,19 @@ Alerta operativa periódica sobre radicado.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `process_lookup_query`
-- `case_state_reader`
+Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_inactividad_procesal`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `process_lookup_query` — no implementada
+- `case_state_reader` — no implementada
 
 ## Guardrails (g1–g10)
 - **g1:** Última actuación con fuente y timestamp de consulta.

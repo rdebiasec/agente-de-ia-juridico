@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Asistente jurídico multi-agente — firma virtual web-only"
 requires-python = ">=3.11"
 dependencies = [
-    "openai-agents>=0.0.14",
+    "openai-agents>=0.16,<0.18",
     "openai>=1.68.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",

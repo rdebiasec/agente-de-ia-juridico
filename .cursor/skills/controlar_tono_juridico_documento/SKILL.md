@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: b5708ccb4b785be1 -->
 ---
 name: controlar-tono-juridico-documento
 description: Skill atomico penal-victimas: asegurar tono formal, preciso, no agresivo y no especulativo. Use when the workflow requires `controlar_tono_juridico_documento`.
@@ -41,7 +40,15 @@ Control final de estilo en salidas externas.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- Sin herramientas obligatorias
+Skills = contratos (no function_tools invocables). No existe tool LLM `controlar_tono_juridico_documento`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
 ## Guardrails (g1–g10)
 - **g5:** Tono respetuoso con la víctima y las autoridades.

@@ -41,9 +41,20 @@ Producto central del agente. Ejecutar tras `extraer_hechos_relevantes` y `crear_
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `date_extractor`
-- `entity_extractor`
-- `case_state_writer`
+Skills = contratos (no function_tools invocables). No existe tool LLM `construir_cronologia_penal`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `date_extractor` — no implementada
+- `entity_extractor` — no implementada
+- `case_state_writer` — no implementada
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar fechas, horas ni eventos para completar la línea de tiempo.

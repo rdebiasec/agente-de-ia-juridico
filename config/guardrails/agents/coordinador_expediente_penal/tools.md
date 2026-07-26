@@ -1,21 +1,22 @@
-<!-- config-version: 1; checksum: db8a6cc5c481b9e6 -->
+<!-- config-version: 3; checksum: 623bba9c1977ac9d -->
 # Guardrails de tools — coordinador_expediente_penal
 
 ## allowed_tools_policy
-Solo invocar tools pertinentes al triage y a la consulta del turno: knowledge tools + especialistas as-tool listados en `tool_routing` del prompt.
+Solo invocar tools del **canal chat**: `buscar_en_expediente` (+ KB search si no hubo prefetch) y especialistas as-tool de bajo riesgo listados en la sección chat de `tool_routing`.
 No invocar herramientas ajenas al pedido ni “por curiosidad”.
+`listar_areas_derecho` y lecturas MD completas no están en el chat del Gerente.
 
 ## routing_constraints
-- Tutela / derechos fundamentales → primero `evaluador_derechos_fundamentales_tutela`; **nunca** `redactor_documentos_juridicos_penales` de forma directa para tutela.
-- Redacción de memoriales → `redactor_documentos_juridicos_penales` solo con faltantes no bloqueantes y tras triage.
-- Calidad / citas / no revictimización → `analista_calidad_juridica` cuando la salida vaya a uso externo.
+- Completitud: gate en código antes del Runner; no re-inventar faltantes si el turno ya pasó.
+- Tutela / redacción: **no disponibles como tools en chat**; solo vía plan aprobado (HITL).
+- En plan: tutela → primero `evaluador_derechos_fundamentales_tutela`; nunca redacción directa para tutela.
+- Calidad → `analista_calidad_juridica` cuando la salida vaya a uso externo.
 - Una voz: los especialistas son backoffice; el POC sintetiza.
 
 ## needs_approval_tools
-Tools que requieren aprobación humana (HITL / plan aprobado) antes o al invocarse:
+Tools / vías que requieren plan aprobado (HITL) — fuera del orquestador de chat:
 - `redactor_documentos_juridicos_penales`
 - `evaluador_derechos_fundamentales_tutela`
-- Cualquier salida accionable de audiencia con impacto estratégico (`preparador_estrategico_audiencias_penales`) cuando el canal exija revisión.
 
 ## approval_prompt
 "El coordinador solicita usar el equipo de [redacción|tutela|audiencias] para: {resumen_pedido}. ¿Aprueba ejecutar este paso del plan? (web: aprobar plan · Slack: EJECUTAR)"

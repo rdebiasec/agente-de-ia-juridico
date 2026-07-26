@@ -1,6 +1,15 @@
-"""Herramientas de lectura de la base de conocimiento (grounding stateless)."""
+"""Herramientas de lectura de la base de conocimiento (grounding stateless).
 
-from pathlib import Path
+Política de exposición (Ola 0–2):
+- Chat del Gerente (slim): solo `buscar_en_expediente` (+ KB search si no hay prefetch).
+  Sin dumps MD ni `listar_areas_derecho`.
+- Plan / especialistas: pueden usar `include_full_reads=True` y/o `include_list_areas=True`
+  cuando el paso necesita playbook/área/normas o catálogo; no vuelca dumps al chat del POC.
+"""
+
+from __future__ import annotations
+
+from typing import Literal
 
 from agents import function_tool
 
@@ -14,6 +23,9 @@ AREA_FILES = {
 PLAYBOOK_FILES = {
     "penal": "proceso-penal-906.md",
 }
+
+AreaDerecho = Literal["penal", "normas"]
+MateriaPlaybook = Literal["penal"]
 
 
 def _read_kb_file(name: str) -> str:
@@ -40,18 +52,31 @@ def listar_areas_derecho() -> str:
 
 
 @function_tool
-def leer_area_derecho(area: str) -> str:
-    """Lee el contenido habilitado: penal o normas."""
-    key = area.strip().lower().replace(" ", "_")
+def leer_area_derecho(
+    area: AreaDerecho,
+) -> str:
+    """Lee el MD de área habilitada.
+
+    Args:
+        area: Área de conocimiento. Valores: `penal` (marco penal-víctimas) o
+            `normas` (normas penales clave).
+    """
+    key = str(area).strip().lower().replace(" ", "_")
     if key not in AREA_FILES:
         return f"Área no reconocida: {area}. Áreas habilitadas: penal, normas."
     return _read_kb_file(AREA_FILES[key])
 
 
 @function_tool
-def leer_playbook_proceso(materia: str) -> str:
-    """Lee el playbook procesal habilitado para penal (Ley 906)."""
-    key = materia.strip().lower()
+def leer_playbook_proceso(
+    materia: MateriaPlaybook,
+) -> str:
+    """Lee el playbook procesal habilitado.
+
+    Args:
+        materia: Materia del playbook. Valor habilitado: `penal` (Ley 906 de 2004).
+    """
+    key = str(materia).strip().lower()
     if key not in PLAYBOOK_FILES:
         return "Playbook no disponible. Materia habilitada: penal."
     return _read_kb_file(PLAYBOOK_FILES[key])
@@ -86,11 +111,11 @@ def buscar_en_conocimiento(consulta: str) -> str:
 
 
 @function_tool
-def buscar_en_expediente(consulta: str, expediente_id: str = "") -> str:
-    """Busca por similitud (RAG) en los documentos del expediente de la sesión.
+def buscar_en_expediente(consulta: str) -> str:
+    """Busca por similitud (RAG) en los documentos del expediente de la sesión activa.
 
-    El ID solicitado por el modelo se valida contra la sesión activa; no se
-    permite lectura cruzada de otros casos.
+    No pide ID de expediente: el runtime enlaza solo el caso de la sesión en curso
+    (sin lectura cruzada de otros casos).
     """
     from src.agents.session_context import resolve_expediente_id
     from src.services.rag import (
@@ -99,11 +124,11 @@ def buscar_en_expediente(consulta: str, expediente_id: str = "") -> str:
         last_embed_used_local_fallback,
     )
 
-    bound_id = resolve_expediente_id(expediente_id)
+    bound_id = resolve_expediente_id("")
     if not bound_id:
         return (
-            "Búsqueda de expediente denegada: no hay sesión activa o el "
-            "identificador no corresponde al caso en curso."
+            "Búsqueda de expediente denegada: no hay sesión activa vinculada "
+            "al caso en curso."
         )
     chunks = buscar(consulta, expediente_id=bound_id, incluir_kb=False, k=5)
     if last_embed_used_local_fallback():
@@ -114,13 +139,42 @@ def buscar_en_expediente(consulta: str, expediente_id: str = "") -> str:
     return contexto_para_prompt(chunks)
 
 
-def get_knowledge_tools():
-    """Tools de grounding compartidas por los agentes."""
-    return [
-        listar_areas_derecho,
-        leer_area_derecho,
-        leer_playbook_proceso,
-        leer_normas_clave,
-        buscar_en_conocimiento,
-        buscar_en_expediente,
-    ]
+def get_knowledge_tools(
+    *,
+    include_kb_search: bool = True,
+    include_full_reads: bool = True,
+    include_list_areas: bool = False,
+):
+    """Tools de grounding compartidas por los agentes.
+
+    include_kb_search: RAG sobre la KB (omitir en chat del gerente si ya hay prefetch).
+    include_full_reads: lecturas de archivos completos (plan/especialistas; no chat slim).
+    include_list_areas: catálogo estático de áreas (off en chat Gerente; on en plan/specs).
+    """
+    tools = [buscar_en_expediente]
+    if include_list_areas:
+        tools.insert(0, listar_areas_derecho)
+    if include_kb_search:
+        tools.append(buscar_en_conocimiento)
+    if include_full_reads:
+        tools.extend(
+            [
+                leer_area_derecho,
+                leer_playbook_proceso,
+                leer_normas_clave,
+            ]
+        )
+    return tools
+
+
+# Allowlist para CI / registry honesty (function_tools reales).
+REAL_FUNCTION_TOOL_NAMES = frozenset(
+    {
+        "listar_areas_derecho",
+        "leer_area_derecho",
+        "leer_playbook_proceso",
+        "leer_normas_clave",
+        "buscar_en_conocimiento",
+        "buscar_en_expediente",
+    }
+)

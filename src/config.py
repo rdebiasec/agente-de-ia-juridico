@@ -54,9 +54,16 @@ class Settings(BaseSettings):
     # Default más corto para equipos compartidos; Render puede sobreescribir.
     session_idle_minutes: int = 60
     session_max_messages: int = 120
-    agent_max_turns: int = 25
+    # Ventana reciente enviada al Runner; el resto se compacta a un resumen extractivo.
+    session_recent_messages: int = 16
+    # Chat del gerente: clasificar → 0–1 KB → 1 especialista → sintetizar.
+    agent_max_turns: int = 10
     # Tope de turnos por paso de plan (Watchdog Timeout / control de costo).
     agent_max_turns_plan_step: int = 6
+    # Tope de turnos del agente anidado (as_tool) invocado por el gerente.
+    agent_nested_max_turns: int = 3
+    # Tope de caracteres del resumen de turnos antiguos en sesión.
+    session_summary_max_chars: int = 1200
     agent_run_timeout_seconds: float = 90.0
     agent_plan_step_timeout_seconds: float = 75.0
     agent_max_retries: int = 1

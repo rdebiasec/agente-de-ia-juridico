@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import re
-from dataclasses import dataclass
 import hashlib
+import re
 import time
+from dataclasses import dataclass, field
+from typing import Literal
 
 from src.storage.models import Expediente
 
@@ -43,15 +44,55 @@ _OPERATIONAL_RE = re.compile(
     re.I,
 )
 
+FaltantePrioridad = Literal["bloqueante", "deseable"]
+PendienteTipo = Literal["hecho", "cita", "radicado", "fecha", "otro"]
+PendienteImpacto = Literal["alto", "medio", "bajo"]
+
+# Checklist documental real del gate (labels canónicos → motivo).
+_CHECKLIST_MOTIVOS: dict[str, str] = {
+    "hechos mínimos del caso": "Sin hechos mínimos no se puede analizar ni redactar con soporte.",
+    "número de radicado": "Alto riesgo: memorial/tutela/seguimiento requieren radicado verificable.",
+    "poder o calidad en que actúa el despacho": (
+        "Alto riesgo: falta acreditar poder o rol del despacho."
+    ),
+    "última actuación procesal": "Necesaria para ubicar oportunidad y no actuar a ciegas.",
+    "partes relevantes": "Identificar víctima/procesado/accionado evita piezas incompletas.",
+    "etapa o última actuación procesal": (
+        "Ruta 906 / audiencia / seguimiento requieren etapa o última actuación."
+    ),
+}
+
+
+@dataclass(frozen=True)
+class FaltanteItem:
+    elemento: str
+    prioridad: FaltantePrioridad = "bloqueante"
+    motivo: str = ""
+    responsable_sugerido: str = "abogado_titular"
+
 
 @dataclass(frozen=True)
 class CompletenessResult:
     puede_continuar: bool
-    faltantes: list[str]
-    hechos_minimos: bool
-    poder_acreditado: bool
-    ultima_actuacion: bool
-    etapa_aparente: str
+    faltantes_detalle: list[FaltanteItem] = field(default_factory=list)
+    hechos_minimos: bool = False
+    poder_acreditado: bool = False
+    ultima_actuacion: bool = False
+    etapa_aparente: str = "desconocida"
+
+    @property
+    def faltantes(self) -> list[str]:
+        """Compat: labels string para ledger / mensajes / TriageResult."""
+        return [item.elemento for item in self.faltantes_detalle]
+
+
+def _faltante(elemento: str, *, prioridad: FaltantePrioridad = "bloqueante") -> FaltanteItem:
+    return FaltanteItem(
+        elemento=elemento,
+        prioridad=prioridad,
+        motivo=_CHECKLIST_MOTIVOS.get(elemento, "Dato requerido por el gate de completitud."),
+        responsable_sugerido="abogado_titular",
+    )
 
 
 def infer_stage(text: str, expediente: Expediente | None = None) -> str:
@@ -82,7 +123,7 @@ def assess_completeness(
     if destination == POC_AGENT_ID or not _OPERATIONAL_RE.search(combined):
         return CompletenessResult(
             puede_continuar=True,
-            faltantes=[],
+            faltantes_detalle=[],
             hechos_minimos=bool(exp.hechos_minimos_confirmados),
             poder_acreditado=bool(exp.poder_acreditado),
             ultima_actuacion=bool(exp.ultima_actuacion_confirmada),
@@ -119,10 +160,10 @@ def assess_completeness(
             ]
         )
 
-    faltantes = [label for label, present in required if not present]
+    detalle = [_faltante(label) for label, present in required if not present]
     return CompletenessResult(
-        puede_continuar=not faltantes,
-        faltantes=faltantes,
+        puede_continuar=not detalle,
+        faltantes_detalle=detalle,
         hechos_minimos=facts,
         poder_acreditado=power,
         ultima_actuacion=last_action,
@@ -144,6 +185,7 @@ def persist_verification(
     result: CompletenessResult,
     *,
     destination: str,
+    urgency: dict | None = None,
 ) -> Expediente:
     """Actualiza ledger y métricas; las tareas se cierran cuando llega el dato."""
     now = int(time.time())
@@ -161,7 +203,8 @@ def persist_verification(
         for title, old in previous.items():
             if title not in result.faltantes:
                 tasks.append({**old, "estado": "cerrada", "cerrada_en": now})
-        for title in result.faltantes:
+        for item in result.faltantes_detalle:
+            title = item.elemento
             old = previous.get(title, {})
             tasks.append(
                 {
@@ -169,8 +212,10 @@ def persist_verification(
                     or f"faltante-{hashlib.sha256(title.encode()).hexdigest()[:10]}",
                     "tipo": "faltante",
                     "titulo": title,
-                    "responsable": "abogado_titular",
+                    "responsable": item.responsable_sugerido,
                     "estado": "pendiente",
+                    "prioridad": item.prioridad,
+                    "motivo": item.motivo,
                     "creada_en": old.get("creada_en") or now,
                 }
             )
@@ -184,6 +229,8 @@ def persist_verification(
         metrics[metric] = int(metrics.get(metric, 0)) + 1
         metrics["ultimo_destino_evaluado"] = destination
         metrics["ultima_verificacion_en"] = now
+        if urgency:
+            metrics["ultima_urgencia"] = urgency
         current.faltantes_gerencia = list(result.faltantes)
         current.tareas_gerencia = tasks
         current.metricas_gerencia = metrics
@@ -199,6 +246,19 @@ def persist_verification(
     return get_repository().mutate_expediente(expediente.session_id, _apply)
 
 
+def _classify_pending(text: str) -> tuple[PendienteTipo, PendienteImpacto]:
+    lower = text.lower()
+    if re.search(r"\b(radicado|n[uú]mero\s+de\s+proceso)\b", lower):
+        return "radicado", "alto"
+    if re.search(r"\b(art[ií]culo|ley|sentencia|jurisprudencia|norma)\b", lower):
+        return "cita", "alto"
+    if re.search(r"\b(fecha|audiencia|vencimiento|t[eé]rmino|plazo)\b", lower):
+        return "fecha", "alto"
+    if re.search(r"\b(hecho|relato|ocurri|denunci)\b", lower):
+        return "hecho", "medio"
+    return "otro", "medio"
+
+
 def record_specialist_result(
     session_id: str,
     *,
@@ -210,12 +270,19 @@ def record_specialist_result(
     from src.storage import get_repository
 
     repo = get_repository()
-    pending: list[str] = []
+    pending: list[dict] = []
     for line in (text or "").splitlines():
         if re.search(r"\[(?:PENDIENTE(?:\s+DE\s+VERIFICAR)?|FALTANTE)\]", line, re.I):
             cleaned = re.sub(r"\[[^\]]+\]\s*:?\s*", "", line).strip(" -*")
             if cleaned:
-                pending.append(cleaned[:240])
+                tipo, impacto = _classify_pending(cleaned)
+                pending.append(
+                    {
+                        "elemento": cleaned[:240],
+                        "tipo": tipo,
+                        "impacto_juridico": impacto,
+                    }
+                )
 
     now = int(time.time())
 
@@ -231,7 +298,8 @@ def record_specialist_result(
         existing = {
             str(task.get("titulo")): task for task in expediente.tareas_gerencia
         }
-        for title in pending:
+        for item in pending:
+            title = item["elemento"]
             existing[title] = {
                 **existing.get(title, {}),
                 "id": existing.get(title, {}).get("id")
@@ -241,6 +309,8 @@ def record_specialist_result(
                 "responsable": "abogado_titular",
                 "origen": agent_id,
                 "estado": "pendiente",
+                "pendiente_tipo": item["tipo"],
+                "impacto_juridico": item["impacto_juridico"],
                 "creada_en": existing.get(title, {}).get("creada_en") or now,
             }
         expediente.tareas_gerencia = list(existing.values())
@@ -249,7 +319,7 @@ def record_specialist_result(
 
     repo.mutate_expediente(session_id, _apply)
     return {
-        "faltantes_detectados": pending,
+        "faltantes_detectados": [p["elemento"] for p in pending],
+        "pendientes_detalle": pending,
         "responsable_verificacion": "abogado_titular" if pending else None,
     }
-

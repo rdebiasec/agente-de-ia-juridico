@@ -19,6 +19,7 @@ from src.agents.triage import (
     is_non_penal_scope_request,
     requires_execution_plan,
 )
+from src.agents.urgency import assess_urgency
 from src.config import get_settings
 from src.config_store.service import checksum_content
 from src.storage.models import Expediente
@@ -172,6 +173,34 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
             "Gate determinista de completitud",
         )
 
+    if category == "urgency":
+        expediente = _expediente(case.get("expediente"))
+        urgency = assess_urgency(str(case["message"]), expediente)
+        triage = build_triage(str(case["message"]), expediente=expediente)
+        expected_nivel = str(case["expected_nivel_urgencia"])
+        expected_escalar = bool(case["expected_escalar_humano"])
+        passed = (
+            urgency.nivel_urgencia == expected_nivel
+            and urgency.escalar_humano == expected_escalar
+            and triage.urgencia_preliminar == (expected_nivel in {"critica", "alta"})
+            and triage.nivel_urgencia == expected_nivel
+        )
+        return EvalAssertion(
+            case_id,
+            category,
+            passed,
+            {
+                "nivel_urgencia": expected_nivel,
+                "escalar_humano": expected_escalar,
+            },
+            {
+                "nivel_urgencia": urgency.nivel_urgencia,
+                "escalar_humano": urgency.escalar_humano,
+                "urgencia_preliminar": triage.urgencia_preliminar,
+            },
+            "Urgencia determinista (4 niveles)",
+        )
+
     if category == "groundedness":
         actual = citation_hints_without_pending(str(case["output"]))
         expected = bool(case["expected_pending_required"])
@@ -245,6 +274,7 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
         chat = build_orchestrator(
             require_tool_approval=True,
             include_high_risk_tools=False,
+            use_cache=False,
         )
         tool_names = {
             getattr(tool, "name", "")
@@ -258,6 +288,135 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
             [],
             exposed,
             "El chat no expone tools de redacción/tutela",
+        )
+
+    if category == "tool_surface":
+        from src.agents.orchestrator import (
+            SPECIALIST_AGENT_IDS,
+            build_orchestrator,
+            enabled_specialists_for_focus,
+        )
+
+        message = str(case.get("message") or "")
+        focus = str(case.get("focus_agent_id") or infer_destination_agent(message))
+        chat_pool = SPECIALIST_AGENT_IDS - {
+            "redactor_documentos_juridicos_penales",
+            "evaluador_derechos_fundamentales_tutela",
+        }
+        enabled = enabled_specialists_for_focus(focus, chat_pool)
+        include_kb = bool(case.get("include_kb_search_tool", False))
+        orch = build_orchestrator(
+            require_tool_approval=True,
+            include_high_risk_tools=False,
+            focus_agent_id=focus,
+            include_kb_search_tool=include_kb,
+            include_full_read_tools=False,
+            use_cache=False,
+        )
+        by_name = {getattr(t, "name", None): t for t in (orch.tools or [])}
+        enabled_runtime = {
+            name
+            for name, tool in by_name.items()
+            if name in SPECIALIST_AGENT_IDS and getattr(tool, "is_enabled", True)
+        }
+        contains = set(case.get("expected_enabled_contains") or [])
+        excludes = set(case.get("expected_enabled_excludes") or [])
+        kb_ok = ("buscar_en_conocimiento" in by_name) is include_kb
+        nested_ok = all(
+            getattr(tool, "nested_max_turns", 99) <= 5
+            for name, tool in by_name.items()
+            if name in SPECIALIST_AGENT_IDS
+        )
+        structured_ok = all(
+            getattr(tool, "params_json_schema", {})
+            and "pedido" in str(getattr(tool, "params_json_schema", {}))
+            for name, tool in by_name.items()
+            if name in enabled_runtime
+        )
+        passed = (
+            contains.issubset(enabled)
+            and contains.issubset(enabled_runtime)
+            and not (excludes & enabled_runtime)
+            and kb_ok
+            and nested_ok
+            and structured_ok
+        )
+        actual = {
+            "focus": focus,
+            "enabled": sorted(enabled_runtime),
+            "kb_search": "buscar_en_conocimiento" in by_name,
+            "nested_ok": nested_ok,
+            "structured_ok": structured_ok,
+        }
+        return EvalAssertion(
+            case_id,
+            category,
+            passed,
+            {
+                "contains": sorted(contains),
+                "excludes": sorted(excludes),
+                "kb_search": include_kb,
+            },
+            actual,
+            "Superficie de tools del Gerente (is_enabled, nested, schema)",
+        )
+
+    if category == "instruction_budget":
+        from src.agents.agent_cache import clear_agent_cache
+        from src.agents.orchestrator import build_orchestrator, get_agent_by_id
+
+        clear_agent_cache()
+        max_chars = int(case.get("max_chars") or 12000)
+        agent_id = str(case.get("agent_id") or "coordinador_expediente_penal")
+        if agent_id == "coordinador_expediente_penal":
+            agent = build_orchestrator(
+                include_high_risk_tools=False,
+                use_cache=False,
+                slim_instructions=True,
+            )
+        else:
+            agent = get_agent_by_id(agent_id)
+        chars = len(getattr(agent, "instructions", "") or "")
+        return EvalAssertion(
+            case_id,
+            category,
+            chars <= max_chars,
+            {"max_chars": max_chars},
+            {"chars": chars},
+            "Presupuesto de instrucciones slim",
+        )
+
+    if category == "quality_gate":
+        from types import SimpleNamespace
+
+        from src.agents.execution_schemas import PlanStep
+        from src.agents.plan_executor import _quality_gate_blocks
+        from src.agents.schemas import DictamenCalidad
+
+        veredicto = str(case.get("veredicto") or "rechazado")
+        expected_blocks = bool(case.get("expected_blocks"))
+        step = PlanStep(
+            step_id="s99",
+            order=99,
+            agent_id="analista_calidad_juridica",
+            title="Control de calidad",
+            user_summary="dictamen",
+        )
+        result = SimpleNamespace(
+            final_output=DictamenCalidad(
+                veredicto=veredicto,  # type: ignore[arg-type]
+                resumen="eval",
+                hallazgos=["caso eval"],
+            )
+        )
+        blocked, _msg = _quality_gate_blocks(result, step)
+        return EvalAssertion(
+            case_id,
+            category,
+            blocked is expected_blocks,
+            {"blocks": expected_blocks, "veredicto": veredicto},
+            {"blocked": blocked},
+            "Gate duro DictamenCalidad en plan",
         )
 
     return EvalAssertion(

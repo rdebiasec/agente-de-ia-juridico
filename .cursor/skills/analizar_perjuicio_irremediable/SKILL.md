@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: c6980bcd38aee2a5 -->
 ---
 name: analizar-perjuicio-irremediable
 description: Skill estrategico penal-victimas: identificar urgencia constitucional. Use when the workflow requires `analizar_perjuicio_irremediable`.
@@ -42,8 +41,19 @@ Insumo para `evaluar_procedencia_tutela` (requisito de inmediatez); no dictamina
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_corte_constitucional_search`
-- `rag_expediente_search`
+Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_perjuicio_irremediable`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `rag_corte_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar perjuicios ni estados de salud/riesgo.

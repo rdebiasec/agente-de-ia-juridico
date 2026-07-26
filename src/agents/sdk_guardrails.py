@@ -202,22 +202,36 @@ async def poc_output_guardrail(
     )
 
 
+def _structured_text(output: Any) -> str:
+    if output is None:
+        return ""
+    if isinstance(output, str):
+        return output.strip()
+    if hasattr(output, "model_dump"):
+        data = output.model_dump()
+        for key in (
+            "cuerpo",
+            "fundamentos",
+            "resumen",
+            "hipotesis_tipica",
+            "titulo",
+            "veredicto",
+        ):
+            val = data.get(key)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+        return str(data).strip()
+    return str(output).strip()
+
+
 @output_guardrail(name="specialist_output_guardrail")
 async def specialist_output_guardrail(
     ctx: RunContextWrapper[Any],
     agent: Any,
     output: Any,
 ) -> GuardrailFunctionOutput:
-    """Output guardrail para especialistas de alto riesgo (redactor/tutela)."""
-    if output is None:
-        text = ""
-    elif isinstance(output, str):
-        text = output.strip()
-    elif hasattr(output, "model_dump"):
-        data = output.model_dump()
-        text = str(data.get("cuerpo") or data.get("fundamentos") or data).strip()
-    else:
-        text = str(output).strip()
+    """Output guardrail genérico de especialistas (vacío + PII flags)."""
+    text = _structured_text(output)
     flags = pii_flags(text) if text else []
     empty = not text
     trip = empty
@@ -230,6 +244,79 @@ async def specialist_output_guardrail(
             ),
             "chars": len(text),
             "pii_flags": flags,
+            "agent": getattr(agent, "name", None),
+        },
+        tripwire_triggered=trip,
+    )
+
+
+@output_guardrail(name="redactor_output_guardrail")
+async def redactor_output_guardrail(
+    ctx: RunContextWrapper[Any],
+    agent: Any,
+    output: Any,
+) -> GuardrailFunctionOutput:
+    """Redactor: exige cuerpo no vacío; marca citas sin pendiente."""
+    text = _structured_text(output)
+    empty = not text
+    missing_pending = (not empty) and citation_hints_without_pending(text)
+    trip = empty
+    return GuardrailFunctionOutput(
+        output_info={
+            "reason": "salida_vacia" if empty else ("citas_sin_pendiente" if missing_pending else "ok"),
+            "chars": len(text),
+            "pii_flags": pii_flags(text) if text else [],
+            "citation_without_pending": missing_pending,
+            "agent": getattr(agent, "name", None),
+        },
+        tripwire_triggered=trip,
+    )
+
+
+@output_guardrail(name="tutela_output_guardrail")
+async def tutela_output_guardrail(
+    ctx: RunContextWrapper[Any],
+    agent: Any,
+    output: Any,
+) -> GuardrailFunctionOutput:
+    """Tutela: salida estructurada mínima (derecho/fundamentos o texto)."""
+    text = _structured_text(output)
+    empty = not text
+    has_tutela_anchor = bool(_TUTELA_RE.search(text)) if text else False
+    return GuardrailFunctionOutput(
+        output_info={
+            "reason": "salida_vacia" if empty else ("ok" if has_tutela_anchor else "sin_ancla_tutela"),
+            "chars": len(text),
+            "pii_flags": pii_flags(text) if text else [],
+            "has_tutela_anchor": has_tutela_anchor,
+            "agent": getattr(agent, "name", None),
+        },
+        # Vacío = trip; falta de ancla se reporta pero no corta (puede ser improcedencia).
+        tripwire_triggered=empty,
+    )
+
+
+@output_guardrail(name="calidad_output_guardrail")
+async def calidad_output_guardrail(
+    ctx: RunContextWrapper[Any],
+    agent: Any,
+    output: Any,
+) -> GuardrailFunctionOutput:
+    """Calidad: exige veredicto DictamenCalidad reconocible."""
+    veredicto = None
+    if hasattr(output, "model_dump"):
+        veredicto = (output.model_dump() or {}).get("veredicto")
+    elif isinstance(output, dict):
+        veredicto = output.get("veredicto")
+    text = _structured_text(output)
+    valid = veredicto in ("aprobable", "con_cambios", "rechazado", "escalar")
+    empty = not text and not valid
+    trip = empty or not valid
+    return GuardrailFunctionOutput(
+        output_info={
+            "reason": "salida_vacia" if empty else ("veredicto_invalido" if not valid else "ok"),
+            "veredicto": veredicto,
+            "chars": len(text),
             "agent": getattr(agent, "name", None),
         },
         tripwire_triggered=trip,
@@ -306,6 +393,18 @@ def poc_output_guardrails() -> list:
 
 def specialist_output_guardrails() -> list:
     return [specialist_output_guardrail]
+
+
+def redactor_output_guardrails() -> list:
+    return [redactor_output_guardrail]
+
+
+def tutela_output_guardrails() -> list:
+    return [tutela_output_guardrail]
+
+
+def calidad_output_guardrails() -> list:
+    return [calidad_output_guardrail]
 
 
 def poc_tool_input_guardrails() -> list:

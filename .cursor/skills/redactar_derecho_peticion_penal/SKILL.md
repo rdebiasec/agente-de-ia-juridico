@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 500d622a71dd8e8a -->
 ---
 name: redactar-derecho-peticion-penal
 description: Skill atomico penal-victimas: redactar derecho de peticion relacionado con autoridad o informacion del caso. Use when the workflow requires `redactar_derecho_peticion_penal`.
@@ -38,8 +37,19 @@ Ejecutar redacción solo con evaluación favorable preliminar de petición.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_constitucional_search`
-- `rag_plantillas_search`
+Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_derecho_peticion_penal`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `rag_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g4:** HITL y firma humana antes de radicar.

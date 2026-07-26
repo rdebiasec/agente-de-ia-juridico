@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: d8404fd3e497fa33 -->
+<!-- config-version: 3; checksum: b7ed0df8fbeecbb9 -->
 ---
 name: clasificar-tarea-y-etapa
 description: Skill operativo penal-victimas: clasificar la solicitud del usuario interno y detectar la etapa aparente del caso. Use when the workflow requires `clasificar_tarea_y_etapa`.
@@ -23,7 +23,7 @@ Triage del turno: tipo de tarea + etapa aparente + agente destino o faltantes.
 Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes.
 
 ## Rol en coordinador
-Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o solicita insumos mínimos.
+Primer skill en cada consulta nueva. En runtime el contrato lo materializa `build_triage` (`src/agents/triage.py` → `TriageResult`); el LLM no re-clasifica si ya hay `[TRIAGE_SISTEMA]`.
 
 ## Inputs
 - Solicitud textual del abogado o usuario interno.
@@ -32,11 +32,15 @@ Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o sol
 - Estado procesal conocido (última actuación, audiencia programada, etapa declarada).
 
 ## Outputs
-- `tipo_tarea`: redacción | análisis factual | tipicidad | ruta 906 | representación víctima | evidencia | audiencia | tutela/constitucional | seguimiento | fuera_de_alcance.
-- `etapa_aparente`: indagación | investigación | imputación | juicio | ejecución | desconocida | `[PENDIENTE DE VERIFICAR]`.
-- `agente_destino` recomendado (uno o secuencia).
-- `datos_faltantes_bloqueantes` (lista corta) o confirmación de derivación.
-- `urgencia_preliminar`: sí/no (disparar `detectar_urgencia_penal` si sí).
+Alineados a `TriageResult` (`src/agents/schemas.py`):
+- `tipo_tarea`: `redaccion` | `analisis_factual` | `tipicidad` | `ruta_906` | `representacion_victima` | `evidencia` | `audiencia` | `tutela_constitucional` | `seguimiento` | `fuera_de_alcance`.
+- `etapa_aparente`: `indagacion` | `investigacion` | `imputacion` | `juicio` | `ejecucion` | `desconocida` | `pendiente_verificar`.
+- `agente_destino` recomendado (agent id).
+- `datos_faltantes_bloqueantes` (lista corta de labels) o confirmación de derivación.
+- `puede_continuar`: bool.
+- `urgencia_preliminar`: bool (true si `nivel_urgencia` ∈ {critica, alta}).
+- `nivel_urgencia`: `critica` | `alta` | `media` | `baja`.
+- `motivos_urgencia`, `escalar_humano`, `accion_inmediata_urgencia`.
 
 ## Steps
 1. Analizar solicitud del usuario y objetivo del turno.
@@ -45,9 +49,14 @@ Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o sol
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_expediente_search`
-- `case_state_reader`
-- `audit_log_write`
+Skills = contratos (no function_tools invocables). No existe tool LLM `clasificar_tarea_y_etapa`.
+
+### Function tools (LLM, si aplica en el turno)
+- `buscar_en_expediente` (sesión activa vinculada)
+
+### Side-effects de código (no son function_tools)
+- `gerencia_ledger` — triage/completitud en `src/agents/triage.py` + `src/agents/completeness.py`
+- `audit_trace` — spans del runner / pipeline
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar etapa, radicado ni actuaciones para justificar derivación.
@@ -62,7 +71,7 @@ Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o sol
 - Tipicidad / calificación → `analista_tipicidad_y_responsabilidad_penal` (solo con hechos mínimos).
 - Ruta Ley 906 → `analista_ruta_procesal_ley906`.
 - Tutela → `evaluador_derechos_fundamentales_tutela` (nunca redactor directo).
-- Urgencia detectada → `detectar_urgencia_penal` antes de derivar.
+- Urgencia detectada → contrato `detectar_urgencia_penal` / `assess_urgency` antes de derivar.
 
 ## No duplicar
 - No determinar etapa con rigor procesal (`identificar_etapa_procesal_ley906` → especialista ruta 906).
@@ -72,7 +81,7 @@ Primer skill en cada consulta nueva. No resuelve el fondo del caso; enruta o sol
 ## Best Practices
 - Preferir `etapa_aparente=desconocida` + pregunta concreta antes que inventar etapa.
 - Una sola `agente_destino` primaria; secuencia solo si el turno lo exige explícitamente.
-- Si `urgencia_preliminar=sí`, no saltar a redacción.
+- Si `urgencia_preliminar=true`, no saltar a redacción.
 
 ## Riesgo si se omite
 Derivación errónea retrasa actuaciones, mezcla competencias y puede hacer perder términos en Ley 906.

@@ -17,6 +17,47 @@ def _stored_content(role: str, content: Any) -> str:
     return text.strip()
 
 
+def _preview(text: str, limit: int = 160) -> str:
+    normalized = " ".join((text or "").split())
+    if len(normalized) <= limit:
+        return normalized
+    return f"{normalized[: limit - 3]}..."
+
+
+def compact_session_items(
+    items: list[Any],
+    *,
+    recent_messages: int,
+    summary_max_chars: int,
+) -> list[Any]:
+    """Mantiene los últimos N mensajes y resume el resto (G2 session compact)."""
+    if recent_messages <= 0 or len(items) <= recent_messages:
+        return items
+    older = items[:-recent_messages]
+    recent = items[-recent_messages:]
+    lines: list[str] = []
+    for item in older:
+        if isinstance(item, dict):
+            role = str(item.get("role") or "item")
+            content = _preview(str(item.get("content") or ""))
+        else:
+            role = str(getattr(item, "role", "item"))
+            content = _preview(str(getattr(item, "content", item)))
+        if content:
+            lines.append(f"- {role}: {content}")
+    summary = "\n".join(lines)
+    if len(summary) > summary_max_chars:
+        summary = summary[: summary_max_chars - 3] + "..."
+    summary_item = {
+        "role": "user",
+        "content": (
+            "[Resumen de turnos previos de la sesión — contexto compactado]\n"
+            f"{summary}"
+        ),
+    }
+    return [summary_item, *recent]
+
+
 class RepositoryAgentSession(SessionABC):
     """Mantiene el historial de conversación para Runner.run(session=...)."""
 
@@ -25,6 +66,7 @@ class RepositoryAgentSession(SessionABC):
         self.channel = channel
         self.user_id = user_id
         self.session_settings = None
+        self.last_compaction: dict[str, int] | None = None
 
     def _to_input_item(self, msg: dict) -> dict[str, Any]:
         role = msg.get("role", "user")
@@ -34,14 +76,29 @@ class RepositoryAgentSession(SessionABC):
         return {"role": "user", "content": content}
 
     async def get_items(self, limit: int | None = None) -> list[Any]:
+        from src.config import get_settings
+
         repo = get_repository()
         session = repo.get_chat_session(self.session_id)
         if session is None:
+            self.last_compaction = {"raw": 0, "sent": 0, "compacted": 0}
             return []
         items = [self._to_input_item(m) for m in session.messages if m.get("content")]
         if limit is not None:
-            return items[-limit:]
-        return items
+            items = items[-limit:]
+        settings = get_settings()
+        raw_count = len(items)
+        compacted = compact_session_items(
+            items,
+            recent_messages=settings.session_recent_messages,
+            summary_max_chars=settings.session_summary_max_chars,
+        )
+        self.last_compaction = {
+            "raw": raw_count,
+            "sent": len(compacted),
+            "compacted": 1 if len(compacted) < raw_count else 0,
+        }
+        return compacted
 
     async def add_items(self, items: list[Any]) -> None:
         repo = get_repository()
@@ -57,6 +114,9 @@ class RepositoryAgentSession(SessionABC):
                 content = getattr(item, "content", str(item))
             stored = _stored_content(str(role), content)
             if not stored:
+                continue
+            # No persistir el resumen sintético de compactación.
+            if stored.startswith("[Resumen de turnos previos"):
                 continue
             repo.append_chat_message(
                 self.session_id,

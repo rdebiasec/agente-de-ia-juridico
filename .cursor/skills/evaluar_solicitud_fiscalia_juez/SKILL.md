@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: 1f948643845f0c25 -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Skill operativo penal-victimas: evaluar si una solicitud a Fiscalia o juez es procedente y conveniente. Use when the workflow requires `evaluar_solicitud_fiscalia_juez`.
@@ -45,9 +44,20 @@ Validar que la solicitud a redactar tuvo evaluación procesal previa.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_ley906_search`
-- `rag_expediente_search`
-- `citation_checker`
+Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_solicitud_fiscalia_juez`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `citation_checker` — no implementada
 
 ## Guardrails (g1–g10)
 - **g1:** Fundamentos normativos verificados en RAG.

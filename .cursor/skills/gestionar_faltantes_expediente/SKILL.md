@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 2ea1e7b18c33cab0 -->
+<!-- config-version: 3; checksum: 94a8e2cb3e9d2d6c -->
 ---
 name: gestionar-faltantes-expediente
 description: Skill operativo penal-victimas: identificar datos y documentos faltantes antes de analizar o redactar. Use when the workflow requires `gestionar_faltantes_expediente`.
@@ -22,19 +22,21 @@ Gate documental del POC: lista faltantes bloqueantes/deseables y decide si puede
 Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras.
 
 ## Rol en coordinador
-Gate de completitud documental exclusivo del coordinador. Se ejecuta tras `clasificar_tarea_y_etapa` cuando la tarea requiere expediente mínimo.
+Gate de completitud documental exclusivo del coordinador. Runtime: `assess_completeness` → `CompletenessResult` (`src/agents/completeness.py`).
 
 ## Inputs
-- Tipo de tarea clasificada (redacción, análisis, audiencia, tutela, etc.).
+- Tipo de tarea / destino clasificado.
 - Inventario de documentos en expediente o adjuntos del turno.
-- Radicado, poder, cédula de víctima, actuaciones procesales conocidas.
-- Checklist mínimo por tipo de tarea (definido en el turno o estándar del despacho).
+- Radicado, poder, actuaciones procesales conocidas.
+- Checklist mínimo por destino (código).
 
 ## Outputs
-- Lista de faltantes: `elemento`, `prioridad` (`bloqueante` | `deseable`), `motivo`, `responsable_sugerido`.
-- `puede_continuar`: sí | no (solo si no hay bloqueantes).
-- Tareas creadas para recolección (si aplica).
-- Mensaje al abogado con solicitud concreta de completar.
+- `faltantes_detalle`: lista de `{elemento, prioridad (bloqueante|deseable), motivo, responsable_sugerido}`.
+- `faltantes`: `list[str]` (compat; labels de `elemento`).
+- `puede_continuar`: bool (false si hay bloqueantes).
+- Checklist canónico (labels): hechos mínimos del caso; número de radicado; poder o calidad en que actúa el despacho; última actuación procesal; partes relevantes; etapa o última actuación procesal.
+- Tareas de recolección en `tareas_gerencia` (estado `pendiente` hasta cerrar).
+- Mensaje al abogado con solicitud concreta (`format_missing_request`).
 
 ## Steps
 1. Inventariar datos y documentos mínimos para el análisis solicitado.
@@ -43,9 +45,17 @@ Gate de completitud documental exclusivo del coordinador. Se ejecuta tras `clasi
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `case_state_reader`
-- `rag_expediente_search`
-- `task_manager_create`
+Skills = contratos (no function_tools invocables). No existe tool LLM `gestionar_faltantes_*` ni CRUD de faltantes.
+
+### Function tools (LLM, si aplica en el turno)
+- `buscar_en_expediente` (sesión activa vinculada)
+
+### Side-effects de código (no son function_tools)
+- `gerencia_ledger` — gate determinista en `src/agents/completeness.py` (`assess_completeness`, `persist_verification`, `tareas_gerencia`)
+- `audit_trace` — spans `Gerencia: verificación de completitud` en pipeline/runner
+
+### Tool omitida a propósito
+- `consultar_estado_gerencia` no se expone como function_tool: el estado ya llega en `[TRIAGE_SISTEMA]` / expediente / métricas; una tool de lectura sumaría superficie sin beneficio claro en el POC.
 
 ## Guardrails (g1–g10)
 - **g1:** No afirmar que un documento existe si no está en expediente o adjuntos.
@@ -56,8 +66,8 @@ Gate de completitud documental exclusivo del coordinador. Se ejecuta tras `clasi
 - **g8:** Aviso de revisión profesional.
 
 ## Handoff
-- `puede_continuar=sí` → tool del especialista según `tipo_tarea`.
-- `puede_continuar=no` → `actualizar_tareas_responsable` con tareas de recolección + mensaje al abogado.
+- `puede_continuar=true` → tool del especialista según `tipo_tarea`.
+- `puede_continuar=false` → tareas de recolección (`actualizar_tareas_responsable` como contrato) + mensaje al abogado.
 
 ## No duplicar
 - **vs `detectar_vacios_factuales`:** este skill es **checklist documental/administrativo**; vacíos factuales son lagunas en la narrativa o prueba del hecho (especialista cronología).
@@ -66,7 +76,7 @@ Gate de completitud documental exclusivo del coordinador. Se ejecuta tras `clasi
 
 ## Best Practices
 - Pedir 3–5 faltantes concretos, no un cuestionario largo.
-- Separar bloqueantes de deseables en el mensaje al abogado.
+- Separar bloqueantes de deseables en la solicitud al abogado.
 
 ## Riesgo si se omite
 Memoriales o solicitudes con anexos inexistentes, poder inválido o radicado errado → rechazo o nulidad.

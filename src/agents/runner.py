@@ -19,18 +19,27 @@ from src.agents.guardrails import (
     check_input,
     needs_human_review,
 )
-from src.agents.orchestrator import POC_AGENT_ID, SPECIALIST_AGENT_IDS, build_orchestrator
+from src.agents.orchestrator import (
+    POC_AGENT_ID,
+    SPECIALIST_AGENT_IDS,
+    build_orchestrator,
+    enabled_specialists_for_focus,
+)
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.agents.pii import mask_pii
 from src.agents.resilience import run_with_retries
 from src.agents.session_context import bind_active_session
 from src.agents.skill_catalog import agent_display_name
 from src.agents.triage import (
+    build_triage,
+    format_triage_sistema,
     has_penal_context,
     infer_destination_agent,
     is_non_penal_scope_request,
+    is_trivial_consultation,
     requires_execution_plan,
 )
+from src.agents.urgency import format_escalation_notice
 from src.config import get_settings
 from src.gateway.agent_session import RepositoryAgentSession, reconcile_turn_messages
 from src.gateway.expediente import expediente_store
@@ -540,6 +549,10 @@ async def run_agent(
     expediente = expediente_store.get_or_create(session_id)
     exp_resumen = expediente.resumen()
     requested_destination = _infer_destination_agent(message)
+    triage = build_triage(
+        message, expediente=expediente, destination=requested_destination
+    )
+    trace["triage_sistema"] = triage.model_dump()
 
     ok_pre, pre_err = run_pre_validations(
         message,
@@ -666,26 +679,56 @@ async def run_agent(
     if settings.openai_api_key:
         os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 
-    # Defensa estructural: el chat no recibe tools de redacción/tutela. Aunque
-    # falle el clasificador, solo un plan aprobado puede instanciar esos agentes.
-    orchestrator = build_orchestrator(
-        require_tool_approval=True,
-        include_high_risk_tools=False,
-    )
     destination_agent = trace["received_by_agent"]
     trace_hooks = _TraceRunHooks(trace)
     agent_session = RepositoryAgentSession(session_id, channel=channel, user_id=uid)
     from src.agents.context_security import wrap_untrusted_context
 
-    context_block = ""
+    context_block = format_triage_sistema(triage) + "\n"
+    trivial = is_trivial_consultation(
+        message, destination=requested_destination
+    )
+    if triage.escalar_humano and not trivial:
+        from src.agents.urgency import UrgencyResult
+
+        notice = format_escalation_notice(
+            UrgencyResult(
+                nivel_urgencia=triage.nivel_urgencia,
+                motivos=list(triage.motivos_urgencia),
+                accion_inmediata_sugerida=triage.accion_inmediata_urgencia,
+                escalar_humano=True,
+            )
+        )
+        context_block += notice + "\n\n"
+        trace.setdefault("spans", []).append(
+            {
+                "name": "Gerencia: escalamiento por urgencia",
+                "kind": "guardrail",
+                "status": "pending",
+                "detail": (
+                    f"nivel={triage.nivel_urgencia}; "
+                    f"motivos={'; '.join(triage.motivos_urgencia) or 'n/a'}"
+                ),
+                "at_ms": int(time.time() * 1000),
+            }
+        )
+        trace["urgencia_escalamiento"] = {
+            "nivel": triage.nivel_urgencia,
+            "escalar_humano": True,
+            "notice": notice,
+        }
     if exp_resumen and "sin datos" not in exp_resumen.lower():
         exp_context, exp_flags = wrap_untrusted_context(
             exp_resumen,
             label="EXPEDIENTE DEL CASO",
         )
-        context_block = f"[Expediente del caso]\n{exp_context}\n\n"
+        context_block += f"[Expediente del caso]\n{exp_context}\n\n"
         if exp_flags:
             trace["context_security_flags"] = exp_flags
+
+    # Prefetch RAG una sola vez; la tool buscar_en_conocimiento solo se expone
+    # si el prefetch falló o quedó degradado (evita RAG doble).
+    rag_prefetch_ok = False
     try:
         from src.services.rag import buscar, contexto_para_prompt
 
@@ -714,6 +757,7 @@ async def run_agent(
                 )
                 detail = f"{len(rag_chunks)} fragmento(s) inyectados al contexto del turno."
                 trace["rag_chunks_count"] = len(rag_chunks)
+                rag_prefetch_ok = True
                 if rag_flags:
                     existing_flags = list(trace.get("context_security_flags") or [])
                     trace["context_security_flags"] = sorted(
@@ -740,6 +784,47 @@ async def run_agent(
                 "at_ms": int(time.time() * 1000),
             }
         )
+
+    # Defensa estructural: el chat no recibe tools de redacción/tutela. Aunque
+    # falle el clasificador, solo un plan aprobado puede instanciar esos agentes.
+    # G1: superficie dinámica (focus + vecinos), sin lecturas MD completas,
+    # sin tool KB si el prefetch ya inyectó fragmentos.
+    chat_specialist_pool = SPECIALIST_AGENT_IDS - frozenset(
+        {
+            "redactor_documentos_juridicos_penales",
+            "evaluador_derechos_fundamentales_tutela",
+        }
+    )
+    enabled_specialists = enabled_specialists_for_focus(
+        requested_destination, chat_specialist_pool
+    )
+    include_kb_search = not rag_prefetch_ok
+    orchestrator = build_orchestrator(
+        require_tool_approval=True,
+        include_high_risk_tools=False,
+        focus_agent_id=requested_destination,
+        include_kb_search_tool=include_kb_search,
+        include_full_read_tools=False,
+        include_list_areas_tool=False,
+        slim_instructions=True,
+        use_cache=True,
+    )
+    instr_stats = getattr(orchestrator, "instruction_stats", None) or {
+        "chars": len(orchestrator.instructions or ""),
+        "approx_tokens": max(1, len(orchestrator.instructions or "") // 4),
+    }
+    trace["gerente_tool_surface"] = {
+        "focus": requested_destination,
+        "enabled_specialists": sorted(enabled_specialists),
+        "kb_search_tool": include_kb_search,
+        "full_read_tools": False,
+        "list_areas_tool": False,
+        "rag_prefetch_ok": rag_prefetch_ok,
+        "max_turns": settings.agent_max_turns,
+        "nested_max_turns": settings.agent_nested_max_turns,
+        "instruction_chars": instr_stats.get("chars"),
+        "slim_instructions": True,
+    }
     agent_input = (
         f"{context_block}[Consulta del despacho]\n{message}"
         if context_block
@@ -770,6 +855,7 @@ async def run_agent(
         )
 
         result = None
+        original_model = orchestrator.model
 
         async def _on_retry(attempt: int, exc: BaseException, delay: float) -> None:
             fallback_model = (settings.openai_model_fallback or "").strip()
@@ -789,27 +875,33 @@ async def run_agent(
                 }
             )
 
-        with bind_active_session(session_id):
-            result = await run_with_retries(
-                lambda: Runner.run(
-                    orchestrator,
-                    agent_input,
-                    session=agent_session,
-                    max_turns=settings.agent_max_turns,
-                    hooks=trace_hooks,
-                    run_config=run_config,
-                ),
-                max_retries=settings.agent_max_retries,
-                timeout_seconds=settings.agent_run_timeout_seconds,
-                on_retry=_on_retry,
-                non_retryable=(
-                    InputGuardrailTripwireTriggered,
-                    OutputGuardrailTripwireTriggered,
-                    AgentBudgetExceeded,
-                ),
-            )
+        try:
+            with bind_active_session(session_id):
+                result = await run_with_retries(
+                    lambda: Runner.run(
+                        orchestrator,
+                        agent_input,
+                        session=agent_session,
+                        max_turns=settings.agent_max_turns,
+                        hooks=trace_hooks,
+                        run_config=run_config,
+                    ),
+                    max_retries=settings.agent_max_retries,
+                    timeout_seconds=settings.agent_run_timeout_seconds,
+                    on_retry=_on_retry,
+                    non_retryable=(
+                        InputGuardrailTripwireTriggered,
+                        OutputGuardrailTripwireTriggered,
+                        AgentBudgetExceeded,
+                    ),
+                )
+        finally:
+            # No contaminar el Agent cacheado con el modelo de fallback.
+            orchestrator.model = original_model
         if result is None:  # pragma: no cover - defensa de invariantes
             raise RuntimeError("El runner terminó sin resultado.")
+        if agent_session.last_compaction:
+            trace["session_compaction"] = dict(agent_session.last_compaction)
         trace.setdefault("spans", []).append(
             {
                 "name": "runner:fin",

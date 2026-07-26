@@ -33,8 +33,19 @@ Bitácora operativa del expediente para cronología y reportes.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `case_state_writer`
-- `audit_log_write`
+Skills = contratos (no function_tools invocables). No existe tool LLM `registrar_actuacion_procesal`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `case_state_writer` — no implementada
+- `audit_log_write` — no implementada
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar actuaciones.

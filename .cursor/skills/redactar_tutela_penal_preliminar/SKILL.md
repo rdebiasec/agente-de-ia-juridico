@@ -1,4 +1,3 @@
-<!-- config-version: 1; checksum: b86322576b26bf04 -->
 ---
 name: redactar-tutela-penal-preliminar
 description: Skill critico penal-victimas: crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente. Use when the workflow requires `redactar_tutela_penal_preliminar`.
@@ -44,9 +43,20 @@ Ejecutar los 10 pasos solo si `evaluar_procedencia_tutela` dictaminó procedenci
 10. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
-- `rag_constitucion_search`
-- `rag_corte_constitucional_search`
-- `rag_plantillas_search`
+Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_tutela_penal_preliminar`.
+
+### Function tools (LLM, si aplica)
+- `buscar_en_expediente` (sesión activa vinculada)
+- `buscar_en_conocimiento` (KB / normas)
+- `leer_area_derecho` — lectura MD de área (plan/especialistas; chat Gerente slim off)
+- `leer_playbook_proceso` — playbook Ley 906 (plan/especialistas)
+- `leer_normas_clave` — normas penales clave (plan/especialistas)
+- `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
+
+### Planned capabilities (no implementadas — no invocar como tools)
+- `rag_constitucion_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_corte_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
+- `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar hechos, normas, sentencias ni radicados.

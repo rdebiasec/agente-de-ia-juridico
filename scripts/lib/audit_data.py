@@ -39,7 +39,7 @@ def build_audit_data() -> dict:
         agent_ids = data.get("agents") or []
         tools = skill_tools_list(data)
         guardrails = skill_guardrails_list(data)
-        source_path = data.get("path") or f".cursor/skills/{sid}/SKILL.md"
+        source_path = data.get("path") or f"agente/skills/{sid}/SKILL.md"
         skills.append(
             {
                 "id": sid,
