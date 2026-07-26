@@ -113,6 +113,7 @@ Ejecutado el 2026-07-25. Commit `bb82c50` en `main`, deploy `dep-d9ilavsvikkc73c
 | Aprobación de plan incompleto | PASS — rechazada con HTTP 400 |
 | Gate completo en producción | PASS — `pending_approval` con el redactor incluido |
 | Ledger en producción | PASS — bloqueo registrado y tarea cerrada al llegar el dato |
+| Prompt y guardrails del Gerente en la base viva | PASS tras corregir — publicados en `v2`; ver sección 5 |
 | Login del portal, local y producción | PASS en ambos, con el mismo login |
 | Slack | PASS — 6 pruebas verdes, socket activo, `awaiting_input` manejado |
 
@@ -120,17 +121,29 @@ Detalle y evidencia en [`smoke-gerencia-2026-07-25.md`](smoke-gerencia-2026-07-2
 
 Dos checks de smoke daban falso FAIL por estar desactualizados frente al rediseño del portal y frente a `DEV_AUTO_LOGIN`. Se corrigieron los scripts, no el producto.
 
-## 5. Riesgo detectado en el smoke
+## 5. Hallazgo del cierre: el prompt nuevo no estaba llegando a producción
 
-La base que producción usa hoy es `agente-db` (plan gratuito) y tiene fecha de expiración **2026-08-16**. El workspace además conserva una segunda base, `agente-ia-juridico-db` (plan básico), que ya no recibe escrituras.
+El smoke destapó algo que ningún test podía ver, porque solo aparece con la infraestructura real conectada.
 
-Sin acción, los datos del caso en producción desaparecen en pocas semanas. La decisión de a cuál base apuntar y con qué plan es del dueño del proyecto, no del código.
+En runtime **Postgres es autoritativo** para prompts, skills y guardrails; los archivos en disco son baseline. Publicar el prompt del Gerente en el repositorio no cambia por sí solo el comportamiento del agente: hace falta que llegue al config store de la base que la aplicación lee.
+
+Dos cosas lo impedían:
+
+1. **El sync abortaba.** La base de producción se recreó y quedó reseeded en `v1`, mientras los headers de archivo declaraban el historial de la base local (hasta `v9`). El script no podía determinar de qué lado venía el cambio y no escribía nada. Corregido alineando los headers al baseline real (`6a8243d`).
+
+2. **El CI escribe en una base distinta de la que usa la aplicación.** El secreto `DATABASE_URL` de GitHub Actions apunta a `agente-ia-juridico-db` (plan básico), mientras el servicio de Render lee `agente-db` (plan gratuito). El sync quedó en verde y publicó `v2`… en la base que nadie lee.
+
+Evidencia: las escrituras del smoke HTTP aterrizaron en `agente-db`, y el sync del CI creó `v2` en `agente-ia-juridico-db` en el mismo minuto.
+
+**Resuelto para el contenido:** el prompt y los tres guardrails del Gerente se publicaron en la base viva por la vía auditada del portal (`POST /api/audit/config/save`), quedando en `v2`, versionados y reversibles. Script reutilizable: `scripts/publicar_config_gerente.py`. Quedaron registrados a nombre de la cuenta de smoke, no de la abogada; conviene republicar con autoría real si esa traza importa.
+
+**Sin resolver, porque es una decisión del dueño:** cuál de las dos bases es la autoritativa. Mientras sigan desalineadas, cada publicación por CI se va a la base equivocada. Además `agente-db`, que es la que hoy tiene los datos del caso, **expira el 2026-08-16** por ser plan gratuito.
 
 ## 6. Pendiente humano
 
 Estos puntos no se pueden cerrar con código y quedan abiertos a propósito.
 
-- **Base de datos de producción:** migrar a un plan que no expire y retirar la base que quedó sin uso. Ver la sección anterior.
+- **Decidir la base autoritativa de producción** y alinear `DATABASE_URL` del servicio de Render y del secreto de GitHub Actions a la misma. Hoy divergen. Si se elige `agente-db`, hay que salir del plan gratuito antes del 2026-08-16; si se elige `agente-ia-juridico-db`, hay que migrar los datos del caso primero. Ver la sección anterior.
 - **DPA y contratos de tratamiento de datos:** sin firmar. Requiere decisión y firma del despacho.
 - **Cuentas individuales por abogado:** hoy el acceso es por contraseña compartida. Falta identidad por persona para trazabilidad real de quién aprueba.
 - **WhatsApp y Twilio:** integración inactiva a propósito. No se habilita sin evaluación previa frente a la Ley 1581 y la Ley 2300.

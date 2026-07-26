@@ -54,6 +54,23 @@ Dos checks daban falso FAIL por estar desactualizados, no por fallas del product
 - `smoke_produccion.sh` buscaba el texto «10 reglas estrictas», que ya no existe desde el rediseño del portal como editor por agente. Ahora verifica la pestaña de guardrails. También se corrigió un `|| echo 0` que duplicaba el valor y rompía la comparación.
 - `smoke_audit_login.py` exigía que la sesión quedara cerrada tras el logout, lo que en local es imposible con `DEV_AUTO_LOGIN` activo. Ahora acepta la reapertura automática solo cuando el servidor reporta ese modo.
 
+## Publicación del prompt en la base viva
+
+El gate es código y funcionó desde el primer intento, pero el **texto** del Gerente vive en el config store, y ahí Postgres es autoritativo. En producción seguía activo el prompt viejo del coordinador (`v1`).
+
+Causa doble: el sync abortaba por un baseline de versión desalineado, y el `DATABASE_URL` del CI apunta a una base distinta de la que lee la aplicación.
+
+Se publicaron el prompt y los tres guardrails en la base viva con `scripts/publicar_config_gerente.py --prod --apply`, quedando en `v2`:
+
+| Item | Antes | Después |
+|---|---|---|
+| `prompt/coordinador_expediente_penal` | v1, sin el rol de Gerente | v2, con el rol de Gerente |
+| `agent_guardrail/...__input` | v1 | v2 |
+| `agent_guardrail/...__output` | v1 | v2 |
+| `agent_guardrail/...__tools` | v1 | v2 |
+
+El script es idempotente: una segunda corrida reporta `ya_publicado: true` y no crea versiones nuevas. Las versiones quedaron a nombre de la cuenta de smoke; si la autoría importa para la traza, conviene republicar con el correo real.
+
 ## Pendiente de clic humano
 
 El smoke de Slack HITL (`scripts/smoke_slack_hitl_drafts.py`) publica borradores reales en `#revision-abogado` y requiere que una persona pulse Aprobar y Rechazar. No se ejecutó para no dejar ruido en el canal del despacho sin autorización previa.
