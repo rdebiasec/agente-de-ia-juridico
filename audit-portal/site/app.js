@@ -540,6 +540,139 @@
         autosizeField(el);
     }
 
+    let fmtTarget = null;
+
+    function isFmtTarget(el) {
+        if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+        if (el.classList.contains('cfg-rich') && el.getAttribute('contenteditable') === 'true') return true;
+        if (el.id === 'cfg-editor' && !el.disabled) return true;
+        return false;
+    }
+
+    function syncFmtBarState() {
+        const bar = $('cfg-fmt-bar');
+        if (!bar) return;
+        const active = isFmtTarget(fmtTarget);
+        bar.dataset.disabled = active ? 'false' : 'true';
+        bar.querySelectorAll('.cfg-fmt-btn[data-fmt="bold"], .cfg-fmt-btn[data-fmt="italic"]').forEach((btn) => {
+            const cmd = btn.dataset.fmt;
+            let on = false;
+            try {
+                on = active && fmtTarget.classList.contains('cfg-rich') && document.queryCommandState(cmd);
+            } catch (_) {
+                on = false;
+            }
+            btn.classList.toggle('is-active', Boolean(on));
+        });
+    }
+
+    function wrapTextareaSelection(el, before, after) {
+        const start = el.selectionStart ?? 0;
+        const end = el.selectionEnd ?? 0;
+        const val = el.value || '';
+        const selected = val.slice(start, end) || 'texto';
+        const next = val.slice(0, start) + before + selected + after + val.slice(end);
+        el.value = next;
+        const selStart = start + before.length;
+        el.setSelectionRange(selStart, selStart + selected.length);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function insertTextareaLinePrefix(el, prefix) {
+        const start = el.selectionStart ?? 0;
+        const val = el.value || '';
+        const lineStart = val.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+        el.value = val.slice(0, lineStart) + prefix + val.slice(lineStart);
+        const pos = start + prefix.length;
+        el.setSelectionRange(pos, pos);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function applyTextFormat(fmt) {
+        const el = fmtTarget;
+        if (!isFmtTarget(el)) return;
+        el.focus();
+
+        if (el.classList.contains('cfg-rich')) {
+            const run = (cmd, value) => {
+                try {
+                    document.execCommand(cmd, false, value);
+                } catch (_) { /* ignore */ }
+            };
+            if (fmt === 'bold') run('bold');
+            else if (fmt === 'italic') run('italic');
+            else if (fmt === 'ul') run('insertUnorderedList');
+            else if (fmt === 'ol') run('insertOrderedList');
+            else if (fmt === 'undo') run('undo');
+            else if (fmt === 'redo') run('redo');
+            else if (fmt === 'clear') run('removeFormat');
+            else if (fmt === 'code') {
+                const sel = window.getSelection();
+                const text = sel && !sel.isCollapsed ? sel.toString() : 'término';
+                run('insertHTML', `<span class="md-term">${escapeHtmlText(text)}</span>`);
+            } else if (fmt === 'h3') {
+                const sel = window.getSelection();
+                const text = (sel && !sel.isCollapsed ? sel.toString() : 'Título').trim() || 'Título';
+                run('insertHTML', `<div class="md-h"><strong>${escapeHtmlText(text)}</strong></div><div><br></div>`);
+            }
+            el.classList.toggle('is-empty', !editorHtmlToMd(el.innerHTML).trim());
+            autosizeRich(el);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            syncFmtBarState();
+            return;
+        }
+
+        if (el.id === 'cfg-editor') {
+            if (fmt === 'bold') wrapTextareaSelection(el, '**', '**');
+            else if (fmt === 'italic') wrapTextareaSelection(el, '*', '*');
+            else if (fmt === 'code') wrapTextareaSelection(el, '`', '`');
+            else if (fmt === 'h3') insertTextareaLinePrefix(el, '### ');
+            else if (fmt === 'ul') insertTextareaLinePrefix(el, '- ');
+            else if (fmt === 'ol') insertTextareaLinePrefix(el, '1. ');
+            else if (fmt === 'clear') {
+                const start = el.selectionStart ?? 0;
+                const end = el.selectionEnd ?? 0;
+                if (end > start) {
+                    const plain = (el.value || '').slice(start, end).replace(/[*_`#]+/g, '');
+                    el.setRangeText(plain, start, end, 'select');
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+            // undo/redo: browser nativo del textarea
+            else if (fmt === 'undo') {
+                try { document.execCommand('undo'); } catch (_) { /* ignore */ }
+            } else if (fmt === 'redo') {
+                try { document.execCommand('redo'); } catch (_) { /* ignore */ }
+            }
+            syncFmtBarState();
+        }
+    }
+
+    function wireFmtToolbar() {
+        const bar = $('cfg-fmt-bar');
+        if (!bar || bar.dataset.wired === '1') return;
+        bar.dataset.wired = '1';
+        bar.addEventListener('mousedown', (e) => {
+            // Evita que el botón robe el foco del editor antes del click.
+            if (e.target.closest('.cfg-fmt-btn')) e.preventDefault();
+        });
+        bar.addEventListener('click', (e) => {
+            const btn = e.target.closest('.cfg-fmt-btn');
+            if (!btn || !bar.contains(btn)) return;
+            applyTextFormat(btn.dataset.fmt);
+        });
+        document.addEventListener('focusin', (e) => {
+            const t = e.target;
+            if (isFmtTarget(t)) {
+                fmtTarget = t;
+                syncFmtBarState();
+            }
+        });
+        document.addEventListener('selectionchange', () => {
+            if (fmtTarget && fmtTarget.classList.contains('cfg-rich')) syncFmtBarState();
+        });
+        syncFmtBarState();
+    }
 
     function activateAnatomyTab(groupId, { fromTray = false } = {}) {
         const hasSelection = ANATOMY_UI_GROUPS.some((group) => group.id === groupId);
@@ -2220,17 +2353,10 @@
         }
     }
 
-    /** Sin lista lateral: Prompt / Skills / Guardrails usan trays + editor amplio. */
+    /** Lista lateral retirada: Prompt / Skills / Guardrails usan trays + editor amplio. */
     function updateSidebarVisibility() {
         const sidebar = $('cfg-sidebar');
-        if (!sidebar) return;
-        const hideAgentConfigLists =
-            editorMode === 'agent' &&
-            (currentSection === 'prompt' ||
-                currentSection === 'skills' ||
-                currentSection === 'guardrails');
-        const hideSistemaPrompt = editorMode === 'sistema';
-        sidebar.classList.toggle('hidden', hideAgentConfigLists || hideSistemaPrompt);
+        if (sidebar) sidebar.classList.add('hidden');
     }
 
     /** Editor amplio para Skills/Guardrails; mensaje de elección si aún no hay ítem. */
@@ -2738,6 +2864,7 @@
             btn.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         if (sync) syncTrayChrome();
+        renderCompactNav();
     }
 
     function renderGroupTabs() {
@@ -2905,6 +3032,211 @@
         }
     }
 
+    function renderCompactNav() {
+        const groupSel = $('ux-group-select');
+        const agentSel = $('ux-agent-select');
+        const crumbSection = $('ux-crumb-section');
+        const crumbPart = $('ux-crumb-part');
+        const sepSection = $('ux-crumb-sep-section');
+        const sepPart = $('ux-crumb-sep-part');
+        const partRow = $('ux-part-pills');
+        if (!groupSel || !agentSel) return;
+
+        if (groupSel.dataset.built !== '1') {
+            groupSel.dataset.built = '1';
+            groupSel.innerHTML = GROUP_ORDER.map(
+                (g) => `<option value="${g}">${GROUP_LABELS[g] || g}</option>`,
+            ).join('');
+        }
+        groupSel.value = currentGroup;
+        groupSel.disabled = editorMode === 'sistema';
+
+        const agents = agentsInGroup(currentGroup);
+        const agentSig = `${currentGroup}|${agents.map((a) => a.id).join(',')}`;
+        if (agentSel.dataset.sig !== agentSig) {
+            agentSel.dataset.sig = agentSig;
+            agentSel.innerHTML = agents.length
+                ? agents
+                      .map(
+                          (a) =>
+                              `<option value="${a.id}">${escapeHtmlText(a.label || a.id)}</option>`,
+                      )
+                      .join('')
+                : '<option value="">Sin agentes</option>';
+        }
+        if (currentAgentId) agentSel.value = currentAgentId;
+        agentSel.disabled = editorMode === 'sistema' || !agents.length;
+
+        const sectionLabel =
+            editorMode === 'sistema'
+                ? 'Sistema'
+                : currentSection === 'prompt'
+                  ? 'Prompt'
+                  : currentSection === 'skills'
+                    ? 'Skills'
+                    : currentSection === 'guardrails'
+                      ? 'Guardrails'
+                      : '—';
+        if (crumbSection) {
+            crumbSection.textContent = sectionLabel;
+            crumbSection.classList.toggle('is-current', Boolean(currentSection) || editorMode === 'sistema');
+        }
+        if (sepSection) sepSection.classList.toggle('hidden', editorMode === 'sistema');
+
+        document.querySelectorAll('#ux-section-pills .ux-pill').forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.section === currentSection);
+            btn.disabled = editorMode === 'sistema';
+        });
+        $('ux-section-pills')?.classList.toggle('hidden', editorMode === 'sistema');
+
+        if (!partRow) return;
+        if (editorMode === 'sistema' || !currentSection) {
+            partRow.classList.add('hidden');
+            partRow.innerHTML = '';
+            if (crumbPart) crumbPart.classList.add('hidden');
+            if (sepPart) sepPart.classList.add('hidden');
+            return;
+        }
+
+        partRow.classList.remove('hidden');
+        let partLabel = '—';
+        if (currentSection === 'prompt') {
+            const sig = `prompt|${ANATOMY_UI_GROUPS.map((g) => g.id).join(',')}`;
+            if (partRow.dataset.sig !== sig) {
+                partRow.dataset.sig = sig;
+                partRow.innerHTML = '';
+                ANATOMY_UI_GROUPS.forEach((g) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'ux-pill';
+                    btn.dataset.part = g.id;
+                    btn.textContent = g.trayLabel || g.label;
+                    btn.addEventListener('click', () => selectPromptPart(g.id));
+                    partRow.appendChild(btn);
+                });
+            }
+            partRow.querySelectorAll('.ux-pill').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.part === currentPromptPart);
+            });
+            const g = ANATOMY_UI_GROUPS.find((x) => x.id === currentPromptPart);
+            partLabel = g ? g.trayLabel || g.label : '—';
+        } else if (currentSection === 'skills') {
+            const agent = agentById(currentAgentId);
+            const ids = (agent && agent.skill_ids) || [];
+            const sig = `skills|${currentAgentId || ''}|${ids.join(',')}`;
+            if (partRow.dataset.sig !== sig) {
+                partRow.dataset.sig = sig;
+                partRow.innerHTML = '';
+                if (!ids.length) {
+                    partRow.innerHTML =
+                        '<span class="ux-crumb-label">Sin skills en este agente</span>';
+                } else {
+                    ids.forEach((sid) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'ux-pill';
+                        btn.dataset.skillId = sid;
+                        btn.textContent = skillTrayLabel(sid);
+                        btn.title = sid;
+                        btn.addEventListener('click', () => selectItem('skill', sid));
+                        partRow.appendChild(btn);
+                    });
+                }
+            }
+            partRow.querySelectorAll('.ux-pill[data-skill-id]').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.skillId === currentKey);
+            });
+            partLabel = currentKey ? skillTrayLabel(currentKey) : '—';
+        } else if (currentSection === 'guardrails') {
+            const sig = `guard|${GUARD_CLASS_ORDER.join(',')}`;
+            if (partRow.dataset.sig !== sig) {
+                partRow.dataset.sig = sig;
+                partRow.innerHTML = '';
+                GUARD_CLASS_ORDER.forEach((clase) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'ux-pill';
+                    btn.dataset.clase = clase;
+                    btn.textContent = GUARD_CLASS_LABEL[clase] || clase;
+                    btn.addEventListener('click', () => selectGuardClass(clase));
+                    partRow.appendChild(btn);
+                });
+            }
+            partRow.querySelectorAll('.ux-pill').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.clase === currentGuardClass);
+            });
+            partLabel = currentGuardClass
+                ? GUARD_CLASS_LABEL[currentGuardClass] || currentGuardClass
+                : '—';
+        }
+
+        if (crumbPart) {
+            crumbPart.textContent = partLabel;
+            const showPart =
+                (currentSection === 'prompt' && currentPromptPart) ||
+                (currentSection === 'skills' && currentKey) ||
+                (currentSection === 'guardrails' && currentGuardClass);
+            crumbPart.classList.toggle('hidden', !showPart);
+            crumbPart.classList.toggle('is-current', Boolean(showPart));
+        }
+        if (sepPart) {
+            const showPart =
+                (currentSection === 'prompt' && currentPromptPart) ||
+                (currentSection === 'skills' && currentKey) ||
+                (currentSection === 'guardrails' && currentGuardClass);
+            sepPart.classList.toggle('hidden', !showPart);
+        }
+    }
+
+    async function openConfigSection(section) {
+        if (!section || editorMode === 'sistema') return;
+        persistEditorDraft();
+        currentSection = section;
+        currentGuardClass = null;
+        currentPromptPart = null;
+        setDirty(false);
+        loaded = null;
+        currentKey = null;
+        selectGen += 1;
+        setEditorValue('', { disabled: true });
+        setEditorChrome(null, null);
+        updateSharedBadge(null);
+        const hist = $('cfg-btn-history');
+        const reload = $('cfg-btn-reload');
+        if (hist) hist.disabled = true;
+        if (reload) reload.disabled = true;
+        renderNav();
+
+        if (section === 'guardrails') {
+            const guardHost = $('guard-class-tabs');
+            if (guardHost) delete guardHost.dataset.sig;
+            $('guard-tray')?.classList.remove('is-focused');
+            await selectGuardClass(GUARD_CLASS_ORDER[0] || 'input');
+            return;
+        }
+        if (section === 'skills') {
+            const skillHost = $('skill-tabs');
+            if (skillHost) delete skillHost.dataset.sig;
+            $('skills-tray')?.classList.remove('is-focused');
+            updateProseWorkspace();
+            const items = agentListItems();
+            if (items[0]) await selectItem(items[0].kind, items[0].key);
+            else {
+                renderSkillsTray();
+                scheduleGroupConnector();
+            }
+            return;
+        }
+        if (section === 'prompt') {
+            const items = agentListItems();
+            if (items[0]) await selectItem(items[0].kind, items[0].key);
+            ensurePromptPartTabsBuilt();
+            const firstPart = ANATOMY_UI_GROUPS[0]?.id;
+            if (firstPart) await selectPromptPart(firstPart);
+            else activateAnatomyTab(null);
+        }
+    }
+
     function renderNav() {
         renderGroupTabs();
         renderAgentTabs();
@@ -2915,6 +3247,7 @@
             console.warn('renderList:', err);
         }
         syncTrayChrome();
+        renderCompactNav();
     }
 
     async function loadConfigIndex() {
@@ -2977,7 +3310,7 @@
             const agent = agentById(agentId);
             currentGroup = (agent && agent.grupo) || 'especialista';
         }
-        // El agente no abre editor por sí solo: primero se elige Prompt/Skills/Guardrails.
+        // UX compacta: al elegir agente se abre Prompt → primer apartado.
         currentSection = null;
         currentGuardClass = null;
         currentPromptPart = null;
@@ -2990,6 +3323,7 @@
         $('cfg-btn-history').disabled = true;
         $('cfg-btn-reload').disabled = true;
         renderNav();
+        await openConfigSection('prompt');
     }
 
     async function selectItem(kind, key, opts = {}) {
@@ -3269,51 +3603,24 @@
 
         document.querySelectorAll('.section-tab').forEach((btn) => {
             btn.addEventListener('click', async () => {
-                persistEditorDraft();
-                currentSection = btn.dataset.section;
-                currentGuardClass = null;
-                currentPromptPart = null;
-                setDirty(false);
-                loaded = null;
-                currentKey = null;
-                selectGen += 1; // invalidate in-flight selectItem
-                setEditorValue('', { disabled: true });
-                setEditorChrome(null, null);
-                updateSharedBadge(null);
-                $('cfg-btn-history').disabled = true;
-                $('cfg-btn-reload').disabled = true;
-                renderNav();
-                if (currentSection === 'guardrails') {
-                    const guardHost = $('guard-class-tabs');
-                    if (guardHost) delete guardHost.dataset.sig;
-                    $('guard-tray')?.classList.remove('is-focused');
-                    updateProseWorkspace();
-                    renderGuardrailsTray();
-                    scheduleGroupConnector();
-                    return;
-                }
-                const items = agentListItems();
-                if (currentSection === 'skills') {
-                    const skillHost = $('skill-tabs');
-                    if (skillHost) delete skillHost.dataset.sig;
-                    $('skills-tray')?.classList.remove('is-focused');
-                    updateProseWorkspace();
-                    if (items.length === 1) {
-                        await selectItem(items[0].kind, items[0].key);
-                    } else {
-                        renderSkillsTray();
-                        scheduleGroupConnector();
-                    }
-                    return;
-                }
-                if (items.length === 1) {
-                    await selectItem(items[0].kind, items[0].key);
-                }
-                if (currentSection === 'prompt') {
-                    ensurePromptPartTabsBuilt();
-                    activateAnatomyTab(null);
-                }
+                await openConfigSection(btn.dataset.section);
             });
+        });
+        document.querySelectorAll('#ux-section-pills .ux-pill').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                await openConfigSection(btn.dataset.section);
+            });
+        });
+        $('cfg-editor-empty')?.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-empty-section]');
+            if (!btn) return;
+            await openConfigSection(btn.dataset.emptySection);
+        });
+        $('ux-group-select')?.addEventListener('change', (e) => {
+            selectGroup(e.target.value);
+        });
+        $('ux-agent-select')?.addEventListener('change', (e) => {
+            if (e.target.value) selectAgent(e.target.value);
         });
 
         $('cfg-search')?.addEventListener('input', renderList);
@@ -3476,8 +3783,11 @@
             noteToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
         };
         try {
-            applyNoteCollapsed(localStorage.getItem(NOTE_COLLAPSE_KEY) === '1');
-        } catch (_) { /* ignore */ }
+            // Default colapsada (mock UX); solo expandir si el usuario la dejó abierta.
+            applyNoteCollapsed(localStorage.getItem(NOTE_COLLAPSE_KEY) !== '0');
+        } catch (_) {
+            applyNoteCollapsed(true);
+        }
         noteToggle?.addEventListener('click', () => {
             const next = !noteBar?.classList.contains('is-collapsed');
             applyNoteCollapsed(next);
@@ -3509,10 +3819,12 @@
             persistEditorDraft();
         });
         window.addEventListener('resize', scheduleGroupConnector);
+        wireFmtToolbar();
     }
 
     async function boot() {
         bindUi();
+        document.body.classList.add('ux-compact');
         document.body.dataset.mode = 'agent';
         if (!sessionReady) return;
         if (bootInFlight) return;

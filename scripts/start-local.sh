@@ -41,9 +41,13 @@ echo "  Auditoría:  http://localhost:8000/auditoria/"
 echo "  Persistencia: Postgres (Docker) — ${DATABASE_URL}"
 
 WATCH_PID=""
+BROWSER_PID=""
 cleanup_local() {
   if [[ -n "${WATCH_PID}" ]]; then
     kill "${WATCH_PID}" 2>/dev/null || true
+  fi
+  if [[ -n "${BROWSER_PID}" ]]; then
+    kill "${BROWSER_PID}" 2>/dev/null || true
   fi
 }
 trap cleanup_local EXIT INT TERM
@@ -56,6 +60,31 @@ if [[ "${CONFIG_FILE_SYNC_WATCH:-1}" != "0" ]]; then
   WATCH_PID=$!
 else
   echo "  Config watch: OFF"
+fi
+
+# Abre /auditoria/ con sesión (vault ~/Backups/... o SMOKE_*). Off: OPEN_AUDIT_BROWSER=0
+# También prod: OPEN_AUDIT_BROWSER_PROD=1
+OPEN_AUDIT_BROWSER="${OPEN_AUDIT_BROWSER:-1}"
+OPEN_AUDIT_BROWSER_PROD="${OPEN_AUDIT_BROWSER_PROD:-0}"
+if [[ "${OPEN_AUDIT_BROWSER}" == "1" ]]; then
+  BROWSER_ARGS=(--local --prefer-system)
+  if [[ "${OPEN_AUDIT_BROWSER_PROD}" == "1" ]]; then
+    BROWSER_ARGS+=(--prod)
+    echo "  Browser: local (+prod) con sesión tras /health (off: OPEN_AUDIT_BROWSER=0)"
+  else
+    echo "  Browser: local /auditoria/ con sesión tras /health (off: OPEN_AUDIT_BROWSER=0; +prod: OPEN_AUDIT_BROWSER_PROD=1)"
+  fi
+  (
+    for _ in $(seq 1 90); do
+      if curl -sf "http://127.0.0.1:8000/health" >/dev/null 2>&1; then
+        exec "$ROOT/.venv/bin/python" "$ROOT/scripts/open_audit_browser.py" "${BROWSER_ARGS[@]}"
+      fi
+      sleep 1
+    done
+    echo "WARN: timeout esperando /health para abrir el browser de auditoría" >&2
+    exit 1
+  ) &
+  BROWSER_PID=$!
 fi
 
 echo "Ctrl+C para detener (la DB Docker sigue corriendo; para bajarla: (cd deploy && docker compose --env-file /dev/null stop db))."

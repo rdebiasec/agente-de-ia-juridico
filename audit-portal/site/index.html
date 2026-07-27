@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Editor de configuración del asistente penal-víctimas — por agente: prompts, skills y guardrails">
-    <title>DBX Solutions - Editor de configuración</title>
+    <title>Lexiatek - Editor de configuración</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="audit-portal.css?v=4.1">
@@ -62,52 +62,61 @@
         #audit-app-root main {
             background: var(--ui-surface);
         }
-        #cfg-workspace {
-            width: 100%;
-        }
-        /* Prompt / Skills / Guardrails (+ sistema): tarjeta centrada con gutters #1e293b.
-           main es flex-col; sin align-items:center el hijo se estira a full-bleed. */
-        body[data-config-active="true"] #audit-app-root > .flex.flex-1,
-        body[data-config-active="true"] #audit-app-root main {
+        /* Editor card: centered over #1e293b gutters — no divider lines */
+        #audit-app-root > .flex.flex-1,
+        #audit-app-root main {
             background: #1e293b !important;
         }
-        body[data-config-active="true"] #audit-app-root main {
+        #audit-app-root main {
             align-items: center;
             padding-inline: 0;
         }
-        body[data-config-active="true"] #agent-tabs-bar {
+        #agent-tabs-bar {
             background: #1e293b !important;
-            border-bottom-color: #334155;
+            border-bottom: none !important;
         }
-        body[data-config-active="true"] #cfg-workspace {
+        #cfg-workspace {
             box-sizing: border-box;
-            width: min(calc(100% - 2.5rem), 72rem);
-            max-width: calc(100% - 2.5rem);
-            flex: 0 1 auto;
+            width: min(calc(100% - 5rem), 56rem);
+            max-width: min(calc(100% - 5rem), 56rem);
+            flex: 1 1 auto;
             align-self: center;
-            margin: clamp(1rem, 2.5vw, 2rem) auto;
-            border: 1px solid var(--ui-border-strong);
+            /* Uniform top + sides; a bit less below */
+            margin: 1.25rem auto 0.7rem;
+            border: none;
             border-radius: 1.1rem;
             overflow: hidden;
-            background: var(--ui-surface-inset);
-            box-shadow: 0 1.25rem 3rem rgba(2, 6, 23, 0.28);
+            background: #0f172a;
+            box-shadow: none;
         }
-        body[data-config-active="true"] #cfg-workspace .cfg-compose {
-            background: #172033;
+        #cfg-toolbar {
+            border-bottom: none !important;
+            background: #0f172a !important;
         }
-        body[data-config-active="true"] #cfg-form-anatomy.is-workspace,
-        body[data-config-active="true"] #cfg-form-skill.is-workspace,
-        body[data-config-active="true"] #cfg-form-guard.is-workspace,
-        body[data-config-active="true"] #cfg-form-prose.is-workspace {
+        #cfg-note-bar {
+            border-bottom: none !important;
+            background: #0f172a !important;
+        }
+        #cfg-workspace .cfg-compose {
+            background: #0f172a;
+            border-top: none !important;
+        }
+        #cfg-editor-empty {
+            border: none;
+        }
+        #cfg-form-anatomy.is-workspace,
+        #cfg-form-skill.is-workspace,
+        #cfg-form-guard.is-workspace,
+        #cfg-form-prose.is-workspace {
             width: 100%;
             max-width: none;
             margin-inline: 0;
         }
         @media (max-width: 640px) {
-            body[data-config-active="true"] #cfg-workspace {
-                width: calc(100% - 1rem);
-                max-width: calc(100% - 1rem);
-                margin: 0.5rem auto 1rem;
+            #cfg-workspace {
+                width: calc(100% - 1.25rem);
+                max-width: calc(100% - 1.25rem);
+                margin: 0.75rem auto 0.5rem;
                 border-radius: 0.85rem;
             }
         }
@@ -125,8 +134,8 @@
         .diff-del { background: #7f1d1d; color: #fecaca; }
 
         .cfg-compose {
-            background: var(--ui-surface);
-            border-top: 1px solid var(--ui-border);
+            background: #0f172a;
+            border-top: none;
             padding: 1.25rem 1.25rem 1.75rem;
             color: var(--ui-text);
         }
@@ -312,6 +321,66 @@
         }
         .cfg-anatomy-input { min-height: 2.5rem; }
         .cfg-rich-wrap { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+        .cfg-fmt-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 0 0 1rem;
+            padding: 0.4rem 0.45rem;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            background: rgba(15, 23, 42, 0.92);
+            position: sticky;
+            top: 0;
+            z-index: 8;
+        }
+        .cfg-fmt-bar[data-disabled="true"] {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        .cfg-fmt-btn {
+            min-width: 2rem;
+            height: 2rem;
+            padding: 0 0.55rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #cbd5e1;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+        .cfg-fmt-btn:hover {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+        .cfg-fmt-btn.is-active {
+            background: #1e3a5f;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        .cfg-fmt-sep {
+            width: 1px;
+            height: 1.35rem;
+            background: #334155;
+            margin: 0 0.15rem;
+        }
+        .cfg-fmt-hint {
+            margin-left: auto;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #64748b;
+            padding-right: 0.25rem;
+        }
         .cfg-anatomy-nav {
             display: flex;
             flex-wrap: wrap;
@@ -558,6 +627,120 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Room for tray-label chips sitting fully above each layer */
+            padding-top: 1.35rem;
+        }
+        /* Compact UX (mock): breadcrumb + pills; hide tall tray tree */
+        body.ux-compact #agent-tabs-bar {
+            padding: 0.65rem 0.75rem 0.35rem;
+            align-items: stretch;
+        }
+        body.ux-compact #agent-tabs-bar > .group-tray,
+        body.ux-compact #agent-tabs-bar > .agent-tray,
+        body.ux-compact #agent-tabs-bar > .section-tray,
+        body.ux-compact #agent-tabs-bar > .prompt-tray,
+        body.ux-compact #agent-tabs-bar > .skills-tray,
+        body.ux-compact #agent-tabs-bar > .guard-tray,
+        body.ux-compact #group-connector {
+            display: none !important;
+        }
+        #ux-nav {
+            display: none;
+            width: min(100%, 56rem);
+            margin: 0 auto;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+        body.ux-compact #ux-nav { display: flex; }
+        .ux-crumb-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.65rem;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid #334155;
+            border-radius: 0.85rem;
+        }
+        .ux-crumb-bar select {
+            appearance: none;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            padding: 0.35rem 1.6rem 0.35rem 0.55rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%3494a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.45rem center;
+            cursor: pointer;
+        }
+        .ux-crumb-sep {
+            color: #64748b;
+            font-size: 0.65rem;
+            user-select: none;
+        }
+        .ux-crumb-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #94a3b8;
+            padding: 0.2rem 0.35rem;
+        }
+        .ux-crumb-label.is-current {
+            color: #fff;
+            background: #1e3a5f;
+            border: 1px solid #3b82f6;
+            border-radius: 0.45rem;
+            padding: 0.28rem 0.55rem;
+        }
+        .ux-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .ux-pill-row.hidden { display: none !important; }
+        .ux-pill {
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #94a3b8;
+            border-radius: 999px;
+            padding: 0.38rem 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .ux-pill:hover { border-color: #64748b; color: #fff; }
+        .ux-pill.active {
+            background: #3b82f6;
+            border-color: #60a5fa;
+            color: #fff;
+        }
+        #cfg-editor-empty .empty-ctas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        #cfg-editor-empty .empty-ctas button {
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 0.75rem;
+            padding: 0.7rem 1.05rem;
+            font-weight: 800;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            min-width: 8rem;
+        }
+        #cfg-editor-empty .empty-ctas button:hover {
+            border-color: #60a5fa;
+            background: #1e3a5f;
         }
         .group-tray,
         .agent-tray,
@@ -567,9 +750,11 @@
         .skills-tray {
             position: relative;
             z-index: 3;
+            overflow: visible;
             margin-left: auto;
             margin-right: auto;
-            padding: 0.85rem 0.75rem 0.55rem;
+            /* Equal inset on all 4 sides for tabs / content inside the layer */
+            padding: 0.9rem;
             border: 1px solid #334155;
             border-radius: 1rem;
             background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(2, 6, 23, 0.78));
@@ -581,21 +766,19 @@
         }
         .agent-tray {
             z-index: 1;
-            margin-top: 2.4rem;
+            margin-top: 2.75rem;
             width: fit-content;
             max-width: 100%;
-            padding: 0.85rem 0.75rem 0.55rem;
             align-self: center;
         }
         .agent-tray #agent-tabs {
-            padding-top: 0.35rem;
             justify-content: center;
             flex-wrap: nowrap;
             width: 100%;
         }
         .section-tray {
             z-index: 1;
-            margin-top: 2.4rem;
+            margin-top: 2.75rem;
             width: fit-content;
             max-width: 100%;
             align-self: center;
@@ -603,11 +786,10 @@
         .section-tray.hidden { display: none; }
         .guard-tray {
             z-index: 1;
-            margin-top: 2.4rem;
+            margin-top: 2.75rem;
             width: min(100%, 42rem);
             max-width: 100%;
             align-self: center;
-            padding-bottom: 0.85rem;
         }
         .guard-tray.is-focused {
             width: min(100%, 34rem);
@@ -616,18 +798,17 @@
         .guard-tray.hidden { display: none; }
         .prompt-tray {
             z-index: 1;
-            margin-top: 2.4rem;
+            margin-top: 2.75rem;
             width: fit-content;
             max-width: 100%;
             align-self: center;
         }
         .skills-tray {
             z-index: 1;
-            margin-top: 2.4rem;
+            margin-top: 2.75rem;
             width: min(100%, 42rem);
             max-width: 100%;
             align-self: center;
-            padding-bottom: 0.85rem;
         }
         .skills-tray.is-focused {
             width: min(100%, 34rem);
@@ -644,9 +825,7 @@
             align-items: center;
             justify-content: space-evenly;
             gap: 2rem;
-            padding-top: 0.35rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding: 0;
             min-width: 22rem;
         }
         #prompt-part-tabs {
@@ -671,7 +850,7 @@
             max-height: min(58vh, 36rem);
             overflow-x: hidden;
             overflow-y: auto;
-            padding: 0.85rem 0.9rem 0.55rem;
+            padding: 0;
             scrollbar-gutter: stable;
         }
         #skill-tabs::-webkit-scrollbar,
@@ -766,6 +945,7 @@
             border-color: rgba(251, 191, 36, 0.35);
             color: var(--g-qa-child);
         }
+        /* Layer title chips — fully above the tray (no border overlay) */
         .tray-label,
         .agent-tray-label,
         .section-tray-label,
@@ -775,31 +955,34 @@
             position: absolute;
             top: 0;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, calc(-100% - 0.35rem));
             margin: 0;
-            padding: 0.18rem 0.55rem;
-            font-size: 0.58rem;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.5rem;
             font-weight: 700;
-            letter-spacing: 0.14em;
-            line-height: 1;
+            letter-spacing: 0.11em;
+            line-height: 1.15;
             text-transform: uppercase;
             white-space: nowrap;
             color: #94a3b8;
             background: #0f172a;
             border: 1px solid #475569;
             border-radius: 999px;
-            z-index: 5;
+            z-index: 6;
+            pointer-events: none;
+            box-shadow: none;
         }
-        /* White chips only for the three top-level tile tags */
+        /* White chips for the three top-level tile tags */
         .tray-label,
         .agent-tray-label,
         .section-tray-label {
-            padding: 0.22rem 0.58rem;
-            font-size: 0.66rem;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.5rem;
             letter-spacing: 0.1em;
             color: var(--ui-tag-text);
             background: var(--ui-tag-bg);
             border-color: var(--ui-tag-border);
+            box-shadow: none;
         }
         .guard-tray[data-group="coordinacion"] .guard-tray-label,
         .prompt-tray[data-group="coordinacion"] .prompt-tray-label,
@@ -828,14 +1011,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
-            min-height: 2.5rem;
-            padding-top: 0.35rem;
+            min-height: 2.25rem;
+            padding: 0;
         }
         #group-tabs {
             justify-content: space-evenly;
             gap: 2.5rem;
-            padding-left: 1.25rem;
-            padding-right: 1.25rem;
         }
 
         /* Connector tree: selected group → each agent of that group */
@@ -1099,12 +1280,12 @@
         body[data-mode="sistema"] #agent-tabs-bar { display: none !important; }
     </style>
 </head>
-<body class="text-slate-800 flex flex-col min-h-screen">
+<body class="text-slate-800 flex flex-col min-h-screen ux-compact">
 
     <div id="audit-auth-gate" class="fixed inset-0 z-[100] gate-checking">
         <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 px-6 py-6 text-white text-center">
-                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wider text-2xl mb-3">dbx</div>
+                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wide text-xl mb-3">Lexiatek</div>
                 <h2 class="text-xl font-bold ui-title">Entrar al editor del despacho</h2>
                 <p class="text-sm text-slate-400 mt-2">Revise e instruya cómo trabaja el asistente en sus casos</p>
             </div>
@@ -1150,7 +1331,7 @@
     <div id="audit-app-root" class="flex flex-col min-h-screen flex-1 app-gated">
         <header class="bg-slate-900 text-white px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 sticky top-0 z-40">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wider text-xl">dbx</div>
+                <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wide text-lg">Lexiatek</div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white">Instrucciones del asistente</h1>
                     <p class="text-xs text-slate-400 mt-0.5 hidden md:block">La IA propone · usted revisa y aprueba</p>
@@ -1164,7 +1345,26 @@
             </div>
         </header>
 
-        <div id="agent-tabs-bar" class="bg-slate-900 border-b border-slate-800 px-3 md:px-5 py-3">
+        <div id="agent-tabs-bar" class="bg-slate-900 px-3 md:px-5 py-3">
+            <div id="ux-nav" aria-label="Navegación compacta de configuración">
+                <div class="ux-crumb-bar">
+                    <label class="sr-only" for="ux-group-select">Equipo</label>
+                    <select id="ux-group-select" aria-label="Equipo de agentes"></select>
+                    <span class="ux-crumb-sep" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <label class="sr-only" for="ux-agent-select">Agente</label>
+                    <select id="ux-agent-select" aria-label="Agente"></select>
+                    <span class="ux-crumb-sep" id="ux-crumb-sep-section" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <span class="ux-crumb-label" id="ux-crumb-section">—</span>
+                    <span class="ux-crumb-sep hidden" id="ux-crumb-sep-part" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <span class="ux-crumb-label hidden" id="ux-crumb-part">—</span>
+                </div>
+                <div class="ux-pill-row" id="ux-section-pills" role="tablist" aria-label="Configuración">
+                    <button type="button" class="ux-pill" data-section="prompt">Prompt</button>
+                    <button type="button" class="ux-pill" data-section="skills">Skills</button>
+                    <button type="button" class="ux-pill" data-section="guardrails">Guardrails</button>
+                </div>
+                <div class="ux-pill-row hidden" id="ux-part-pills" role="tablist" aria-label="Detalle"></div>
+            </div>
             <div class="group-tray" id="group-tray" data-group="coordinacion">
                 <p class="tray-label">Equipos de Agentes</p>
                 <div id="group-tabs" role="tablist" aria-label="Equipos de agentes"></div>
@@ -1203,20 +1403,9 @@
         </div>
 
         <div class="flex flex-1 min-h-0">
-            <aside id="cfg-sidebar" class="w-80 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col sticky top-[73px] h-[calc(100vh-73px)]">
-                <div id="cfg-list-header" class="p-3 border-b border-slate-700 space-y-2 hidden">
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                        <input id="cfg-search" type="search" placeholder="Buscar…" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-600 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <p id="cfg-list-count" class="text-xs text-slate-500 px-1 uppercase tracking-wide">0 ítems</p>
-                </div>
-                <div id="cfg-item-list" class="flex-1 overflow-y-auto p-2 space-y-1.5"></div>
-            </aside>
-
             <main class="flex-1 flex flex-col min-w-0" style="background: #1e293b;">
                 <div id="cfg-workspace">
-                    <div id="cfg-toolbar" class="border-b border-slate-700 px-4 md:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900">
+                    <div id="cfg-toolbar" class="px-4 md:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900">
                         <div>
                             <p id="cfg-current-label" class="text-base font-bold text-slate-100">Seleccione un ítem</p>
                             <p id="cfg-meta" class="hidden text-xs text-slate-400 mt-0.5">—</p>
@@ -1235,7 +1424,7 @@
                         </div>
                     </div>
                     <div id="cfg-editor-panel">
-                        <div id="cfg-note-bar" class="border-b border-slate-700 bg-slate-900">
+                        <div id="cfg-note-bar" class="bg-slate-900">
                             <div class="px-4 md:px-6 py-2 flex items-center gap-2">
                                 <button type="button" id="cfg-note-toggle" class="cfg-note-toggle" aria-expanded="true" aria-controls="cfg-note-body" title="Mostrar u ocultar la nota de versión">
                                     <i class="fa-solid fa-chevron-down cfg-note-chevron" aria-hidden="true"></i>
@@ -1249,6 +1438,20 @@
                             </div>
                         </div>
                         <div class="cfg-compose">
+                        <div id="cfg-fmt-bar" class="cfg-fmt-bar" role="toolbar" aria-label="Herramientas de texto" data-disabled="true">
+                            <button type="button" class="cfg-fmt-btn" data-fmt="bold" title="Negrita" aria-label="Negrita"><i class="fa-solid fa-bold" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="italic" title="Cursiva" aria-label="Cursiva"><i class="fa-solid fa-italic" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="code" title="Código / término" aria-label="Código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-sep" aria-hidden="true"></span>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="h3" title="Título" aria-label="Título"><i class="fa-solid fa-heading" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="ul" title="Lista con viñetas" aria-label="Lista con viñetas"><i class="fa-solid fa-list-ul" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="ol" title="Lista numerada" aria-label="Lista numerada"><i class="fa-solid fa-list-ol" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-sep" aria-hidden="true"></span>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="undo" title="Deshacer" aria-label="Deshacer"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="redo" title="Rehacer" aria-label="Rehacer"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="clear" title="Quitar formato" aria-label="Quitar formato"><i class="fa-solid fa-text-slash" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-hint">Texto</span>
+                        </div>
                         <div id="cfg-form-anatomy" class="hidden is-workspace">
                             <p id="cfg-prompt-pick" class="hidden">Elija un apartado del Prompt arriba para editarlo con espacio amplio.</p>
                             <nav id="cfg-anatomy-nav" class="cfg-anatomy-nav hidden" role="tablist" aria-label="Apartados de la instrucción"></nav>
@@ -1288,9 +1491,14 @@
                         </div>
                         </div>
                     </div>
-                    <p id="cfg-editor-empty" class="hidden px-4 md:px-6 py-10 text-sm text-slate-400 text-center">
-                        Elija <strong>Prompt</strong>, <strong>Skills</strong> o <strong>Guardrails</strong> arriba; luego el apartado, skill o clase (Input / Output / Tools).
-                    </p>
+                    <div id="cfg-editor-empty" class="hidden px-4 md:px-6 py-10 text-sm text-slate-400 text-center">
+                        <p class="mb-1">¿Qué quiere configurar de este agente?</p>
+                        <div class="empty-ctas">
+                            <button type="button" data-empty-section="prompt">Prompt</button>
+                            <button type="button" data-empty-section="skills">Skills</button>
+                            <button type="button" data-empty-section="guardrails">Guardrails</button>
+                        </div>
+                    </div>
                 </div>
                 <p id="cfg-toast" class="hidden fixed bottom-4 right-4 max-w-sm bg-slate-950 text-white text-sm px-4 py-3 rounded-xl shadow-xl z-50 border border-slate-700" role="status"></p>
             </main>

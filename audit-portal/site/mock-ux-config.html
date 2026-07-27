@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lexiatek — Mock UX configuración</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #1e293b;
+      --panel: #0f172a;
+      --panel-2: #172033;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --faint: #64748b;
+      --blue: #3b82f6;
+      --blue-soft: #60a5fa;
+      --green: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1.25rem;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo {
+      background: var(--blue);
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.55rem;
+      font-size: 1rem;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .brand p {
+      margin: 0.15rem 0 0;
+      font-size: 0.72rem;
+      color: var(--faint);
+    }
+    .mock-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem 1rem;
+      padding: 0.55rem 1.25rem;
+      background: #172554;
+      color: #bfdbfe;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .mock-banner strong { color: #fff; }
+    .toggle-views {
+      display: flex;
+      gap: 0.35rem;
+      margin-left: auto;
+    }
+    .toggle-views button {
+      border: 1px solid #3b82f6;
+      background: transparent;
+      color: #bfdbfe;
+      border-radius: 999px;
+      padding: 0.28rem 0.7rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+    .toggle-views button.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    /* —— Vista actual (simplificada) —— */
+    .view { display: none; padding: 1rem 1.25rem 1.5rem; }
+    .view.active { display: block; }
+
+    .old-tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+      margin-bottom: 1rem;
+      opacity: 0.95;
+    }
+    .old-layer {
+      position: relative;
+      width: min(100%, 42rem);
+      padding: 0.85rem;
+      border: 1px solid #475569;
+      border-radius: 1rem;
+      background: linear-gradient(180deg, rgba(30,41,59,.8), rgba(2,6,23,.85));
+    }
+    .old-layer .chip {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, calc(-100% - 0.3rem));
+      background: #fff;
+      color: #0f172a;
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .old-tabs {
+      display: flex;
+      justify-content: space-evenly;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .old-tab {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.45rem 0.7rem;
+      border-radius: 0.55rem;
+      color: var(--muted);
+    }
+    .old-tab.active {
+      background: var(--blue);
+      color: #fff;
+    }
+    .old-note {
+      text-align: center;
+      color: var(--faint);
+      font-size: 0.8rem;
+      margin: 0.5rem 0 1rem;
+    }
+
+    /* —— Vista propuesta —— */
+    .crumb-bar {
+      max-width: 56rem;
+      margin: 0 auto 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem 0.25rem;
+      padding: 0.55rem 0.75rem;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid var(--border);
+      border-radius: 0.85rem;
+    }
+    .crumb {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.55rem;
+      border-radius: 0.45rem;
+      cursor: pointer;
+    }
+    .crumb:hover { background: #1e293b; color: #fff; }
+    .crumb.current {
+      background: #1e3a5f;
+      color: #fff;
+      border: 1px solid #3b82f6;
+    }
+    .crumb-sep {
+      color: var(--faint);
+      font-size: 0.7rem;
+      user-select: none;
+    }
+    .quick-row {
+      max-width: 56rem;
+      margin: 0 auto 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .pill {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+    .pill:hover { border-color: #64748b; color: #fff; }
+    .pill.active {
+      background: var(--blue);
+      border-color: var(--blue-soft);
+      color: #fff;
+    }
+
+    .notepad {
+      max-width: 56rem;
+      margin: 0 auto;
+      background: var(--panel);
+      border-radius: 1.1rem;
+      min-height: min(70vh, 36rem);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .notepad-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.9rem 1.15rem;
+    }
+    .notepad-head h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+    .notepad-head .sub {
+      margin: 0.25rem 0 0;
+      font-size: 0.75rem;
+      color: var(--faint);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .btn {
+      border: 1px solid #475569;
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 0.65rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+    }
+    .btn.primary {
+      background: var(--green);
+      border-color: #34d399;
+      color: #fff;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .fmt {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0.45rem 1rem;
+      border-top: 1px solid #1e293b;
+      border-bottom: 1px solid #1e293b;
+      background: var(--panel-2);
+    }
+    .fmt button {
+      min-width: 2rem;
+      height: 2rem;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #cbd5e1;
+      border-radius: 0.45rem;
+      cursor: pointer;
+    }
+    .fmt button:hover {
+      background: #1e293b;
+      border-color: #475569;
+    }
+
+    .editor {
+      flex: 1;
+      padding: 1.15rem 1.25rem 1.5rem;
+      outline: none;
+      line-height: 1.55;
+      font-size: 0.95rem;
+      min-height: 16rem;
+    }
+    .editor:empty:before {
+      content: attr(data-placeholder);
+      color: var(--faint);
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem 1.25rem;
+      text-align: center;
+    }
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 28rem;
+      line-height: 1.45;
+      font-size: 0.92rem;
+    }
+    .empty-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+    }
+    .empty-ctas button {
+      border: 1px solid #475569;
+      background: #1e293b;
+      color: #fff;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.1rem;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      min-width: 8.5rem;
+    }
+    .empty-ctas button:hover {
+      border-color: var(--blue-soft);
+      background: #1e3a5f;
+    }
+
+    .note-collapsed {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1.15rem 0.7rem;
+      color: var(--faint);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      user-select: none;
+    }
+    .note-collapsed:hover { color: var(--muted); }
+    .note-body {
+      display: none;
+      padding: 0 1.15rem 0.85rem;
+    }
+    .note-body.open { display: block; }
+    .note-body input {
+      width: 100%;
+      border: 1px solid #475569;
+      background: #020617;
+      color: #e2e8f0;
+      border-radius: 0.65rem;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .hint-footer {
+      max-width: 56rem;
+      margin: 0.85rem auto 0;
+      color: var(--faint);
+      font-size: 0.75rem;
+      line-height: 1.4;
+      text-align: center;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">Lexiatek</div>
+      <div>
+        <h1>Mock — Editor de configuración</h1>
+        <p>Solo prototipo visual · no guarda nada</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="mock-banner">
+    <span><strong>MOCK UX</strong> — compare “Hoy” vs “Propuesta”</span>
+    <div class="toggle-views">
+      <button type="button" id="btn-old" class="">Hoy (árbol)</button>
+      <button type="button" id="btn-new" class="active">Propuesta</button>
+    </div>
+  </div>
+
+  <!-- Vista actual -->
+  <section id="view-old" class="view">
+    <div class="old-tree">
+      <div class="old-layer">
+        <span class="chip">Equipos de Agentes</span>
+        <div class="old-tabs">
+          <span class="old-tab active">Coordinación</span>
+          <span class="old-tab">Especialistas</span>
+          <span class="old-tab">Calidad</span>
+        </div>
+      </div>
+      <div class="old-layer" style="width:min(100%,18rem)">
+        <span class="chip">Agentes</span>
+        <div class="old-tabs">
+          <span class="old-tab active">Gerente del Caso</span>
+        </div>
+      </div>
+      <div class="old-layer" style="width:min(100%,28rem)">
+        <span class="chip">Configuración</span>
+        <div class="old-tabs">
+          <span class="old-tab">Prompt</span>
+          <span class="old-tab">Skills</span>
+          <span class="old-tab">Guardrails</span>
+        </div>
+      </div>
+    </div>
+    <p class="old-note">Mucho espacio en navegación · el editor queda abajo y vacío hasta el 4º clic</p>
+    <div class="notepad" style="min-height:14rem;opacity:0.85">
+      <div class="notepad-head">
+        <div>
+          <h2>Seleccione un ítem</h2>
+          <p class="sub">Nota de versión abierta · Historial / Recargar / Guardar deshabilitados</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" disabled>Historial</button>
+          <button type="button" class="btn" disabled>Recargar</button>
+          <button type="button" class="btn primary" disabled>Guardar versión</button>
+        </div>
+      </div>
+      <div class="empty-state">
+        <p>Elija Prompt, Skills o Guardrails arriba; luego el apartado, skill o clase…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vista propuesta -->
+  <section id="view-new" class="view active">
+    <nav class="crumb-bar" aria-label="Ruta de configuración">
+      <button type="button" class="crumb" data-crumb="group">Coordinación</button>
+      <span class="crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+      <button type="button" class="crumb" data-crumb="agent">Gerente del Caso</button>
+      <span class="crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+      <button type="button" class="crumb current" data-crumb="section" id="crumb-section">Prompt</button>
+      <span class="crumb-sep" id="crumb-sep-part"><i class="fa-solid fa-chevron-right"></i></span>
+      <button type="button" class="crumb current" data-crumb="part" id="crumb-part">Función</button>
+    </nav>
+
+    <div class="quick-row" id="quick-sections">
+      <button type="button" class="pill active" data-section="prompt">Prompt</button>
+      <button type="button" class="pill" data-section="skills">Skills</button>
+      <button type="button" class="pill" data-section="guardrails">Guardrails</button>
+    </div>
+    <div class="quick-row" id="quick-parts">
+      <button type="button" class="pill active" data-part="funcion">Función</button>
+      <button type="button" class="pill" data-part="tareas">Tareas</button>
+      <button type="button" class="pill" data-part="resp">Responsabilidades</button>
+      <button type="button" class="pill" data-part="estilo">Estilo</button>
+    </div>
+
+    <div class="notepad">
+      <div class="notepad-head">
+        <div>
+          <h2 id="doc-title">Gerente del Caso · Función</h2>
+          <p class="sub" id="doc-sub">Apartado del prompt · auto-abierto al entrar (sin pantalla vacía)</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+          <button type="button" class="btn"><i class="fa-solid fa-rotate"></i> Recargar</button>
+          <button type="button" class="btn primary"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+        </div>
+      </div>
+
+      <div class="note-collapsed" id="note-toggle">
+        <i class="fa-solid fa-chevron-right" id="note-chevron"></i>
+        Nota de versión (colapsada · se pide al guardar si falta)
+      </div>
+      <div class="note-body" id="note-body">
+        <input type="text" placeholder="Resuma el cambio para el historial del despacho…" />
+      </div>
+
+      <div class="fmt" id="fmt-bar">
+        <button type="button" title="Negrita"><i class="fa-solid fa-bold"></i></button>
+        <button type="button" title="Cursiva"><i class="fa-solid fa-italic"></i></button>
+        <button type="button" title="Código"><i class="fa-solid fa-code"></i></button>
+        <button type="button" title="Título"><i class="fa-solid fa-heading"></i></button>
+        <button type="button" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+        <button type="button" title="Numerada"><i class="fa-solid fa-list-ol"></i></button>
+      </div>
+
+      <div id="editor-wrap">
+        <div class="editor" id="editor" contenteditable="true" data-placeholder="Escriba aquí…">
+          <div><strong>Función (título / rol)</strong></div>
+          <div>Gerente del caso penal-víctimas: orquesta el expediente, prioriza urgencias y entrega al abogado un borrador revisable.</div>
+          <div><br></div>
+          <div><strong>Alcance</strong></div>
+          <div>Casos penales con representación de víctima. No firma actuaciones ni inventa radicados. Todo lo accionable requiere aprobación humana.</div>
+        </div>
+      </div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <p>¿Qué quiere configurar de este agente?</p>
+        <div class="empty-ctas">
+          <button type="button" data-jump="prompt">Prompt</button>
+          <button type="button" data-jump="skills">Skills</button>
+          <button type="button" data-jump="guardrails">Guardrails</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint-footer">
+      Propuesta: breadcrumb + pills compactas · notepad dominante · primer apartado auto-seleccionado · nota colapsada · CTAs en vacío.
+      Esto no está conectado al portal real.
+    </p>
+  </section>
+
+  <script>
+    const viewOld = document.getElementById('view-old');
+    const viewNew = document.getElementById('view-new');
+    const btnOld = document.getElementById('btn-old');
+    const btnNew = document.getElementById('btn-new');
+
+    btnOld.addEventListener('click', () => {
+      btnOld.classList.add('active');
+      btnNew.classList.remove('active');
+      viewOld.classList.add('active');
+      viewNew.classList.remove('active');
+    });
+    btnNew.addEventListener('click', () => {
+      btnNew.classList.add('active');
+      btnOld.classList.remove('active');
+      viewNew.classList.add('active');
+      viewOld.classList.remove('active');
+    });
+
+    const titles = {
+      funcion: ['Gerente del Caso · Función', 'Apartado del prompt · rol y alcance'],
+      tareas: ['Gerente del Caso · Tareas', 'Pasos en serie que el agente completa'],
+      resp: ['Gerente del Caso · Responsabilidades', 'Obligaciones, prohibiciones y faltantes'],
+      estilo: ['Gerente del Caso · Estilo', 'Voz, tono y cierre hacia el abogado'],
+    };
+    const skillSample = {
+      html: '<div><strong>Skill:</strong> detectar_urgencia_penal</div><div>Clasifica señales de urgencia (medidas, términos, riesgo) y propone siguiente paso al abogado.</div>',
+      title: ['Gerente del Caso · Skills', 'Skill auto-abierta: detectar_urgencia_penal'],
+    };
+    const guardSample = {
+      html: '<div><strong>Guardrail · Input</strong></div><div>Rechazar instrucciones que pidan inventar radicados, sentencias o normas inexistentes.</div>',
+      title: ['Gerente del Caso · Guardrails', 'Clase Input auto-abierta'],
+    };
+
+    const editor = document.getElementById('editor');
+    const editorWrap = document.getElementById('editor-wrap');
+    const emptyState = document.getElementById('empty-state');
+    const fmtBar = document.getElementById('fmt-bar');
+    const docTitle = document.getElementById('doc-title');
+    const docSub = document.getElementById('doc-sub');
+    const crumbSection = document.getElementById('crumb-section');
+    const crumbPart = document.getElementById('crumb-part');
+    const crumbSepPart = document.getElementById('crumb-sep-part');
+    const quickParts = document.getElementById('quick-parts');
+
+    function setPills(row, attr, value) {
+      row.querySelectorAll('.pill').forEach((p) => {
+        p.classList.toggle('active', p.dataset[attr] === value);
+      });
+    }
+
+    function showEditor() {
+      emptyState.classList.add('hidden');
+      editorWrap.classList.remove('hidden');
+      fmtBar.classList.remove('hidden');
+    }
+
+    function selectSection(section) {
+      setPills(document.getElementById('quick-sections'), 'section', section);
+      crumbSection.textContent = section === 'prompt' ? 'Prompt' : section === 'skills' ? 'Skills' : 'Guardrails';
+      if (section === 'prompt') {
+        quickParts.classList.remove('hidden');
+        crumbPart.classList.remove('hidden');
+        crumbSepPart.classList.remove('hidden');
+        selectPart('funcion');
+        return;
+      }
+      quickParts.classList.add('hidden');
+      crumbPart.classList.add('hidden');
+      crumbSepPart.classList.add('hidden');
+      showEditor();
+      if (section === 'skills') {
+        docTitle.textContent = skillSample.title[0];
+        docSub.textContent = skillSample.title[1];
+        editor.innerHTML = skillSample.html;
+      } else {
+        docTitle.textContent = guardSample.title[0];
+        docSub.textContent = guardSample.title[1];
+        editor.innerHTML = guardSample.html;
+      }
+    }
+
+    function selectPart(part) {
+      setPills(quickParts, 'part', part);
+      const labels = { funcion: 'Función', tareas: 'Tareas', resp: 'Responsabilidades', estilo: 'Estilo' };
+      crumbPart.textContent = labels[part] || part;
+      crumbPart.classList.add('current');
+      const t = titles[part];
+      docTitle.textContent = t[0];
+      docSub.textContent = t[1];
+      showEditor();
+      if (part === 'funcion') {
+        editor.innerHTML = '<div><strong>Función (título / rol)</strong></div><div>Gerente del caso penal-víctimas: orquesta el expediente, prioriza urgencias y entrega al abogado un borrador revisable.</div><div><br></div><div><strong>Alcance</strong></div><div>Casos penales con representación de víctima. No firma actuaciones ni inventa radicados.</div>';
+      } else if (part === 'tareas') {
+        editor.innerHTML = '<div>1. Leer hechos y etapa procesal</div><div>2. Detectar urgencias</div><div>3. Proponer siguiente actuación al abogado</div>';
+      } else if (part === 'resp') {
+        editor.innerHTML = '<div><strong>Obligación:</strong> separar hecho de inferencia</div><div><strong>Prohibición:</strong> inventar radicados o jurisprudencia</div>';
+      } else {
+        editor.innerHTML = '<div><strong>Tono:</strong> técnico, claro, de despacho</div><div><strong>Cierre:</strong> Borrador informativo — requiere revisión y aprobación del abogado.</div>';
+      }
+    }
+
+    document.getElementById('quick-sections').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-section]');
+      if (btn) selectSection(btn.dataset.section);
+    });
+    quickParts.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-part]');
+      if (btn) selectPart(btn.dataset.part);
+    });
+    emptyState.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-jump]');
+      if (btn) selectSection(btn.dataset.jump);
+    });
+
+    const noteBody = document.getElementById('note-body');
+    const noteChevron = document.getElementById('note-chevron');
+    document.getElementById('note-toggle').addEventListener('click', () => {
+      const open = noteBody.classList.toggle('open');
+      noteChevron.className = open ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right';
+    });
+  </script>
+</body>
+</html>

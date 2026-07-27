@@ -5,7 +5,7 @@ from __future__ import annotations
 CURRENT_POLICY_VERSION = "2026-07-07"
 
 DATA_CONTROLLER = {
-    "name": "DBX Solutions",
+    "name": "Lexiatek",
     "contact_email": "privacidad@dbxsolutions.com",
     "country": "Colombia",
     "retention_audit_days": 365 * 3,
