@@ -14,6 +14,23 @@ from src.auth.gate import COOKIE_NAME, auth_enabled, create_session_token, is_se
 from src.config import Settings
 
 DEV_AUDIT_FALLBACK_EMAIL = "dev@local.test"
+OPEN_AUDIT_FALLBACK_EMAIL = "editor@lexiatek.local"
+
+
+def audit_login_required(settings: Settings) -> bool:
+    """False = portal de auditoría sin gate (local y/o prod según env)."""
+    return bool(settings.audit_require_login)
+
+
+def open_audit_email(settings: Settings) -> str:
+    """Correo de trabajo cuando el portal abre sin login."""
+    candidate = normalize_audit_email(settings.dev_audit_email or OPEN_AUDIT_FALLBACK_EMAIL)
+    allow = settings.audit_email_allowlist()
+    if allow and candidate not in allow:
+        candidate = sorted(allow)[0]
+    if not is_valid_audit_email(candidate):
+        candidate = OPEN_AUDIT_FALLBACK_EMAIL
+    return candidate
 
 
 def dev_auto_login_allowed(settings: Settings) -> bool:
@@ -55,6 +72,8 @@ def dev_auto_login_redirect(request: Request, settings: Settings, *, next_url: s
 
 def dev_audit_email(settings: Settings) -> str | None:
     """Correo con el que el portal de auditoría abre sesión sola en local."""
+    if not audit_login_required(settings):
+        return open_audit_email(settings)
     if not auth_enabled(settings.site_password):
         return None
     if not dev_auto_login_allowed(settings):

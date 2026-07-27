@@ -14,7 +14,7 @@ from src.auth.audit_gate import (
     refresh_audit_session_token,
 )
 from src.auth.deps import cookie_secure, idle_seconds
-from src.auth.dev import dev_audit_email
+from src.auth.dev import audit_login_required, dev_audit_email, open_audit_email
 from src.auth.gate import auth_enabled, verify_password
 from src.compliance.pin import hash_pin, validate_pin_format, verify_pin
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
@@ -137,6 +137,15 @@ def _require_audit_email(
     audit_session: str | None = Cookie(default=None),
     settings: Settings = Depends(get_settings),
 ) -> str:
+    if not audit_login_required(settings):
+        email = open_audit_email(settings)
+        _apply_audit_cookie(
+            response,
+            create_audit_session_token(settings.session_secret, email),
+            settings,
+        )
+        request.state.audit_email = email
+        return email
     if not auth_enabled(settings.site_password):
         raise HTTPException(
             status_code=503,
@@ -591,8 +600,31 @@ async def audit_session(
     audit_session: str | None = Cookie(default=None),
     settings: Settings = Depends(get_settings),
 ):
+    if not audit_login_required(settings):
+        email = open_audit_email(settings)
+        _apply_audit_cookie(
+            response,
+            create_audit_session_token(settings.session_secret, email),
+            settings,
+        )
+        _log_access(request, action="login_open_access", email=email)
+        return {
+            "authenticated": True,
+            "email": email,
+            "auth_enabled": True,
+            "login_required": False,
+            "open_access": True,
+            "policy_version": CURRENT_POLICY_VERSION,
+        }
+
     if not auth_enabled(settings.site_password):
-        return {"authenticated": False, "email": None, "auth_enabled": False}
+        return {
+            "authenticated": False,
+            "email": None,
+            "auth_enabled": False,
+            "login_required": True,
+            "open_access": False,
+        }
 
     refreshed = refresh_audit_session_token(
         settings.session_secret,
@@ -602,7 +634,13 @@ async def audit_session(
     if not refreshed:
         dev_email = dev_audit_email(settings)
         if not dev_email:
-            return {"authenticated": False, "email": None, "auth_enabled": True}
+            return {
+                "authenticated": False,
+                "email": None,
+                "auth_enabled": True,
+                "login_required": True,
+                "open_access": False,
+            }
         _apply_audit_cookie(
             response,
             create_audit_session_token(settings.session_secret, dev_email),
@@ -613,6 +651,8 @@ async def audit_session(
             "authenticated": True,
             "email": dev_email,
             "auth_enabled": True,
+            "login_required": True,
+            "open_access": False,
             "policy_version": CURRENT_POLICY_VERSION,
             "dev_auto_login": True,
         }
@@ -626,6 +666,8 @@ async def audit_session(
         "authenticated": bool(email),
         "email": email,
         "auth_enabled": True,
+        "login_required": True,
+        "open_access": False,
         "policy_version": CURRENT_POLICY_VERSION,
     }
 

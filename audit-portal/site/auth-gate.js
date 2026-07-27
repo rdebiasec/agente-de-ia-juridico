@@ -59,7 +59,12 @@
         gate?.classList.remove('gate-checking');
         document.getElementById('audit-app-root')?.classList.remove('app-gated');
         document.body.classList.remove('overflow-hidden');
-        document.getElementById('audit-auth-logout')?.classList.remove('hidden');
+        const logout = document.getElementById('audit-auth-logout');
+        if (window.__AUDIT_OPEN_ACCESS__) {
+            logout?.classList.add('hidden');
+        } else {
+            logout?.classList.remove('hidden');
+        }
     }
 
     function showError(msg) {
@@ -111,6 +116,11 @@
         const res = await fetchAuditApi('/api/audit/session');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        window.__AUDIT_OPEN_ACCESS__ = Boolean(data.open_access) || data.login_required === false;
+        if (window.__AUDIT_OPEN_ACCESS__ && data.email) {
+            setSessionEmail(data.email);
+            return true;
+        }
         if (!data.auth_enabled) {
             throw new Error('Auditoría no disponible: configure SITE_PASSWORD en el servidor.');
         }
