@@ -653,46 +653,83 @@
         }
         body.ux-compact #ux-nav { display: flex; }
         .ux-crumb-bar {
+            position: relative;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.45rem 0.65rem;
-            background: rgba(15, 23, 42, 0.65);
+            gap: 0.35rem 0.25rem;
+            padding: 0.55rem 0.75rem;
+            background: rgba(15, 23, 42, 0.55);
             border: 1px solid #334155;
             border-radius: 0.85rem;
         }
-        .ux-crumb-bar select {
-            appearance: none;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: #e2e8f0;
+        .ux-crumb {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
             font-size: 0.78rem;
             font-weight: 700;
-            border-radius: 0.5rem;
-            padding: 0.35rem 1.6rem 0.35rem 0.55rem;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%3494a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.45rem center;
+            padding: 0.35rem 0.55rem;
+            border-radius: 0.45rem;
             cursor: pointer;
+            line-height: 1.2;
+        }
+        .ux-crumb:hover:not(:disabled) {
+            background: #1e293b;
+            color: #fff;
+        }
+        .ux-crumb.current {
+            background: #1e3a5f;
+            color: #fff;
+            border: 1px solid #3b82f6;
+        }
+        .ux-crumb:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
+        .ux-crumb-wrap {
+            position: relative;
+            display: inline-flex;
         }
         .ux-crumb-sep {
             color: #64748b;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             user-select: none;
         }
-        .ux-crumb-label {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #94a3b8;
-            padding: 0.2rem 0.35rem;
+        .ux-crumb-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 0.3rem);
+            left: 0;
+            z-index: 40;
+            min-width: 12rem;
+            max-width: 18rem;
+            max-height: 16rem;
+            overflow: auto;
+            padding: 0.35rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 28px rgba(2, 6, 23, 0.45);
         }
-        .ux-crumb-label.is-current {
-            color: #fff;
-            background: #1e3a5f;
-            border: 1px solid #3b82f6;
+        .ux-crumb-menu.open { display: block; }
+        .ux-crumb-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            color: #e2e8f0;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.45rem 0.65rem;
             border-radius: 0.45rem;
-            padding: 0.28rem 0.55rem;
+            cursor: pointer;
+        }
+        .ux-crumb-menu button:hover { background: #1e293b; }
+        .ux-crumb-menu button.active {
+            background: #1e3a5f;
+            color: #fff;
         }
         .ux-pill-row {
             display: flex;
@@ -741,6 +778,217 @@
         #cfg-editor-empty .empty-ctas button:hover {
             border-color: #60a5fa;
             background: #1e3a5f;
+        }
+
+        /* —— Vista Mapa / documentación —— */
+        .ux-view-tabs {
+            display: flex;
+            gap: 0.35rem;
+            margin-right: 0.35rem;
+        }
+        .ux-view-tab {
+            border: 1px solid #475569;
+            background: transparent;
+            color: #cbd5e1;
+            border-radius: 0.55rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .ux-view-tab:hover { border-color: #94a3b8; color: #fff; }
+        .ux-view-tab.active {
+            background: #1e3a5f;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        body.ux-map-view #ux-nav,
+        body.ux-map-view #cfg-editor-panel,
+        body.ux-map-view #cfg-editor-empty,
+        body.ux-map-view #cfg-toolbar {
+            display: none !important;
+        }
+        body.ux-map-view #cfg-map-panel { display: block; }
+        #cfg-map-panel {
+            display: none;
+            width: min(100%, 56rem);
+            margin: 0 auto;
+            padding: 1rem 1.1rem 2rem;
+            color: #e2e8f0;
+        }
+        .map-hero {
+            margin-bottom: 1.1rem;
+        }
+        .map-hero h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+        .map-hero p {
+            margin: 0.45rem 0 0;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            line-height: 1.45;
+            max-width: 42rem;
+        }
+        .map-section {
+            margin-top: 1.35rem;
+        }
+        .map-section h3 {
+            margin: 0 0 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #60a5fa;
+        }
+        .map-diagram {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 1rem 0.9rem 1.1rem;
+            overflow-x: auto;
+        }
+        .map-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0.55rem 0.35rem;
+        }
+        .map-node {
+            min-width: 7.5rem;
+            max-width: 11rem;
+            flex: 1 1 7.5rem;
+            border: 1px solid #475569;
+            background: #0f172a;
+            border-radius: 0.75rem;
+            padding: 0.65rem 0.7rem;
+            text-align: center;
+        }
+        .map-node strong {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+        .map-node span {
+            display: block;
+            font-size: 0.68rem;
+            line-height: 1.35;
+            color: #94a3b8;
+        }
+        .map-node.accent {
+            border-color: #3b82f6;
+            background: linear-gradient(180deg, #1e3a5f, #0f172a);
+        }
+        .map-node.soft {
+            border-color: #334155;
+            background: #172033;
+        }
+        .map-arrow {
+            align-self: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            padding: 0 0.1rem;
+            user-select: none;
+        }
+        .map-stack {
+            display: grid;
+            gap: 0.55rem;
+        }
+        .map-layer {
+            border: 1px dashed #475569;
+            border-radius: 0.85rem;
+            padding: 0.7rem 0.75rem;
+            background: rgba(2, 6, 23, 0.35);
+        }
+        .map-layer-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.45rem;
+        }
+        .map-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .map-chip {
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 0.28rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .map-chip.active {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+            color: #fff;
+        }
+        .map-docs {
+            display: grid;
+            gap: 0.75rem;
+        }
+        @media (min-width: 780px) {
+            .map-docs { grid-template-columns: 1fr 1fr; }
+        }
+        .map-doc {
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.65);
+            border-radius: 0.85rem;
+            padding: 0.85rem 0.95rem;
+        }
+        .map-doc h4 {
+            margin: 0 0 0.35rem;
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .map-doc p, .map-doc li {
+            margin: 0;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: #94a3b8;
+        }
+        .map-doc ul {
+            margin: 0.35rem 0 0;
+            padding-left: 1.1rem;
+        }
+        .map-doc li + li { margin-top: 0.25rem; }
+        .map-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.1rem;
+        }
+        .map-cta-row button {
+            border: 1px solid #3b82f6;
+            background: #1e3a5f;
+            color: #fff;
+            border-radius: 0.65rem;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .map-cta-row button:hover { background: #2563eb; }
+        .map-footnote {
+            margin-top: 1rem;
+            font-size: 0.72rem;
+            color: #64748b;
+            line-height: 1.4;
         }
         .group-tray,
         .agent-tray,
@@ -1338,6 +1586,10 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+                <div class="ux-view-tabs" role="tablist" aria-label="Vista del portal">
+                    <button type="button" class="ux-view-tab active" id="ux-view-editor" role="tab" aria-selected="true" data-view="editor">Editor</button>
+                    <button type="button" class="ux-view-tab" id="ux-view-map" role="tab" aria-selected="false" data-view="map">Cómo funciona</button>
+                </div>
                 <button type="button" id="btn-sistema" title="Prompt compartido del sistema (fuera de los grupos)">Prompt sistema</button>
                 <button type="button" id="audit-auth-logout" class="hidden ui-btn bg-slate-700 hover:bg-slate-600 text-white border border-slate-600">
                     <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar sesión
@@ -1347,16 +1599,20 @@
 
         <div id="agent-tabs-bar" class="bg-slate-900 px-3 md:px-5 py-3">
             <div id="ux-nav" aria-label="Navegación compacta de configuración">
-                <div class="ux-crumb-bar">
-                    <label class="sr-only" for="ux-group-select">Equipo</label>
-                    <select id="ux-group-select" aria-label="Equipo de agentes"></select>
+                <div class="ux-crumb-bar" role="navigation" aria-label="Ruta de configuración">
+                    <div class="ux-crumb-wrap">
+                        <button type="button" class="ux-crumb" id="ux-crumb-group" aria-haspopup="menu" aria-expanded="false" title="Elegir equipo">Equipo</button>
+                        <div class="ux-crumb-menu" id="ux-menu-group" role="menu" aria-label="Equipos de agentes"></div>
+                    </div>
                     <span class="ux-crumb-sep" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-                    <label class="sr-only" for="ux-agent-select">Agente</label>
-                    <select id="ux-agent-select" aria-label="Agente"></select>
+                    <div class="ux-crumb-wrap">
+                        <button type="button" class="ux-crumb" id="ux-crumb-agent" aria-haspopup="menu" aria-expanded="false" title="Elegir agente">Agente</button>
+                        <div class="ux-crumb-menu" id="ux-menu-agent" role="menu" aria-label="Agentes"></div>
+                    </div>
                     <span class="ux-crumb-sep" id="ux-crumb-sep-section" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-                    <span class="ux-crumb-label" id="ux-crumb-section">—</span>
+                    <button type="button" class="ux-crumb current" id="ux-crumb-section" disabled>Prompt</button>
                     <span class="ux-crumb-sep hidden" id="ux-crumb-sep-part" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-                    <span class="ux-crumb-label hidden" id="ux-crumb-part">—</span>
+                    <button type="button" class="ux-crumb current hidden" id="ux-crumb-part" disabled>—</button>
                 </div>
                 <div class="ux-pill-row" id="ux-section-pills" role="tablist" aria-label="Configuración">
                     <button type="button" class="ux-pill" data-section="prompt">Prompt</button>
@@ -1499,6 +1755,141 @@
                             <button type="button" data-empty-section="guardrails">Guardrails</button>
                         </div>
                     </div>
+                    <div id="cfg-map-panel" aria-label="Mapa y documentación del asistente">
+                        <div class="map-hero">
+                            <h2>Cómo funciona Lexiatek</h2>
+                            <p>
+                                La IA propone; el abogado revisa y aprueba. Este portal versiona las instrucciones
+                                del despacho (prompts, skills y guardrails) sin inventar radicados, sentencias ni normas.
+                            </p>
+                        </div>
+
+                        <section class="map-section">
+                            <h3>1 · Firma en runtime</h3>
+                            <div class="map-diagram">
+                                <div class="map-flow" aria-hidden="false">
+                                    <div class="map-node soft">
+                                        <strong>Abogado</strong>
+                                        <span>Chat web · aprueba borradores (HITL)</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node accent">
+                                        <strong>Gerente del Caso</strong>
+                                        <span>Único interlocutor (POC) en web/Slack</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node">
+                                        <strong>Especialistas</strong>
+                                        <span>Backoffice interno · no hablan al cliente</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node soft">
+                                        <strong>Calidad</strong>
+                                        <span>Revisión jurídica antes de entregar</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="map-section">
+                            <h3>2 · Qué edita este portal</h3>
+                            <div class="map-diagram">
+                                <div class="map-stack">
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Equipos</div>
+                                        <div class="map-chips" id="map-group-chips">
+                                            <span class="map-chip">Coordinación</span>
+                                            <span class="map-chip">Especialistas</span>
+                                            <span class="map-chip">Calidad</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Agentes del equipo</div>
+                                        <div class="map-chips" id="map-agent-chips">
+                                            <span class="map-chip">Cargando agentes…</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Por cada agente</div>
+                                        <div class="map-chips">
+                                            <span class="map-chip active">Prompt</span>
+                                            <span class="map-chip">Función · Tareas · Responsabilidades · Estilo</span>
+                                            <span class="map-chip active">Skills</span>
+                                            <span class="map-chip active">Guardrails</span>
+                                            <span class="map-chip">Input · Output · Tools</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Persistencia</div>
+                                        <div class="map-flow" style="justify-content:flex-start">
+                                            <div class="map-node soft" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Borrador local</strong>
+                                                <span>Autosave en el navegador</span>
+                                            </div>
+                                            <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                            <div class="map-node accent" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Guardar versión</strong>
+                                                <span>Historial en Postgres · nota obligatoria</span>
+                                            </div>
+                                            <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                            <div class="map-node" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Asistente en vivo</strong>
+                                                <span>Nueva versión entra al runtime</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="map-section">
+                            <h3>3 · Documentación rápida</h3>
+                            <div class="map-docs">
+                                <article class="map-doc">
+                                    <h4>Ruta del editor</h4>
+                                    <p>Use el breadcrumb: Equipo → Agente → Prompt/Skills/Guardrails. Cada clic baja un nivel; el notepad muestra solo el ítem activo.</p>
+                                    <ul>
+                                        <li><strong>Prompt:</strong> quién es, qué hace, límites y tono.</li>
+                                        <li><strong>Skills:</strong> procedimientos reutilizables (pueden compartirse).</li>
+                                        <li><strong>Guardrails:</strong> filtros de entrada, salida y tools.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Reglas del despacho</h4>
+                                    <ul>
+                                        <li>No inventar sentencias, radicados ni normas.</li>
+                                        <li>Todo lo accionable requiere aprobación humana.</li>
+                                        <li>Prompt sistema = reglas compartidas de toda la firma.</li>
+                                        <li>Cambios quedan auditados con nota e historial.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Flujo recomendado</h4>
+                                    <ul>
+                                        <li>1. Elija equipo y agente en la ruta.</li>
+                                        <li>2. Ajuste Prompt (Función primero).</li>
+                                        <li>3. Revise Skills y Guardrails críticos.</li>
+                                        <li>4. Guarde versión y pruebe en el chat del abogado.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Dónde está cada cosa</h4>
+                                    <ul>
+                                        <li><strong>COORDINACIÓN:</strong> Gerente del Caso (POC).</li>
+                                        <li><strong>ESPECIALISTAS:</strong> cronología, tipicidad, ruta, víctimas, evidencia, audiencias…</li>
+                                        <li><strong>CALIDAD:</strong> control jurídico antes de entregar.</li>
+                                    </ul>
+                                </article>
+                            </div>
+                            <div class="map-cta-row">
+                                <button type="button" id="map-go-editor">Ir al editor</button>
+                                <button type="button" id="map-go-gerente">Abrir Gerente del Caso</button>
+                            </div>
+                            <p class="map-footnote">
+                                Fuente operativa: firma virtual con HITL · canales web (activo) y Slack · WhatsApp no implementado.
+                            </p>
+                        </section>
+                    </div>
                 </div>
                 <p id="cfg-toast" class="hidden fixed bottom-4 right-4 max-w-sm bg-slate-950 text-white text-sm px-4 py-3 rounded-xl shadow-xl z-50 border border-slate-700" role="status"></p>
             </main>
@@ -1524,6 +1915,6 @@
     <script src="./audit-api-config.js?v=4.0"></script>
     <script src="./auth-config.js?v=3.0.1"></script>
     <script src="./auth-gate.js?v=3.9"></script>
-    <script src="./app.js?v=7.25"></script>
+    <script src="./app.js?v=7.28"></script>
 </body>
 </html>

@@ -327,7 +327,30 @@ def _maybe_create_draft(
         return draft.id
     except Exception:
         logger.exception("No se pudo registrar el borrador HITL")
+        _append_action(
+            trace,
+            action_type="draft_created",
+            status="blocked",
+            actor="hitl",
+            detail=(
+                "No se pudo materializar el borrador para revisión; "
+                "la salida NO quedó en cola de aprobación."
+            ),
+        )
         return None
+
+
+def _human_review_trace(pending_review: bool, draft_id: str | None) -> tuple[str, str]:
+    """status + detalle para la acción/paso de revisión humana."""
+    if not pending_review:
+        return "done", "No requiere aprobación adicional."
+    if draft_id:
+        return "pending", "Pendiente de aprobación del abogado."
+    return (
+        "blocked",
+        "Se requería revisión humana pero el borrador NO se materializó; "
+        "la salida no quedó en cola de aprobación.",
+    )
 
 
 def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> dict[str, str]:
@@ -644,19 +667,16 @@ async def run_agent(
                 destination_agent=inferred_destination,
                 trace=trace,
             )
+        hr_status, hr_detail = _human_review_trace(pending_review, draft_id)
         _append_action(
             trace,
             action_type="human_review",
-            status="pending" if pending_review else "done",
+            status=hr_status,
             actor="guardrails",
-            detail="Pendiente de aprobación del abogado." if pending_review else "No requiere aprobación adicional para esta respuesta.",
+            detail=hr_detail,
         )
         trace["steps"].append(
-            _trace_step(
-                "Revisión humana",
-                "pending" if pending_review else "done",
-                "Pendiente de aprobación del abogado." if pending_review else "No requiere aprobación adicional para este tipo de salida.",
-            )
+            _trace_step("Revisión humana", hr_status, hr_detail)
         )
         _finalize_trace(trace, text)
         get_repository().append_chat_message(
@@ -799,8 +819,10 @@ async def run_agent(
         requested_destination, chat_specialist_pool
     )
     include_kb_search = not rag_prefetch_ok
+    # Chat: alto riesgo va por plan HITL, no por interruptions del SDK
+    # (include_high_risk_tools=False ⇒ no hay tools con needs_approval aquí).
     orchestrator = build_orchestrator(
-        require_tool_approval=True,
+        require_tool_approval=False,
         include_high_risk_tools=False,
         focus_agent_id=requested_destination,
         include_kb_search_tool=include_kb_search,
@@ -1159,19 +1181,16 @@ async def run_agent(
             destination_agent=destination_agent,
             trace=trace,
         )
+    hr_status, hr_detail = _human_review_trace(pending_review, draft_id)
     _append_action(
         trace,
         action_type="human_review",
-        status="pending" if pending_review else "done",
+        status=hr_status,
         actor="guardrails",
-        detail="Pendiente de aprobación del abogado." if pending_review else "No requiere aprobación adicional.",
+        detail=hr_detail,
     )
     trace["steps"].append(
-        _trace_step(
-            "Revisión humana",
-            "pending" if pending_review else "done",
-            "Pendiente de aprobación del abogado." if pending_review else "No requiere aprobación adicional.",
-        )
+        _trace_step("Revisión humana", hr_status, hr_detail)
     )
     _finalize_trace(trace, text)
     reconcile_turn_messages(session_id, user_text=message, assistant_text=text)

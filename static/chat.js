@@ -582,12 +582,171 @@ async function fetchSessionTracesFromServer() {
   }
 }
 
+const ACTIVITY_LIVE_MS = 3000;
+let activityLiveTimer = null;
+let activityBusy = false;
+let activityFingerprint = "";
+let activitySelectedTraceId = null;
+let activityServerTraces = [];
+
+function activityLiveOn() {
+  return Boolean(document.getElementById("activity-live-toggle")?.checked);
+}
+
+function activityFollowOn() {
+  return Boolean(document.getElementById("activity-follow-toggle")?.checked);
+}
+
+function setActivityLivePill(on) {
+  const pill = document.getElementById("activity-live-pill");
+  if (pill) pill.hidden = !on;
+  const dot = document.getElementById("activity-tab-dot");
+  if (dot) dot.hidden = !on;
+}
+
+function entryFromServerTrace(record) {
+  const payload = record?.payload || record || {};
+  return {
+    id: payload.trace_id || record?.trace_id || null,
+    text: payload.input_summary || "",
+    agent: payload.sent_to_agent || payload.route || null,
+    pendingReview: Boolean(payload.human_review_required),
+    trace: payload,
+  };
+}
+
+function renderActivityOpsList(traces) {
+  const list = document.getElementById("activity-ops-list");
+  if (!list) return;
+  if (!traces.length) {
+    list.innerHTML =
+      '<p class="trace-muted">Sin turnos aún. Envíe un mensaje en el chat; aquí aparecerá el flujo solo.</p>';
+    return;
+  }
+  const rows = traces
+    .slice()
+    .reverse()
+    .map((rec) => {
+      const p = rec.payload || rec;
+      const tid = p.trace_id || rec.trace_id || "";
+      const when = rec.created_at || p.started_at_iso || "";
+      const label = when ? new Date(when).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—";
+      const active = tid && tid === activitySelectedTraceId ? " is-active" : "";
+      const blocked = p.blocked ? " activity-op--blocked" : p.human_review_required ? " activity-op--pending" : "";
+      return `<button type="button" class="activity-op${active}${blocked}" data-trace="${escapeHtml(tid)}">
+        <span class="activity-op-time">${escapeHtml(label)}</span>
+        <strong>${escapeHtml(p.sent_to_agent || p.route || "turno")}</strong>
+        <span class="activity-op-meta">${escapeHtml(String(p.span_count ?? (p.spans || []).length))} spans · ${escapeHtml(p.skill_kan || "")}</span>
+        <p>${escapeHtml((p.input_summary || "").slice(0, 90))}</p>
+      </button>`;
+    })
+    .join("");
+  list.innerHTML = rows;
+  list.querySelectorAll(".activity-op").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activitySelectedTraceId = btn.dataset.trace || null;
+      const follow = document.getElementById("activity-follow-toggle");
+      if (follow) follow.checked = false;
+      const rec = activityServerTraces.find(
+        (t) => (t.payload?.trace_id || t.trace_id) === activitySelectedTraceId
+      );
+      if (rec) void renderTracePanelForEntry(entryFromServerTrace(rec));
+      renderActivityOpsList(activityServerTraces);
+    });
+  });
+}
+
+async function refreshActivityPanel(options = {}) {
+  const { force = false } = options;
+  if (activityBusy) return;
+  activityBusy = true;
+  try {
+    const sid = window.Workspace?.getSessionId?.() || `web:${getUserId()}`;
+    const res = await authFetch(`/support/operations/${encodeURIComponent(sid)}?limit=40`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const traces = Array.isArray(data.traces) ? data.traces : [];
+    activityServerTraces = traces;
+    const top = traces.length ? traces[traces.length - 1] : null;
+    const topId = top?.payload?.trace_id || top?.trace_id || "";
+    const fp = `${traces.length}|${topId}|${top?.payload?.span_count || 0}`;
+    const changed = fp !== activityFingerprint;
+    activityFingerprint = fp;
+
+    renderActivityOpsList(traces);
+
+    if (!traces.length) {
+      if (force || !selectedTraceMsgId) {
+        const local = getLatestAssistantEntry();
+        if (local) await renderTracePanelForEntry(local);
+        else if (traceBodyEl) {
+          traceBodyEl.innerHTML =
+            '<div class="trace-empty">Esperando el primer turno de esta sesión…</div>';
+        }
+      }
+      return;
+    }
+
+    const shouldFollow = force || activityFollowOn() || !activitySelectedTraceId;
+    if (shouldFollow && (changed || force)) {
+      activitySelectedTraceId = topId;
+      await renderTracePanelForEntry(entryFromServerTrace(top));
+      renderActivityOpsList(traces);
+    } else if (activitySelectedTraceId && (changed || force)) {
+      const rec = traces.find((t) => (t.payload?.trace_id || t.trace_id) === activitySelectedTraceId);
+      if (rec) await renderTracePanelForEntry(entryFromServerTrace(rec));
+    }
+  } catch {
+    /* silencioso en poll */
+  } finally {
+    activityBusy = false;
+  }
+}
+
+function stopActivityLive() {
+  if (activityLiveTimer) {
+    clearInterval(activityLiveTimer);
+    activityLiveTimer = null;
+  }
+  setActivityLivePill(false);
+}
+
+function startActivityLive() {
+  stopActivityLive();
+  if (!activityLiveOn()) return;
+  setActivityLivePill(true);
+  activityLiveTimer = setInterval(() => {
+    void refreshActivityPanel();
+  }, ACTIVITY_LIVE_MS);
+}
+
+function initActivityPanel() {
+  if (!document.getElementById("tab-actividad")) return;
+  document.getElementById("activity-live-toggle")?.addEventListener("change", () => {
+    if (activityLiveOn()) {
+      startActivityLive();
+      void refreshActivityPanel({ force: true });
+    } else {
+      stopActivityLive();
+    }
+  });
+  document.getElementById("activity-refresh-btn")?.addEventListener("click", () => {
+    void refreshActivityPanel({ force: true });
+  });
+  document.getElementById("activity-follow-toggle")?.addEventListener("change", () => {
+    if (activityFollowOn()) void refreshActivityPanel({ force: true });
+  });
+  window.ChatActivity = { refresh: refreshActivityPanel, start: startActivityLive, stop: stopActivityLive };
+  void refreshActivityPanel({ force: true });
+  startActivityLive();
+}
+
 async function renderTracePanelForEntry(entry) {
   if (!traceBodyEl) return;
   if (!entry) {
     traceBodyEl.innerHTML = `
       <div class="trace-empty">
-        Seleccione un mensaje del asistente en el Panel de Chat para ver la trazabilidad de decisiones, metadatos y acciones.
+        Esperando actividad… Envíe un mensaje o deje esta pestaña abierta: se actualiza sola.
       </div>
     `;
     return;
@@ -702,14 +861,16 @@ async function renderTracePanelForEntry(entry) {
 
 function setSelectedTraceMessage(msgId, options = {}) {
   selectedTraceMsgId = msgId || null;
-  const { skipSave = false } = options;
+  const { skipSave = false, openTab = false } = options;
   document.querySelectorAll(".message.assistant[data-msg-id]").forEach((el) => {
     el.classList.toggle("message--selected", el.dataset.msgId === selectedTraceMsgId);
   });
   const selected = getAssistantEntryByMsgId(selectedTraceMsgId) || getLatestAssistantEntry();
   if (!selectedTraceMsgId && selected?.id) selectedTraceMsgId = selected.id;
+  if (selected?.trace?.trace_id) activitySelectedTraceId = selected.trace.trace_id;
   void renderTracePanelForEntry(selected || null);
-  if (selectedTraceMsgId) window.Workspace?.smartTab?.("trazas");
+  void refreshActivityPanel({ force: true });
+  if (openTab && selectedTraceMsgId) window.Workspace?.smartTab?.("actividad");
   if (!skipSave) saveSessionState();
 }
 
@@ -740,7 +901,9 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   });
   if (role === "assistant" && options.msgId) {
     el.addEventListener("click", () => {
-      setSelectedTraceMessage(options.msgId);
+      const follow = document.getElementById("activity-follow-toggle");
+      if (follow) follow.checked = false;
+      setSelectedTraceMessage(options.msgId, { openTab: true });
     });
   }
 
@@ -1887,7 +2050,11 @@ function resetChatConversation() {
   selectedTraceMsgId = null;
   clearChatUI();
   showWelcomeMessage();
+  activitySelectedTraceId = null;
+  activityFingerprint = "";
+  activityServerTraces = [];
   void renderTracePanelForEntry(null);
+  void refreshActivityPanel({ force: true });
   if (sendBtn) sendBtn.disabled = false;
 }
 
@@ -2281,6 +2448,7 @@ async function bootAgentApp() {
   } catch {
     /* iOS Safari puede rechazar focus automático */
   }
+  initActivityPanel();
   window.addEventListener("load", () => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;

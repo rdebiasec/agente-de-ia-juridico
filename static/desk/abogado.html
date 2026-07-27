@@ -51,7 +51,7 @@
       </header>
 
       <p class="desk-value-banner" id="desk-value-banner">
-        La IA organiza hechos, redacta borradores y calcula plazos — usted revisa, edita y aprueba cada salida antes de usarla.
+        Un solo escritorio: chat, expediente, borradores, plazos y actividad en vivo — usted revisa y aprueba antes de usar cualquier salida.
       </p>
 
       <div class="workspace-layout desk-layout">
@@ -137,7 +137,10 @@
           <div class="context-tabs" role="tablist">
             <button type="button" class="context-tab is-active" data-tab="borrador" role="tab">Borrador</button>
             <button type="button" class="context-tab" data-tab="plazos" role="tab">Plazos</button>
-            <button type="button" class="context-tab" data-tab="trazas" role="tab">Detalle</button>
+            <button type="button" class="context-tab" data-tab="actividad" role="tab" aria-controls="tab-actividad">
+              Actividad
+              <span class="activity-tab-dot" id="activity-tab-dot" hidden aria-hidden="true"></span>
+            </button>
             <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
           <div class="context-tab-panels">
@@ -164,9 +167,26 @@
               </form>
               <div class="firma-list" id="firma-terminos-list" aria-live="polite"></div>
             </section>
-            <section class="context-tab-panel" id="tab-trazas" data-panel="trazas" role="tabpanel" hidden>
-              <header class="context-panel-head"><p>Cómo llegó el asistente a esta respuesta</p></header>
-              <p class="trace-header-note">Seleccione un mensaje del asistente en el chat.</p>
+            <section class="context-tab-panel" id="tab-actividad" data-panel="actividad" role="tabpanel" hidden>
+              <header class="context-panel-head">
+                <p>Actividad en vivo</p>
+                <span class="activity-live-pill" id="activity-live-pill">EN VIVO</span>
+              </header>
+              <p class="context-panel-hint">
+                Se actualiza sola: turnos, agentes, spans y OpenAI de esta sesión. No hace falta otra pantalla.
+              </p>
+              <div class="activity-toolbar">
+                <label class="activity-toggle">
+                  <input type="checkbox" id="activity-live-toggle" checked />
+                  Auto
+                </label>
+                <label class="activity-toggle">
+                  <input type="checkbox" id="activity-follow-toggle" checked />
+                  Seguir último
+                </label>
+                <button type="button" class="btn-firma-action" id="activity-refresh-btn">Actualizar</button>
+              </div>
+              <div class="activity-ops" id="activity-ops-list" aria-live="polite"></div>
               <section class="trace-body" id="trace-body"></section>
             </section>
             <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
@@ -207,7 +227,7 @@
 
       <footer class="workspace-footer desk-footer">
         <span>Human-supervised · Lexiatek</span>
-        <a class="desk-footer-link" href="/soporte">Consola soporte</a>
+        <button type="button" class="desk-footer-link" id="btn-open-actividad">Ir a Actividad</button>
       </footer>
     </div>
 

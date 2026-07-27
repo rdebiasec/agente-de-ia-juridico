@@ -28,6 +28,7 @@
     let configIndex = { prompt: [], guardrail: [], skill: [], agent_guardrail: [] };
     let agentsMeta = { agents: [], groups: {}, global: { prompt_key: 'sistema' } };
     let editorMode = 'agent'; // agent | sistema
+    let workspaceView = 'editor'; // editor | map
     let currentGroup = 'coordinacion';
     let currentAgentId = null;
     let currentSection = null; // prompt | skills | guardrails | null hasta elegir hijo
@@ -39,7 +40,7 @@
     let sessionReady = false;
     let sharedBadgeForKey = null;
     let uiBound = false;
-    let bootInFlight = false;
+    let bootInFlight = null;
     let selectGen = 0;
     let connectorRaf = 0;
     let connectorTimer = 0;
@@ -3032,40 +3033,146 @@
         }
     }
 
+    function closeUxCrumbMenus() {
+        document.querySelectorAll('.ux-crumb-menu.open').forEach((menu) => {
+            menu.classList.remove('open');
+        });
+        ['ux-crumb-group', 'ux-crumb-agent'].forEach((id) => {
+            const btn = $(id);
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    function renderMapPanel() {
+        const groupHost = $('map-group-chips');
+        const agentHost = $('map-agent-chips');
+        if (groupHost) {
+            groupHost.innerHTML = '';
+            GROUP_ORDER.forEach((g) => {
+                const chip = document.createElement('span');
+                chip.className = 'map-chip' + (g === currentGroup && workspaceView === 'map' ? ' active' : '');
+                chip.textContent = GROUP_LABELS[g] || g;
+                groupHost.appendChild(chip);
+            });
+        }
+        if (agentHost) {
+            agentHost.innerHTML = '';
+            const agents = agentsInGroup(currentGroup);
+            if (!agents.length) {
+                const empty = document.createElement('span');
+                empty.className = 'map-chip';
+                empty.textContent = 'Sin agentes en este equipo';
+                agentHost.appendChild(empty);
+            } else {
+                agents.forEach((a) => {
+                    const chip = document.createElement('button');
+                    chip.type = 'button';
+                    chip.className = 'map-chip' + (a.id === currentAgentId ? ' active' : '');
+                    chip.textContent = a.label || a.id;
+                    chip.title = a.title || a.id;
+                    chip.addEventListener('click', async () => {
+                        await setWorkspaceView('editor');
+                        await selectAgent(a.id, { groupAlreadySet: true });
+                    });
+                    agentHost.appendChild(chip);
+                });
+            }
+        }
+    }
+
+    async function setWorkspaceView(view) {
+        workspaceView = view === 'map' ? 'map' : 'editor';
+        document.body.classList.toggle('ux-map-view', workspaceView === 'map');
+        document.querySelectorAll('.ux-view-tab').forEach((btn) => {
+            const active = btn.dataset.view === workspaceView;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        if (workspaceView === 'map') {
+            closeUxCrumbMenus();
+            renderMapPanel();
+            return;
+        }
+        // Volver al editor: asegurar un apartado abierto.
+        if (editorMode === 'agent' && currentAgentId && !currentSection) {
+            await openConfigSection('prompt');
+        } else {
+            renderCompactNav();
+        }
+    }
+
+    function fillUxCrumbMenu(menu, items, { activeValue, onPick } = {}) {
+        if (!menu) return;
+        menu.innerHTML = '';
+        if (!items.length) {
+            const empty = document.createElement('button');
+            empty.type = 'button';
+            empty.disabled = true;
+            empty.textContent = 'Sin opciones';
+            menu.appendChild(empty);
+            return;
+        }
+        items.forEach((it) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('role', 'menuitem');
+            btn.textContent = it.label;
+            if (it.title) btn.title = it.title;
+            btn.classList.toggle('active', it.value === activeValue);
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeUxCrumbMenus();
+                if (typeof onPick === 'function') onPick(it.value);
+            });
+            menu.appendChild(btn);
+        });
+    }
+
     function renderCompactNav() {
-        const groupSel = $('ux-group-select');
-        const agentSel = $('ux-agent-select');
+        const crumbGroup = $('ux-crumb-group');
+        const crumbAgent = $('ux-crumb-agent');
+        const menuGroup = $('ux-menu-group');
+        const menuAgent = $('ux-menu-agent');
         const crumbSection = $('ux-crumb-section');
         const crumbPart = $('ux-crumb-part');
         const sepSection = $('ux-crumb-sep-section');
         const sepPart = $('ux-crumb-sep-part');
         const partRow = $('ux-part-pills');
-        if (!groupSel || !agentSel) return;
+        if (!crumbGroup || !crumbAgent) return;
 
-        if (groupSel.dataset.built !== '1') {
-            groupSel.dataset.built = '1';
-            groupSel.innerHTML = GROUP_ORDER.map(
-                (g) => `<option value="${g}">${GROUP_LABELS[g] || g}</option>`,
-            ).join('');
-        }
-        groupSel.value = currentGroup;
-        groupSel.disabled = editorMode === 'sistema';
+        const groupLabel = GROUP_LABELS[currentGroup] || currentGroup || 'Equipo';
+        crumbGroup.textContent = editorMode === 'sistema' ? 'Sistema' : groupLabel;
+        crumbGroup.disabled = editorMode === 'sistema';
 
         const agents = agentsInGroup(currentGroup);
-        const agentSig = `${currentGroup}|${agents.map((a) => a.id).join(',')}`;
-        if (agentSel.dataset.sig !== agentSig) {
-            agentSel.dataset.sig = agentSig;
-            agentSel.innerHTML = agents.length
-                ? agents
-                      .map(
-                          (a) =>
-                              `<option value="${a.id}">${escapeHtmlText(a.label || a.id)}</option>`,
-                      )
-                      .join('')
-                : '<option value="">Sin agentes</option>';
-        }
-        if (currentAgentId) agentSel.value = currentAgentId;
-        agentSel.disabled = editorMode === 'sistema' || !agents.length;
+        const agent = agentById(currentAgentId);
+        const agentLabel = agent
+            ? agent.nombre_corto || agent.titulo_profesional || tabLabel(agent.id)
+            : agents[0]?.label || 'Agente';
+        crumbAgent.textContent = editorMode === 'sistema' ? 'Prompt sistema' : agentLabel;
+        crumbAgent.disabled = editorMode === 'sistema' || !agents.length;
+
+        fillUxCrumbMenu(
+            menuGroup,
+            GROUP_ORDER.map((g) => ({ value: g, label: GROUP_LABELS[g] || g })),
+            {
+                activeValue: currentGroup,
+                onPick: (g) => selectGroup(g),
+            },
+        );
+        fillUxCrumbMenu(
+            menuAgent,
+            agents.map((a) => ({
+                value: a.id,
+                label: a.label || a.id,
+                title: a.title || a.id,
+            })),
+            {
+                activeValue: currentAgentId,
+                onPick: (id) => selectAgent(id),
+            },
+        );
 
         const sectionLabel =
             editorMode === 'sistema'
@@ -3079,7 +3186,7 @@
                       : '—';
         if (crumbSection) {
             crumbSection.textContent = sectionLabel;
-            crumbSection.classList.toggle('is-current', Boolean(currentSection) || editorMode === 'sistema');
+            crumbSection.classList.toggle('current', Boolean(currentSection) || editorMode === 'sistema');
         }
         if (sepSection) sepSection.classList.toggle('hidden', editorMode === 'sistema');
 
@@ -3121,15 +3228,15 @@
             const g = ANATOMY_UI_GROUPS.find((x) => x.id === currentPromptPart);
             partLabel = g ? g.trayLabel || g.label : '—';
         } else if (currentSection === 'skills') {
-            const agent = agentById(currentAgentId);
-            const ids = (agent && agent.skill_ids) || [];
+            const ag = agentById(currentAgentId);
+            const ids = (ag && ag.skill_ids) || [];
             const sig = `skills|${currentAgentId || ''}|${ids.join(',')}`;
             if (partRow.dataset.sig !== sig) {
                 partRow.dataset.sig = sig;
                 partRow.innerHTML = '';
                 if (!ids.length) {
                     partRow.innerHTML =
-                        '<span class="ux-crumb-label">Sin skills en este agente</span>';
+                        '<span class="ux-crumb" style="cursor:default">Sin skills en este agente</span>';
                 } else {
                     ids.forEach((sid) => {
                         const btn = document.createElement('button');
@@ -3170,22 +3277,17 @@
                 : '—';
         }
 
+        const showPart =
+            (currentSection === 'prompt' && currentPromptPart) ||
+            (currentSection === 'skills' && currentKey) ||
+            (currentSection === 'guardrails' && currentGuardClass);
         if (crumbPart) {
             crumbPart.textContent = partLabel;
-            const showPart =
-                (currentSection === 'prompt' && currentPromptPart) ||
-                (currentSection === 'skills' && currentKey) ||
-                (currentSection === 'guardrails' && currentGuardClass);
             crumbPart.classList.toggle('hidden', !showPart);
-            crumbPart.classList.toggle('is-current', Boolean(showPart));
+            crumbPart.classList.toggle('current', Boolean(showPart));
         }
-        if (sepPart) {
-            const showPart =
-                (currentSection === 'prompt' && currentPromptPart) ||
-                (currentSection === 'skills' && currentKey) ||
-                (currentSection === 'guardrails' && currentGuardClass);
-            sepPart.classList.toggle('hidden', !showPart);
-        }
+        if (sepPart) sepPart.classList.toggle('hidden', !showPart);
+        if (workspaceView === 'map') renderMapPanel();
     }
 
     async function openConfigSection(section) {
@@ -3197,9 +3299,6 @@
         setDirty(false);
         loaded = null;
         currentKey = null;
-        selectGen += 1;
-        setEditorValue('', { disabled: true });
-        setEditorChrome(null, null);
         updateSharedBadge(null);
         const hist = $('cfg-btn-history');
         const reload = $('cfg-btn-reload');
@@ -3207,33 +3306,39 @@
         if (reload) reload.disabled = true;
         renderNav();
 
-        if (section === 'guardrails') {
-            const guardHost = $('guard-class-tabs');
-            if (guardHost) delete guardHost.dataset.sig;
-            $('guard-tray')?.classList.remove('is-focused');
-            await selectGuardClass(GUARD_CLASS_ORDER[0] || 'input');
-            return;
-        }
-        if (section === 'skills') {
-            const skillHost = $('skill-tabs');
-            if (skillHost) delete skillHost.dataset.sig;
-            $('skills-tray')?.classList.remove('is-focused');
-            updateProseWorkspace();
-            const items = agentListItems();
-            if (items[0]) await selectItem(items[0].kind, items[0].key);
-            else {
-                renderSkillsTray();
-                scheduleGroupConnector();
+        try {
+            if (section === 'guardrails') {
+                const guardHost = $('guard-class-tabs');
+                if (guardHost) delete guardHost.dataset.sig;
+                $('guard-tray')?.classList.remove('is-focused');
+                await selectGuardClass(GUARD_CLASS_ORDER[0] || 'input');
+                return;
             }
-            return;
-        }
-        if (section === 'prompt') {
-            const items = agentListItems();
-            if (items[0]) await selectItem(items[0].kind, items[0].key);
-            ensurePromptPartTabsBuilt();
-            const firstPart = ANATOMY_UI_GROUPS[0]?.id;
-            if (firstPart) await selectPromptPart(firstPart);
-            else activateAnatomyTab(null);
+            if (section === 'skills') {
+                const skillHost = $('skill-tabs');
+                if (skillHost) delete skillHost.dataset.sig;
+                $('skills-tray')?.classList.remove('is-focused');
+                updateProseWorkspace();
+                const items = agentListItems();
+                if (items[0]) await selectItem(items[0].kind, items[0].key);
+                else {
+                    renderSkillsTray();
+                    scheduleGroupConnector();
+                }
+                return;
+            }
+            if (section === 'prompt') {
+                const items = agentListItems();
+                if (items[0]) await selectItem(items[0].kind, items[0].key);
+                ensurePromptPartTabsBuilt();
+                const firstPart = ANATOMY_UI_GROUPS[0]?.id;
+                if (firstPart) await selectPromptPart(firstPart);
+                else activateAnatomyTab(null);
+            }
+        } catch (err) {
+            toast(String(err.message || err));
+        } finally {
+            renderCompactNav();
         }
     }
 
@@ -3599,15 +3704,36 @@
     function bindUi() {
         if (uiBound) return;
         uiBound = true;
-        $('btn-sistema')?.addEventListener('click', () => selectSistema());
+        $('btn-sistema')?.addEventListener('click', async () => {
+            await setWorkspaceView('editor');
+            selectSistema();
+        });
+
+        document.querySelectorAll('.ux-view-tab').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                void setWorkspaceView(btn.dataset.view);
+            });
+        });
+        $('map-go-editor')?.addEventListener('click', () => {
+            void setWorkspaceView('editor');
+        });
+        $('map-go-gerente')?.addEventListener('click', async () => {
+            await setWorkspaceView('editor');
+            const gerente = (agentsMeta.agents || []).find(
+                (a) => a.id === 'coordinador_expediente_penal' || a.grupo === 'coordinacion',
+            );
+            if (gerente) await selectAgent(gerente.id, { groupAlreadySet: true });
+        });
 
         document.querySelectorAll('.section-tab').forEach((btn) => {
             btn.addEventListener('click', async () => {
+                await setWorkspaceView('editor');
                 await openConfigSection(btn.dataset.section);
             });
         });
         document.querySelectorAll('#ux-section-pills .ux-pill').forEach((btn) => {
             btn.addEventListener('click', async () => {
+                await setWorkspaceView('editor');
                 await openConfigSection(btn.dataset.section);
             });
         });
@@ -3616,11 +3742,30 @@
             if (!btn) return;
             await openConfigSection(btn.dataset.emptySection);
         });
-        $('ux-group-select')?.addEventListener('change', (e) => {
-            selectGroup(e.target.value);
+        const toggleCrumbMenu = (btnId, menuId) => {
+            const btn = $(btnId);
+            const menu = $(menuId);
+            if (!btn || !menu) return;
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (btn.disabled) return;
+                const willOpen = !menu.classList.contains('open');
+                closeUxCrumbMenus();
+                if (willOpen) {
+                    menu.classList.add('open');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        };
+        toggleCrumbMenu('ux-crumb-group', 'ux-menu-group');
+        toggleCrumbMenu('ux-crumb-agent', 'ux-menu-agent');
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.ux-crumb-wrap')) return;
+            closeUxCrumbMenus();
         });
-        $('ux-agent-select')?.addEventListener('change', (e) => {
-            if (e.target.value) selectAgent(e.target.value);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeUxCrumbMenus();
         });
 
         $('cfg-search')?.addEventListener('input', renderList);
@@ -3827,32 +3972,38 @@
         document.body.classList.add('ux-compact');
         document.body.dataset.mode = 'agent';
         if (!sessionReady) return;
-        if (bootInFlight) return;
-        bootInFlight = true;
-        try {
-            await Promise.all([loadConfigIndex(), loadAgents()]);
-            currentGroup = 'coordinacion';
-            editorMode = 'agent';
-            const firstAgent = (agentsMeta.agents || []).find((a) => a.grupo === 'coordinacion');
-            if (firstAgent) {
-                await selectAgent(firstAgent.id, { groupAlreadySet: true });
-            } else {
-                await selectGroup('especialista');
+        if (bootInFlight) return bootInFlight;
+        bootInFlight = (async () => {
+            try {
+                await Promise.all([loadConfigIndex(), loadAgents()]);
+                currentGroup = 'coordinacion';
+                editorMode = 'agent';
+                const firstAgent = (agentsMeta.agents || []).find((a) => a.grupo === 'coordinacion');
+                if (firstAgent) {
+                    await selectAgent(firstAgent.id, { groupAlreadySet: true });
+                } else {
+                    await selectGroup('especialista');
+                }
+                renderCompactNav();
+                if (workspaceView === 'map') renderMapPanel();
+            } catch (e) {
+                toast(String(e.message || e));
             }
-        } catch (e) {
-            toast(String(e.message || e));
+        })();
+        try {
+            await bootInFlight;
         } finally {
-            bootInFlight = false;
+            bootInFlight = null;
         }
     }
 
     window.addEventListener('audit-session-ready', (ev) => {
         sessionReady = Boolean(ev.detail?.email);
-        if (sessionReady) boot();
+        if (sessionReady) void boot();
     });
 
     if (window.__AUDIT_SESSION_EMAIL__) {
         sessionReady = true;
-        boot();
+        void boot();
     }
 })();

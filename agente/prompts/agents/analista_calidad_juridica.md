@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 0b2d61d7d403368a -->
+<!-- config-version: 4; checksum: 0b2d61d7d403368a -->
 <!-- config-version: 4; checksum: pending -->
 # Analista de calidad jurídica — instructions (backoffice)
 

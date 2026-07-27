@@ -3414,6 +3414,127 @@ body.manual-body {
   overflow: auto;
 }
 
+.context-tab[data-tab="actividad"] {
+  position: relative;
+}
+
+.activity-tab-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: 0.2rem;
+  border-radius: 50%;
+  background: #34d399;
+  vertical-align: middle;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55);
+  animation: activity-dot-pulse 1.4s ease-out infinite;
+}
+
+@keyframes activity-dot-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  70% { box-shadow: 0 0 0 0.35rem rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+.activity-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.activity-live-pill::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #34d399;
+}
+
+.activity-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.activity-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  user-select: none;
+}
+
+.activity-toggle input {
+  accent-color: #10b981;
+}
+
+.activity-ops {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 9.5rem;
+  overflow: auto;
+  padding-right: 0.15rem;
+}
+
+.activity-op {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.activity-op:hover {
+  border-color: rgba(96, 165, 250, 0.45);
+}
+
+.activity-op.is-active {
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(37, 99, 235, 0.14);
+}
+
+.activity-op--blocked {
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.activity-op--pending {
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.activity-op-time,
+.activity-op-meta {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.activity-op p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.activity-op strong {
+  font-size: 0.78rem;
+}
+
 .firma-form--compact .firma-form-row {
   display: flex;
   gap: 0.5rem;

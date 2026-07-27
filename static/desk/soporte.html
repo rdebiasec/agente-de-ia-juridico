@@ -10,23 +10,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/chat.css" />
     <link rel="stylesheet" href="/static/desk.css" />
-    <title>Soporte · Trazas OpenAI | DBX Solutions</title>
+    <title>Observatorio · Trazas | Lexiatek</title>
   </head>
   <body class="workspace-body desk-soporte">
     <div class="page desk-page desk-soporte-page">
       <header class="site-header desk-header desk-header--soporte">
         <a class="logo" href="/abogado">
-          <img src="/static/dbx-logo.png" alt="DBX Solutions" width="140" height="28" />
+          <img src="/static/dbx-logo.png" alt="Lexiatek" width="140" height="28" />
         </a>
         <div class="workspace-header-center">
-          <span class="desk-product-label desk-product-label--soporte">Consola de soporte</span>
+          <span class="desk-product-label desk-product-label--soporte">Observatorio en vivo</span>
           <span class="support-health" id="support-health">Verificando…</span>
+          <span class="support-live-pill" id="support-live-pill" hidden>EN VIVO</span>
         </div>
         <div class="site-header-actions">
           <a class="btn-help" href="/abogado">Escritorio abogado</a>
           <button type="button" class="btn-logout" id="auth-logout-btn">Cerrar sesión</button>
         </div>
       </header>
+
+      <p class="support-live-banner">
+        Deje esta pestaña abierta: se actualiza sola y sigue el último turno (planes, agentes, spans, OpenAI).
+        No necesita escribir en el chat.
+      </p>
 
       <div class="support-toolbar">
         <form class="support-search" id="support-search-form">
@@ -39,6 +45,14 @@
           />
           <button type="submit" class="btn-firma-primary">Buscar sesión</button>
           <button type="button" class="btn-firma-action" id="support-refresh">Actualizar</button>
+          <label class="support-live-toggle">
+            <input type="checkbox" id="support-live-toggle" checked />
+            Modo vivo (3s)
+          </label>
+          <label class="support-live-toggle">
+            <input type="checkbox" id="support-follow-toggle" checked />
+            Seguir último
+          </label>
         </form>
       </div>
 

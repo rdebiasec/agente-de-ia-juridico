@@ -1,5 +1,6 @@
 /**
- * Consola de soporte: operaciones, spans OpenAI y diagnóstico de sesiones.
+ * Observatorio de soporte: operaciones, spans OpenAI y diagnóstico en vivo.
+ * Modo vivo: refresca sola y sigue el último turno sin interacción.
  */
 (() => {
   "use strict";
@@ -12,8 +13,27 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
+  const LIVE_MS = 3000;
   let selectedSessionId = null;
+  let selectedTraceId = null;
   let tracesBySession = new Map();
+  let liveTimer = null;
+  let lastFingerprint = "";
+  let quietRefresh = false;
+
+  function liveEnabled() {
+    return Boolean(document.getElementById("support-live-toggle")?.checked);
+  }
+
+  function followEnabled() {
+    return Boolean(document.getElementById("support-follow-toggle")?.checked);
+  }
+
+  function setLivePill(on) {
+    const pill = document.getElementById("support-live-pill");
+    if (!pill) return;
+    pill.hidden = !on;
+  }
 
   function openaiLogUrl(responseId) {
     if (!responseId) return null;
@@ -26,10 +46,18 @@
     return "support-op--ok";
   }
 
+  function opFingerprint(ops) {
+    if (!ops.length) return "empty";
+    const top = ops[0];
+    return `${top.trace_id}|${top.created_at}|${ops.length}|${top.span_count}|${top.blocked}|${top.pending_review}`;
+  }
+
   function renderOpSummary(op) {
     const when = op.created_at ? new Date(op.created_at).toLocaleString("es-CO") : "—";
+    const followed =
+      selectedTraceId && op.trace_id === selectedTraceId ? " is-followed" : "";
     return `
-      <button type="button" class="support-op ${statusClass(op.blocked, op.pending_review)}" data-session="${esc(op.session_id)}" data-trace="${esc(op.trace_id)}">
+      <button type="button" class="support-op ${statusClass(op.blocked, op.pending_review)}${followed}" data-session="${esc(op.session_id)}" data-trace="${esc(op.trace_id)}">
         <span class="support-op-time">${esc(when)}</span>
         <strong class="support-op-route">${esc(op.sent_to_agent || op.route || "—")}</strong>
         <span class="support-op-skill">${esc(op.skill_kan || "")}</span>
@@ -39,27 +67,47 @@
       </button>`;
   }
 
-  async function loadOperations() {
+  async function loadOperations(opts = {}) {
+    const { silent = false, autoFollow = false } = opts;
     const list = document.getElementById("support-ops-list");
-    list.innerHTML = '<p class="support-empty">Cargando…</p>';
+    if (!list) return;
+    if (!silent) list.innerHTML = '<p class="support-empty">Cargando…</p>';
     try {
       const res = await api("/support/operations?limit=50");
       const data = await res.json();
       const ops = data.operations || [];
+      const fp = opFingerprint(ops);
+      const changed = fp !== lastFingerprint;
+      lastFingerprint = fp;
+
       list.innerHTML = ops.length
         ? ops.map(renderOpSummary).join("")
-        : '<p class="support-empty">Sin operaciones registradas.</p>';
+        : '<p class="support-empty">Sin operaciones registradas. Abra /abogado y envíe un mensaje, o espere tráfico.</p>';
       list.querySelectorAll(".support-op").forEach((btn) => {
-        btn.addEventListener("click", () => selectOperation(btn.dataset.session, btn.dataset.trace));
+        btn.addEventListener("click", () => {
+          selectedTraceId = btn.dataset.trace;
+          selectOperation(btn.dataset.session, btn.dataset.trace);
+        });
       });
+
+      if (ops.length && (autoFollow || (followEnabled() && changed))) {
+        const top = ops[0];
+        selectedTraceId = top.trace_id;
+        await selectOperation(top.session_id, top.trace_id);
+      } else if (selectedSessionId && selectedTraceId && changed) {
+        await selectOperation(selectedSessionId, selectedTraceId);
+      }
     } catch {
-      list.innerHTML = '<p class="support-empty support-empty--error">No se pudieron cargar operaciones.</p>';
+      if (!silent) {
+        list.innerHTML = '<p class="support-empty support-empty--error">No se pudieron cargar operaciones.</p>';
+      }
     }
   }
 
-  async function loadSessions() {
+  async function loadSessions(silent = false) {
     const list = document.getElementById("support-sessions-list");
-    list.innerHTML = '<p class="support-empty">…</p>';
+    if (!list) return;
+    if (!silent) list.innerHTML = '<p class="support-empty">…</p>';
     try {
       const res = await api("/support/sessions?limit=20");
       const data = await res.json();
@@ -79,13 +127,14 @@
         btn.addEventListener("click", () => loadSessionDetail(btn.dataset.session));
       });
     } catch {
-      list.innerHTML = '<p class="support-empty">Error al cargar sesiones.</p>';
+      if (!silent) list.innerHTML = '<p class="support-empty">Error al cargar sesiones.</p>';
     }
   }
 
   async function loadSessionDetail(sessionId) {
     selectedSessionId = sessionId;
-    document.getElementById("support-session-input").value = sessionId;
+    const input = document.getElementById("support-session-input");
+    if (input) input.value = sessionId;
     const meta = document.getElementById("support-turn-meta");
     meta.innerHTML = '<p class="support-empty">Cargando sesión…</p>';
     try {
@@ -107,9 +156,23 @@
         })
         .join("");
       timeline.querySelectorAll(".support-turn-btn").forEach((btn) => {
-        btn.addEventListener("click", () => showTraceDetail(sessionId, Number(btn.dataset.idx)));
+        btn.addEventListener("click", () => {
+          const traces = tracesBySession.get(sessionId) || [];
+          const rec = traces[Number(btn.dataset.idx)];
+          selectedTraceId = rec?.payload?.trace_id || rec?.trace_id || null;
+          showTraceDetail(sessionId, Number(btn.dataset.idx));
+        });
       });
-      if ((data.traces || []).length) showTraceDetail(sessionId, data.traces.length - 1);
+      if ((data.traces || []).length) {
+        let idx = data.traces.length - 1;
+        if (selectedTraceId) {
+          const found = data.traces.findIndex(
+            (t) => (t.payload?.trace_id || t.trace_id) === selectedTraceId
+          );
+          if (found >= 0) idx = found;
+        }
+        showTraceDetail(sessionId, idx);
+      }
     } catch {
       meta.innerHTML = '<p class="support-empty support-empty--error">No se pudo cargar la sesión.</p>';
     }
@@ -120,6 +183,7 @@
     const record = traces[idx];
     if (!record) return;
     const payload = record.payload || record;
+    selectedTraceId = payload.trace_id || record.trace_id || selectedTraceId;
     const spans = payload.spans || [];
     const timeline = document.getElementById("support-span-timeline");
     timeline.querySelectorAll(".support-turn-btn").forEach((b, i) => {
@@ -167,6 +231,7 @@
   }
 
   async function selectOperation(sessionId, traceId) {
+    selectedTraceId = traceId;
     await loadSessionDetail(sessionId);
     const traces = tracesBySession.get(sessionId) || [];
     const idx = traces.findIndex((t) => (t.payload?.trace_id || t.trace_id) === traceId);
@@ -186,6 +251,31 @@
     }
   }
 
+  async function tickLive() {
+    if (!liveEnabled() || quietRefresh) return;
+    quietRefresh = true;
+    try {
+      await Promise.all([loadOperations({ silent: true, autoFollow: followEnabled() }), loadSessions(true), checkHealth()]);
+    } finally {
+      quietRefresh = false;
+    }
+  }
+
+  function startLive() {
+    stopLive();
+    setLivePill(liveEnabled());
+    if (!liveEnabled()) return;
+    liveTimer = setInterval(tickLive, LIVE_MS);
+  }
+
+  function stopLive() {
+    if (liveTimer) {
+      clearInterval(liveTimer);
+      liveTimer = null;
+    }
+    setLivePill(false);
+  }
+
   document.getElementById("support-search-form")?.addEventListener("submit", (e) => {
     e.preventDefault();
     const sid = document.getElementById("support-session-input").value.trim();
@@ -193,20 +283,25 @@
   });
 
   document.getElementById("support-refresh")?.addEventListener("click", () => {
-    loadOperations();
+    lastFingerprint = "";
+    loadOperations({ autoFollow: followEnabled() });
     loadSessions();
     checkHealth();
+  });
+
+  document.getElementById("support-live-toggle")?.addEventListener("change", () => {
+    startLive();
   });
 
   document.getElementById("auth-logout-btn")?.addEventListener("click", () => {
     window.AgentAuth?.logout(false);
   });
 
-  function boot() {
-    checkHealth();
-    loadOperations();
-    loadSessions();
-    setInterval(loadOperations, 60000);
+  async function boot() {
+    await checkHealth();
+    await loadOperations({ autoFollow: true });
+    await loadSessions();
+    startLive();
   }
 
   if (document.readyState === "loading") {

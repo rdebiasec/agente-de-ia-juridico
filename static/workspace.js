@@ -151,23 +151,41 @@
     });
   }
 
+  function normalizeTabId(tabId) {
+    if (tabId === "trazas" || tabId === "trace" || tabId === "detalle") return "actividad";
+    return tabId;
+  }
+
   function switchTab(tabId) {
+    const id = normalizeTabId(tabId);
     document.querySelectorAll(".context-tab").forEach((btn) => {
-      const active = btn.dataset.tab === tabId;
+      const active = btn.dataset.tab === id;
       btn.classList.toggle("is-active", active);
       btn.setAttribute("aria-selected", String(active));
     });
     document.querySelectorAll(".context-tab-panel").forEach((panel) => {
-      const active = panel.dataset.panel === tabId;
+      const active = panel.dataset.panel === id;
       panel.classList.toggle("is-active", active);
       panel.hidden = !active;
     });
+    if (id === "actividad" || id === "borrador" || id === "plazos" || id === "rag") {
+      try {
+        history.replaceState(null, "", `#${id}`);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (id === "actividad") {
+      window.ChatActivity?.refresh?.({ force: true });
+    }
   }
 
   function smartTab(reason) {
     if (reason === "borrador" || reason === "draft") switchTab("borrador");
     else if (reason === "plazos" || reason === "deadline") switchTab("plazos");
-    else if (reason === "trazas" || reason === "trace") switchTab("trazas");
+    else if (reason === "trazas" || reason === "trace" || reason === "actividad" || reason === "detalle") {
+      switchTab("actividad");
+    }
   }
 
   function initSidebarCollapse() {
@@ -256,5 +274,8 @@
     initTabs();
     initSidebarCollapse();
     autofillSessionIds();
+    document.getElementById("btn-open-actividad")?.addEventListener("click", () => switchTab("actividad"));
+    const hash = (location.hash || "").replace(/^#/, "");
+    if (hash) switchTab(normalizeTabId(hash));
   });
 })();

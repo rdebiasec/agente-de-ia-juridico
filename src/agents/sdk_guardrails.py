@@ -185,18 +185,23 @@ async def poc_output_guardrail(
     text = (output if isinstance(output, str) else str(output or "")).strip()
     empty = not text
     flags = [] if empty else pii_flags(text)
+    invention_suspect = (not empty) and citation_hints_without_pending(text)
+    pending_markers_count = text.count("[PENDIENTE") if text else 0
     if empty:
         reason = "salida_vacia"
         trip = True
     else:
         reason = "sensitive_pii_pending_mask" if sensitive_pii_flags(text) else "ok"
         trip = False
+    # Soft flags only: invention_suspect no dispara tripwire (el abogado revisa).
+    # has_disclaimer se mide en _finalize_trace sobre el texto ya post-procesado.
     return GuardrailFunctionOutput(
         output_info={
             "reason": reason,
             "chars": len(text),
             "pii_flags": flags,
-            "has_disclaimer": "Borrador informativo" in text,
+            "invention_suspect": invention_suspect,
+            "pending_markers_count": pending_markers_count,
         },
         tripwire_triggered=trip,
     )

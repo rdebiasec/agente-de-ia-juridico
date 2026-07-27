@@ -27,4 +27,5 @@ Salida vacía o solo whitespace → tripwire `salida_vacia`. No entregar mensaje
 "La salida no cumple las políticas de calidad/seguridad del despacho (invención, PII, vacío o falta de aviso de borrador). Se retiene para corrección."
 
 ## output_info_fields
-Registrar: `reason`, `chars`, `has_disclaimer`, `pending_markers_count`, `pii_flags`, `invention_suspect`.
+Registrar: `reason`, `chars`, `pending_markers_count`, `pii_flags`, `invention_suspect`.
+(`has_disclaimer` se audita en la traza final tras `apply_output_guardrails`, no en este guardrail.)

@@ -338,13 +338,11 @@ async def soporte_desk(
     request: Request,
     settings: Settings = Depends(get_settings),
 ):
+    """Compat: la trazabilidad vive en el escritorio unificado (/abogado#actividad)."""
     redirect = _auth_redirect_if_needed(request, settings)
     if redirect:
         return redirect
-    page = _static_dir / "desk" / "soporte.html"
-    if not page.is_file():
-        raise HTTPException(status_code=404, detail="Consola de soporte no encontrada.")
-    return FileResponse(page)
+    return RedirectResponse(url="/abogado#actividad", status_code=302)
 
 
 @app.get("/chat")
