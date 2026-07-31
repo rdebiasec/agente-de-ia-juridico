@@ -844,6 +844,11 @@ async function renderTracePanelForEntry(entry) {
         <p><strong>Proveedor:</strong> ${escapeHtml(completion.provider || "openai-responses")}</p>
         <p><strong>Llamadas:</strong> ${escapeHtml(String(completion.summary?.calls ?? completionCalls.length ?? 0))}</p>
         <p><strong>Tokens entrada/salida/total:</strong> ${escapeHtml(String(completion.summary?.input_tokens ?? 0))} / ${escapeHtml(String(completion.summary?.output_tokens ?? 0))} / ${escapeHtml(String(completion.summary?.total_tokens ?? 0))}</p>
+        <p><strong>Costo estimado:</strong> ${
+          completion.summary?.estimated_cost_usd != null
+            ? escapeHtml(`~USD ${completion.summary.estimated_cost_usd}`)
+            : "No tarifado"
+        }${completion.budget_exceeded ? ' · <span class="trace-budget-warn">PRESUPUESTO TOKENS EXCEDIDO</span>' : ""}</p>
         <p><strong>Nota:</strong> ${escapeHtml(completion.note || "Sin nota")}</p>
       </div>
       <ul class="trace-actions">${completionRows || "<li><span>Sin completions reportados para este mensaje.</span></li>"}</ul>

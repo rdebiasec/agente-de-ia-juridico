@@ -27,8 +27,9 @@ from src.agents.orchestrator import (
 )
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.agents.pii import mask_pii
+from src.agents.pricing import enrich_completion_with_cost
 from src.agents.resilience import run_with_retries
-from src.agents.session_context import bind_active_session
+from src.agents.session_context import FirmRunContext, bind_run_context
 from src.agents.skill_catalog import agent_display_name
 from src.agents.triage import (
     build_triage,
@@ -124,13 +125,48 @@ def _usage_to_dict(usage: Any) -> dict[str, int]:
     }
 
 
-def _completion_summary(calls: list[dict]) -> dict[str, int]:
-    return {
+def _completion_summary(calls: list[dict]) -> dict[str, int | float | None]:
+    summary: dict[str, int | float | None] = {
         "calls": len(calls),
         "input_tokens": sum(int(call.get("usage", {}).get("input_tokens", 0) or 0) for call in calls),
         "output_tokens": sum(int(call.get("usage", {}).get("output_tokens", 0) or 0) for call in calls),
         "total_tokens": sum(int(call.get("usage", {}).get("total_tokens", 0) or 0) for call in calls),
     }
+    cost_meta = enrich_completion_with_cost(calls)
+    summary["estimated_cost_usd"] = cost_meta.get("estimated_cost_usd")
+    summary["priced_calls"] = cost_meta.get("priced_calls")
+    summary["unpriced_calls"] = cost_meta.get("unpriced_calls")
+    return summary
+
+
+def _new_item_detail(item: object) -> str:
+    """Tool name + args redactados desde RunResult.new_items (B08)."""
+    item_type = item.__class__.__name__
+    tool_name = (
+        getattr(item, "tool_name", None)
+        or getattr(getattr(item, "raw_item", None), "name", None)
+    )
+    if not tool_name:
+        raw = getattr(item, "raw_item", None)
+        if isinstance(raw, dict):
+            tool_name = raw.get("name")
+        elif hasattr(raw, "get"):
+            try:
+                tool_name = raw.get("name")  # type: ignore[union-attr]
+            except Exception:
+                tool_name = None
+    args_preview = ""
+    raw = getattr(item, "raw_item", None)
+    arguments = None
+    if isinstance(raw, dict):
+        arguments = raw.get("arguments") or raw.get("input")
+    elif raw is not None:
+        arguments = getattr(raw, "arguments", None) or getattr(raw, "input", None)
+    if arguments is not None:
+        args_preview = _safe_json_preview(arguments, limit=180)
+    name_bit = f" tool={tool_name}" if tool_name else ""
+    args_bit = f" args={args_preview}" if args_preview else ""
+    return f"Evento {item_type}.{name_bit}{args_bit}".strip()
 
 
 class _TraceRunHooks(RunHooksBase[Any, Any]):
@@ -878,6 +914,14 @@ async def run_agent(
 
         result = None
         original_model = orchestrator.model
+        firm_ctx = FirmRunContext(
+            session_id=session_id,
+            expediente_id=session_id,
+            channel=channel,
+            user_id=uid,
+            involucra_menor=bool(getattr(expediente, "involucra_menor", False)),
+            datos_sensibles=bool(getattr(expediente, "datos_sensibles", False)),
+        )
 
         async def _on_retry(attempt: int, exc: BaseException, delay: float) -> None:
             fallback_model = (settings.openai_model_fallback or "").strip()
@@ -898,12 +942,13 @@ async def run_agent(
             )
 
         try:
-            with bind_active_session(session_id):
+            with bind_run_context(firm_ctx):
                 result = await run_with_retries(
                     lambda: Runner.run(
                         orchestrator,
                         agent_input,
                         session=agent_session,
+                        context=firm_ctx,
                         max_turns=settings.agent_max_turns,
                         hooks=trace_hooks,
                         run_config=run_config,
@@ -1036,12 +1081,14 @@ async def run_agent(
                     action_type="runtime_event",
                     status="done",
                     actor=item_type,
-                    detail=f"Evento de ejecución detectado: {item_type}.",
+                    detail=_new_item_detail(item),
                 )
         calls = trace["completion"]["calls"]
         if calls:
             trace["completion"]["summary"] = _completion_summary(calls)
             trace["completion"]["available"] = True
+            cost = trace["completion"]["summary"].get("estimated_cost_usd")
+            cost_bit = f" · ~USD {cost}" if cost is not None else ""
             _append_action(
                 trace,
                 action_type="completion_summary",
@@ -1049,9 +1096,21 @@ async def run_agent(
                 actor="llm",
                 detail=(
                     f"Se ejecutaron {trace['completion']['summary']['calls']} completion(s), "
-                    f"{trace['completion']['summary']['total_tokens']} tokens totales."
+                    f"{trace['completion']['summary']['total_tokens']} tokens totales"
+                    f"{cost_bit}."
                 ),
             )
+            if trace["completion"].get("budget_exceeded"):
+                _append_action(
+                    trace,
+                    action_type="cost_budget",
+                    status="blocked",
+                    actor="watchdog",
+                    detail=(
+                        f"Presupuesto tokens ({settings.agent_max_total_tokens}) "
+                        "excedido o cerca del tope en este turno."
+                    ),
+                )
         else:
             trace["completion"]["note"] = "No se recibieron eventos de completion en hooks."
     except AgentBudgetExceeded as exc:

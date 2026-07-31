@@ -360,40 +360,40 @@
     <header class="hero">
       <p class="kicker">Firma virtual · Agents SDK</p>
       <h1 class="brand">Udemy → <em>despacho</em></h1>
-      <p class="lede">Una lección. Un cambio mínimo. Una prueba. Sin ruido.</p>
+      <p class="lede">Propósito primero. Las 28 lecciones. Una a la vez.</p>
     </header>
 
     <section class="now">
       <div class="panel next">
         <p class="kicker">Ahora</p>
-        <h2 id="nextTitle">L11 — Guardrails + HITL</h2>
-        <p class="lede" id="nextHint" style="max-width:none">Cierra seguridad y revisión humana antes de tocar el resto.</p>
+        <h2 id="nextTitle">L01 — Overview</h2>
+        <p class="lede" id="nextHint" style="max-width:none">Propósito del Agents SDK → firma virtual. No empezar por guardrails.</p>
         <div class="ring-wrap">
           <div class="ring" id="ring"><i id="ringPct">0%</i></div>
           <div>
-            <div style="font-weight:600" id="progressLabel">0 de 11 listas</div>
-            <div style="color:var(--mute);font-size:0.82rem">Marca al terminar cada una</div>
+            <div style="font-weight:600" id="progressLabel">0 de 28 listas</div>
+            <div style="color:var(--mute);font-size:0.82rem">Orden pedagógico · marca al cerrar</div>
           </div>
         </div>
         <button class="cmd" type="button" id="copyCmd">
-          aprobado, ejecuta L11
+          cerrar L01, dejar quieto
           <small>copiar</small>
         </button>
       </div>
       <div class="stats">
-        <div class="stat"><span>En cola</span><b id="statQueue">11</b></div>
+        <div class="stat"><span>En cola</span><b id="statQueue">28</b></div>
         <div class="stat"><span>Hechas</span><b id="statDone">0</b></div>
-        <div class="stat"><span>Diferidas</span><b>14</b></div>
+        <div class="stat"><span>Total</span><b>28</b></div>
       </div>
     </section>
 
     <section class="section">
       <h3>Ritual por lección</h3>
       <div class="ritual">
-        <div class="step"><b>1</b><span>Antes</span></div>
-        <div class="step"><b>2</b><span>Cambio mínimo</span></div>
-        <div class="step"><b>3</b><span>Prueba corta</span></div>
-        <div class="step"><b>4</b><span>Después + por qué</span></div>
+        <div class="step"><b>1</b><span>Clase (prompt)</span></div>
+        <div class="step"><b>2</b><span>High-level</span></div>
+        <div class="step"><b>3</b><span>Ajuste o quieto</span></div>
+        <div class="step"><b>4</b><span>Actualizar listas</span></div>
       </div>
     </section>
 
@@ -403,22 +403,14 @@
     </section>
 
     <section class="section">
-      <h3>No tocar</h3>
-      <div class="track">
-        <div class="lesson skip">
-          <div class="check" aria-hidden="true">×</div>
-          <div class="meta">
-            <strong>L18–L28 · voz, sandbox, Bedrock</strong>
-            <span>Fuera de scope · 1581 / hosting Render</span>
-          </div>
-          <span class="tag off">off</span>
-        </div>
-      </div>
+      <h3>Avanzado en la pista</h3>
+      <p class="lede" style="max-width:none;margin:0">L18–L20 Voice aparcadas. L21–L28: leer hilo explicativo · DIFERIR (no portar sandbox/Bedrock).</p>
     </section>
 
     <footer class="foot">
-      <span>Fuente: PLAN_UDEMY_CORTO.md</span>
+      <span>Fuente: PLAN_UDEMY_CORTO.md · orden pedagógico</span>
       <a href="./PLAN_UDEMY_CORTO.md">ver markdown</a>
+      <a href="./PROMPT_CLASE_UDEMY.md">prompt de clase</a>
     </footer>
   </div>
 
@@ -426,20 +418,37 @@
 
   <script>
     const LESSONS = [
-  { id: "L11", title: "Guardrails + HITL", note: "HECHO · safety + revisión", tag: "p0", cmd: "aprobado, ejecuta L10", doneDefault: true },
-  { id: "L10", title: "as_tool", note: "Especialistas como tools", tag: "p0", cmd: "aprobado, ejecuta L10" },
-      { id: "L03", title: "Salidas estructuradas", note: "Schemas / HITL legible", tag: "p0", cmd: "aprobado, ejecuta L03" },
-      { id: "L05", title: "RunContext tipado", note: "Expediente + canal + 1581", tag: "p0", cmd: "aprobado, ejecuta L05" },
-      { id: "L04", title: "ModelSettings", note: "Temp / costo por rol", tag: "p0", cmd: "aprobado, ejecuta L04" },
-      { id: "L17", title: "Monitoreo", note: "Trazas sin filtrar PII", tag: "p0", cmd: "aprobado, ejecuta L17" },
-      { id: "L08", title: "RunResult / trazas", note: "Debug reproducible", tag: "p0", cmd: "aprobado, ejecuta L08" },
-      { id: "L12-13", title: "Sesiones", note: "Postgres · idle · stale", tag: "p1", cmd: "aprobado, ejecuta L12" },
-      { id: "L07", title: "Run loop", note: "Chat vs streaming", tag: "p1", cmd: "aprobado, ejecuta L07" },
-      { id: "L14-16", title: "Sin handoffs", note: "Solo confirmar arquitectura", tag: "p1", cmd: "aprobado, ejecuta L14" },
-      { id: "L09-15", title: "Tools / MCP", note: "No web search · no MCP extra", tag: "p1", cmd: "aprobado, ejecuta L09" },
+      { id: "L01", title: "Overview", note: "Propósito Agents SDK → firma", tag: "fund", cmd: "cerrar L01, dejar quieto", doneDefault: true },
+      { id: "L02", title: "Setup", note: "HECHO · local/Render/API key", tag: "fund", cmd: "cerrar L03, dejar quieto", doneDefault: true },
+      { id: "L06", title: "Basic Agents · POC", note: "HECHO · Agent = Gerente", tag: "fund", cmd: "cerrar L04, dejar quieto", doneDefault: true },
+      { id: "L03", title: "Structured Output", note: "HECHO · 10/10 schemas · POC prosa", tag: "design", cmd: "cerrar L05, dejar quieto", doneDefault: true },
+      { id: "L04", title: "Model Settings", note: "HECHO clase · gap ModelSettings", tag: "design", cmd: "aprobado, ejecuta L04", doneDefault: true },
+      { id: "L05", title: "RunContext", note: "HECHO clase · gap context=", tag: "design", cmd: "aprobado, ejecuta L05", doneDefault: true },
+      { id: "L07", title: "Run Loop", note: "HECHO · chat completo + SSE planes", tag: "run", cmd: "cerrar L08, dejar quieto", doneDefault: true },
+      { id: "L08", title: "RunResult", note: "HECHO · traza=REPL · AJUSTE opcional", tag: "run", cmd: "aprobado, ejecuta L08", doneDefault: true },
+      { id: "L09", title: "Hosted Tools", note: "HECHO · no aplicar hosted", tag: "tools", cmd: "cerrar L09, dejar quieto", doneDefault: true },
+      { id: "L10", title: "as_tool", note: "HECHO · Gerente + as_tool · quieto", tag: "tools", cmd: "cerrar L10, dejar quieto", doneDefault: true },
+      { id: "L15", title: "MCP", note: "HECHO · no MCP real · src/mcp=tools", tag: "tools", cmd: "cerrar L15, dejar quieto", doneDefault: true },
+      { id: "L14", title: "Handoffs", note: "HECHO · as_tool+planes · no peer", tag: "orch", cmd: "cerrar L14, dejar quieto", doneDefault: true },
+      { id: "L16", title: "Lab multi-agents", note: "HECHO · no portar · as_tool vivo", tag: "orch", cmd: "cerrar L16, dejar quieto", doneDefault: true },
+      { id: "L11", title: "Guardrails + HITL", note: "HECHO · plan/draft HITL · B12 Slack", tag: "safety", cmd: "cerrar L11, dejar quieto", doneDefault: true },
+      { id: "L12", title: "Sessions", note: "HECHO · Postgres SessionABC · B13", tag: "mem", cmd: "cerrar L12, dejar quieto", doneDefault: true },
+      { id: "L13", title: "Sessions prod", note: "HECHO · Postgres · B14 idle≠purge", tag: "mem", cmd: "cerrar L13, dejar quieto", doneDefault: true },
+      { id: "L17", title: "Monitoring", note: "HECHO · traces + B04/B07/B15", tag: "obs", cmd: "cerrar L17, dejar quieto", doneDefault: true },
+      { id: "L18", title: "Realtime Voice", note: "APARCADA · al implementar voz", tag: "adv", cmd: "reabrir L18 cuando voz" },
+      { id: "L19", title: "Chained Voice", note: "APARCADA · al implementar voz", tag: "adv", cmd: "reabrir L19 cuando voz" },
+      { id: "L20", title: "Lab Voice", note: "APARCADA · al implementar voz", tag: "adv", cmd: "reabrir L20 cuando voz" },
+      { id: "L21", title: "Sandbox Agents", note: "HECHO · DIFERIR", tag: "adv", cmd: "cerrar L21, diferir", doneDefault: true },
+      { id: "L22", title: "SandboxRunConfig", note: "HECHO · DIFERIR · mapa G1", tag: "adv", cmd: "cerrar L22, diferir", doneDefault: true },
+      { id: "L23", title: "Sandbox credentials", note: "HECHO · DIFERIR · env Render", tag: "adv", cmd: "cerrar L23, diferir", doneDefault: true },
+      { id: "L24", title: "AGENTS.md / Skills", note: "HECHO · skills OK · memory no", tag: "adv", cmd: "cerrar L24, diferir", doneDefault: true },
+      { id: "L25", title: "Sandbox state", note: "HECHO · DB + planes", tag: "adv", cmd: "cerrar L25, diferir", doneDefault: true },
+      { id: "L26", title: "Lab Sandbox", note: "HECHO · no portar", tag: "adv", cmd: "cerrar L26, diferir", doneDefault: true },
+      { id: "L27", title: "Lab SQL Analyzer", note: "HECHO · no portar", tag: "adv", cmd: "cerrar L27, diferir", doneDefault: true },
+      { id: "L28", title: "Bedrock AgentCore", note: "HECHO · A–Z · DIFERIR Render", tag: "adv", cmd: "aprobado, ejecuta batch udemy", doneDefault: true },
     ];
 
-    const KEY = "udemy-plan-dashboard-v1";
+    const KEY = "udemy-plan-dashboard-v2-pedagogico";
     const stored = JSON.parse(localStorage.getItem(KEY) || "[]");
     const store = new Set(stored);
     LESSONS.forEach((l) => {

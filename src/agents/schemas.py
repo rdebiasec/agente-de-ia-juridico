@@ -304,3 +304,83 @@ class DictamenCalidad(BaseModel):
     @property
     def bloquea_entrega(self) -> bool:
         return self.veredicto in ("rechazado", "escalar")
+
+
+# --- Especialistas que estaban en prosa (L03): schemas mínimos para HITL ---
+
+
+class RutaProcesalLey906(BaseModel):
+    """Salida estructurada del analista de ruta procesal Ley 906."""
+
+    resumen: str = Field(..., description="Resumen operativo de la ruta para el Gerente.")
+    etapa_aparente: str = Field(
+        default="pendiente_verificar",
+        description="Etapa aparente (indagación, imputación, etc.) o pendiente.",
+    )
+    oportunidades_intervencion: list[str] = Field(default_factory=list)
+    terminos_o_vencimientos: list[str] = Field(default_factory=list)
+    riesgos_procesales: list[str] = Field(default_factory=list)
+    ruta_recomendada: list[str] = Field(
+        default_factory=list,
+        description="Pasos o actuaciones sugeridas (preliminares).",
+    )
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("resumen")
+    @classmethod
+    def _validar_resumen(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class RepresentacionVictimas(BaseModel):
+    """Salida estructurada del analista de representación de víctimas."""
+
+    teoria_caso: str = Field(..., description="Teoría del caso preliminar (víctima).")
+    derechos_relevantes: list[str] = Field(default_factory=list)
+    dano_afectacion: str = Field(default="", description="Daño/afectación narrada o pendiente.")
+    enfoque_diferencial: list[str] = Field(default_factory=list)
+    riesgos_revictimizacion: list[str] = Field(default_factory=list)
+    objetivos_representacion: list[str] = Field(default_factory=list)
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("teoria_caso")
+    @classmethod
+    def _validar_teoria(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class PreparacionAudiencia(BaseModel):
+    """Salida estructurada del preparador estratégico de audiencias."""
+
+    objetivo_audiencia: str = Field(..., description="Objetivo de la intervención oral.")
+    guion_puntos: list[str] = Field(default_factory=list)
+    solicitudes_orales: list[str] = Field(default_factory=list)
+    preguntas_clave: list[str] = Field(default_factory=list)
+    riesgos_audiencia: list[str] = Field(default_factory=list)
+    checklist: list[str] = Field(default_factory=list)
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("objetivo_audiencia")
+    @classmethod
+    def _validar_objetivo(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
+class SeguimientoProcesal(BaseModel):
+    """Salida estructurada del gestor de seguimiento procesal."""
+
+    resumen: str = Field(..., description="Estado de seguimiento para el Gerente.")
+    radicado_o_referencia: str = Field(
+        default="[PENDIENTE DE VERIFICAR]",
+        description="Radicado o referencia; marcar pendiente si no está confirmado.",
+    )
+    actuaciones_relevantes: list[str] = Field(default_factory=list)
+    terminos_alertas: list[str] = Field(default_factory=list)
+    inactividad_detectada: str = Field(default="", description="Señal de inactividad o vacío.")
+    proximas_acciones: list[str] = Field(default_factory=list)
+    pendientes_verificacion: list[str] = Field(default_factory=list)
+
+    @field_validator("resumen")
+    @classmethod
+    def _validar_resumen(cls, v: str, info):
+        return _no_vacio(v, info.field_name)

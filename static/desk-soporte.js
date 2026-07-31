@@ -62,8 +62,9 @@
         <strong class="support-op-route">${esc(op.sent_to_agent || op.route || "—")}</strong>
         <span class="support-op-skill">${esc(op.skill_kan || "")}</span>
         <p class="support-op-input">${esc((op.input_summary || "").slice(0, 120))}</p>
-        <span class="support-op-meta">${esc(op.span_count)} spans · ${esc(op.tokens_total)} tok · turno ${esc(op.turn_index)}</span>
+        <span class="support-op-meta">${esc(op.span_count)} spans · ${esc(op.tokens_total)} tok · turno ${esc(op.turn_index)}${op.budget_exceeded ? " · BUDGET" : ""}${op.estimated_cost_usd != null ? ` · ~$${esc(op.estimated_cost_usd)}` : ""}</span>
         ${op.blocked ? '<span class="support-badge support-badge--danger">Bloqueado</span>' : ""}
+        ${op.budget_exceeded ? '<span class="support-badge support-badge--danger">Budget</span>' : ""}
       </button>`;
   }
 
@@ -218,7 +219,7 @@
             const url = openaiLogUrl(c.response_id);
             return `<div class="support-completion">
               <p><strong>${esc(c.call_id || "completion")}</strong> · ${esc(c.model || "—")}</p>
-              <p>Tokens: ${esc(c.usage?.input_tokens)}/${esc(c.usage?.output_tokens)}/${esc(c.usage?.total_tokens)}</p>
+              <p>Tokens: ${esc(c.usage?.input_tokens)}/${esc(c.usage?.output_tokens)}/${esc(c.usage?.total_tokens)}${c.estimated_cost_usd != null ? ` · ~USD ${esc(c.estimated_cost_usd)}` : ""}</p>
               <p class="support-mono">response_id: ${esc(c.response_id || "—")}</p>
               ${url ? `<a class="btn-firma-link" href="${url}" target="_blank" rel="noopener">Ver en OpenAI Logs ↗</a>` : ""}
               <details><summary>Input preview</summary><pre>${esc(c.input_preview || "")}</pre></details>
@@ -226,6 +227,20 @@
           })
           .join("")
       : `<p class="support-empty">${esc(completion.note || "Sin completions en este turno.")}</p>`;
+    if (completion.budget_exceeded || completion.summary?.estimated_cost_usd != null) {
+      openaiEl.insertAdjacentHTML(
+        "afterbegin",
+        `<p class="support-budget ${completion.budget_exceeded ? "support-budget--warn" : ""}">
+          ${completion.budget_exceeded ? "<strong>Presupuesto de tokens excedido.</strong> " : ""}
+          Costo turno: ${
+            completion.summary?.estimated_cost_usd != null
+              ? `~USD ${esc(completion.summary.estimated_cost_usd)}`
+              : "—"
+          }
+          · tope AGENT_MAX_TOTAL_TOKENS
+        </p>`
+      );
+    }
 
     document.getElementById("support-json").textContent = JSON.stringify(payload, null, 2);
   }

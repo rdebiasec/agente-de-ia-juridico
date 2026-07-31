@@ -31,6 +31,8 @@ def _summarize_trace(record) -> dict:
         "span_count": payload.get("span_count") or len(payload.get("spans") or []),
         "completion_calls": summary.get("calls") or len(calls),
         "tokens_total": summary.get("total_tokens") or 0,
+        "estimated_cost_usd": summary.get("estimated_cost_usd"),
+        "budget_exceeded": bool(completion.get("budget_exceeded")),
         "response_ids": [c.get("response_id") for c in calls if c.get("response_id")],
     }
 

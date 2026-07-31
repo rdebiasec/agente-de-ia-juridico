@@ -32,6 +32,8 @@ def config_fingerprint() -> str:
         "m:"
         f"{settings.openai_model}:"
         f"{settings.openai_model_high_risk}:"
+        f"{settings.agent_temperature}:"
+        f"{settings.agent_temperature_high_risk}:"
         f"{settings.agent_nested_max_turns}:"
         f"{settings.agent_max_turns}"
     )

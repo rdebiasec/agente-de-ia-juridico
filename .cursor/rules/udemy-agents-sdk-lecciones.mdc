@@ -1,0 +1,39 @@
+---
+description: Catálogo oficial de las 28 lecciones Udemy (OpenAI Agents SDK) — títulos canónicos L01–L28
+alwaysApply: true
+---
+
+# Udemy — Mastering Agents (títulos oficiales)
+
+Curso: Mastering Agents with OpenAI Agents SDK & OpenAI Codex.  
+Usar estos títulos al mapear lecciones (`L01`…`L28`), clases, registro y `UDEMY_LISTA_CAMBIOS`.  
+Orden pedagógico del producto: ver `docs/canon/PLAN_UDEMY_CORTO.md` (no implica el orden del curso).
+
+1. Overview on OpenAI Agents
+2. Lab: Setup OpenAI Codex and OpenAI API Key
+3. Prompts, Structured Output
+4. Model Settings
+5. RunContext and RunContextWrapper
+6. Lab: Basic Agents
+7. Run Loop
+8. RunResult and REPL
+9. Hosted Tools
+10. Function Tools and Agent as Tools
+11. Guardrails and Human Review
+12. Session Management
+13. Session Management on Production
+14. Handoffs and Multi-Agentic Orchestration
+15. MCP
+16. Lab: Multi-Agents Handoffs and As Tools
+17. Monitoring
+18. Realtime Voice Agents
+19. Chained Voice Workflows
+20. Lab: Voice Agents
+21. Sandbox Agents
+22. SandboxRunConfig, Manifest and Capabilities
+23. Sandbox Provider and Mount Credentials
+24. AGENTS.md, Skills and Sandbox Memory
+25. Sandbox Agents State and Composition
+26. Lab: SandboxAgents
+27. Lab: SQL Analyzer Agent
+28. Bonus AWS Bedrock AgentCore

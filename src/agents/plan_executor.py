@@ -39,7 +39,7 @@ from src.agents.runner import (
     _summarize_input,
     _trace_step,
 )
-from src.agents.session_context import bind_active_session
+from src.agents.session_context import FirmRunContext, bind_run_context
 from src.agents.skill_catalog import agent_display_name, skill_contract_brief
 from src.config import get_settings
 from src.gateway.agent_session import reconcile_turn_messages
@@ -458,12 +458,21 @@ async def _run_single_step(
                     }
                 )
 
-            with bind_active_session(session_id):
+            firm_ctx = FirmRunContext(
+                session_id=session_id,
+                expediente_id=session_id,
+                channel=channel,
+                user_id=user_id,
+                involucra_menor=bool(getattr(expediente, "involucra_menor", False)),
+                datos_sensibles=bool(getattr(expediente, "datos_sensibles", False)),
+            )
+            with bind_run_context(firm_ctx):
                 result = await run_with_retries(
                     lambda: Runner.run(
                         agent,
                         prompt,
                         session=None,
+                        context=firm_ctx,
                         # Watchdog por criticidad: especialistas acotados.
                         max_turns=(
                             min(settings.agent_max_turns_plan_step, 4)
