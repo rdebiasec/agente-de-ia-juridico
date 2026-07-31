@@ -32,6 +32,7 @@
 - **Slack HITL Render:** [`operaciones/SLACK_HITL_RENDER.md`](./operaciones/SLACK_HITL_RENDER.md)
 - **Plantilla DPA encargados:** [`operaciones/PLANTILLA_DPA_ENCARGADOS.md`](./operaciones/PLANTILLA_DPA_ENCARGADOS.md)
 - **Checklist RNBD/SIC:** [`operaciones/CHECKLIST_RNBD_SIC.md`](./operaciones/CHECKLIST_RNBD_SIC.md)
+- **Auditoría viva Gerente + agentes (un solo doc):** [`auditoria/AUDITORIA_GERENTE_Y_AGENTES.md`](./auditoria/AUDITORIA_GERENTE_Y_AGENTES.md)
 - **Resumen auditoría pasos:** [`auditoria/reporte-ejecutivo-auditoria-pasos-skills.md`](./auditoria/reporte-ejecutivo-auditoria-pasos-skills.md)
 
 ## Regenerar

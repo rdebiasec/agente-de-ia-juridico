@@ -124,8 +124,13 @@ def run_pre_validations(
     trace: dict,
     expediente: Expediente | None = None,
     destination: str | None = None,
+    completeness=None,
+    urgency=None,
 ) -> tuple[bool, str | None]:
-    """Validaciones encadenadas antes de llamar al coordinador penal."""
+    """Validaciones encadenadas antes de llamar al coordinador penal.
+
+    Si `completeness`/`urgency` vienen de `build_triage_bundle`, no se reevalúan (G02).
+    """
     if not message or not message.strip():
         _span(trace, "Validación: mensaje vacío", "blocked", "La consulta llegó sin contenido.")
         return False, "Escriba su consulta para continuar la conversación."
@@ -160,20 +165,31 @@ def run_pre_validations(
             format_missing_request,
             persist_verification,
         )
+        from src.agents.triage import is_trivial_consultation
         from src.agents.urgency import assess_urgency
 
-        verification = assess_completeness(
+        verification = completeness or assess_completeness(
             message,
             destination=destination,
             expediente=expediente,
         )
-        urgency = assess_urgency(message, expediente)
-        persist_verification(
-            expediente,
-            verification,
-            destination=destination,
-            urgency=urgency.model_dump(),
+        urgency_result = urgency or assess_urgency(message, expediente)
+        urgency_dump = (
+            urgency_result.model_dump()
+            if hasattr(urgency_result, "model_dump")
+            else dict(urgency_result or {})
         )
+        # G02: no spamear ledger en chit-chat trivial al POC.
+        if not (
+            destination == "coordinador_expediente_penal"
+            and is_trivial_consultation(message, destination=destination)
+        ):
+            persist_verification(
+                expediente,
+                verification,
+                destination=destination,
+                urgency=urgency_dump,
+            )
         trace["gerencia_verification"] = {
             "puede_continuar": verification.puede_continuar,
             "faltantes": verification.faltantes,
@@ -187,7 +203,7 @@ def run_pre_validations(
                 for f in verification.faltantes_detalle
             ],
             "destination": destination,
-            "urgencia": urgency.model_dump(),
+            "urgencia": urgency_dump,
         }
         if not verification.puede_continuar:
             _span(

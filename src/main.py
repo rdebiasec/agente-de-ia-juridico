@@ -102,6 +102,13 @@ async def lifespan(app: FastAPI):
         except Exception:
             logger.exception("No se pudo inicializar Sentry (continuando)")
 
+    try:
+        from src.agents.prompt_parity import log_prompt_parity_on_startup
+
+        log_prompt_parity_on_startup(logger)
+    except Exception:
+        logger.exception("Prompt parity check falló (continuando)")
+
     slack_task = None
     if settings.slack_bot_token and settings.slack_signing_secret:
         if not settings.slack_app_token:

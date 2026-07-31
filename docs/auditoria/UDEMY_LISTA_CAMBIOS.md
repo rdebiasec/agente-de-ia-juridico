@@ -50,7 +50,7 @@ Criterios de priorización del backlog:
 | B06 | Documento de precios internos: $/turno chat vs $/paso plan (mini vs high-risk) | Cotizar clientes / límites de uso | Base del forecast | S (docs + medir) | **hecho** (`docs/operaciones/FORECAST_COSTOS_TURNOS.md`) |
 | B07 | Alertas budget ya existentes visibles en desk soporte (si faltan) | Ops no adivina | Evita runs que estallan en 30k tokens | S | **hecho** (desk + chat trace) |
 | B08 | Detalle `new_items` (tool name + args redactados) en traza | Debug más barato (menos re-runs a ciegas) | Baja re-trabajo | S | **hecho** |
-| B12 | Slack HITL en Render (`SLACK_APP_TOKEN` / approvers) verificado | Cola humana en canal Slack además de web | Neutro tokens; productiza aprobación | S (ops) | **hecho docs** · falta secretos Render (`docs/operaciones/SLACK_HITL_RENDER.md`) |
+| B12 | Slack HITL en Render (`SLACK_APP_TOKEN` / approvers) verificado | Cola humana en canal Slack además de web | Neutro tokens; productiza aprobación | S (ops) | **hecho** (prod `/health.slack_socket_started=true`; runbook `SLACK_HITL_RENDER.md`) |
 | B13 | Tunear `session_recent_messages` / `session_summary_max_chars` tras medir tokens | Controlar $/turno cuando el chat crece | Baja input tokens largos | S | **pendiente medir** (instrucciones en forecast B06) |
 | B14 | Documentar/ops: idle UI (60m) ≠ retención 5y ≠ borrar con HITL pendiente; smoke `purge_retention --dry-run` | Evita pérdida de trabajo y cumple narrativa 1581 | Neutro tokens; baja riesgo ops | S | **hecho** (runbook 1581) |
 | B15 | Sentry `before_send` scrub PII/caso + tags release; no subir sample sin scrub | Incidentes sin filtrar 1581 | Neutro tokens | S | **hecho** |

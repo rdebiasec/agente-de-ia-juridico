@@ -32,7 +32,7 @@ from src.agents.resilience import run_with_retries
 from src.agents.session_context import FirmRunContext, bind_run_context
 from src.agents.skill_catalog import agent_display_name
 from src.agents.triage import (
-    build_triage,
+    build_triage_bundle,
     format_triage_sistema,
     has_penal_context,
     infer_destination_agent,
@@ -338,8 +338,9 @@ def _maybe_create_draft(
     text: str,
     destination_agent: str,
     trace: dict,
+    channel: str = "web",
 ) -> str | None:
-    """Materializa una salida accionable como borrador HITL y notifica a Slack."""
+    """Materializa una salida accionable como borrador HITL; Slack según canal/flag (G07)."""
     try:
         from src.hitl.drafts import crear_borrador, enviar_a_revision
         from src.hitl.slack_review import notificar_borrador
@@ -349,16 +350,21 @@ def _maybe_create_draft(
         draft = crear_borrador(
             session_id=session_id, contenido=text, tipo=tipo, titulo=titulo
         )
-        slack_ts = notificar_borrador(draft)
+        settings = get_settings()
+        notify_slack = channel == "slack" or bool(settings.slack_notify_web_drafts)
+        slack_ts = notificar_borrador(draft) if notify_slack else None
         if slack_ts:
             enviar_a_revision(draft.id, slack_ts=slack_ts)
         trace["draft_id"] = draft.id
+        detail = f"Borrador {draft.id} ({tipo}) creado y pendiente de aprobación del abogado."
+        if not notify_slack:
+            detail += " Slack omitido (canal web y SLACK_NOTIFY_WEB_DRAFTS=false)."
         _append_action(
             trace,
             action_type="draft_created",
             status="pending",
             actor="hitl",
-            detail=f"Borrador {draft.id} ({tipo}) creado y pendiente de aprobación del abogado.",
+            detail=detail,
         )
         return draft.id
     except Exception:
@@ -570,7 +576,11 @@ def _resolve_backoffice_agent(
 
 
 def _ensure_poc_voice(text: str, *, last_agent_name: str | None, backoffice_agent: str) -> str:
-    """Red de seguridad: si un handoff residual dejó voz de especialista, enmarca como POC."""
+    """Red de seguridad residual (plan/handoff): chat usa as_tool y last_agent suele ser el POC.
+
+    En el camino chat normal no reencuadra (last_agent = POC). Sí actúa si un
+    handoff residual o un paso de plan dejó voz de especialista.
+    """
     if not last_agent_name or last_agent_name == POC_AGENT_ID:
         return text
     if last_agent_name in {"guardrail", "error", "fallback"}:
@@ -584,6 +594,36 @@ def _ensure_poc_voice(text: str, *, last_agent_name: str | None, backoffice_agen
     return (
         f"Como Gerente del Caso Penal, consolidé el trabajo del equipo interno "
         f"({label}):\n\n{stripped}"
+    )
+
+
+def _persist_chat_turn(
+    *,
+    session_id: str,
+    channel: str,
+    user_id: str,
+    message: str,
+    text: str,
+) -> None:
+    """Persiste user+assistant en chat_sessions (G01 — todos los early-returns)."""
+    settings = get_settings()
+    max_messages = settings.session_max_messages
+    repo = get_repository()
+    repo.append_chat_message(
+        session_id,
+        channel=channel,
+        user_id=user_id,
+        role="user",
+        content=message,
+        max_messages=max_messages,
+    )
+    repo.append_chat_message(
+        session_id,
+        channel=channel,
+        user_id=user_id,
+        role="assistant",
+        content=text,
+        max_messages=max_messages,
     )
 
 
@@ -608,9 +648,10 @@ async def run_agent(
     expediente = expediente_store.get_or_create(session_id)
     exp_resumen = expediente.resumen()
     requested_destination = _infer_destination_agent(message)
-    triage = build_triage(
+    triage_bundle = build_triage_bundle(
         message, expediente=expediente, destination=requested_destination
     )
+    triage = triage_bundle.triage
     trace["triage_sistema"] = triage.model_dump()
 
     ok_pre, pre_err = run_pre_validations(
@@ -620,6 +661,8 @@ async def run_agent(
         trace=trace,
         expediente=expediente,
         destination=requested_destination,
+        completeness=triage_bundle.completeness,
+        urgency=triage_bundle.urgency,
     )
     prior_traces = get_repository().list_session_traces(session_id, limit=40)
     attach_session_continuity(trace, history=history, session_id=session_id, prior_traces=prior_traces)
@@ -630,21 +673,12 @@ async def run_agent(
         trace["selected_agent"] = "guardrail"
         text = err or pre_err or "Entrada no válida."
         _finalize_trace(trace, text)
-        get_repository().append_chat_message(
-            session_id,
+        _persist_chat_turn(
+            session_id=session_id,
             channel=channel,
             user_id=uid,
-            role="user",
-            content=message,
-            max_messages=settings.session_max_messages,
-        )
-        get_repository().append_chat_message(
-            session_id,
-            channel=channel,
-            user_id=uid,
-            role="assistant",
-            content=text,
-            max_messages=settings.session_max_messages,
+            message=message,
+            text=text,
         )
         return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace, "session_id": session_id}
 
@@ -660,12 +694,19 @@ async def run_agent(
         trace["sent_to_agent"] = "none"
         trace["human_review_required"] = True
         _finalize_trace(trace, text)
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
         return {
             "text": text,
             "agent": POC_AGENT_ID,
             "pending_review": True,
-            "trace": trace,
             "session_id": session_id,
+            "trace": trace,
         }
 
     if not has_key:
@@ -702,6 +743,7 @@ async def run_agent(
                 text=text,
                 destination_agent=inferred_destination,
                 trace=trace,
+                channel=channel,
             )
         hr_status, hr_detail = _human_review_trace(pending_review, draft_id)
         _append_action(
@@ -715,13 +757,12 @@ async def run_agent(
             _trace_step("Revisión humana", hr_status, hr_detail)
         )
         _finalize_trace(trace, text)
-        get_repository().append_chat_message(
-            session_id, channel=channel, user_id=uid, role="user", content=message,
-            max_messages=settings.session_max_messages,
-        )
-        get_repository().append_chat_message(
-            session_id, channel=channel, user_id=uid, role="assistant", content=text,
-            max_messages=settings.session_max_messages,
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
         )
         return {
             "text": text,
@@ -1040,6 +1081,13 @@ async def run_agent(
             )
             trace["human_review_required"] = True
             _finalize_trace(trace, text)
+            _persist_chat_turn(
+                session_id=session_id,
+                channel=channel,
+                user_id=uid,
+                message=message,
+                text=text,
+            )
             return {
                 "text": text,
                 "agent": POC_AGENT_ID,
@@ -1135,6 +1183,13 @@ async def run_agent(
             detail=str(exc),
         )
         _finalize_trace(trace, text)
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
         return {
             "text": text,
             "agent": "guardrail",
@@ -1177,6 +1232,13 @@ async def run_agent(
         )
         trace["human_review_required"] = False
         _finalize_trace(trace, text)
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
         return {
             "text": text,
             "agent": "guardrail",
@@ -1212,6 +1274,13 @@ async def run_agent(
             _trace_step("Revisión humana", "done", "Se devolvió mensaje de error controlado.")
         )
         _finalize_trace(trace, text)
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
         return {"text": text, "agent": "error", "pending_review": False, "session_id": session_id, "trace": trace}
 
     pending_review = needs_human_review(text, channel, message)
@@ -1239,6 +1308,7 @@ async def run_agent(
             text=text,
             destination_agent=destination_agent,
             trace=trace,
+            channel=channel,
         )
     hr_status, hr_detail = _human_review_trace(pending_review, draft_id)
     _append_action(

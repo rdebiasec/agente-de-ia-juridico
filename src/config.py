@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # CSV de Slack user IDs (U…) autorizados a aprobar/editar/rechazar borradores.
     # Vacío = cualquier miembro del workspace con acceso al canal (solo para local/dev).
     slack_approver_ids: str = ""
+    # G07: si true, borradores creados desde canal web también se notifican a Slack.
+    # Canal slack siempre notifica. false = solo cola web (menos exposición 1581).
+    slack_notify_web_drafts: bool = True
 
     # Twilio SMS — alertas transaccionales de plazos (complemento a Slack).
     twilio_account_sid: str = ""

@@ -1,11 +1,14 @@
-"""Cache de agentes por fingerprint de config (G2)."""
+"""Cache de agentes por fingerprint de config (G2) con techo LRU (G05)."""
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from typing import Any, Callable
 
-_ORCH_CACHE: dict[tuple[Any, ...], Any] = {}
-_AGENT_CACHE: dict[tuple[str, str], Any] = {}
+_ORCH_CACHE: OrderedDict[tuple[Any, ...], Any] = OrderedDict()
+_AGENT_CACHE: OrderedDict[tuple[str, str], Any] = OrderedDict()
+_ORCH_CACHE_MAX = 6
+_AGENT_CACHE_MAX = 24
 
 
 def config_fingerprint() -> str:
@@ -45,6 +48,13 @@ def clear_agent_cache() -> None:
     _AGENT_CACHE.clear()
 
 
+def _lru_set(cache: OrderedDict, key: Any, value: Any, max_size: int) -> None:
+    cache[key] = value
+    cache.move_to_end(key)
+    while len(cache) > max_size:
+        cache.popitem(last=False)
+
+
 def get_cached_orchestrator(
     builder: Callable[..., Any],
     *,
@@ -68,6 +78,7 @@ def get_cached_orchestrator(
     )
     cached = _ORCH_CACHE.get(key)
     if cached is not None:
+        _ORCH_CACHE.move_to_end(key)
         return cached
     agent = builder(
         require_tool_approval=require_tool_approval,
@@ -79,7 +90,7 @@ def get_cached_orchestrator(
         slim_instructions=slim_instructions,
         use_cache=False,
     )
-    _ORCH_CACHE[key] = agent
+    _lru_set(_ORCH_CACHE, key, agent, _ORCH_CACHE_MAX)
     return agent
 
 
@@ -87,9 +98,10 @@ def get_cached_agent(agent_id: str, builder: Callable[[], Any]) -> Any:
     key = (config_fingerprint(), agent_id)
     cached = _AGENT_CACHE.get(key)
     if cached is not None:
+        _AGENT_CACHE.move_to_end(key)
         return cached
     agent = builder()
-    _AGENT_CACHE[key] = agent
+    _lru_set(_AGENT_CACHE, key, agent, _AGENT_CACHE_MAX)
     return agent
 
 
@@ -97,4 +109,6 @@ def cache_stats() -> dict[str, int]:
     return {
         "orchestrator_entries": len(_ORCH_CACHE),
         "agent_entries": len(_AGENT_CACHE),
+        "orchestrator_max": _ORCH_CACHE_MAX,
+        "agent_max": _AGENT_CACHE_MAX,
     }

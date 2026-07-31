@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import re
 
-from src.agents.completeness import assess_completeness, infer_stage
+from dataclasses import dataclass
+
+from src.agents.completeness import CompletenessResult, assess_completeness, infer_stage
 from src.agents.schemas import TriageResult
-from src.agents.urgency import assess_urgency
+from src.agents.urgency import UrgencyResult, assess_urgency
 from src.storage.models import Expediente
 
 POC_AGENT_ID = "coordinador_expediente_penal"
@@ -46,12 +48,24 @@ _VICTIMAS_RE = re.compile(
 _CRONOLOGIA_RE = re.compile(
     r"\b(cronolog[ií]a|linea de tiempo|hechos|narrativa factual|relato)\b", re.I
 )
+# G03: sin "borrador"/"escrito"/"redact" sueltos (evitan plan_required por resumen).
 _REDACCION_RE = re.compile(
-    r"\b(memorial|solicitud|recurso|derecho de petici[oó]n|redact|escrito|borrador)\b",
+    r"(?:"
+    r"\b(?:memorial|solicitud|recurso|derecho de petici[oó]n)\b|"
+    r"\bredact(?:ar|e|ame|emos)\b|"
+    r"\bborrador\s+de\s+(?:memorial|solicitud|recurso|tutela|escrito)\b|"
+    r"\bescrito\s+(?:de\s+)?(?:impulso|solicitud|memorial|tutela)\b"
+    r")",
     re.I,
 )
+# G03: sin "verificar" suelto (evita robar tipicidad/cronología).
 _CALIDAD_RE = re.compile(
-    r"\b(calidad|verificar|auditar|alucinaci[oó]n|coherencia|confidencialidad)\b",
+    r"\b("
+    r"calidad\s+jur[ií]dica|control\s+de\s+calidad|"
+    r"auditar\s+(?:la\s+)?(?:salida|borrador|dictamen|respuesta)|"
+    r"alucinaci[oó]n|coherencia\s+estrat[eé]gica|"
+    r"verificar\s+(?:citas|jurisprudencia|normas|calidad|coherencia)"
+    r")\b",
     re.I,
 )
 _OUT_OF_SCOPE_RE = re.compile(
@@ -113,8 +127,6 @@ def infer_destination_agent(message: str) -> str:
     """Unica funcion de destino: usada por chat, planner y gates."""
     if is_non_penal_scope_request(message):
         return POC_AGENT_ID
-    if _CALIDAD_RE.search(message):
-        return "analista_calidad_juridica"
     if _TUTELA_RE.search(message):
         return "evaluador_derechos_fundamentales_tutela"
     # La intención explícita de producir un escrito prevalece sobre términos
@@ -135,11 +147,23 @@ def infer_destination_agent(message: str) -> str:
         return "analista_representacion_victimas"
     if _SEGUIMIENTO_RE.search(message):
         return "gestor_seguimiento_procesal_penal"
+    # Calidad después del fondo: evita que "verificar tipicidad" robe el destino (G03).
+    if _CALIDAD_RE.search(message):
+        return "analista_calidad_juridica"
     if _PROFILE_RE.search(message):
         return POC_AGENT_ID
     if _KNOWLEDGE_RE.search(message):
         return "analista_ruta_procesal_ley906"
     return POC_AGENT_ID
+
+
+@dataclass(frozen=True)
+class TriageBundle:
+    """Triage + verificación ya calculada (G02 — una sola pass por turno)."""
+
+    triage: TriageResult
+    completeness: CompletenessResult
+    urgency: UrgencyResult
 
 
 def _summarize(message: str, limit: int = 240) -> str:
@@ -192,13 +216,13 @@ def format_triage_sistema(triage: TriageResult) -> str:
     )
 
 
-def build_triage(
+def build_triage_bundle(
     message: str,
     *,
     expediente: Expediente | None = None,
     destination: str | None = None,
-) -> TriageResult:
-    """Construye TriageResult determinista (sin LLM) como contrato unico de ruteo."""
+) -> TriageBundle:
+    """Triage + completeness + urgency en una sola pass (G02)."""
     dest = destination or infer_destination_agent(message)
     urgency = assess_urgency(message, expediente)
     fuera = is_non_penal_scope_request(message)
@@ -209,7 +233,7 @@ def build_triage(
         expediente=expediente,
     )
     stage = completeness.etapa_aparente or infer_stage(message, expediente)
-    return TriageResult(
+    triage = TriageResult(
         tipo_tarea=tipo,  # type: ignore[arg-type]
         etapa_aparente=stage,  # type: ignore[arg-type]
         agente_destino=dest,
@@ -222,6 +246,19 @@ def build_triage(
         accion_inmediata_urgencia=urgency.accion_inmediata_sugerida,
         resumen_triage=_summarize(message),
     )
+    return TriageBundle(triage=triage, completeness=completeness, urgency=urgency)
+
+
+def build_triage(
+    message: str,
+    *,
+    expediente: Expediente | None = None,
+    destination: str | None = None,
+) -> TriageResult:
+    """Construye TriageResult determinista (sin LLM) como contrato unico de ruteo."""
+    return build_triage_bundle(
+        message, expediente=expediente, destination=destination
+    ).triage
 
 
 def requires_execution_plan(destination: str) -> bool:

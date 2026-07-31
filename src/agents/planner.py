@@ -19,7 +19,7 @@ from src.agents.skill_catalog import (
     skill_io_lists,
     valid_skill_ids,
 )
-from src.agents.triage import build_triage, infer_destination_agent
+from src.agents.triage import build_triage_bundle, infer_destination_agent
 from src.storage import get_repository
 from src.storage.models import ExecutionPlanRecord, Expediente
 
@@ -131,18 +131,14 @@ def create_execution_plan(
 
     sync_expediente_from_chat(session_id, message, history)
     expediente = repo.get_expediente(session_id) or Expediente(session_id=session_id)
-    triage = build_triage(message, expediente=expediente, destination=destination)
+    triage_bundle = build_triage_bundle(
+        message, expediente=expediente, destination=destination
+    )
+    triage = triage_bundle.triage
     triage_snapshot = triage.model_dump()
     completeness_ok = triage.puede_continuar
-    from src.agents.completeness import assess_completeness
-    from src.agents.urgency import assess_urgency
-
-    completeness = assess_completeness(
-        message,
-        destination=destination,
-        expediente=expediente,
-    )
-    urgency = assess_urgency(message, expediente)
+    completeness = triage_bundle.completeness
+    urgency = triage_bundle.urgency
     persist_verification(
         expediente,
         completeness,

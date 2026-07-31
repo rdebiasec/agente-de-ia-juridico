@@ -120,6 +120,7 @@ _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
             "gestor_evidencia_y_soporte_probatorio",
             "analista_calidad_juridica",
             "analista_tipicidad_y_responsabilidad_penal",
+            "analista_ruta_procesal_ley906",  # G04: hechos ↔ etapa
         }
     ),
     "analista_tipicidad_y_responsabilidad_penal": frozenset(
@@ -127,6 +128,7 @@ _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
             "gestor_evidencia_y_soporte_probatorio",
             "analista_calidad_juridica",
             "analista_cronologia_hechos_penales",
+            "analista_ruta_procesal_ley906",  # G04
         }
     ),
     "analista_ruta_procesal_ley906": frozenset(

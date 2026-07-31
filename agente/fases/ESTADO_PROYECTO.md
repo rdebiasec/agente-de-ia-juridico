@@ -14,15 +14,17 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 **Modelos (batch Udemy 2026-07-31, Opción A):** default/laborers `gpt-4.1-mini` @ temp 0.2 · high-risk (redactor/tutela) `gpt-4.1` @ temp 0.1 · RunContext tipado + costo estimado en traza.
 
+**Auditoría Gerente + agentes (vivo):** `docs/auditoria/AUDITORIA_GERENTE_Y_AGENTES.md` — G01–G09 **hecho** (2026-07-31): persistencia early-return, triage endurecido, TriageBundle, Slack notify toggle, prompt parity boot, vecinos ruta906, LRU cache.
+
 ## Resumen ejecutivo
 
 | Bloque | Estado | Notas |
 |--------|--------|-------|
 | **Fase A — Firma sin estado** | ✅ Cerrada | Orquestador, 10 roles, KB, playbooks CGP/906, guardrails, web |
 | **Fase B — Persistencia** | ✅ Mayoría | Postgres, Alembic, RAG, HITL borradores, PDF/DOCX, plazos, scheduler |
-| **Sesiones multi-turno** | ✅ | `chat_sessions`, idle configurable, reset chat, historial servidor en UI |
-| **Editor de configuración** | ✅ | Prompts / guardrails / skills versionados |
-| **Canales producción** | 🟡 Parcial | Web ✅ · Slack HITL (Aprobar/Editar/Rechazar + allowlist) — falta `SLACK_APP_TOKEN`/`SLACK_APPROVER_IDS` en Render · WhatsApp **no** |
+| **Sesiones multi-turno** | ✅ | `chat_sessions`, idle configurable, reset chat, historial servidor en UI; G01 persiste también `plan_required` |
+| **Editor de configuración** | ✅ | Prompts / guardrails / skills versionados; G08 parity checksum al boot |
+| **Canales producción** | 🟡 Parcial | Web ✅ · Slack HITL en Render ✅ (`slack_socket_started`) · WhatsApp **no** |
 | **50 requisitos (REQ)** | 🟡 Por validar | Tablero: `docs/operaciones/CHECKLIST_REQ_CIERRE.md` |
 
 ## Hecho (evidencia en repo)
@@ -63,10 +65,9 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 ## Pendiente prioritario (siguiente sprint)
 
 ### P0 — Operación despacho
-1. **Slack HITL en producción** — configurar `SLACK_APP_TOKEN` (`xapp`) en Render; verificar `/health.slack_socket_started`. Runbook: `docs/operaciones/SLACK_HITL_RENDER.md`.
-2. **Checklist REQ-001…050** — pruebas en JSON / `docs/operaciones/CHECKLIST_REQ_CIERRE.md`.
-3. **DPA firmados** — evidencia en `docs/operaciones/ESTADO_DPA_Y_ARCO.md`.
-4. **Medir tokens (B13)** — tras 1–2 semanas con costo en traza, tunear `SESSION_RECENT_MESSAGES` / `SESSION_SUMMARY_MAX_CHARS` (`docs/operaciones/FORECAST_COSTOS_TURNOS.md`).
+1. **Checklist REQ-001…050** — pruebas en JSON / `docs/operaciones/CHECKLIST_REQ_CIERRE.md`.
+2. **DPA firmados** — evidencia en `docs/operaciones/ESTADO_DPA_Y_ARCO.md`.
+3. **Medir tokens (B13)** — tras 1–2 semanas con costo en traza, tunear `SESSION_RECENT_MESSAGES` / `SESSION_SUMMARY_MAX_CHARS` (`docs/operaciones/FORECAST_COSTOS_TURNOS.md`).
 
 ### P1 — Acceso
 4. Configurar `AUDIT_ALLOWED_EMAILS` en prod (ver `docs/operaciones/CUENTAS_POR_ABOGADO.md`).
@@ -79,6 +80,10 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 ### P3 — Canales
 9. **WhatsApp** — no construir sin evaluación 1581/2300.
+
+### Hecho reciente (ops)
+- Slack HITL prod: `slack_socket_started=true` — runbook `docs/operaciones/SLACK_HITL_RENDER.md`.
+- Auditoría Gerente G01–G09 (persistencia, triage, parity, cache, vecinos).
 
 ## Documentos históricos (no borrar, contexto)
 
