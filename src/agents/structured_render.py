@@ -137,6 +137,90 @@ def render_structured_output(output: Any) -> str:
             lines.extend(f"- {p}" for p in pret)
         return "\n".join(lines).strip()
 
+    # RutaProcesalLey906
+    if "ruta_recomendada" in data and "etapa_aparente" in data:
+        lines = [
+            "Ruta procesal Ley 906 (preliminar)",
+            str(data.get("resumen") or "").strip(),
+            f"Etapa aparente: {data.get('etapa_aparente')}",
+        ]
+        for label, key in (
+            ("Oportunidades de intervención", "oportunidades_intervencion"),
+            ("Términos / vencimientos", "terminos_o_vencimientos"),
+            ("Riesgos procesales", "riesgos_procesales"),
+            ("Ruta recomendada", "ruta_recomendada"),
+            ("Pendientes de verificación", "pendientes_verificacion"),
+        ):
+            items = data.get(key) or []
+            if items:
+                lines.append(f"\n{label}:")
+                lines.extend(f"- {x}" for x in items)
+        return "\n".join(lines).strip()
+
+    # RepresentacionVictimas
+    if "teoria_caso" in data:
+        lines = [
+            "Representación de víctimas (preliminar)",
+            f"Teoría del caso: {data.get('teoria_caso')}",
+        ]
+        dano = str(data.get("dano_afectacion") or "").strip()
+        if dano:
+            lines.append(f"Daño/afectación: {dano}")
+        for label, key in (
+            ("Derechos relevantes", "derechos_relevantes"),
+            ("Enfoque diferencial", "enfoque_diferencial"),
+            ("Riesgos de revictimización", "riesgos_revictimizacion"),
+            ("Objetivos de representación", "objetivos_representacion"),
+            ("Pendientes de verificación", "pendientes_verificacion"),
+        ):
+            items = data.get(key) or []
+            if items:
+                lines.append(f"\n{label}:")
+                lines.extend(f"- {x}" for x in items)
+        return "\n".join(lines).strip()
+
+    # PreparacionAudiencia
+    if "objetivo_audiencia" in data:
+        lines = [
+            "Preparación de audiencia (preliminar)",
+            f"Objetivo: {data.get('objetivo_audiencia')}",
+        ]
+        for label, key in (
+            ("Guion / puntos", "guion_puntos"),
+            ("Solicitudes orales", "solicitudes_orales"),
+            ("Preguntas clave", "preguntas_clave"),
+            ("Riesgos", "riesgos_audiencia"),
+            ("Checklist", "checklist"),
+            ("Pendientes de verificación", "pendientes_verificacion"),
+        ):
+            items = data.get(key) or []
+            if items:
+                lines.append(f"\n{label}:")
+                lines.extend(f"- {x}" for x in items)
+        return "\n".join(lines).strip()
+
+    # SeguimientoProcesal
+    if "actuaciones_relevantes" in data and "proximas_acciones" in data:
+        lines = [
+            "Seguimiento procesal",
+            str(data.get("resumen") or "").strip(),
+            f"Radicado/referencia: {data.get('radicado_o_referencia')}",
+        ]
+        inac = str(data.get("inactividad_detectada") or "").strip()
+        if inac:
+            lines.append(f"Inactividad: {inac}")
+        for label, key in (
+            ("Actuaciones relevantes", "actuaciones_relevantes"),
+            ("Términos / alertas", "terminos_alertas"),
+            ("Próximas acciones", "proximas_acciones"),
+            ("Pendientes de verificación", "pendientes_verificacion"),
+        ):
+            items = data.get(key) or []
+            if items:
+                lines.append(f"\n{label}:")
+                lines.extend(f"- {x}" for x in items)
+        return "\n".join(lines).strip()
+
     return str(data)
 
 

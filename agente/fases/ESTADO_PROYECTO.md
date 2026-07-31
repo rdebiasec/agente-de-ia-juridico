@@ -10,7 +10,9 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 **Cumplimiento Ley 1581 (2026-07-21):** consentimiento hard en `/auth/login`; ARCO web `POST /api/compliance/arco-erase`; retención mensual; términos `/legal/terminos`; cifrado en reposo (Fernet via `DATA_AT_REST_KEY`/`SESSION_SECRET`); flags `involucra_menor`/`datos_sensibles` en expediente; plantillas DPA/RNBD en `docs/operaciones/`.
 
-**Config live (2026-07-24):** editor `/auditoria/` versiona prompts, guardrails (texto) y skills en Postgres. Allowlist opcional `AUDIT_ALLOWED_EMAILS`. Idle sesión default **60 min**. Observabilidad opcional: `SENTRY_DSN`.
+**Config live (2026-07-24):** editor `/auditoria/` versiona prompts, guardrails (texto) y skills en Postgres. Allowlist opcional `AUDIT_ALLOWED_EMAILS`. Idle sesión default **60 min**. Observabilidad opcional: `SENTRY_DSN` (scrub PII via `before_send`).
+
+**Modelos (batch Udemy 2026-07-31, Opción A):** default/laborers `gpt-4.1-mini` @ temp 0.2 · high-risk (redactor/tutela) `gpt-4.1` @ temp 0.1 · RunContext tipado + costo estimado en traza.
 
 ## Resumen ejecutivo
 
@@ -61,9 +63,10 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 ## Pendiente prioritario (siguiente sprint)
 
 ### P0 — Operación despacho
-1. **Slack HITL en producción** — configurar `SLACK_APP_TOKEN` (`xapp`) en Render; verificar `/health.slack_socket_started`.
+1. **Slack HITL en producción** — configurar `SLACK_APP_TOKEN` (`xapp`) en Render; verificar `/health.slack_socket_started`. Runbook: `docs/operaciones/SLACK_HITL_RENDER.md`.
 2. **Checklist REQ-001…050** — pruebas en JSON / `docs/operaciones/CHECKLIST_REQ_CIERRE.md`.
 3. **DPA firmados** — evidencia en `docs/operaciones/ESTADO_DPA_Y_ARCO.md`.
+4. **Medir tokens (B13)** — tras 1–2 semanas con costo en traza, tunear `SESSION_RECENT_MESSAGES` / `SESSION_SUMMARY_MAX_CHARS` (`docs/operaciones/FORECAST_COSTOS_TURNOS.md`).
 
 ### P1 — Acceso
 4. Configurar `AUDIT_ALLOWED_EMAILS` en prod (ver `docs/operaciones/CUENTAS_POR_ABOGADO.md`).

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agents import Agent, RunContextWrapper
+from agents import Agent, ModelSettings, RunContextWrapper
 
 from src.agents.agent_cache import get_cached_agent, get_cached_orchestrator
 from src.agents.prompt_assembly import assemble_instructions, instruction_stats
@@ -19,6 +19,10 @@ from src.agents.schemas import (
     DictamenCalidad,
     InventarioEvidencia,
     MatrizTipicidad,
+    PreparacionAudiencia,
+    RepresentacionVictimas,
+    RutaProcesalLey906,
+    SeguimientoProcesal,
     Tutela,
 )
 from src.agents.sdk_guardrails import (
@@ -51,50 +55,63 @@ Modo BACKOFFICE (equipo interno):
 - El coordinador sintetiza y responde al abogado con una sola voz.
 """
 
+# Contratos as_tool: skill primario + cuándo usar / no usar (routing L10).
 _SPECIALIST_TOOL_DESCRIPTIONS: dict[str, str] = {
     "analista_cronologia_hechos_penales": (
-        "Consulta interna al equipo de cronología y hechos penales: línea de tiempo, "
-        "actores, contradicciones y vacíos fácticos."
+        "Cronología y hechos (skill: construir_cronologia_penal). "
+        "Usar para línea de tiempo, actores, contradicciones y vacíos fácticos. "
+        "No usar para tipicidad, redacción de memoriales ni tutela."
     ),
     "analista_tipicidad_y_responsabilidad_penal": (
-        "Consulta interna al equipo de tipicidad y responsabilidad penal: elementos del tipo, "
-        "autoría, dolo/culpa, agravantes y riesgos de atipicidad."
+        "Tipicidad y responsabilidad (skill: descomponer_elementos_tipo_penal). "
+        "Usar para elementos del tipo, autoría, dolo/culpa, agravantes y riesgo de atipicidad. "
+        "No usar para inventariar pruebas ni redactar memoriales."
     ),
     "analista_ruta_procesal_ley906": (
-        "Consulta interna al equipo de ruta procesal Ley 906: etapa, oportunidades de "
-        "intervención, términos preliminares y riesgos procesales."
+        "Ruta procesal Ley 906 (skill: identificar_etapa_procesal_ley906). "
+        "Usar para etapa, oportunidades de intervención, términos y riesgos procesales. "
+        "No usar para redacción de tutela ni inventario de evidencia."
     ),
     "analista_representacion_victimas": (
-        "Consulta interna al equipo de representación de víctimas: teoría del caso, "
-        "derechos, daño/afectación, enfoque diferencial y no revictimización."
+        "Representación de víctimas (skill: construir_teoria_caso_victima). "
+        "Usar para teoría del caso, derechos, daño/afectación, enfoque diferencial y no revictimización. "
+        "No usar para tipicidad pura ni seguimiento de radicados."
     ),
     "gestor_evidencia_y_soporte_probatorio": (
-        "Consulta interna al equipo probatorio: inventario de evidencia, matriz hecho-prueba, "
-        "brechas y plan de recaudo."
+        "Evidencia y soporte probatorio (skill: inventariar_evidencia). "
+        "Usar para inventario, matriz hecho-prueba, brechas y plan de recaudo. "
+        "No usar para redactar memoriales ni evaluar tutela."
     ),
     "preparador_estrategico_audiencias_penales": (
-        "Consulta interna al equipo de audiencias: objetivos, guiones, solicitudes, "
-        "preguntas y checklist para representación de víctimas."
+        "Audiencias penales (skill: preparar_preguntas_audiencia). "
+        "Usar para objetivos, guiones, solicitudes orales, preguntas y checklist de audiencia. "
+        "No usar para memorial escrito ni tipicidad aislada."
     ),
     "redactor_documentos_juridicos_penales": (
-        "Consulta interna al equipo de redacción: borradores internos de memoriales, "
-        "solicitudes, ampliaciones, derechos de petición o tutela preliminar."
+        "Redacción jurídica penal (skill: redactar_memorial_penal). "
+        "Usar para borradores internos: memoriales, solicitudes, ampliaciones o derecho de petición. "
+        "No usar para tutela constitucional (derivar a evaluador_tutela) ni dictamen de calidad."
     ),
     "gestor_seguimiento_procesal_penal": (
-        "Consulta interna al equipo de seguimiento procesal: radicados, actuaciones, "
-        "audiencias, términos e inactividad."
+        "Seguimiento procesal (skill: monitorear_radicado). "
+        "Usar para radicados, actuaciones, audiencias calendarizadas, términos e inactividad. "
+        "No usar para redactar memoriales ni tipicidad."
     ),
     "evaluador_derechos_fundamentales_tutela": (
-        "Consulta interna al equipo constitucional: derechos fundamentales y procedencia "
-        "preliminar de tutela vinculada al caso penal."
+        "Derechos fundamentales / tutela (skill: evaluar_procedencia_tutela). "
+        "Usar para procedencia preliminar de tutela vinculada al caso penal. "
+        "No usar para memorial ordinario ni inventario de evidencia."
     ),
     "analista_calidad_juridica": (
-        "Consulta interna al equipo de calidad jurídica: soporte fáctico, citas, coherencia "
-        "estratégica, confidencialidad y no revictimización. Devuelve DictamenCalidad."
+        "Calidad jurídica (skill: revisar_coherencia_estrategica). "
+        "Usar para soporte fáctico, citas, coherencia, confidencialidad y no revictimización. "
+        "Devuelve DictamenCalidad. No usar para redactar el memorial final."
     ),
 }
 
+# Alineado a HIGH_RISK_AGENTS: needs_approval en chat cuando require_tool_approval=True.
 _APPROVAL_REQUIRED_TOOLS = frozenset(HIGH_RISK_AGENTS)
+APPROVAL_REQUIRED_TOOL_IDS = _APPROVAL_REQUIRED_TOOLS
 
 # Vecinos tipicos: destino inferido + 1–2 adyacentes (superficie dinamica).
 _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
@@ -167,6 +184,7 @@ _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
     ),
 }
 
+# Overrides por costo/complejidad; techo duro evita loops caros (L10).
 _NESTED_MAX_TURNS_BY_AGENT: dict[str, int] = {
     "analista_calidad_juridica": 4,
     "redactor_documentos_juridicos_penales": 5,
@@ -174,6 +192,7 @@ _NESTED_MAX_TURNS_BY_AGENT: dict[str, int] = {
     "evaluador_derechos_fundamentales_tutela": 4,
     "gestor_evidencia_y_soporte_probatorio": 4,
 }
+_NESTED_MAX_TURNS_CEILING = 8
 
 
 def _model_for_agent(agent_id: str) -> str:
@@ -182,6 +201,17 @@ def _model_for_agent(agent_id: str) -> str:
     if agent_id in HIGH_RISK_AGENTS:
         return settings.openai_model_high_risk or settings.openai_model
     return settings.openai_model
+
+
+def _model_settings_for_agent(agent_id: str) -> ModelSettings:
+    """Temperatura baja en todos; high-risk aún más determinista (Opción A / B01)."""
+    settings = get_settings()
+    temp = (
+        settings.agent_temperature_high_risk
+        if agent_id in HIGH_RISK_AGENTS
+        else settings.agent_temperature
+    )
+    return ModelSettings(temperature=float(temp))
 
 
 def _capability_anchor(agent_id: str) -> str:
@@ -221,6 +251,7 @@ def _build_agent(
         "name": name,
         "instructions": instructions,
         "model": _model_for_agent(name),
+        "model_settings": _model_settings_for_agent(name),
         "output_guardrails": output_guardrails or specialist_output_guardrails(),
     }
     if with_tools:
@@ -245,11 +276,17 @@ def build_analista_tipicidad_y_responsabilidad_penal_agent() -> Agent:
 
 
 def build_analista_ruta_procesal_ley906_agent() -> Agent:
-    return _build_agent("analista_ruta_procesal_ley906")
+    return _build_agent(
+        "analista_ruta_procesal_ley906",
+        output_type=RutaProcesalLey906,
+    )
 
 
 def build_analista_representacion_victimas_agent() -> Agent:
-    return _build_agent("analista_representacion_victimas")
+    return _build_agent(
+        "analista_representacion_victimas",
+        output_type=RepresentacionVictimas,
+    )
 
 
 def build_gestor_evidencia_y_soporte_probatorio_agent() -> Agent:
@@ -260,7 +297,10 @@ def build_gestor_evidencia_y_soporte_probatorio_agent() -> Agent:
 
 
 def build_preparador_estrategico_audiencias_penales_agent() -> Agent:
-    return _build_agent("preparador_estrategico_audiencias_penales")
+    return _build_agent(
+        "preparador_estrategico_audiencias_penales",
+        output_type=PreparacionAudiencia,
+    )
 
 
 def build_redactor_documentos_juridicos_penales_agent() -> Agent:
@@ -272,7 +312,10 @@ def build_redactor_documentos_juridicos_penales_agent() -> Agent:
 
 
 def build_gestor_seguimiento_procesal_penal_agent() -> Agent:
-    return _build_agent("gestor_seguimiento_procesal_penal")
+    return _build_agent(
+        "gestor_seguimiento_procesal_penal",
+        output_type=SeguimientoProcesal,
+    )
 
 
 def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
@@ -303,6 +346,7 @@ def build_coordinador_agent(*, slim_instructions: bool = True) -> Agent:
         name=POC_AGENT_ID,
         instructions=instructions,
         model=_model_for_agent(POC_AGENT_ID),
+        model_settings=_model_settings_for_agent(POC_AGENT_ID),
         tools=get_knowledge_tools(
             include_kb_search=True,
             include_full_reads=False,
@@ -352,11 +396,14 @@ SPECIALIST_AGENT_IDS = frozenset(_SPECIALIST_TOOL_DESCRIPTIONS.keys())
 
 
 def nested_max_turns_for(agent_id: str) -> int:
-    """Tope de turnos del especialista invocado via as_tool."""
+    """Tope de turnos del especialista invocado via as_tool (con techo duro)."""
     override = _NESTED_MAX_TURNS_BY_AGENT.get(agent_id)
-    if override is not None:
-        return override
-    return get_settings().agent_nested_max_turns
+    base = override if override is not None else get_settings().agent_nested_max_turns
+    try:
+        turns = int(base)
+    except (TypeError, ValueError):
+        turns = 3
+    return max(1, min(turns, _NESTED_MAX_TURNS_CEILING))
 
 
 def enabled_specialists_for_focus(
@@ -374,12 +421,49 @@ def enabled_specialists_for_focus(
     return frozenset(name for name in chosen if name in available_set)
 
 
+def _as_tool_failure_code(error: Exception) -> str:
+    """Código estable para soporte/trazas (sin stack ni PII)."""
+    from agents.exceptions import (
+        MaxTurnsExceeded,
+        ModelBehaviorError,
+        ModelRefusalError,
+        ToolTimeoutError,
+        UserError,
+    )
+
+    from src.agents.runner import AgentBudgetExceeded
+
+    if isinstance(error, AgentBudgetExceeded):
+        return "budget_exceeded"
+    if isinstance(error, MaxTurnsExceeded):
+        return "max_turns"
+    if isinstance(error, ToolTimeoutError):
+        return "tool_timeout"
+    if isinstance(error, ModelRefusalError):
+        return "model_refusal"
+    if isinstance(error, ModelBehaviorError):
+        return "model_behavior"
+    if isinstance(error, UserError):
+        return "user_error"
+    if type(error).__name__ == "ValidationError":
+        return "invalid_input"
+    if type(error).__name__ in {"TimeoutError", "asyncio.TimeoutError"} or isinstance(
+        error, TimeoutError
+    ):
+        return "timeout"
+    return f"error:{type(error).__name__}"
+
+
 def _as_tool_failure_error(
     ctx: RunContextWrapper[Any],  # noqa: ARG001
     error: Exception,
 ) -> str:
-    """Re-lanza presupuestos/tripwires; mensajes cortos para el resto."""
+    """Re-lanza presupuestos/tripwires; mensajes tipados y sanitizados para el resto."""
     from agents import InputGuardrailTripwireTriggered, OutputGuardrailTripwireTriggered
+    from agents.exceptions import (
+        ToolInputGuardrailTripwireTriggered,
+        ToolOutputGuardrailTripwireTriggered,
+    )
 
     from src.agents.runner import AgentBudgetExceeded
 
@@ -389,13 +473,29 @@ def _as_tool_failure_error(
             AgentBudgetExceeded,
             InputGuardrailTripwireTriggered,
             OutputGuardrailTripwireTriggered,
+            ToolInputGuardrailTripwireTriggered,
+            ToolOutputGuardrailTripwireTriggered,
         ),
     ):
         raise error
-    return (
-        "El especialista interno no pudo completar la consulta. "
-        f"Detalle: {type(error).__name__}. Reformule el pedido o apruebe un plan."
+
+    code = _as_tool_failure_code(error)
+    hints = {
+        "max_turns": "El especialista agotó sus turnos internos. Acote el pedido o apruebe un plan.",
+        "tool_timeout": "La consulta interna superó el tiempo límite. Reintente con un pedido más corto.",
+        "timeout": "La consulta interna superó el tiempo límite. Reintente con un pedido más corto.",
+        "model_refusal": "El modelo rechazó la consulta interna. Reformule sin pedir datos sensibles innecesarios.",
+        "model_behavior": "Salida inválida del especialista. Reformule el pedido con hechos confirmados.",
+        "invalid_input": "Pedido al especialista mal formado. Envíe pedido concreto y hechos confirmados.",
+        "user_error": "Configuración inválida de la consulta interna. Revise el pedido o el plan.",
+        "budget_exceeded": "Presupuesto de ejecución agotado. Apruebe un plan o reduzca el alcance.",
+    }
+    detail = hints.get(
+        code,
+        f"El especialista interno no pudo completar la consulta ({code}). "
+        "Reformule el pedido o apruebe un plan.",
     )
+    return detail
 
 
 async def _tool_output_text(result: object) -> str:
@@ -481,6 +581,7 @@ def build_orchestrator(
         name=POC_AGENT_ID,
         instructions=instructions,
         model=_model_for_agent(POC_AGENT_ID),
+        model_settings=_model_settings_for_agent(POC_AGENT_ID),
         tools=[*knowledge, *specialist_tools],
         input_guardrails=poc_input_guardrails(),
         output_guardrails=poc_output_guardrails(),

@@ -1,0 +1,1 @@
+"""Observabilidad opcional (Sentry, etc.)."""

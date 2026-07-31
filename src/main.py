@@ -86,12 +86,19 @@ async def lifespan(app: FastAPI):
         try:
             import sentry_sdk
 
+            from src.observability.sentry_scrub import sentry_before_send
+
             sentry_sdk.init(
                 dsn=settings.sentry_dsn,
                 traces_sample_rate=0.05,
                 environment="production" if os.environ.get("RENDER") else "development",
+                release=os.environ.get("RENDER_GIT_COMMIT")
+                or os.environ.get("GIT_COMMIT")
+                or None,
+                before_send=sentry_before_send,
+                send_default_pii=False,
             )
-            logger.info("Sentry inicializado")
+            logger.info("Sentry inicializado (scrub PII activo)")
         except Exception:
             logger.exception("No se pudo inicializar Sentry (continuando)")
 

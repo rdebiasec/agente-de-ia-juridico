@@ -28,6 +28,8 @@
 - **Flujos SPOA frecuentes (sin handoffs peer):** [`canon/flujos-frecuentes-penal-victimas-co.md`](./canon/flujos-frecuentes-penal-victimas-co.md)
 - **Cumplimiento Colombia (Ley 1581):** [`auditoria/reporte-cumplimiento-colombia-2026-07-20.md`](./auditoria/reporte-cumplimiento-colombia-2026-07-20.md)
 - **Runbook cumplimiento operativo:** [`operaciones/RUNBOOK_CUMPLIMIENTO_1581.md`](./operaciones/RUNBOOK_CUMPLIMIENTO_1581.md)
+- **Forecast $/turno:** [`operaciones/FORECAST_COSTOS_TURNOS.md`](./operaciones/FORECAST_COSTOS_TURNOS.md)
+- **Slack HITL Render:** [`operaciones/SLACK_HITL_RENDER.md`](./operaciones/SLACK_HITL_RENDER.md)
 - **Plantilla DPA encargados:** [`operaciones/PLANTILLA_DPA_ENCARGADOS.md`](./operaciones/PLANTILLA_DPA_ENCARGADOS.md)
 - **Checklist RNBD/SIC:** [`operaciones/CHECKLIST_RNBD_SIC.md`](./operaciones/CHECKLIST_RNBD_SIC.md)
 - **Resumen auditoría pasos:** [`auditoria/reporte-ejecutivo-auditoria-pasos-skills.md`](./auditoria/reporte-ejecutivo-auditoria-pasos-skills.md)

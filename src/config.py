@@ -14,11 +14,15 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    # Default / laborers + POC (Opción A batch Udemy).
+    openai_model: str = "gpt-4.1-mini"
     # Modelo mas capaz para redaccion/tutela (alto riesgo). Vacio = usa openai_model.
-    openai_model_high_risk: str = "gpt-4o"
+    openai_model_high_risk: str = "gpt-4.1"
     # Respaldo operacional; vacío desactiva cambio de modelo en reintento.
     openai_model_fallback: str = ""
+    # Temperatura Agents SDK (ModelSettings). Baja = más determinismo jurídico.
+    agent_temperature: float = 0.2
+    agent_temperature_high_risk: float = 0.1
 
     slack_bot_token: str = ""
     # App-level token (xapp-…) for Socket Mode — see docs.slack.dev Socket Mode / Bolt.

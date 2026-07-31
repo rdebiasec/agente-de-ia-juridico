@@ -9,6 +9,9 @@
 | ARCO chat web | `POST /api/compliance/arco-erase` (sesión autenticada) |
 | ARCO portal | «Borrar mi progreso» / `DELETE /api/audit/progress` (archiva snapshot) |
 | Retención | Policy 3y auditoría / 5y chat; job mensual scheduler + `scripts/purge_retention.py` |
+| Idle UI chat | Default **60 min** (`SESSION_IDLE_MINUTES`) — cierra sesión de navegador; **no** borra historial ni expediente |
+| Idle ≠ retención ≠ HITL | Idle no dispara purge. Retención 5y chat / 3y auditoría. **No** borrar expediente/chat si hay borrador HITL pendiente de aprobación |
+| Smoke retención | `DATABASE_URL=... python scripts/purge_retention.py --dry-run` (solo cuenta; no borra) |
 | Páginas | `/legal/privacidad`, `/legal/tratamiento-datos-casos`, `/legal/terminos` |
 
 ## Encargados / DPA (operación — fuera del código)

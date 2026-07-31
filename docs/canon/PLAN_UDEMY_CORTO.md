@@ -54,9 +54,7 @@ Regla: **una lección a la vez**. Código solo con `aprobado, ejecuta Lxx`.
 
 ## Ahora
 
-**Clase L28 hecha (detalle A–Z):** Bedrock AgentCore + mapa competitivo.  
-**Veredicto:** DIFERIR · seguir en Render.  
+**Batch Udemy Must+Should ejecutado (2026-07-31):** Opción A modelos (`gpt-4.1-mini` / `gpt-4.1`) + temp baja; RunContext tipado; costo en traza; forecast; Sentry scrub; docs Slack/idle.  
+**Pendiente ops:** secretos Slack en Render (B12) · medir tokens y tunear compactación (B13).  
 **Aparcadas:** L18–L20 Voice.  
-**Pedagógicas sandbox:** L21–L28 cerradas.  
-
-**Siguiente trabajo de código:** `aprobado, ejecuta batch udemy`
+**Pedagógicas sandbox:** L21–L28 cerradas.

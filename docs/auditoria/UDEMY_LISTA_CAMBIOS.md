@@ -35,11 +35,11 @@ Criterios de priorización del backlog:
 
 | ID | Mejora | Lección | Dónde | Productiza | Efecto costo | Esf. | Est. costo* | Estado |
 |---|---|---|---|---|---|---|---|---|
-| B01 | `ModelSettings` temp baja en redactor / tutela / calidad | L04 | `orchestrator.py` | Memoriales/tutelas más estables; menos re-trabajo HITL | **Baja** retries y reescrituras (tokens high-risk ~`gpt-4o`) | S | Ahorro neto si baja 10–20% re-runs high-risk | pendiente |
-| B02 | Dataclass RunContext + `Runner.run(..., context=)` | L05 | `runner.py`, `plan_executor.py`, tipo nuevo | Anti-IDOR tipado; tools/guardrails listos para prod multi-tenant | Neutro tokens; evita incidente de fuga (costo reputacional) | M | Costo eng. único; riesgo $ incidente >> eng. | pendiente |
-| B03 | Enlazar `resolve_expediente_id` al context tipado | L05 | `session_context.py` + tools | Misma defensa IDOR, idiomática SDK | Neutro tokens | S–M | Incluido en B02 | pendiente |
-| B04 | Panel/ops: costo por turno (tokens in/out × precio modelo) | L08→L17 | hooks → `trace.completion` + UI soporte o export | **Estimar costos** reales por consulta/plan | Neutro (solo lectura); habilita control de gasto | M | Sin él no hay forecast serio | pendiente (parcial hoy: tokens en traza) |
-| B05 | Smoke productización: chat tipicidad + plan HITL + traza tokens | L08 | checklist ops / tests | Confianza pre-demo / pre-cliente | Evita demos rotas (costo comercial) | S | — | pendiente |
+| B01 | `ModelSettings` temp baja en **todos** + high-risk 0.1; modelos Opción A (`gpt-4.1-mini` / `gpt-4.1`) | L04 | `orchestrator.py`, `config.py` | Memoriales/tutelas más estables; laborers más capaces baratos | **Baja** retries high-risk vs gpt-4o | S | Ahorro neto vs 4o; laborers ~2–3× vs 4o-mini | **hecho** |
+| B02 | Dataclass RunContext + `Runner.run(..., context=)` | L05 | `session_context.py`, `runner.py`, `plan_executor.py` | Anti-IDOR tipado; tools/guardrails listos para prod multi-tenant | Neutro tokens; evita incidente de fuga (costo reputacional) | M | Costo eng. único; riesgo $ incidente >> eng. | **hecho** |
+| B03 | Enlazar `resolve_expediente_id` al context tipado | L05 | `session_context.py` + tools | Misma defensa IDOR, idiomática SDK | Neutro tokens | S–M | Incluido en B02 | **hecho** |
+| B04 | Panel/ops: costo por turno (tokens in/out × precio modelo) | L08→L17 | `pricing.py` + hooks → `trace.completion` + desk/chat | **Estimar costos** reales por consulta/plan | Neutro (solo lectura); habilita control de gasto | M | Sin él no hay forecast serio | **hecho** |
+| B05 | Smoke productización: chat tipicidad + plan HITL + traza tokens | L08 | `tests/test_batch_udemy_productizacion.py` | Confianza pre-demo / pre-cliente | Evita demos rotas (costo comercial) | S | — | **hecho** |
 
 \*Est. costo = orden de magnitud hasta fijar precios OpenAI vigentes × mediana de tokens por turno (medir en desk).
 
@@ -47,13 +47,13 @@ Criterios de priorización del backlog:
 
 | ID | Mejora | Productiza | Efecto costo | Esf. | Estado |
 |---|---|---|---|---|---|
-| B06 | Documento de precios internos: $/turno chat vs $/paso plan (mini vs high-risk) | Cotizar clientes / límites de uso | Base del forecast | S (docs + medir) | pendiente |
-| B07 | Alertas budget ya existentes visibles en desk soporte (si faltan) | Ops no adivina | Evita runs que estallan en 30k tokens | S | revisar en L17 |
-| B08 | Detalle `new_items` (tool name + args redactados) en traza | Debug más barato (menos re-runs a ciegas) | Baja re-trabajo | S | pendiente (L08 opc.) |
-| B12 | Slack HITL en Render (`SLACK_APP_TOKEN` / approvers) verificado | Cola humana en canal Slack además de web | Neutro tokens; productiza aprobación | S (ops) | pendiente ops (L11) |
-| B13 | Tunear `session_recent_messages` / `session_summary_max_chars` tras medir tokens | Controlar $/turno cuando el chat crece | Baja input tokens largos | S | pendiente medir (L12→L17) |
-| B14 | Documentar/ops: idle UI (60m) ≠ retención 5y ≠ borrar con HITL pendiente; smoke `purge_retention --dry-run` | Evita pérdida de trabajo y cumple narrativa 1581 | Neutro tokens; baja riesgo ops | S | pendiente (L13) |
-| B15 | Sentry `before_send` scrub PII/caso + tags release; no subir sample sin scrub | Incidentes sin filtrar 1581 | Neutro tokens | S | pendiente (L17) |
+| B06 | Documento de precios internos: $/turno chat vs $/paso plan (mini vs high-risk) | Cotizar clientes / límites de uso | Base del forecast | S (docs + medir) | **hecho** (`docs/operaciones/FORECAST_COSTOS_TURNOS.md`) |
+| B07 | Alertas budget ya existentes visibles en desk soporte (si faltan) | Ops no adivina | Evita runs que estallan en 30k tokens | S | **hecho** (desk + chat trace) |
+| B08 | Detalle `new_items` (tool name + args redactados) en traza | Debug más barato (menos re-runs a ciegas) | Baja re-trabajo | S | **hecho** |
+| B12 | Slack HITL en Render (`SLACK_APP_TOKEN` / approvers) verificado | Cola humana en canal Slack además de web | Neutro tokens; productiza aprobación | S (ops) | **hecho docs** · falta secretos Render (`docs/operaciones/SLACK_HITL_RENDER.md`) |
+| B13 | Tunear `session_recent_messages` / `session_summary_max_chars` tras medir tokens | Controlar $/turno cuando el chat crece | Baja input tokens largos | S | **pendiente medir** (instrucciones en forecast B06) |
+| B14 | Documentar/ops: idle UI (60m) ≠ retención 5y ≠ borrar con HITL pendiente; smoke `purge_retention --dry-run` | Evita pérdida de trabajo y cumple narrativa 1581 | Neutro tokens; baja riesgo ops | S | **hecho** (runbook 1581) |
+| B15 | Sentry `before_send` scrub PII/caso + tags release; no subir sample sin scrub | Incidentes sin filtrar 1581 | Neutro tokens | S | **hecho** |
 
 ### C) Could — solo si producto duele
 
@@ -84,8 +84,9 @@ Criterios de priorización del backlog:
 
 | Driver | Valor típico hoy | Rol |
 |---|---|---|
-| Modelo default | `gpt-4o-mini` | Chat / especialistas baratos |
-| Modelo high-risk | `gpt-4o` | Redacción / tutela (vía plan) |
+| Modelo default | `gpt-4.1-mini` | Chat / laborers |
+| Modelo high-risk | `gpt-4.1` | Redacción / tutela (vía plan) |
+| Temperatura | `0.2` / high-risk `0.1` | ModelSettings |
 | `agent_max_turns` | 10 | Tope vueltas chat |
 | `agent_max_turns_plan_step` | 6 | Tope por paso plan |
 | `agent_max_total_tokens` | 30000 | Budget por run |
