@@ -86,7 +86,8 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 | `agente/fases/FASE_2.md` | Stub roadmap |
 | `agente/fases/FASE_3.md` | Stub roadmap; tutelas/conceptos ya en agentes |
 | `docs/canon/plan-rediseno-firma.md` | Plan maestro técnico |
-| `docs/canon/plan-udemy-agents-sdk-aplicacion.md` | Tablero Udemy Agents SDK → producto (L01–L28); impl. por lección con «aprobado, ejecuta» |
+| `docs/canon/plan-udemy-agents-sdk-aplicacion.md` | Tablero Udemy → producto (28 lecciones, orden pedagógico propósito-primero); clase → mapa → «aprobado, ejecuta» |
+| `docs/canon/PLAN_UDEMY_CORTO.md` / `PROMPT_CLASE_UDEMY.md` | Orden corto + prompt de clase; registro en `REGISTRO_UDEMY_REVISIONES.md` |
 
 ## Criterio de “siguiente entrega” recomendada
 
