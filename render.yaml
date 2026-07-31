@@ -40,7 +40,15 @@ services:
       - key: APP_DEBUG
         value: "false"
       - key: OPENAI_MODEL
-        value: gpt-4o-mini
+        value: gpt-4.1-mini
+      - key: OPENAI_MODEL_HIGH_RISK
+        value: gpt-4.1
+      - key: AGENT_TEMPERATURE
+        value: "0.2"
+      - key: AGENT_TEMPERATURE_HIGH_RISK
+        value: "0.1"
+      - key: AGENT_MAX_TOTAL_TOKENS
+        value: "30000"
       - key: OPENAI_API_KEY
         sync: false
       - key: EMBEDDING_MODEL
@@ -57,6 +65,8 @@ services:
         sync: false
       - key: SLACK_REVIEW_CHANNEL
         value: "#revision-abogado"
+      - key: SLACK_APPROVER_IDS
+        sync: false
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
