@@ -148,6 +148,39 @@ def test_g08_prompt_parity_parses_header():
     report = check_prompt_parity()
     assert report["agent_id"] == "coordinador_expediente_penal"
     assert report["file_version"] == 14
+    assert report["ok"] is True
+    assert report["status"] in {"ok", "ok_checksum", "db_unavailable"}
+
+
+def test_g08_parity_checksum_wins_over_version_counter(monkeypatch, tmp_path):
+    from src.agents import prompt_parity as pp
+
+    layout = tmp_path / "prompts" / "agents"
+    layout.mkdir(parents=True)
+    (layout / "coordinador_expediente_penal.md").write_text(
+        "<!-- config-version: 14; checksum: e5b134fe61eac5f4 -->\n# body\n",
+        encoding="utf-8",
+    )
+
+    class S:
+        agente_dir = tmp_path
+
+    monkeypatch.setattr("src.config.get_settings", lambda: S())
+
+    import src.config_store as cs
+
+    monkeypatch.setattr(cs, "KIND_PROMPT", "prompt", raising=False)
+    monkeypatch.setattr(
+        cs,
+        "get_active_content",
+        lambda kind, key: {"version": 3, "checksum": "e5b134fe61eac5f4"},
+    )
+
+    report = pp.check_prompt_parity()
+    assert report["ok"] is True
+    assert report["status"] == "ok_checksum"
+    assert report["db_version"] == 3
+    assert report["file_version"] == 14
 
 
 def test_g09_udemy_b12_marcado_hecho():

@@ -71,22 +71,42 @@ def check_prompt_parity(agent_id: str = "coordinador_expediente_penal") -> dict:
     except (TypeError, ValueError):
         db_ver_int = None
 
-    if db_ver_int is not None and db_ver_int != file_ver:
+    def _checksums_match() -> bool:
+        if not db_sum or not file_sum:
+            return False
+        return (
+            db_sum.startswith(file_sum)
+            or file_sum in db_sum
+            or file_sum[:8] in db_sum
+            or db_sum[:8] in file_sum
+        )
+
+    # La versión en DB es contador del store; el header del MD puede divergir.
+    # Autoridad de paridad = checksum del contenido activo.
+    if db_sum and file_sum and not _checksums_match():
         result["ok"] = False
-        result["status"] = "version_mismatch"
+        result["status"] = "checksum_mismatch"
         result["detail"] = (
-            f"Versión archivo={file_ver} vs DB={db_ver_int}. "
-            "Sincronizar seed/editor /auditoria/."
+            "Checksum archivo vs DB difieren; posible drift. "
+            "Publicar desde /auditoria/ o scripts/publicar_config_gerente.py."
         )
         return result
 
-    if db_sum and file_sum and not db_sum.startswith(file_sum) and file_sum not in db_sum:
-        # checksums pueden ser más largos en DB; comparación flexible.
-        if file_sum[:8] not in db_sum and db_sum[:8] not in file_sum:
-            result["ok"] = False
-            result["status"] = "checksum_mismatch"
-            result["detail"] = "Checksum archivo vs DB difieren; posible drift."
+    if db_ver_int is not None and file_ver is not None and db_ver_int != file_ver:
+        if _checksums_match():
+            result["status"] = "ok_checksum"
+            result["detail"] = (
+                f"Contenido alineado (checksum OK); contador DB={db_ver_int} "
+                f"≠ header archivo={file_ver} (esperado tras publicaciones parciales)."
+            )
             return result
+        result["ok"] = False
+        result["status"] = "version_mismatch"
+        result["detail"] = (
+            f"Versión archivo={file_ver} vs DB={db_ver_int} sin checksum comparable. "
+            "Sincronizar seed/editor /auditoria/."
+        )
+        return result
 
     result["detail"] = "Paridad OK (o DB ausente de checksum comparable)."
     return result

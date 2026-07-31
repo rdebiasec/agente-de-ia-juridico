@@ -79,11 +79,9 @@ flowchart TD
 | **G06** | `_ensure_poc_voice` casi muerto en chat | Solo reencuadra si `last_agent` es especialista; chat usa as_tool → last=POC | Documentar como red de seguridad plan/handoff residual **o** simplificar | Código engañoso | `runner.py` ~572–587 | **hecho** (docstring) |
 | **G09** | Lista Udemy B12 dice “falta secretos” | Nota desactualizada | Marcar B12 hecho (prod `slack_socket_started: true`) | Ops confunde estado real | `UDEMY_LISTA_CAMBIOS.md` B12; `/health` prod | **hecho** |
 
-### Orden sugerido de implementación (si apruebas)
+### Orden sugerido — ejecutado 2026-07-31
 
-1. G01 → 2. G02 → 3. G03 → 4. G07 + G08 → 5. P2 según dolor  
-
-Comando: `aprobado, ejecuta G01` (o `aprobado, ejecuta G01 G02 G03`).
+1. G01 → 2. G02 → 3. G03 → 4. G07 + G08 → 5. P2 (G04–G06, G09) — **cerrado** (commit + deploy).
 
 ---
 
@@ -317,6 +315,7 @@ Ver §4. Gaps: G01–G09.
 | 2026-07-31 | G05 | LRU cache orch/agent (max 6 / 24) | idem | hecho |
 | 2026-07-31 | G06 | Docstring `_ensure_poc_voice` (red residual plan/handoff) | — | hecho |
 | 2026-07-31 | G09 | Udemy B12 → hecho (Slack socket prod) | `UDEMY_LISTA_CAMBIOS.md` | hecho |
+| 2026-07-31 | G08+ | Prod: prompt DB v2→v3 (contenido = checksum archivo `e5b134fe…`); parity usa checksum como autoridad (versión DB ≠ header MD) | `publicar_config_gerente.py --prod --apply` + fix `prompt_parity.py` | hecho |
 
 ---
 
