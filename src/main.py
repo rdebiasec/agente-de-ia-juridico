@@ -299,6 +299,10 @@ async def login_page(
     request: Request,
     settings: Settings = Depends(get_settings),
 ):
+    # Sin gate de contraseña: no mostrar formulario usuario/clave.
+    if not auth_enabled(settings.site_password):
+        return RedirectResponse(url="/abogado", status_code=302)
+
     if web_session_is_active(request, settings):
         return RedirectResponse(url="/", status_code=302)
 

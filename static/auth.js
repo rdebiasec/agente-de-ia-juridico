@@ -8,16 +8,26 @@ const AgentAuth = (() => {
   let onLogoutCallback = null;
   let isLoggingOut = false;
   let activityHandler = null;
+  let webAuthEnabled = true;
+
+  function homeUrl() {
+    return "/abogado";
+  }
 
   function redirectToLogin(reason = "") {
     clearIdleTimer();
+    // Sin gate: no mandar al formulario usuario/clave.
+    if (!webAuthEnabled) {
+      window.location.replace(homeUrl());
+      return;
+    }
     const url = reason === "expired" ? "/login?expired=1" : "/login";
     window.location.replace(url);
   }
 
   function authFetch(url, options = {}) {
     return fetch(url, { credentials: "include", ...options }).then(async (res) => {
-      if (res.status === 401 && !String(url).includes("/auth/")) {
+      if (res.status === 401 && !String(url).includes("/auth/") && webAuthEnabled) {
         redirectToLogin("expired");
         throw new Error("Unauthorized");
       }
@@ -28,7 +38,9 @@ const AgentAuth = (() => {
   function showApp() {
     const err = document.getElementById("auth-error");
     if (err) err.hidden = true;
-    resetIdleTimer();
+    if (webAuthEnabled) {
+      resetIdleTimer();
+    }
   }
 
   function clearIdleTimer() {
@@ -39,6 +51,7 @@ const AgentAuth = (() => {
   }
 
   function resetIdleTimer() {
+    if (!webAuthEnabled) return;
     clearIdleTimer();
     idleTimer = setTimeout(() => {
       logout(true);
@@ -49,7 +62,7 @@ const AgentAuth = (() => {
     const events = ["mousedown", "keydown", "scroll", "touchstart"];
     let lastPing = 0;
     activityHandler = () => {
-      if (isLoggingOut) return;
+      if (isLoggingOut || !webAuthEnabled) return;
       resetIdleTimer();
       const now = Date.now();
       if (now - lastPing > 60_000) {
@@ -95,6 +108,10 @@ const AgentAuth = (() => {
     clearIdleTimer();
     await fetch("/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
     if (onLogoutCallback) onLogoutCallback();
+    if (!webAuthEnabled) {
+      window.location.replace(homeUrl());
+      return;
+    }
     redirectToLogin(sessionExpired ? "expired" : "");
   }
 
@@ -103,12 +120,18 @@ const AgentAuth = (() => {
     logoutBtn?.addEventListener("click", () => logout(false));
   }
 
+  function setLogoutVisible(visible) {
+    const logoutBtn = document.getElementById("auth-logout-btn");
+    if (logoutBtn) logoutBtn.hidden = !visible;
+  }
+
   async function bootstrap() {
     initForm();
     bindActivityListeners();
 
     const status = await checkStatus();
     if (status.idle_minutes) idleMs = status.idle_minutes * 60 * 1000;
+    webAuthEnabled = status.auth_enabled !== false;
 
     if (status.server_error) {
       showServerWaking();
@@ -116,12 +139,15 @@ const AgentAuth = (() => {
     }
 
     if (!status.auth_enabled) {
+      setLogoutVisible(false);
       updateSessionBadge(status);
       showApp();
       window.__agentAuthed = true;
       window.bootAgentApp?.();
       return;
     }
+
+    setLogoutVisible(true);
 
     if (status.authenticated) {
       updateSessionBadge(status);
