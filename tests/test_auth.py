@@ -6,6 +6,17 @@ from httpx import ASGITransport, AsyncClient
 from src.main import app
 
 
+@pytest.fixture(autouse=True)
+def _enable_web_auth_flag(monkeypatch):
+    """Estos tests ejercen el gate; el .env local puede tener WEB_AUTH_ENABLED=false."""
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 @pytest.mark.asyncio
 async def test_auth_disabled_when_no_password(monkeypatch):
     from src.config import get_settings

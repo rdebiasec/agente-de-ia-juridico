@@ -103,4 +103,19 @@ def refresh_session_token(
 
 
 def auth_enabled(site_password: str) -> bool:
-    return bool(site_password.strip())
+    """Gate del escritorio/API web. Respeta WEB_AUTH_ENABLED aunque haya SITE_PASSWORD."""
+    import os
+
+    raw = os.environ.get("WEB_AUTH_ENABLED")
+    if raw is not None and str(raw).strip() != "":
+        if str(raw).strip().lower() in {"0", "false", "no", "off"}:
+            return False
+    else:
+        try:
+            from src.config import get_settings
+
+            if not get_settings().web_auth_enabled:
+                return False
+        except Exception:
+            pass
+    return bool((site_password or "").strip())

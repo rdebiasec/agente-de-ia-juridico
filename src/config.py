@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     site_username: str = "despacho"
     # Sin valores por defecto débiles: configurar en .env local o secretos de Render.
     site_password: str = ""
+    # False = sin gate de login en /abogado y APIs web (local y prod).
+    # SITE_PASSWORD puede seguir existiendo para /auditoria si AUDIT_REQUIRE_LOGIN=true.
+    web_auth_enabled: bool = True
     session_secret: str = ""
     # Default más corto para equipos compartidos; Render puede sobreescribir.
     session_idle_minutes: int = 60
@@ -96,6 +99,13 @@ class Settings(BaseSettings):
     audit_allowed_emails: str = ""
     # Observabilidad opcional (Sentry). Vacío = desactivado.
     sentry_dsn: str = ""
+
+    # Google Drive Lexiatek — espejo de bitácora del Gerente (local/dev; sin OAuth).
+    # Requiere Shared Drive/carpeta + service account. Ver docs/operaciones/GOOGLE_DRIVE_LEXIATEK.md
+    google_drive_bitacora_enabled: bool = False
+    google_drive_root_folder_id: str = ""
+    # Path al JSON de la SA. Si vacío, usa GOOGLE_APPLICATION_CREDENTIALS.
+    google_drive_service_account_file: str = ""
 
     def audit_email_allowlist(self) -> set[str]:
         raw = (self.audit_allowed_emails or "").strip()
