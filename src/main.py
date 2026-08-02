@@ -36,6 +36,7 @@ from src.config import Settings, get_settings
 from src.gateway.reset import reset_conversation
 from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
+from src.middleware.ip_allowlist import IpAllowlistMiddleware, client_ip as _client_ip_from_request
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
 from src.security import is_production, security_headers_for_path, validate_production_settings
 from src.validation.probes import generate_probes
@@ -202,12 +203,7 @@ CHAT_PLAN_RATE_WINDOW = 900
 
 
 def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-    if forwarded:
-        return forwarded
-    if request.client:
-        return request.client.host
-    return "unknown"
+    return _client_ip_from_request(request)
 
 
 def _web_login_rate_key(request: Request) -> str:
@@ -246,6 +242,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Last-Event-ID"],
 )
+
+# Outer stack: IP allowlist corre antes que el resto (último add_middleware = más externo).
+app.add_middleware(IpAllowlistMiddleware)
 
 
 @app.middleware("http")
@@ -618,6 +617,7 @@ async def health():
         "persistencia": "postgres" if settings.database_url else "memoria",
         "web_auth_enabled": auth_enabled(settings.site_password),
         "dev_auto_login": dev_auto_login_allowed(settings) if auth_enabled(settings.site_password) else False,
+        "ip_allowlist_enabled": bool(settings.ip_allowlist_enabled),
         **crypto_status(),
     }
     return payload

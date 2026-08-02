@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     # False = sin gate de login en /abogado y APIs web (local y prod).
     # SITE_PASSWORD puede seguir existiendo para /auditoria si AUDIT_REQUIRE_LOGIN=true.
     web_auth_enabled: bool = True
+    # Allowlist de IP cuando el login web está apagado (CSV de IPs o CIDR).
+    # En Render: CF-Connecting-IP. Health/Slack/Twilio no pasan por esta lista (path bypass).
+    ip_allowlist_enabled: bool = False
+    ip_allowlist: str = ""
     session_secret: str = ""
     # Default más corto para equipos compartidos; Render puede sobreescribir.
     session_idle_minutes: int = 60

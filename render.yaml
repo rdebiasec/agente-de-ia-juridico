@@ -37,6 +37,10 @@ services:
         value: "true"
       - key: WEB_AUTH_ENABLED
         value: "false"
+      - key: IP_ALLOWLIST_ENABLED
+        value: "true"
+      - key: IP_ALLOWLIST
+        sync: false
       - key: DEV_AUTO_LOGIN
         value: "false"
       - key: APP_DEBUG
