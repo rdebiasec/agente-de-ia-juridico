@@ -214,7 +214,15 @@
   function smartTab(reason) {
     if (reason === "borrador" || reason === "draft") switchTab("borrador");
     else if (reason === "plazos" || reason === "deadline") switchTab("plazos");
-    else if (reason === "equipo" || reason === "interno" || reason === "transcript") switchTab("equipo");
+    else if (
+      reason === "equipo" ||
+      reason === "interno" ||
+      reason === "transcript" ||
+      reason === "junta" ||
+      reason === "junta-del-caso"
+    ) {
+      switchTab("equipo");
+    }
     else if (reason === "trazas" || reason === "trace" || reason === "actividad" || reason === "detalle") {
       switchTab("actividad");
     }

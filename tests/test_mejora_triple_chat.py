@@ -129,12 +129,34 @@ def test_desk_and_cliente_ui_markers():
     html = Path("static/desk/abogado.html").read_text(encoding="utf-8")
     assert "cliente-inbox-count" in html
     assert "alerta de calidad" in html.lower() or "calidad" in html.lower()
+    assert "Junta del caso" in html
 
     cliente_js = Path("static/cliente.js").read_text(encoding="utf-8")
     assert "status_label" in cliente_js
     assert "CASO-" in cliente_js
     assert "lexiatek_cliente_pin" in cliente_js
+    assert "internal-transcript" not in cliente_js
+    assert "Junta del caso" not in cliente_js
 
     firma_js = Path("static/firma.js").read_text(encoding="utf-8")
     assert "quality_flags" in firma_js
     assert "case_label" in firma_js
+
+
+def test_list_internal_transcript_includes_junta_fields(repo):
+    from src.services.triple_chat import list_internal_transcript, record_specialist_exchange
+
+    record_specialist_exchange(
+        session_id="web:abogada",
+        specialist_id="analista_calidad_juridica",
+        pedido="Revisar borrador",
+        respuesta="OK con pendiente",
+        turn_ref="tr-junta",
+        kind="findings",
+        ronda=1,
+    )
+    listed = list_internal_transcript("web:abogada")
+    row = listed["entries"][0]
+    assert row["alto_riesgo"] is True
+    assert row["specialist_id"] == "analista_calidad_juridica"
+    assert row["kind_label"] == "Hallazgos"

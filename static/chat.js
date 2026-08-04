@@ -837,11 +837,13 @@ async function renderTracePanelForEntry(entry) {
     ? deliberationSummary.specialists_consulted
     : [];
   const deliberationRounds = deliberationSummary.rounds ?? deliberationTurns.filter((t) => t?.kind === "consult").length;
+  const kindDesk = { consult: "Consulta", findings: "Hallazgos", synthesize: "Síntesis", escalate: "Escalamiento" };
   const deliberationRows = deliberationTurns
     .map((turn) => {
       const kind = turn.kind || "turn";
+      const kindLabel = kindDesk[kind] || kind;
       const area = turn.specialist_id
-        ? formatAgentRoute(turn.specialist_id)
+        ? agentLabel(turn.specialist_id)
         : "Coordinador / síntesis";
       const body =
         kind === "consult"
@@ -852,12 +854,21 @@ async function renderTracePanelForEntry(entry) {
       const truncated = String(body).length > 420 ? `${String(body).slice(0, 417)}...` : body;
       return `
       <li class="trace-span trace-span--done">
-        <strong>Ronda ${escapeHtml(String(turn.ronda ?? "—"))} · ${escapeHtml(kind)}</strong>
+        <strong>Ronda ${escapeHtml(String(turn.ronda ?? "—"))} · ${escapeHtml(kindLabel)}</strong>
         <span class="trace-span-kind">${escapeHtml(area)}</span>
         <p>${escapeHtml(truncated || "(sin detalle)")}</p>
       </li>`;
     })
     .join("");
+  const pendientesList = Array.isArray(deliberationSummary.open_pendientes)
+    ? deliberationSummary.open_pendientes
+    : [];
+  const pendientesPreview = pendientesList.length
+    ? `<ul class="trace-actions">${pendientesList
+        .slice(0, 6)
+        .map((p) => `<li><span>${escapeHtml(String(p))}</span></li>`)
+        .join("")}</ul>`
+    : "<p class=\"trace-muted\">Sin pendientes marcados en este turno.</p>";
   traceBodyEl.innerHTML = `
     <article class="trace-card">
       <h3>Resumen</h3>
@@ -865,10 +876,10 @@ async function renderTracePanelForEntry(entry) {
         <p><strong>Estado:</strong> ${escapeHtml(statusLabel)}</p>
         <p><strong>Skill determinado:</strong> ${escapeHtml(skill)}</p>
         <p><strong>Ruta usada:</strong> ${escapeHtml(formatAgentRoute(entry.agent || destination || trace.route || "Sin ruta"))}</p>
-        <p><strong>Deliberación:</strong> ${
+        <p><strong>Junta del caso:</strong> ${
           deliberationTurns.length
-            ? escapeHtml(`${deliberationRounds} ronda(s) · ${deliberatedSpecs.length} especialista(s)`)
-            : "Sin junta interna en este turno"
+            ? escapeHtml(`${deliberationRounds} ronda(s) · ${deliberatedSpecs.length} especialista(s) — ver pestaña Junta del caso`)
+            : "Sin junta en este turno"
         }</p>
       </div>
     </article>
@@ -903,20 +914,23 @@ async function renderTracePanelForEntry(entry) {
       ${historyPreview}
     </article>
     <article class="trace-card">
-      <h3>Deliberación interna (${deliberationTurns.length} turnos)</h3>
+      <h3>Detalle técnico · deliberación (${deliberationTurns.length} turnos)</h3>
+      <p class="context-panel-hint">
+        La conversación legible Coordinador ↔ especialistas está en <strong>Junta del caso</strong>.
+        Aquí queda el detalle técnico truncado para soporte.
+      </p>
       <div class="trace-kv">
         <p><strong>Protocolo:</strong> ${escapeHtml(deliberation.protocol || "—")}</p>
         <p><strong>Especialistas:</strong> ${
           deliberatedSpecs.length
-            ? escapeHtml(deliberatedSpecs.map((id) => formatAgentRoute(id)).join(", "))
+            ? escapeHtml(deliberatedSpecs.map((id) => agentLabel(id)).join(", "))
             : "Ninguno"
         }</p>
-        <p><strong>Pendientes detectados:</strong> ${escapeHtml(
-          String((deliberationSummary.open_pendientes || []).length)
-        )}</p>
+        <p><strong>Pendientes detectados:</strong> ${escapeHtml(String(pendientesList.length))}</p>
       </div>
+      ${pendientesPreview}
       <ul class="trace-actions trace-spans-list">${
-        deliberationRows || "<li><span>Sin deliberación registrada en este turno.</span></li>"
+        deliberationRows || "<li><span>Sin deliberación técnica en este turno.</span></li>"
       }</ul>
     </article>
     <article class="trace-card">
@@ -971,13 +985,28 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   if (options.blockId) el.dataset.blockId = options.blockId;
 
   const metaHtml = meta || buildMessageMeta(role, options);
+  const showJuntaActions =
+    role === "assistant" &&
+    options.msgId &&
+    (options.agent === "coordinador_caso" ||
+      resolveAgentId(options.agent) === "coordinador_caso" ||
+      !options.agent ||
+      options.agent === "fallback");
+  const juntaActions = showJuntaActions
+    ? `<div class="message-junta-actions">
+        <button type="button" class="message-junta-btn" data-junta-action="ver-junta">Ver junta de este turno</button>
+        <button type="button" class="message-junta-btn" data-junta-action="attribution">¿De dónde salió esto?</button>
+      </div>`
+    : "";
   el.innerHTML = `
     ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
+    ${juntaActions}
     ${role === "assistant" ? '<span class="message-phase-badge">Fase 1 · Borrador</span>' : ""}
   `;
 
   el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
+    e.stopPropagation();
     const bid = e.currentTarget.dataset.blockId;
     if (bid) {
       setActiveBlock(bid);
@@ -985,8 +1014,34 @@ function addMessageToUI(role, text, meta = "", options = {}) {
       if (blockEl) scrollBlockIntoValidationPanel(blockEl);
     }
   });
+  el.querySelectorAll("[data-junta-action]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const action = btn.dataset.juntaAction;
+      const entry = getAssistantEntryByMsgId(options.msgId);
+      const trace = entry?.trace || options.trace || null;
+      const turnRef = trace?.trace_id || null;
+      const afterIso = entry?.ts || entry?.created_at || null;
+      if (action === "attribution") {
+        window.JuntaDelCaso?.focusAttribution?.({
+          hint: String(text || "").slice(0, 600),
+          turnRef,
+          afterIso,
+        }) ||
+          window.EquipoInterno?.focusAttribution?.({
+            hint: String(text || "").slice(0, 600),
+            turnRef,
+            afterIso,
+          });
+        return;
+      }
+      window.JuntaDelCaso?.focusTurn?.({ turnRef, afterIso, openTab: true }) ||
+        window.EquipoInterno?.focusTurn?.({ turnRef, afterIso, openTab: true });
+    });
+  });
   if (role === "assistant" && options.msgId) {
-    el.addEventListener("click", () => {
+    el.addEventListener("click", (ev) => {
+      if (ev.target.closest("[data-junta-action], .message-block-badge")) return;
       const follow = document.getElementById("activity-follow-toggle");
       if (follow) follow.checked = false;
       setSelectedTraceMessage(options.msgId, { openTab: true });
@@ -1333,6 +1388,15 @@ async function finalizePlanExecution({
     trace: assistantEntry.trace,
   });
   setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
+  try {
+    document.dispatchEvent(
+      new CustomEvent("workspace:chat-activity", {
+        detail: { msgId: assistantEntry.id, traceId: assistantEntry.trace?.trace_id || null },
+      })
+    );
+  } catch {
+    /* ignore */
+  }
   saveSessionState();
   pendingChatMeta = null;
 
@@ -2385,6 +2449,15 @@ async function sendMessage(text) {
   const assistantEl = messagesEl.lastElementChild;
   if (assistantEl && assistantEntry.id) assistantEl.dataset.msgId = assistantEntry.id;
   setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
+  try {
+    document.dispatchEvent(
+      new CustomEvent("workspace:chat-activity", {
+        detail: { msgId: assistantEntry.id, traceId: assistantEntry.trace?.trace_id || null },
+      })
+    );
+  } catch {
+    /* ignore */
+  }
   saveSessionState();
 
   if (assistantDraftId) {

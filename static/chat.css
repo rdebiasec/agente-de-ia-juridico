@@ -3719,8 +3719,9 @@ body.drawer-open {
   }
 }
 
-/* Equipo interno — transcript legible (Fase 2) */
-.equipo-transcript {
+/* Junta del caso — transcript legible Coordinador ↔ especialistas */
+.equipo-transcript,
+.junta-transcript {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
@@ -3737,14 +3738,26 @@ body.drawer-open {
   margin: 0.4rem 0;
 }
 
-.equipo-turn {
+.equipo-turn,
+.junta-exchange {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.55rem 0.65rem;
   background: color-mix(in srgb, var(--panel) 92%, var(--accent, #2c5f4a) 8%);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.equipo-turn-head {
+.junta-exchange.is-focused {
+  border-color: var(--accent, #2c5f4a);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #2c5f4a) 35%, transparent);
+}
+
+.junta-exchange.is-risk {
+  border-color: color-mix(in srgb, #8b3a3a 55%, var(--line));
+}
+
+.equipo-turn-head,
+.junta-exchange-head {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
@@ -3756,6 +3769,26 @@ body.drawer-open {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.junta-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.junta-ronda,
+.junta-kind {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
 }
 
 .equipo-when {
@@ -3780,6 +3813,130 @@ body.drawer-open {
   text-transform: uppercase;
   color: var(--muted);
   margin-right: 0.35rem;
+}
+
+.junta-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.junta-chip {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.junta-chip.is-active {
+  border-color: var(--accent, #2c5f4a);
+  background: color-mix(in srgb, var(--accent, #2c5f4a) 18%, var(--panel));
+}
+
+.junta-chip--risk.is-active {
+  border-color: #8b3a3a;
+  background: color-mix(in srgb, #8b3a3a 16%, var(--panel));
+}
+
+.junta-pendientes {
+  border: 1px solid color-mix(in srgb, #8b3a3a 40%, var(--line));
+  background: color-mix(in srgb, #8b3a3a 8%, var(--panel));
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.junta-pendientes-title {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  color: #6e2f2f;
+}
+
+.junta-pendientes-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text);
+}
+
+.junta-pendientes-list li {
+  margin: 0.15rem 0;
+  line-height: 1.35;
+}
+
+.junta-bubble {
+  margin-top: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.junta-bubble--pedido {
+  background: color-mix(in srgb, var(--panel) 88%, #1f3d32 12%);
+}
+
+.junta-bubble--retorno {
+  background: color-mix(in srgb, var(--panel) 90%, #3d3420 10%);
+  margin-left: 0.6rem;
+}
+
+.junta-bubble-who {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.junta-bubble-body,
+.junta-bubble-body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.junta-toggle {
+  margin-top: 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--accent, #2c5f4a);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.message-junta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.message-junta-btn {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 92%, var(--accent, #2c5f4a) 8%);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.message-junta-btn:hover {
+  border-color: var(--accent, #2c5f4a);
 }
 
 .context-subhead {

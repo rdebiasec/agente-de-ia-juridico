@@ -498,7 +498,7 @@ class ClientMessage:
 
 @dataclass
 class InternalTranscriptEntry:
-    """Turno legible Gerente ↔ especialista (visible al abogado)."""
+    """Turno legible Gerente ↔ especialista (visible al abogado / Junta del caso)."""
 
     id: str = field(default_factory=_new_id)
     session_id: str = ""
@@ -507,6 +507,8 @@ class InternalTranscriptEntry:
     pedido: str = ""
     respuesta: str = ""
     turn_ref: str | None = None
+    kind: str | None = None  # consult | findings | synthesize | escalate
+    ronda: int | None = None
     created_at: datetime = field(default_factory=_now)
 
     def to_dict(self) -> dict:
@@ -518,6 +520,9 @@ class InternalTranscriptEntry:
             "pedido": self.pedido,
             "respuesta": self.respuesta,
             "turn_ref": self.turn_ref,
+            "trace_id": self.turn_ref,
+            "kind": self.kind,
+            "ronda": self.ronda,
             "created_at": self.created_at.isoformat(),
         }
 

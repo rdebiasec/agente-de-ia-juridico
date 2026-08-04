@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import JSON, Boolean, Date, DateTime, Float, String, Text, create_engine, delete, select, text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, Integer, String, Text, create_engine, delete, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from src.storage.models import (
@@ -268,6 +268,8 @@ class InternalTranscriptRow(Base):
     pedido: Mapped[str] = mapped_column(Text, default="")
     respuesta: Mapped[str] = mapped_column(Text, default="")
     turn_ref: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    kind: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    ronda: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -420,6 +422,8 @@ def _to_internal_entry(row: InternalTranscriptRow) -> InternalTranscriptEntry:
         pedido=row.pedido or "",
         respuesta=row.respuesta or "",
         turn_ref=row.turn_ref,
+        kind=getattr(row, "kind", None),
+        ronda=getattr(row, "ronda", None),
         created_at=row.created_at,
     )
 
@@ -1332,6 +1336,8 @@ class SqlRepository:
                     pedido=entry.pedido,
                     respuesta=entry.respuesta,
                     turn_ref=entry.turn_ref,
+                    kind=entry.kind,
+                    ronda=entry.ronda,
                     created_at=entry.created_at,
                 )
             )

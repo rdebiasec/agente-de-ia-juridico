@@ -525,6 +525,8 @@ async def _run_single_step(
                         pedido=step.user_summary or step.title or "",
                         respuesta=text,
                         turn_ref=step.step_id,
+                        kind="findings",
+                        ronda=1,
                     )
                 except Exception:
                     logger.exception(

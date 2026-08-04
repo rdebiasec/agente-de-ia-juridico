@@ -359,6 +359,24 @@ def reject_outbound_draft(
     return {"ok": True, "draft": draft.to_dict()}
 
 
+KIND_DESK_LABELS = {
+    "consult": "Consulta",
+    "findings": "Hallazgos",
+    "synthesize": "Síntesis",
+    "escalate": "Escalamiento",
+}
+
+
+def _mask_clip(text: str, *, max_chars: int = 2400) -> str:
+    from src.agents.pii import mask_pii
+
+    normalized = " ".join((text or "").split())
+    masked = mask_pii(normalized)
+    if len(masked) <= max_chars:
+        return masked
+    return f"{masked[: max_chars - 3]}..."
+
+
 def append_internal_transcript(
     *,
     session_id: str,
@@ -367,14 +385,18 @@ def append_internal_transcript(
     pedido: str = "",
     respuesta: str = "",
     turn_ref: str | None = None,
+    kind: str | None = None,
+    ronda: int | None = None,
 ) -> InternalTranscriptEntry:
     entry = InternalTranscriptEntry(
         session_id=session_id,
         from_actor=from_actor,
         to_actor=to_actor,
-        pedido=pedido,
-        respuesta=respuesta,
+        pedido=_mask_clip(pedido),
+        respuesta=_mask_clip(respuesta),
         turn_ref=turn_ref,
+        kind=(kind or "").strip() or None,
+        ronda=int(ronda) if ronda else None,
     )
     return get_repository().add_internal_transcript_entry(entry)
 
@@ -383,20 +405,37 @@ def list_internal_transcript(session_id: str, *, limit: int = 100) -> dict:
     sid = (session_id or "").strip()
     if not sid:
         raise TripleChatError("session_id requerido.")
+    from src.agents.agent_ids import JUNTA_ALTO_RIESGO_IDS, resolve_agent_id
+    from src.agents.pii import mask_pii
+
     entries = get_repository().list_internal_transcript(sid, limit=limit)
     enriched = []
     for e in entries:
         data = e.to_dict()
-        data["from_label"] = _actor_label(e.from_actor)
-        data["to_label"] = _actor_label(e.to_actor)
+        # Defensa en profundidad: re-mask al listar (filas históricas).
+        data["pedido"] = mask_pii(data.get("pedido") or "")
+        data["respuesta"] = mask_pii(data.get("respuesta") or "")
+        data["from_label"] = _actor_label(e.from_actor, short=True)
+        data["to_label"] = _actor_label(e.to_actor, short=True)
+        data["from_label_full"] = _actor_label(e.from_actor, short=False)
+        data["to_label_full"] = _actor_label(e.to_actor, short=False)
+        data["kind_label"] = KIND_DESK_LABELS.get((e.kind or "").strip(), "")
+        data["trace_id"] = e.turn_ref
+        spec_id = ""
+        if (e.to_actor or "").startswith("especialista:"):
+            spec_id = resolve_agent_id(e.to_actor.split(":", 1)[1])
+        data["specialist_id"] = spec_id
+        data["alto_riesgo"] = spec_id in JUNTA_ALTO_RIESGO_IDS
         enriched.append(data)
     return {"session_id": sid, "entries": enriched}
 
 
-def _actor_label(actor: str) -> str:
+def _actor_label(actor: str, *, short: bool = False) -> str:
     from src.agents.agent_ids import (
+        AGENT_DESK_SHORT_LABELS,
         AGENT_DISPLAY_LABELS,
         LEGACY_AGENT_ALIASES,
+        agent_desk_short_label,
         resolve_agent_id,
     )
 
@@ -408,9 +447,15 @@ def _actor_label(actor: str) -> str:
             "coordinador_expediente_penal",
             "coordinador_caso",
         }:
+            if short:
+                return AGENT_DESK_SHORT_LABELS["coordinador_caso"]
             return AGENT_DISPLAY_LABELS["coordinador_caso"]
     if raw.startswith("especialista:"):
         agent_id = resolve_agent_id(raw.split(":", 1)[1])
+        if short:
+            label = agent_desk_short_label(agent_id)
+            if label:
+                return label
         if agent_id in AGENT_DISPLAY_LABELS:
             return AGENT_DISPLAY_LABELS[agent_id]
         try:
@@ -420,6 +465,10 @@ def _actor_label(actor: str) -> str:
         except Exception:
             return agent_id
     canonical = resolve_agent_id(raw)
+    if short:
+        short_label = agent_desk_short_label(canonical)
+        if short_label:
+            return short_label
     if canonical in AGENT_DISPLAY_LABELS:
         return AGENT_DISPLAY_LABELS[canonical]
     try:
@@ -437,29 +486,30 @@ def record_specialist_exchange(
     pedido: str = "",
     respuesta: str = "",
     turn_ref: str | None = None,
+    kind: str | None = "findings",
+    ronda: int | None = None,
     max_chars: int = 2400,
 ) -> InternalTranscriptEntry | None:
-    """Best-effort: persiste un turno Gerente↔especialista para el panel Equipo interno."""
+    """Best-effort: persiste un turno Coordinador↔especialista para Junta del caso."""
     sid = (session_id or "").strip()
     spec = (specialist_id or "").strip()
     if not sid or not spec:
         return None
 
-    def _clip(text: str) -> str:
-        normalized = " ".join((text or "").split())
-        if len(normalized) <= max_chars:
-            return normalized
-        return f"{normalized[: max_chars - 3]}..."
-
     try:
-        return append_internal_transcript(
+        clipped_pedido = _mask_clip(pedido, max_chars=max_chars)
+        clipped_respuesta = _mask_clip(respuesta, max_chars=max_chars)
+        entry = InternalTranscriptEntry(
             session_id=sid,
             from_actor="gerente",
             to_actor=f"especialista:{spec}",
-            pedido=_clip(pedido) or f"Consulta al área {spec}",
-            respuesta=_clip(respuesta),
+            pedido=clipped_pedido or f"Consulta al área {spec}",
+            respuesta=clipped_respuesta,
             turn_ref=turn_ref,
+            kind=(kind or "findings").strip() or "findings",
+            ronda=int(ronda) if ronda else None,
         )
+        return get_repository().add_internal_transcript_entry(entry)
     except Exception:
         import logging
 

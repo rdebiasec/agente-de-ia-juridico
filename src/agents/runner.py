@@ -276,7 +276,13 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
         )
 
     def _record_internal_exchange(
-        self, *, specialist_id: str, pedido: str, respuesta: str
+        self,
+        *,
+        specialist_id: str,
+        pedido: str,
+        respuesta: str,
+        kind: str = "findings",
+        ronda: int | None = None,
     ) -> None:
         session_id = str(self.trace.get("session_id") or "")
         if not session_id or not _is_specialist_tool(specialist_id):
@@ -290,6 +296,8 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
                 pedido=pedido,
                 respuesta=respuesta,
                 turn_ref=str(self.trace.get("trace_id") or "") or None,
+                kind=kind,
+                ronda=ronda,
             )
         except Exception:
             logger.exception(
@@ -394,6 +402,8 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
                 specialist_id=tool_name,
                 pedido=pedido,
                 respuesta=respuesta,
+                kind="findings",
+                ronda=int(meta.get("ronda") or 1),
             )
 
     async def on_llm_start(

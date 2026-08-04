@@ -111,37 +111,23 @@ def format_attribution_context(session_id: str, *, limit: int = 8) -> str:
     return "\n".join(lines) + "\n"
 
 
-def answer_attribution(
-    message: str,
-    *,
+def find_attribution_entry(
     session_id: str,
-    channel: str = "web",
-) -> str | None:
-    """
-    Respuesta determinista de atribución.
-    None si no aplica (no es pregunta de atribución o canal cliente).
-    """
-    if (channel or "").strip().lower() in {"cliente", "victim", "victima"}:
-        return None
-    if not is_attribution_question(message):
-        return None
-
-    entries = load_recent_exchanges(session_id, limit=8)
-    closing = (
-        "\n\nBorrador informativo — requiere revisión y aprobación del abogado."
-    )
+    *,
+    hint: str = "",
+    turn_ref: str | None = None,
+) -> InternalTranscriptEntry | None:
+    """Best matching internal exchange for «¿De dónde salió esto?» UI jump."""
+    entries = load_recent_exchanges(session_id, limit=20)
     if not entries:
-        return (
-            "Aún no hay consultas internas registradas en esta sesión. "
-            "Cuando el Coordinador del Caso delegue a un área del equipo, podré decirle "
-            "qué especialista aportó cada hallazgo."
-            + closing
-        )
-
-    # Preferir área cuyo retorno solape términos de la pregunta.
+        return None
+    if turn_ref:
+        matched = [e for e in entries if (e.turn_ref or "") == turn_ref]
+        if matched:
+            entries = matched
     tokens = {
         t
-        for t in re.findall(r"[a-záéíóúñ0-9]{4,}", (message or "").lower())
+        for t in re.findall(r"[a-záéíóúñ0-9]{4,}", (hint or "").lower())
         if t
         not in {
             "donde",
@@ -158,6 +144,9 @@ def answer_attribution(
             "ese",
             "hallazgo",
             "conclus",
+            "junta",
+            "salio",
+            "salió",
         }
     }
     best = entries[-1]
@@ -165,10 +154,42 @@ def answer_attribution(
     for e in entries:
         blob = f"{e.pedido} {e.respuesta}".lower()
         score = sum(1 for t in tokens if t in blob)
+        if turn_ref and (e.turn_ref or "") == turn_ref:
+            score += 2
         if score > best_score:
             best_score = score
             best = e
+    return best
 
+
+def answer_attribution(
+    message: str,
+    *,
+    session_id: str,
+    channel: str = "web",
+) -> str | None:
+    """
+    Respuesta determinista de atribución.
+    None si no aplica (no es pregunta de atribución o canal cliente).
+    """
+    if (channel or "").strip().lower() in {"cliente", "victim", "victima"}:
+        return None
+    if not is_attribution_question(message):
+        return None
+
+    closing = (
+        "\n\nBorrador informativo — requiere revisión y aprobación del abogado."
+    )
+    best = find_attribution_entry(session_id, hint=message)
+    if best is None:
+        return (
+            "Aún no hay consultas internas registradas en esta sesión. "
+            "Cuando el Coordinador del Caso delegue a un área del equipo, podré decirle "
+            "qué especialista aportó cada hallazgo."
+            + closing
+        )
+
+    entries = load_recent_exchanges(session_id, limit=8)
     area = _actor_label(best.to_actor)
     areas = []
     for e in entries:

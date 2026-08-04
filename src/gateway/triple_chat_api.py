@@ -236,6 +236,30 @@ async def abogado_internal_transcript(session_id: str, limit: int = 100):
         raise _http(exc) from exc
 
 
+@abogado_router.get("/abogado/attribution-entry")
+async def abogado_attribution_entry(
+    session_id: str,
+    hint: str = "",
+    turn_ref: str | None = None,
+):
+    """Punto de anclaje para «¿De dónde salió esto?» → Junta del caso (nunca cliente)."""
+    from src.services.attribution import find_attribution_entry
+    from src.services.triple_chat import _actor_label
+
+    try:
+        # Valida session_id con el mismo contrato del transcript.
+        tc.list_internal_transcript(session_id, limit=1)
+    except tc.TripleChatError as exc:
+        raise _http(exc) from exc
+    entry = find_attribution_entry(session_id, hint=hint, turn_ref=turn_ref)
+    if entry is None:
+        return {"ok": True, "entry": None}
+    data = entry.to_dict()
+    data["from_label"] = _actor_label(entry.from_actor, short=True)
+    data["to_label"] = _actor_label(entry.to_actor, short=True)
+    return {"ok": True, "entry": data}
+
+
 @abogado_router.post("/abogado/internal-transcript")
 async def abogado_append_internal_transcript(
     session_id: str,
@@ -244,6 +268,8 @@ async def abogado_append_internal_transcript(
     pedido: str = "",
     respuesta: str = "",
     turn_ref: str | None = None,
+    kind: str | None = None,
+    ronda: int | None = None,
 ):
     try:
         entry = tc.append_internal_transcript(
@@ -253,6 +279,8 @@ async def abogado_append_internal_transcript(
             pedido=pedido,
             respuesta=respuesta,
             turn_ref=turn_ref,
+            kind=kind,
+            ronda=ronda,
         )
         return {"ok": True, "entry": entry.to_dict()}
     except tc.TripleChatError as exc:

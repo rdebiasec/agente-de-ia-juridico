@@ -146,7 +146,7 @@
               <span class="activity-tab-dot" id="activity-tab-dot" hidden aria-hidden="true"></span>
             </button>
             <button type="button" class="context-tab" data-tab="equipo" role="tab" aria-controls="tab-equipo">
-              Equipo interno
+              Junta del caso
             </button>
             <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
@@ -207,14 +207,16 @@
             </section>
             <section class="context-tab-panel" id="tab-equipo" data-panel="equipo" role="tabpanel" hidden>
               <header class="context-panel-head">
-                <p>Chat Coordinador ↔ especialistas</p>
+                <p>Junta del caso</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-equipo">Actualizar</button>
               </header>
               <p class="context-panel-hint">
-                Solo lectura. El Coordinador del Caso delega al equipo interno; usted dirige al Coordinador en el chat principal.
-                La pestaña Actividad sigue mostrando trazas técnicas.
+                Conversación interna Coordinador ↔ especialistas (solo despacho; el cliente nunca la ve).
+                Usted dirige al Coordinador en el chat principal. El detalle técnico de costos y spans está en Actividad.
               </p>
-              <div class="equipo-transcript" id="equipo-transcript" aria-live="polite"></div>
+              <div class="junta-filters" id="junta-filters" aria-label="Filtros de la junta"></div>
+              <aside class="junta-pendientes" id="junta-pendientes" hidden aria-live="polite"></aside>
+              <div class="equipo-transcript junta-transcript" id="equipo-transcript" aria-live="polite"></div>
             </section>
             <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
               <header class="context-panel-head"><p>Conocimiento del despacho y del caso</p></header>

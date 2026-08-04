@@ -37,6 +37,28 @@ AGENT_DISPLAY_LABELS: dict[str, str] = {
     "analista_calidad_juridica": "Control de Calidad Jurídica",
 }
 
+# Short desk labels for Junta del caso bubbles
+AGENT_DESK_SHORT_LABELS: dict[str, str] = {
+    "coordinador_caso": "Coordinador",
+    "analista_cronologia_hechos": "Cronología",
+    "analista_responsabilidad_tipicidad": "Tipicidad",
+    "analista_ruta_procesal": "Ruta procesal",
+    "analista_representacion_victimas": "Víctimas",
+    "analista_evidencia": "Evidencia",
+    "analista_audiencias": "Audiencias",
+    "redactor_documentos_juridicos": "Redacción",
+    "analista_seguimiento_procesal": "Seguimiento",
+    "analista_calidad_juridica": "Calidad",
+}
+
+# High-risk specialists for Junta filter chips
+JUNTA_ALTO_RIESGO_IDS: frozenset[str] = frozenset(
+    {
+        "redactor_documentos_juridicos",
+        "analista_calidad_juridica",
+    }
+)
+
 
 def resolve_agent_id(agent_id: str | None) -> str:
     """Map legacy / synonym IDs to the canonical agent id."""
@@ -52,3 +74,13 @@ def agent_display_label(agent_id: str | None) -> str:
     if not canonical:
         return ""
     return AGENT_DISPLAY_LABELS.get(canonical, canonical)
+
+
+def agent_desk_short_label(agent_id: str | None) -> str:
+    """Short label for Junta del caso (resolves legacy first)."""
+    canonical = resolve_agent_id(agent_id)
+    if not canonical:
+        return ""
+    return AGENT_DESK_SHORT_LABELS.get(
+        canonical, AGENT_DISPLAY_LABELS.get(canonical, canonical)
+    )
