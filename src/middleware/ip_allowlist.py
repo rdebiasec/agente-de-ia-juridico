@@ -66,8 +66,10 @@ def path_is_bypassed(path: str) -> bool:
         return True
     if path == "/twilio" or path.startswith("/twilio/"):
         return True
-    # Front-office víctima: no usa allowlist del desk (auth propia / rate limit).
+    # Front-office víctima / webchat: no usa allowlist del desk (auth propia / rate limit).
     if path == "/cliente" or path.startswith("/cliente/"):
+        return True
+    if path == "/webchat" or path.startswith("/webchat/"):
         return True
     return False
 

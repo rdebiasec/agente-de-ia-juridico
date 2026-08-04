@@ -191,7 +191,14 @@
       panel.classList.toggle("is-active", active);
       panel.hidden = !active;
     });
-    if (id === "actividad" || id === "borrador" || id === "plazos" || id === "rag" || id === "equipo") {
+    if (
+      id === "actividad" ||
+      id === "borrador" ||
+      id === "plazos" ||
+      id === "rag" ||
+      id === "equipo" ||
+      id === "canal-victima"
+    ) {
       try {
         history.replaceState(null, "", `#${id}`);
       } catch {
@@ -203,6 +210,9 @@
     }
     if (id === "equipo") {
       window.EquipoInterno?.refresh?.();
+    }
+    if (id === "canal-victima") {
+      window.CanalVictima?.startPoll?.();
     }
     try {
       document.dispatchEvent(new CustomEvent("workspace:tab", { detail: { tab: id } }));
@@ -222,6 +232,9 @@
       reason === "junta-del-caso"
     ) {
       switchTab("equipo");
+    }
+    else if (reason === "canal-victima" || reason === "canal" || reason === "victima") {
+      switchTab("canal-victima");
     }
     else if (reason === "trazas" || reason === "trace" || reason === "actividad" || reason === "detalle") {
       switchTab("actividad");

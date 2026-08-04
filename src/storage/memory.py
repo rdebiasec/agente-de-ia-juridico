@@ -522,6 +522,18 @@ class InMemoryRepository:
                     return thread
             return None
 
+    def get_client_thread_by_lawyer_session(self, lawyer_session_id: str) -> ClientThread | None:
+        with self._lock:
+            matches = [
+                t
+                for t in self._client_threads.values()
+                if t.lawyer_session_id == lawyer_session_id
+            ]
+            if not matches:
+                return None
+            matches.sort(key=lambda t: t.updated_at, reverse=True)
+            return matches[0]
+
     def save_client_thread(self, thread: ClientThread) -> ClientThread:
         with self._lock:
             self._client_threads[thread.thread_id] = thread

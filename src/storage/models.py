@@ -457,6 +457,8 @@ class ClientThread:
     lawyer_session_id: str = ""
     expediente_session_id: str = ""
     subject_label: str = ""
+    # client_display_name, consent_at, phone, email, welcome_sent, …
+    meta: dict = field(default_factory=dict)
     created_at: datetime = field(default_factory=_now)
     updated_at: datetime = field(default_factory=_now)
 
@@ -467,6 +469,7 @@ class ClientThread:
             "lawyer_session_id": self.lawyer_session_id,
             "expediente_session_id": self.expediente_session_id,
             "subject_label": self.subject_label,
+            "meta": dict(self.meta or {}),
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
@@ -482,6 +485,8 @@ class ClientMessage:
     content: str = ""
     visibility: str = MSG_VIS_CLIENT
     outbound_draft_id: str | None = None
+    # authored_by (lawyer_impersonation), lawyer_actor_id, …
+    meta: dict = field(default_factory=dict)
     created_at: datetime = field(default_factory=_now)
 
     def to_dict(self) -> dict:
@@ -492,6 +497,8 @@ class ClientMessage:
             "content": self.content,
             "visibility": self.visibility,
             "outbound_draft_id": self.outbound_draft_id,
+            "meta": dict(self.meta or {}),
+            "authored_by": (self.meta or {}).get("authored_by"),
             "created_at": self.created_at.isoformat(),
         }
 

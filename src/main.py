@@ -355,8 +355,9 @@ async def abogado_desk(
 
 
 @app.get("/cliente")
+@app.get("/webchat")
 async def cliente_front_office():
-    """Front-office víctima (sin gate del escritorio abogado). Solo local/dev hasta OK explícito de prod."""
+    """Webchat consumidor / canal víctima (sin gate del escritorio abogado)."""
     page = _static_dir / "desk" / "cliente.html"
     if page.is_file():
         return FileResponse(page)

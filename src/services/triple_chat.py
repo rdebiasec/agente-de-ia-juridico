@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from src.storage import get_repository
 from src.storage.models import (
     MSG_VIS_CLIENT,
+    MSG_VIS_INTERNAL,
     MSG_VIS_PENDING,
     OUTBOUND_APPROVED,
     OUTBOUND_PROPOSED,
@@ -62,15 +63,127 @@ def _stub_gerente_proposal(inbound: str) -> str:
     return contextual_gerente_draft(inbound, lawyer_session_id="web:abogado")
 
 
+AUTH_BY_LAWYER_IMPERSONATION = "lawyer_impersonation"
+
+
+def _welcome_text(*, display_name: str) -> str:
+    """Saludo breve del Coordinador (tono víctima; sin listar especialidades)."""
+    name = (display_name or "").strip() or "usted"
+    greeting = "Buenos días"
+    try:
+        from zoneinfo import ZoneInfo
+
+        hour = datetime.now(ZoneInfo("America/Bogota")).hour
+        if 12 <= hour < 19:
+            greeting = "Buenas tardes"
+        elif hour >= 19 or hour < 5:
+            greeting = "Buenas noches"
+    except Exception:
+        pass
+    return (
+        f"{greeting}, {name}. Soy el Coordinador del Caso de Lexiatek. "
+        "Puede contarme su situación con tranquilidad; un abogado del despacho "
+        "revisará cada respuesta antes de enviársela."
+    )
+
+
+def start_cliente_session(
+    *,
+    nombre: str,
+    consent_1581: bool,
+    cliente_subject: str | None = None,
+    lawyer_session_id: str | None = None,
+    telefono: str | None = None,
+    email: str | None = None,
+) -> dict:
+    """
+    Identidad v1 + consentimiento 1581 en servidor.
+    Crea/actualiza hilo, cookie subject y mensaje de bienvenida del Coordinador.
+    """
+    if not consent_1581:
+        raise TripleChatError(
+            "Debe autorizar el tratamiento de datos (Ley 1581) para comenzar."
+        )
+    display = (nombre or "").strip()
+    if len(display) < 2:
+        raise TripleChatError("nombre requerido (mínimo 2 caracteres).")
+    if len(display) > 120:
+        raise TripleChatError("nombre demasiado largo.")
+
+    from src.auth.cliente_session import new_cliente_subject_id
+
+    bare = (cliente_subject or "").strip() or new_cliente_subject_id()
+    if bare.startswith("cliente:"):
+        bare = bare.split(":", 1)[-1]
+    cliente_sid = normalize_cliente_session(bare)
+    lawyer_sid = normalize_lawyer_session(lawyer_session_id)
+
+    thread = get_or_create_thread(
+        cliente_session_id=cliente_sid,
+        lawyer_session_id=lawyer_sid,
+        subject_label=display,
+    )
+    repo = get_repository()
+    meta = dict(thread.meta or {})
+    consent_at = _now().isoformat()
+    meta.update(
+        {
+            "client_display_name": display,
+            "consent_at": consent_at,
+            "consent_1581": True,
+        }
+    )
+    phone = (telefono or "").strip()
+    mail = (email or "").strip()
+    if phone:
+        meta["phone"] = phone[:40]
+    if mail:
+        meta["email"] = mail[:120]
+    thread.meta = meta
+    thread.subject_label = display
+    thread.updated_at = _now()
+    thread = repo.save_client_thread(thread)
+
+    welcome_id = None
+    if not meta.get("welcome_sent"):
+        welcome = ClientMessage(
+            thread_id=thread.thread_id,
+            role="gerente",
+            content=_welcome_text(display_name=display),
+            visibility=MSG_VIS_CLIENT,
+            meta={"authored_by": "system_welcome"},
+        )
+        welcome = repo.add_client_message(welcome)
+        welcome_id = welcome.id
+        meta["welcome_sent"] = True
+        thread.meta = meta
+        thread.updated_at = _now()
+        thread = repo.save_client_thread(thread)
+
+    return {
+        "ok": True,
+        "started": True,
+        "thread_id": thread.thread_id,
+        "cliente_session_id": cliente_sid,
+        "lawyer_session_id": lawyer_sid,
+        "client_display_name": display,
+        "consent_at": consent_at,
+        "welcome_message_id": welcome_id,
+        "subject_label": thread.subject_label,
+    }
+
+
 def enqueue_client_message(
     *,
     message: str,
     cliente_subject: str,
     lawyer_session_id: str | None = None,
     subject_label: str = "",
+    authored_by: str | None = None,
+    lawyer_actor_id: str | None = None,
 ) -> dict:
     """
-    Recibe mensaje de la víctima, encola propuesta HITL.
+    Recibe mensaje de la víctima (o impersonación del despacho), encola propuesta HITL.
     No publica respuesta del Gerente al cliente.
     """
     text = (message or "").strip()
@@ -87,12 +200,26 @@ def enqueue_client_message(
         subject_label=subject_label,
     )
 
+    # Consentimiento 1581 obligatorio en canal consumidor (no en impersonación desk).
+    is_impersonation = (authored_by or "").strip() == AUTH_BY_LAWYER_IMPERSONATION
+    if not is_impersonation and not (thread.meta or {}).get("consent_1581"):
+        raise TripleChatError(
+            "Debe completar el inicio de consulta y autorizar el tratamiento de datos (Ley 1581)."
+        )
+
+    inbound_meta: dict = {}
+    if authored_by:
+        inbound_meta["authored_by"] = authored_by.strip()
+    if lawyer_actor_id:
+        inbound_meta["lawyer_actor_id"] = str(lawyer_actor_id).strip()[:120]
+
     repo = get_repository()
     inbound = ClientMessage(
         thread_id=thread.thread_id,
         role="cliente",
         content=text,
         visibility=MSG_VIS_CLIENT,
+        meta=inbound_meta,
     )
     inbound = repo.add_client_message(inbound)
 
@@ -122,11 +249,39 @@ def enqueue_client_message(
         content=draft.proposed_text,
         visibility=MSG_VIS_PENDING,
         outbound_draft_id=draft.id,
+        meta={"draft_status": "pending_hitl"},
     )
     repo.add_client_message(pending)
 
     thread.updated_at = _now()
     repo.save_client_thread(thread)
+
+    if is_impersonation:
+        try:
+            from src.services.bitacora import append_entries
+
+            actor = (lawyer_actor_id or "abogado").strip() or "abogado"
+            append_entries(
+                lawyer_sid,
+                [
+                    {
+                        "autor": actor,
+                        "tipo": "nota",
+                        "resumen": (
+                            "Mensaje escrito como la víctima (impersonación del despacho) "
+                            f"en canal cliente; draft HITL {draft.id}."
+                        ),
+                        "fuentes": ["canal_victima", "lawyer_impersonation"],
+                        "confidencialidad": "sensible",
+                    }
+                ],
+            )
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception(
+                "Bitácora impersonación omitida session=%s", lawyer_sid
+            )
 
     return {
         "status": "en_revision",
@@ -141,6 +296,7 @@ def enqueue_client_message(
         "cliente_session_id": cliente_sid,
         "lawyer_session_id": lawyer_sid,
         "quality_flags": quality_flags,
+        "authored_by": inbound_meta.get("authored_by"),
     }
 
 
@@ -192,6 +348,18 @@ def get_or_create_thread(
     return saved
 
 
+def _cliente_public_message(msg: ClientMessage) -> dict:
+    """Vista víctima: sin meta interna ni authored_by del despacho."""
+    return {
+        "id": msg.id,
+        "thread_id": msg.thread_id,
+        "role": msg.role,
+        "content": msg.content,
+        "visibility": msg.visibility,
+        "created_at": msg.created_at.isoformat(),
+    }
+
+
 def list_cliente_visible_messages(cliente_subject: str) -> dict:
     cliente_sid = normalize_cliente_session(cliente_subject)
     repo = get_repository()
@@ -202,9 +370,10 @@ def list_cliente_visible_messages(cliente_subject: str) -> dict:
             "messages": [],
             "status": "sin_hilo",
             "status_label": "Sin conversación aún",
+            "started": False,
         }
     msgs = [
-        m.to_dict()
+        _cliente_public_message(m)
         for m in repo.list_client_messages(thread.thread_id)
         if m.visibility == MSG_VIS_CLIENT
     ]
@@ -217,9 +386,10 @@ def list_cliente_visible_messages(cliente_subject: str) -> dict:
     if pending:
         status, label = "en_revision", "En revisión del despacho"
     elif has_gerente:
-        status, label = "respuesta_lista", "Respuesta del Gerente disponible"
+        status, label = "respuesta_lista", "Respuesta del Coordinador disponible"
     else:
         status, label = "al_dia", "Listo para su mensaje"
+    meta = dict(thread.meta or {})
     return {
         "thread_id": thread.thread_id,
         "messages": msgs,
@@ -228,7 +398,114 @@ def list_cliente_visible_messages(cliente_subject: str) -> dict:
         "pending_drafts": len(pending),
         "lawyer_session_id": thread.lawyer_session_id,
         "subject_label": thread.subject_label,
+        "started": bool(meta.get("consent_1581")),
+        "client_display_name": meta.get("client_display_name") or thread.subject_label,
+        "consent_at": meta.get("consent_at"),
     }
+
+
+def list_lawyer_cliente_thread(lawyer_session_id: str) -> dict:
+    """
+    Hilo canal víctima para el desk: mensajes cliente + gerente visible +
+    pending_hitl como «borrador en revisión». No expone junta interna.
+    """
+    from src.agents.pii import mask_pii
+
+    lawyer_sid = normalize_lawyer_session(lawyer_session_id)
+    repo = get_repository()
+    thread = repo.get_client_thread_by_lawyer_session(lawyer_sid)
+    if not thread:
+        # Fallback: expediente → cliente_session_id
+        exp = repo.get_expediente(lawyer_sid)
+        if exp and getattr(exp, "cliente_session_id", None):
+            thread = repo.get_client_thread_by_cliente_session(exp.cliente_session_id)
+    if not thread:
+        return {
+            "thread_id": None,
+            "messages": [],
+            "lawyer_session_id": lawyer_sid,
+            "webchat_url": f"/cliente?caso={lawyer_sid}",
+            "client_display_name": None,
+            "started": False,
+        }
+
+    enriched = []
+    for m in repo.list_client_messages(thread.thread_id):
+        if m.visibility == MSG_VIS_INTERNAL:
+            continue
+        data = m.to_dict()
+        data["content"] = mask_pii(data.get("content") or "")
+        authored = (m.meta or {}).get("authored_by")
+        if m.role == "cliente" and authored == AUTH_BY_LAWYER_IMPERSONATION:
+            data["badge"] = "escrito_por_despacho"
+            data["badge_label"] = "Escrito por el despacho"
+        elif m.role == "cliente":
+            data["badge"] = "victima"
+            data["badge_label"] = "Víctima"
+        elif m.visibility == MSG_VIS_PENDING:
+            data["badge"] = "borrador_pendiente"
+            data["badge_label"] = "Borrador pendiente"
+            data["desk_label"] = "borrador en revisión"
+        elif m.role == "gerente":
+            data["badge"] = "coordinador_enviado"
+            data["badge_label"] = "Coordinador (enviado)"
+        else:
+            data["badge"] = m.role
+            data["badge_label"] = m.role
+        # No filtrar meta authored_by al desk; sí omitir datos de junta (no hay).
+        enriched.append(data)
+
+    meta = dict(thread.meta or {})
+    return {
+        "thread_id": thread.thread_id,
+        "messages": enriched,
+        "lawyer_session_id": thread.lawyer_session_id,
+        "cliente_session_id": thread.cliente_session_id,
+        "webchat_url": f"/cliente?caso={thread.lawyer_session_id}",
+        "client_display_name": meta.get("client_display_name") or thread.subject_label,
+        "consent_at": meta.get("consent_at"),
+        "started": bool(meta.get("consent_1581")),
+        "subject_label": thread.subject_label,
+        "meta": {
+            "client_display_name": meta.get("client_display_name"),
+            "consent_at": meta.get("consent_at"),
+            "consent_1581": meta.get("consent_1581"),
+        },
+    }
+
+
+def enqueue_lawyer_as_client(
+    *,
+    message: str,
+    lawyer_session_id: str,
+    lawyer_actor_id: str | None = None,
+) -> dict:
+    """Impersonación desk → mismo hilo role=cliente + HITL outbound."""
+    lawyer_sid = normalize_lawyer_session(lawyer_session_id)
+    repo = get_repository()
+    thread = repo.get_client_thread_by_lawyer_session(lawyer_sid)
+    if not thread:
+        exp = repo.get_expediente(lawyer_sid)
+        if exp and getattr(exp, "cliente_session_id", None):
+            thread = repo.get_client_thread_by_cliente_session(exp.cliente_session_id)
+    if not thread:
+        # Crear hilo placeholder ligado al caso para que el abogado pueda iniciar.
+        from src.auth.cliente_session import new_cliente_subject_id
+
+        cliente_sid = normalize_cliente_session(new_cliente_subject_id())
+        thread = get_or_create_thread(
+            cliente_session_id=cliente_sid,
+            lawyer_session_id=lawyer_sid,
+            subject_label="Canal víctima (despacho)",
+        )
+    return enqueue_client_message(
+        message=message,
+        cliente_subject=thread.cliente_session_id,
+        lawyer_session_id=lawyer_sid,
+        subject_label=thread.subject_label or "",
+        authored_by=AUTH_BY_LAWYER_IMPERSONATION,
+        lawyer_actor_id=lawyer_actor_id,
+    )
 
 
 def _quality_flags_from_comentario(comentario: str | None) -> list[str]:

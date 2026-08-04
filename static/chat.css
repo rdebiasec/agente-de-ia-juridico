@@ -3976,3 +3976,134 @@ body.drawer-open {
   margin-left: 0.4rem;
   vertical-align: middle;
 }
+
+/* --- Canal víctima (desk) --- */
+.canal-victima-meta {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted, #6b7c74);
+}
+
+.canal-victima-link {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent, #2d7a5f);
+  text-decoration: underline;
+}
+
+.canal-victima-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-height: 42vh;
+  overflow: auto;
+  padding: 0.25rem 0 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+}
+
+.canal-victima-empty {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--muted, #6b7c74);
+}
+
+.canal-msg {
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+  background: var(--panel-soft, #f6f8f7);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.canal-msg--cliente {
+  border-color: rgba(45, 122, 95, 0.28);
+}
+
+.canal-msg--despacho {
+  border-color: rgba(180, 120, 40, 0.4);
+  background: rgba(201, 162, 39, 0.08);
+}
+
+.canal-msg--gerente {
+  border-color: rgba(60, 90, 140, 0.25);
+}
+
+.canal-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+}
+
+.canal-badge--victima {
+  background: rgba(45, 122, 95, 0.15);
+  color: #1f5c46;
+}
+
+.canal-badge--despacho {
+  background: rgba(201, 162, 39, 0.22);
+  color: #7a5a10;
+}
+
+.canal-badge--coord {
+  background: rgba(60, 90, 140, 0.15);
+  color: #2a4570;
+}
+
+.canal-badge--pending {
+  background: rgba(150, 90, 40, 0.18);
+  color: #7a4510;
+}
+
+.canal-pending-note {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: #7a4510;
+}
+
+.canal-msg-body {
+  margin-top: 0.15rem;
+}
+
+.canal-victima-composer {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.canal-victima-audit {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  background: rgba(201, 162, 39, 0.1);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #6a5210;
+}
+
+.canal-victima-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted, #6b7c74);
+}
+
+#canal-victima-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 4rem;
+  border-radius: 8px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}

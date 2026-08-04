@@ -148,6 +148,9 @@
             <button type="button" class="context-tab" data-tab="equipo" role="tab" aria-controls="tab-equipo">
               Junta del caso
             </button>
+            <button type="button" class="context-tab" data-tab="canal-victima" role="tab" aria-controls="tab-canal-victima">
+              Canal víctima
+            </button>
             <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
           <div class="context-tab-panels">
@@ -218,6 +221,36 @@
               <aside class="junta-pendientes" id="junta-pendientes" hidden aria-live="polite"></aside>
               <div class="equipo-transcript junta-transcript" id="equipo-transcript" aria-live="polite"></div>
             </section>
+            <section class="context-tab-panel" id="tab-canal-victima" data-panel="canal-victima" role="tabpanel" hidden>
+              <header class="context-panel-head">
+                <p>Canal víctima</p>
+                <button type="button" class="btn-firma-action" id="btn-refresh-canal-victima">Actualizar</button>
+              </header>
+              <p class="context-panel-hint">
+                Hilo vivo con la víctima. Las respuestas del Coordinador siguen pasando por
+                «Respuestas al cliente» antes de publicarse.
+              </p>
+              <p class="canal-victima-meta" id="canal-victima-meta"></p>
+              <a class="canal-victima-link" id="canal-victima-webchat-link" href="/cliente" target="_blank" rel="noopener">
+                Abrir webchat de este caso
+              </a>
+              <div class="canal-victima-thread" id="canal-victima-thread" aria-live="polite"></div>
+              <form class="canal-victima-composer" id="canal-victima-form">
+                <p class="canal-victima-audit" role="note">
+                  Aviso permanente: al enviar, el mensaje se registra en el hilo de la víctima como escrito por el despacho
+                  y genera un borrador HITL para revisión.
+                </p>
+                <label class="canal-victima-label" for="canal-victima-input">Escribir como la víctima</label>
+                <textarea
+                  id="canal-victima-input"
+                  rows="3"
+                  maxlength="4000"
+                  placeholder="Texto que la víctima diría…"
+                  required
+                ></textarea>
+                <button type="submit" class="btn-firma-primary" id="canal-victima-send">Enviar como víctima</button>
+              </form>
+            </section>
             <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
               <header class="context-panel-head"><p>Conocimiento del despacho y del caso</p></header>
               <form class="firma-form" id="firma-search-form">
@@ -266,6 +299,7 @@
     <script src="/static/workspace.js" defer></script>
     <script src="/static/firma.js" defer></script>
     <script src="/static/equipo-interno.js" defer></script>
+    <script src="/static/canal-victima.js" defer></script>
     <script src="/static/chat.js" defer></script>
   </body>
 </html>

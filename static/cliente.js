@@ -1,17 +1,27 @@
-/** Front-office víctima — POST /cliente/chat + poll mensajes visibles. */
+/** Webchat consumidor — start 1581 + POST /cliente/chat + poll mensajes visibles. */
 (function () {
   const STORAGE_SUBJECT = "lexiatek_cliente_subject";
-  const STORAGE_CONSENT = "lexiatek_cliente_consent_v1";
   const STORAGE_LAWYER = "lexiatek_lawyer_session";
-  const STORAGE_PIN = "lexiatek_cliente_pin";
+  const STORAGE_STARTED = "lexiatek_cliente_started_v1";
+
+  const startEl = document.getElementById("cliente-start");
+  const chatEl = document.getElementById("cliente-chat");
+  const startForm = document.getElementById("cliente-start-form");
+  const startBtn = document.getElementById("cliente-start-btn");
+  const startError = document.getElementById("cliente-start-error");
+  const nombreEl = document.getElementById("cliente-nombre");
+  const telefonoEl = document.getElementById("cliente-telefono");
+  const emailEl = document.getElementById("cliente-email");
+  const consentStartEl = document.getElementById("cliente-consent-start");
 
   const messagesEl = document.getElementById("cliente-messages");
   const formEl = document.getElementById("cliente-form");
   const inputEl = document.getElementById("cliente-input");
   const sendBtn = document.getElementById("cliente-send");
-  const consentEl = document.getElementById("cliente-consent");
   const statusEl = document.getElementById("cliente-status");
   const caseEl = document.getElementById("cliente-case-label");
+
+  let pollTimer = null;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -35,15 +45,6 @@
     return sid;
   }
 
-  function getOrCreatePin() {
-    let pin = localStorage.getItem(STORAGE_PIN);
-    if (!pin) {
-      pin = String(100000 + Math.floor(Math.random() * 900000));
-      localStorage.setItem(STORAGE_PIN, pin);
-    }
-    return pin;
-  }
-
   function lawyerSession() {
     const params = new URLSearchParams(window.location.search);
     const fromQuery = (params.get("caso") || params.get("lawyer") || "").trim();
@@ -63,10 +64,9 @@
   function updateCaseLabel(extraLabel) {
     if (!caseEl) return;
     const code = shortCaseCode(lawyerSession());
-    const pin = getOrCreatePin();
     const label = extraLabel ? `${extraLabel} · ${code}` : code;
     caseEl.hidden = false;
-    caseEl.textContent = `${label} · clave local ${pin}`;
+    caseEl.textContent = label;
   }
 
   function setStatus(text, mode) {
@@ -74,6 +74,33 @@
     statusEl.textContent = text;
     statusEl.classList.toggle("is-review", mode === "review");
     statusEl.classList.toggle("is-ok", mode === "ok");
+  }
+
+  function showStartError(msg) {
+    if (!startError) return;
+    startError.hidden = !msg;
+    startError.textContent = msg || "";
+  }
+
+  function showChat() {
+    if (startEl) startEl.hidden = true;
+    if (chatEl) chatEl.hidden = false;
+    localStorage.setItem(STORAGE_STARTED, "1");
+    document.querySelector(".skip-link")?.setAttribute("href", "#cliente-messages");
+    ensurePoll();
+  }
+
+  function showStart() {
+    if (startEl) startEl.hidden = false;
+    if (chatEl) chatEl.hidden = true;
+    localStorage.removeItem(STORAGE_STARTED);
+  }
+
+  function ensurePoll() {
+    if (pollTimer) return;
+    pollTimer = setInterval(() => {
+      if (chatEl && !chatEl.hidden) void refreshMessages();
+    }, 8000);
   }
 
   function renderMessages(messages) {
@@ -103,8 +130,13 @@
     });
     if (!res.ok) return;
     const data = await res.json();
+    if (!data.started) {
+      showStart();
+      return;
+    }
+    showChat();
     renderMessages(Array.isArray(data.messages) ? data.messages : []);
-    updateCaseLabel(data.subject_label || "");
+    updateCaseLabel(data.client_display_name || data.subject_label || "");
     const label = data.status_label;
     if (data.status === "en_revision") {
       setStatus(label || "Su mensaje está en revisión del despacho.", "review");
@@ -115,6 +147,56 @@
         label || "Escriba su mensaje. El despacho revisará la respuesta antes de enviársela.",
         "ok"
       );
+    }
+  }
+
+  async function startConsultation() {
+    const nombre = (nombreEl?.value || "").trim();
+    const consent = !!consentStartEl?.checked;
+    if (!nombre || !consent) {
+      showStartError("Indique su nombre y autorice el tratamiento de datos (Ley 1581).");
+      return;
+    }
+    showStartError("");
+    if (startBtn) startBtn.disabled = true;
+    try {
+      const res = await fetch("/cliente/start", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre,
+          telefono: (telefonoEl?.value || "").trim() || null,
+          email: (emailEl?.value || "").trim() || null,
+          consent_1581: true,
+          cliente_session_id: getSubject(),
+          lawyer_session_id: lawyerSession(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = data.detail;
+        const msg =
+          typeof detail === "string"
+            ? detail
+            : Array.isArray(detail)
+              ? detail.map((d) => d.msg || d).join("; ")
+              : "No se pudo iniciar la consulta.";
+        throw new Error(msg);
+      }
+      if (data.cliente_session_id) {
+        const bare = String(data.cliente_session_id).replace(/^cliente:/, "");
+        localStorage.setItem(STORAGE_SUBJECT, bare);
+      }
+      showChat();
+      updateCaseLabel(data.client_display_name || nombre);
+      setStatus("Consulta iniciada. Puede escribir su mensaje.", "ok");
+      await refreshMessages();
+      inputEl?.focus();
+    } catch (err) {
+      showStartError(err?.message || "Error al iniciar.");
+    } finally {
+      if (startBtn) startBtn.disabled = false;
     }
   }
 
@@ -136,21 +218,15 @@
     return data;
   }
 
-  function initConsent() {
-    if (!consentEl) return;
-    if (localStorage.getItem(STORAGE_CONSENT) === "1") {
-      consentEl.checked = true;
-    }
-    consentEl.addEventListener("change", () => {
-      if (consentEl.checked) localStorage.setItem(STORAGE_CONSENT, "1");
-      else localStorage.removeItem(STORAGE_CONSENT);
-    });
-  }
+  startForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await startConsultation();
+  });
 
   formEl?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const text = (inputEl?.value || "").trim();
-    if (!text || !consentEl?.checked) return;
+    if (!text) return;
     sendBtn.disabled = true;
     setStatus("Enviando…", "review");
     try {
@@ -169,10 +245,26 @@
     }
   });
 
-  initConsent();
-  updateCaseLabel("");
-  void refreshMessages();
-  setInterval(() => {
-    void refreshMessages();
-  }, 8000);
+  async function boot() {
+    lawyerSession();
+    try {
+      const res = await fetch("/cliente/session", { credentials: "same-origin" });
+      if (res.ok) {
+        const info = await res.json();
+        if (info.cliente_subject) {
+          localStorage.setItem(STORAGE_SUBJECT, info.cliente_subject);
+        }
+        if (info.started) {
+          showChat();
+          await refreshMessages();
+          return;
+        }
+      }
+    } catch {
+      /* show start */
+    }
+    showStart();
+  }
+
+  void boot();
 })();

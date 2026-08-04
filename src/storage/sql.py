@@ -242,6 +242,7 @@ class ClientThreadRow(Base):
     lawyer_session_id: Mapped[str] = mapped_column(String(120), index=True)
     expediente_session_id: Mapped[str] = mapped_column(String(120), default="")
     subject_label: Mapped[str] = mapped_column(String(200), default="")
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
@@ -255,6 +256,7 @@ class ClientMessageRow(Base):
     content: Mapped[str] = mapped_column(Text, default="")
     visibility: Mapped[str] = mapped_column(String(20), default="client_visible")
     outbound_draft_id: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -396,6 +398,7 @@ def _to_client_thread(row: ClientThreadRow) -> ClientThread:
         lawyer_session_id=row.lawyer_session_id,
         expediente_session_id=row.expediente_session_id,
         subject_label=row.subject_label or "",
+        meta=dict(getattr(row, "meta", None) or {}),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -409,6 +412,7 @@ def _to_client_message(row: ClientMessageRow) -> ClientMessage:
         content=row.content,
         visibility=row.visibility,
         outbound_draft_id=row.outbound_draft_id,
+        meta=dict(getattr(row, "meta", None) or {}),
         created_at=row.created_at,
     )
 
@@ -1282,6 +1286,16 @@ class SqlRepository:
             )
             return _to_client_thread(row) if row else None
 
+    def get_client_thread_by_lawyer_session(self, lawyer_session_id: str) -> ClientThread | None:
+        with self._session() as s:
+            row = s.scalar(
+                select(ClientThreadRow)
+                .where(ClientThreadRow.lawyer_session_id == lawyer_session_id)
+                .order_by(ClientThreadRow.updated_at.desc())
+                .limit(1)
+            )
+            return _to_client_thread(row) if row else None
+
     def save_client_thread(self, thread: ClientThread) -> ClientThread:
         with self._session() as s:
             row = s.get(ClientThreadRow, thread.thread_id)
@@ -1292,6 +1306,7 @@ class SqlRepository:
             row.lawyer_session_id = thread.lawyer_session_id
             row.expediente_session_id = thread.expediente_session_id
             row.subject_label = thread.subject_label
+            row.meta = dict(thread.meta or {})
             row.created_at = thread.created_at
             row.updated_at = thread.updated_at
             s.commit()
@@ -1307,6 +1322,7 @@ class SqlRepository:
                     content=message.content,
                     visibility=message.visibility,
                     outbound_draft_id=message.outbound_draft_id,
+                    meta=dict(message.meta or {}),
                     created_at=message.created_at,
                 )
             )
