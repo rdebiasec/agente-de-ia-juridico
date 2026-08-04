@@ -726,9 +726,11 @@ def _fallback_response(message: str) -> str:
         )
     elif is_non_penal_scope_request(message):
         body = (
-            "Esta solicitud está fuera de alcance penal-víctimas. Solo atiendo representación de víctimas "
-            "en contexto penal colombiano. Si existe componente penal, compárteme hechos, etapa Ley 906 "
-            "y objetivo procesal para continuar."
+            "Esta consulta está fuera de alcance penal-víctimas. Este despacho atiende "
+            "únicamente representación penal de víctimas humanas en Colombia. Para "
+            "asuntos de animales u otras materias distintas, lo más prudente es buscar "
+            "apoyo con un profesional experto en esa área. Si existe un componente penal "
+            "con víctima humana, compárteme hechos y etapa Ley 906 para continuar."
         )
     elif any(
         w in (message or "").lower()
@@ -930,7 +932,44 @@ async def run_agent(
         trace["route"] = "fuera_alcance_rol"
         trace["blocked"] = True
         trace["selected_agent"] = POC_AGENT_ID
-        trace["sent_to_agent"] = "none"
+        trace["sent_to_agent"] = POC_AGENT_ID
+        _finalize_trace(trace, text)
+        _record_bitacora_turn(
+            session_id=session_id,
+            message=message,
+            text=text,
+            trace=trace,
+            expediente=expediente,
+        )
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
+        return {
+            "text": text,
+            "agent": POC_AGENT_ID,
+            "pending_review": False,
+            "offer_plan": False,
+            "session_id": session_id,
+            "trace": trace,
+        }
+
+    if is_non_penal_scope_request(message):
+        text = apply_output_guardrails(
+            "Esta consulta está fuera de alcance penal-víctimas. Este despacho atiende "
+            "únicamente representación penal de víctimas humanas en Colombia. Para "
+            "asuntos de animales u otras materias distintas, lo más prudente es buscar "
+            "apoyo con un profesional experto en esa área. Si su caso también incluye "
+            "una víctima humana en contexto penal, compárteme ese componente y lo "
+            "encauzamos por la vía penal-víctimas."
+        )
+        trace["route"] = "fuera_alcance_materia"
+        trace["blocked"] = True
+        trace["selected_agent"] = POC_AGENT_ID
+        trace["sent_to_agent"] = POC_AGENT_ID
         _finalize_trace(trace, text)
         _record_bitacora_turn(
             session_id=session_id,

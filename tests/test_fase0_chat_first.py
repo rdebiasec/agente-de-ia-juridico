@@ -11,6 +11,7 @@ from src.agents.triage import (
     build_triage,
     infer_destination_agent,
     is_investigado_posture,
+    is_non_penal_scope_request,
 )
 
 
@@ -28,6 +29,14 @@ def test_victima_message_not_investigado():
     assert not is_investigado_posture(msg)
     triage = build_triage(msg)
     assert triage.rol_aparente != "investigado_o_conductor"
+
+
+def test_animal_case_is_out_of_scope():
+    msg = "me violaron el gato"
+    assert is_non_penal_scope_request(msg)
+    triage = build_triage(msg)
+    assert triage.tipo_tarea == "fuera_de_alcance"
+    assert triage.rol_aparente == "fuera_penal_victimas"
 
 
 @pytest.mark.asyncio
@@ -93,6 +102,73 @@ async def test_investigado_chat_no_offer_plan(monkeypatch):
     assert result["trace"]["route"] == "fuera_alcance_rol"
     assert result.get("offer_plan") is False
     assert "víctimas" in result["text"].lower() or "victimas" in result["text"].lower()
+    assert "TriageResult" not in result["text"]
+
+
+@pytest.mark.asyncio
+async def test_non_penal_scope_chat_refers_to_expert_without_plan(monkeypatch):
+    from src.agents import runner as runner_mod
+
+    class FakeRepo:
+        def get_chat_session(self, _sid):
+            return None
+
+        def list_session_traces(self, _sid, limit=40):
+            return []
+
+        def append_chat_message(self, *a, **k):
+            return None
+
+        def save_session_trace(self, *a, **k):
+            return None
+
+        def mutate_expediente(self, *a, **k):
+            return None
+
+    monkeypatch.setattr(runner_mod, "get_repository", lambda: FakeRepo())
+    monkeypatch.setattr(
+        "src.services.expediente_sync.sync_expediente_from_chat",
+        lambda *a, **k: None,
+    )
+    monkeypatch.setattr(
+        "src.agents.completeness.persist_verification",
+        lambda *a, **k: None,
+    )
+
+    class Exp:
+        session_id = "web:fase0-oos"
+        hechos_minimos_confirmados = False
+        poder_acreditado = False
+        ultima_actuacion_confirmada = False
+        radicado = ""
+        partes: list = []
+        rol_despacho = ""
+        etapa_actual = ""
+        terminos: list = []
+        evidencias: list = []
+        faltantes: list = []
+        involucra_menor = False
+        datos_sensibles = False
+
+        def resumen(self):
+            return ""
+
+    monkeypatch.setattr(
+        runner_mod.expediente_store,
+        "get_or_create",
+        lambda _sid: Exp(),
+    )
+
+    result = await runner_mod.run_agent(
+        "me violaron el gato",
+        channel="web",
+        session_id="web:fase0-oos",
+        user_id="abogada",
+    )
+    assert result["trace"]["route"] == "fuera_alcance_materia"
+    assert result.get("offer_plan") is False
+    assert "profesional experto" in result["text"].lower()
+    assert "puedo orient" not in result["text"].lower()
     assert "TriageResult" not in result["text"]
 
 

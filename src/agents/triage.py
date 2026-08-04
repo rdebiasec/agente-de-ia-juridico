@@ -76,6 +76,20 @@ _OUT_OF_SCOPE_RE = re.compile(
     r"contrato|divorcio|custodia|alimentos|arrendamiento)\b",
     re.I,
 )
+_ANIMAL_SCOPE_RE = re.compile(
+    r"\b(animal(?:es)?|mascota(?:s)?|gato(?:s)?|perro(?:s)?|veterinari[oa]s?|zootecni[ae])\b",
+    re.I,
+)
+_ANIMAL_OWNER_RE = re.compile(
+    r"\b(?:mi|mis|nuestro|nuestra|nuestros|nuestras)\s+"
+    r"(?:gato(?:s)?|perro(?:s)?|mascota(?:s)?|animal(?:es)?)\b",
+    re.I,
+)
+_HUMAN_VICTIM_HINT_RE = re.compile(
+    r"\b(v[ií]ctima(?:s)?\s+humana(?:s)?|persona(?:s)?|cliente|"
+    r"mujer(?:es)?|hombre(?:s)?|niñ[oa]s?|menor(?:es)?)\b",
+    re.I,
+)
 # Postura aparente de conductor/investigado (no víctima) — despacho es penal-víctimas.
 _INVESTIGADO_RE = re.compile(
     r"(?:"
@@ -90,7 +104,9 @@ _INVESTIGADO_RE = re.compile(
     re.I,
 )
 _KNOWLEDGE_RE = re.compile(
-    r"\b(ley 906|proceso penal|despacho penal|rutas penales)\b", re.I
+    r"\b(ley 906|proceso penal|caso penal|despacho penal|rutas penales|"
+    r"lesiones(?:\s+personales)?|homicidio|denuncia penal)\b",
+    re.I,
 )
 _PROFILE_RE = re.compile(
     r"\b(perfil|experiencia|qu[ií]en eres|quien eres)\b", re.I
@@ -130,10 +146,21 @@ def has_penal_context(message: str) -> bool:
     return any(pattern.search(message or "") for pattern in _PENAL_CONTEXT_PATTERNS)
 
 
+def is_animal_scope_request(message: str) -> bool:
+    """True cuando la consulta trata de mascota/animal fuera del foco penal-víctimas humanas."""
+    text = message or ""
+    if not _ANIMAL_SCOPE_RE.search(text):
+        return False
+    if _ANIMAL_OWNER_RE.search(text):
+        return True
+    return not bool(_HUMAN_VICTIM_HINT_RE.search(text))
+
+
 def is_non_penal_scope_request(message: str) -> bool:
-    return bool(_OUT_OF_SCOPE_RE.search(message or "")) and not has_penal_context(
-        message or ""
-    )
+    text = message or ""
+    if is_animal_scope_request(text):
+        return True
+    return bool(_OUT_OF_SCOPE_RE.search(text)) and not has_penal_context(text)
 
 
 def is_investigado_posture(message: str) -> bool:
