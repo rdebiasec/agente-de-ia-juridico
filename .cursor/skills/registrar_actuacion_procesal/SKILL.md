@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 7c6465e0cf96d5c7 -->
 ---
 name: registrar-actuacion-procesal
 description: Skill atomico penal-victimas: registrar una actuacion nueva en la bitacora del caso. Use when the workflow requires `registrar_actuacion_procesal`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `atomico`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Registrar en el sistema una actuación procesal nueva con fuente y fecha.

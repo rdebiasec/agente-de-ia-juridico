@@ -13,8 +13,8 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_responsabilidad_tipicidad`
+- `analista_evidencia`
 - `analista_calidad_juridica`
 
 ## Purpose

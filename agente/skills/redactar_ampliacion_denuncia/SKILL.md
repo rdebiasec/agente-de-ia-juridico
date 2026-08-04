@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.

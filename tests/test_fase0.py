@@ -67,7 +67,7 @@ async def test_chat_non_penal_request_is_out_of_scope():
     lowered = data["text"].lower()
     assert "fuera de alcance penal-víctimas" in lowered
     assert data["pending_review"] is False
-    assert data["trace"].get("sent_to_agent") == "coordinador_expediente_penal"
+    assert data["trace"].get("sent_to_agent") == "coordinador_caso"
 
 
 @pytest.mark.asyncio
@@ -97,8 +97,8 @@ async def test_chat_mixed_scope_reconduces_to_penal():
     lowered = data["text"].lower()
     assert "penal" in lowered or "víctima" in lowered or "victima" in lowered
     assert data["trace"].get("sent_to_agent") in {
-        "coordinador_expediente_penal",
-        "analista_ruta_procesal_ley906",
+        "coordinador_caso",
+        "analista_ruta_procesal",
     }
 
 
@@ -120,20 +120,32 @@ async def test_chat_seguimiento_requires_complete_expediente():
 
 
 @pytest.mark.asyncio
-async def test_chat_tutela_requires_complete_expediente():
+async def test_chat_tutela_no_abre_especialista_constitucional():
+    from src.agents.plan_templates import classify_plan_template
+    from src.agents.triage import infer_destination_agent
+
+    msg = "Redacta una tutela por derecho de petición"
+    assert infer_destination_agent(msg) == "coordinador_caso"
+    assert classify_plan_template(msg) != "tutela"
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         r = await client.post(
             "/chat",
-            json={"message": "Redacta una tutela por derecho de petición", "user_id": "test"},
+            json={"message": msg, "user_id": "test"},
         )
     assert r.status_code == 200
     data = r.json()
     lowered = data["text"].lower()
     assert "no está activa" not in lowered
-    assert data["pending_review"] is False
-    assert data["trace"]["blocked"] is True
-    assert "completar el expediente" in lowered
+    sent = data.get("trace", {}).get("sent_to_agent")
+    assert sent not in {
+        "evaluador_derechos_fundamentales_tutela",
+        "tutela_constitucional",
+    }
+    plan = data.get("plan") or {}
+    assert plan.get("template") != "tutela"
+    assert "acción de tutela" not in str(plan).lower()
 
 
 @pytest.mark.asyncio

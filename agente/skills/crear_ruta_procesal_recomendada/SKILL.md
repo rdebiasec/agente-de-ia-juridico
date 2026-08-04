@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906` (uso principal)
+- `analista_ruta_procesal` (uso principal)
 
 ## Purpose
 Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado.
@@ -71,7 +71,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_rut
 
 ## No duplicar
 - No evaluar oportunidad de cada actuación (`evaluar_oportunidad_procesal`).
-- No redactar memoriales (`redactor_documentos_juridicos_penales`).
+- No redactar memoriales (`redactor_documentos_juridicos`).
 
 ## Riesgo si se omite
 Actuaciones desordenadas o extemporáneas en representación de víctimas bajo Ley 906.

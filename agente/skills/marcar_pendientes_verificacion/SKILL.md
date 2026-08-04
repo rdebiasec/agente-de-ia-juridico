@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 357b631e5822d06e -->
+<!-- config-version: 5; checksum: 522250085d3865bf -->
 ---
 name: marcar-pendientes-verificacion
 description: Skill atomico penal-victimas: marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`. Use when the workflow requires `marcar_pendientes_verificacion`.
@@ -16,7 +16,7 @@ disable-model-invocation: true
 Etiqueta todo dato no verificado antes de entregar la voz del despacho.
 
 ## Used By Agents
-- `coordinador_expediente_penal`
+- `coordinador_caso`
 
 ## Purpose
 Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
@@ -52,7 +52,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `marcar_pe
 ## Guardrails (g1–g10)
 - **g1:** Implementación directa de g1 — todo sin fuente queda marcado, nunca inventado.
 - **g3:** No eliminar la distinción hecho/inferencia al marcar; solo etiquetar.
-- **g4:** Si impacto alto (etapa, tutela, término), bloquear uso externo hasta revisión humana.
+- **g4:** Si impacto alto (etapa, memorial, término), bloquear uso externo hasta revisión humana.
 - **g8:** Incluir aviso estándar de revisión profesional al final.
 
 ## Handoff

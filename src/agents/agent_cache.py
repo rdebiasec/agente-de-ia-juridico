@@ -19,7 +19,7 @@ def config_fingerprint() -> str:
     try:
         from src.config_store import KIND_PROMPT, get_active_content
 
-        for key in ("sistema", "coordinador_expediente_penal"):
+        for key in ("sistema", "coordinador_caso"):
             try:
                 data = get_active_content(KIND_PROMPT, key)
                 parts.append(

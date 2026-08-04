@@ -106,8 +106,29 @@ def _write_file(path: Path, content: str, *, version: int, checksum: str) -> Non
     path.write_text(with_header(content, version=version, checksum=checksum), encoding="utf-8")
 
 
+def _resolve_config_key(kind: str, key: str) -> str:
+    """Map legacy agent IDs in prompt / agent_guardrail keys to canonical names."""
+    if kind == KIND_PROMPT and key != "sistema":
+        try:
+            from src.agents.agent_ids import resolve_agent_id
+
+            return resolve_agent_id(key) or key
+        except Exception:
+            return key
+    if kind == KIND_AGENT_GUARDRAIL:
+        try:
+            from src.agents.agent_ids import resolve_agent_id
+
+            agent_id, clase = parse_agent_guardrail_key(key)
+            return agent_guardrail_key(resolve_agent_id(agent_id) or agent_id, clase)
+        except Exception:
+            return key
+    return key
+
+
 def get_active_content(kind: str, key: str, *, prefer_db: bool = True) -> dict[str, Any]:
     """Devuelve contenido activo. DB primero; fallback a archivo seed."""
+    key = _resolve_config_key(kind, key)
     _validate_kind_key(kind, key)
     repo = get_repository()
     active = repo.get_config_active(kind, key) if prefer_db else None

@@ -33,15 +33,15 @@ Este documento esta disenado para aprobacion de la abogada lider. Explica:
 
 ```mermaid
 flowchart TD
-  coordinator["coordinador_expediente_penal"]
-  chronology["analista_cronologia_hechos_penales"]
-  typicity["analista_tipicidad_y_responsabilidad_penal"]
-  route906["analista_ruta_procesal_ley906"]
+  coordinator["coordinador_caso"]
+  chronology["analista_cronologia_hechos"]
+  typicity["analista_responsabilidad_tipicidad"]
+  route906["analista_ruta_procesal"]
   victims["analista_representacion_victimas"]
-  evidence["gestor_evidencia_y_soporte_probatorio"]
-  hearings["preparador_estrategico_audiencias_penales"]
-  drafting["redactor_documentos_juridicos_penales"]
-  tracking["gestor_seguimiento_procesal_penal"]
+  evidence["analista_evidencia"]
+  hearings["analista_audiencias"]
+  drafting["redactor_documentos_juridicos"]
+  tracking["analista_seguimiento_procesal"]
   tutela["evaluador_derechos_fundamentales_tutela"]
   quality["analista_calidad_juridica"]
   lawyer["abogada_responsable_HITL"]
@@ -71,7 +71,7 @@ flowchart TD
 
 ### Lectura juridica de la arquitectura
 
-- `coordinador_expediente_penal` administra el triage legal-operativo y evita dispersion.
+- `coordinador_caso` administra el triage legal-operativo y evita dispersion.
 - Los agentes especialistas producen trabajo modular por funcion juridica.
 - `analista_calidad_juridica` opera como puerta tecnica de control previo.
 - La decision final siempre recae en `abogada_responsable_HITL`.
@@ -80,7 +80,7 @@ flowchart TD
 
 > Nota: los skills listados son los activos en el catalogo atomico actual.
 
-### 4.1 `coordinador_expediente_penal`
+### 4.1 `coordinador_caso`
 
 **Rol juridico:** direccion del expediente y enrutamiento.
 
@@ -99,7 +99,7 @@ flowchart TD
 - `clasificar_fuente_factual`
 - `crear_ruta_procesal_recomendada`
 
-### 4.2 `analista_cronologia_hechos_penales`
+### 4.2 `analista_cronologia_hechos`
 
 **Rol juridico:** depuracion factual y linea de tiempo del caso.
 
@@ -116,7 +116,7 @@ flowchart TD
 - `generar_preguntas_tipicidad`
 - `verificar_hechos_soportados`
 
-### 4.3 `analista_tipicidad_y_responsabilidad_penal`
+### 4.3 `analista_responsabilidad_tipicidad`
 
 **Rol juridico:** analisis sustantivo preliminar (tipicidad y responsabilidad).
 
@@ -133,7 +133,7 @@ flowchart TD
 - `generar_preguntas_tipicidad`
 - `construir_matriz_hecho_prueba`
 
-### 4.4 `analista_ruta_procesal_ley906`
+### 4.4 `analista_ruta_procesal`
 
 **Rol juridico:** lectura procesal penal Ley 906 por etapa y oportunidad.
 
@@ -175,7 +175,7 @@ flowchart TD
 - `identificar_actores_y_roles`
 - `controlar_no_revictimizacion`
 
-### 4.6 `gestor_evidencia_y_soporte_probatorio`
+### 4.6 `analista_evidencia`
 
 **Rol juridico:** gestion probatoria y brechas de soporte.
 
@@ -196,7 +196,7 @@ flowchart TD
 - `generar_preguntas_aclaracion`
 - `mapear_tipo_penal_hecho_prueba`
 
-### 4.7 `preparador_estrategico_audiencias_penales`
+### 4.7 `analista_audiencias`
 
 **Rol juridico:** preparacion tactica de audiencia para representacion de victimas.
 
@@ -220,7 +220,7 @@ flowchart TD
 - `generar_preguntas_testigos_peritos`
 - `detectar_riesgo_revictimizacion`
 
-### 4.8 `redactor_documentos_juridicos_penales`
+### 4.8 `redactor_documentos_juridicos`
 
 **Rol juridico:** redaccion tecnica de piezas juridicas revisables.
 
@@ -244,7 +244,7 @@ flowchart TD
 - `verificar_citas_normativas`
 - `verificar_hechos_soportados`
 
-### 4.9 `gestor_seguimiento_procesal_penal`
+### 4.9 `analista_seguimiento_procesal`
 
 **Rol juridico:** dependencia judicial digital y continuidad operativa.
 
@@ -334,11 +334,11 @@ flowchart TD
 
 **Cadena de agentes y skills:**
 
-1. `coordinador_expediente_penal`
+1. `coordinador_caso`
    - `clasificar_tarea_y_etapa`
    - `detectar_urgencia_penal`
    - `gestionar_faltantes_expediente`
-2. `analista_cronologia_hechos_penales`
+2. `analista_cronologia_hechos`
    - `extraer_hechos_relevantes`
    - `construir_cronologia_penal`
    - `detectar_vacios_factuales`
@@ -366,12 +366,12 @@ flowchart TD
 
 **Cadena de agentes y skills:**
 
-1. `analista_tipicidad_y_responsabilidad_penal`
+1. `analista_responsabilidad_tipicidad`
    - `identificar_conductas_punibles_preliminares`
    - `descomponer_elementos_tipo_penal`
    - `mapear_tipo_penal_hecho_prueba`
    - `detectar_riesgos_atipicidad`
-2. `gestor_evidencia_y_soporte_probatorio`
+2. `analista_evidencia`
    - `detectar_brechas_probatorias`
 3. `analista_calidad_juridica`
    - `verificar_hechos_soportados`
@@ -395,10 +395,10 @@ flowchart TD
 
 **Cadena de agentes y skills:**
 
-1. `analista_ruta_procesal_ley906`
+1. `analista_ruta_procesal`
    - `identificar_etapa_procesal_ley906`
    - `analizar_intervencion_victima`
-2. `preparador_estrategico_audiencias_penales`
+2. `analista_audiencias`
    - `identificar_objetivo_audiencia`
    - `preparar_guion_intervencion_oral`
    - `preparar_solicitudes_orales`
@@ -426,7 +426,7 @@ flowchart TD
 
 **Cadena de agentes y skills:**
 
-1. `redactor_documentos_juridicos_penales`
+1. `redactor_documentos_juridicos`
    - `redactar_solicitud_impulso_procesal`
    - `estructurar_hechos_fundamentos_solicitudes`
    - `controlar_tono_juridico_documento`
@@ -459,7 +459,7 @@ flowchart TD
    - `evaluar_procedencia_tutela`
    - `detectar_riesgo_improcedencia_tutela`
    - `recomendar_via_constitucional_o_alternativa`
-2. `redactor_documentos_juridicos_penales` (si procede)
+2. `redactor_documentos_juridicos` (si procede)
    - `redactar_tutela_penal_preliminar`
 3. `analista_calidad_juridica`
    - `verificar_citas_normativas`
@@ -484,7 +484,7 @@ flowchart TD
 
 **Cadena de agentes y skills:**
 
-1. `gestor_seguimiento_procesal_penal`
+1. `analista_seguimiento_procesal`
    - `monitorear_radicado`
    - `registrar_actuacion_procesal`
    - `crear_reporte_estado_caso`

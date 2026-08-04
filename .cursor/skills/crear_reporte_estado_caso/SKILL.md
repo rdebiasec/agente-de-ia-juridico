@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: ef07b26b3a9f5e4e -->
 ---
 name: crear-reporte-estado-caso
 description: Skill atomico penal-victimas: crear reporte interno periodico. Use when the workflow requires `crear_reporte_estado_caso`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Generar reporte interno del estado del caso para el despacho (no para cliente).

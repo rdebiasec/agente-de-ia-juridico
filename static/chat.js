@@ -6,7 +6,7 @@ const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
 const ENABLE_SERVER_RUBRIC = true;
 
 const WELCOME_MESSAGE =
-  "Bienvenida. Soy la firma virtual penal-víctimas del despacho. Puedo apoyarla en cronología de hechos, tipicidad, ruta Ley 906, evidencia, audiencias, redacción penal, seguimiento procesal y tutela.\n\n¿En qué punto del caso penal necesita apoyo hoy?";
+  "Bienvenida. Soy la firma virtual penal-víctimas del despacho. Puedo apoyarla en cronología de hechos, tipicidad, ruta Ley 906, evidencia, audiencias, redacción penal y seguimiento procesal.\n\n¿En qué punto del caso penal necesita apoyo hoy?";
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
@@ -396,25 +396,57 @@ function buildMessageMeta(role, options = {}) {
   return parts.join(" · ");
 }
 
+/** Legacy agent IDs → canonical (keep old keys for stored traces). */
+const LEGACY_AGENT_ALIASES = {
+  coordinador_expediente_penal: "coordinador_caso",
+  gerente: "coordinador_caso",
+  gerente_caso: "coordinador_caso",
+  analista_cronologia_hechos_penales: "analista_cronologia_hechos",
+  analista_tipicidad_y_responsabilidad_penal: "analista_responsabilidad_tipicidad",
+  analista_ruta_procesal_ley906: "analista_ruta_procesal",
+  gestor_evidencia_y_soporte_probatorio: "analista_evidencia",
+  preparador_estrategico_audiencias_penales: "analista_audiencias",
+  redactor_documentos_juridicos_penales: "redactor_documentos_juridicos",
+  gestor_seguimiento_procesal_penal: "analista_seguimiento_procesal",
+};
+
+const AGENT_DISPLAY_LABELS = {
+  coordinador_caso: "Coordinador del Caso",
+  analista_cronologia_hechos: "Cronología y Hechos",
+  analista_responsabilidad_tipicidad: "Tipicidad y Responsabilidad",
+  analista_ruta_procesal: "Ruta Procesal Ley 906",
+  analista_representacion_victimas: "Representación de Víctimas",
+  analista_evidencia: "Evidencia y Pruebas",
+  analista_audiencias: "Audiencias Penales",
+  redactor_documentos_juridicos: "Redacción Documentos",
+  analista_seguimiento_procesal: "Seguimiento Procesal",
+  analista_calidad_juridica: "Control de Calidad Jurídica",
+};
+
+function resolveAgentId(agentId) {
+  if (!agentId) return "";
+  return LEGACY_AGENT_ALIASES[agentId] || agentId;
+}
+
 function formatAgentRoute(agent) {
   if (!agent) return "";
+  const canonical = resolveAgentId(agent);
   // Cara al abogado: siempre POC / despacho (especialistas solo en Workflow Trace).
   if (
-    agent === "coordinador_expediente_penal" ||
-    agent === "analista_cronologia_hechos_penales" ||
-    agent === "analista_tipicidad_y_responsabilidad_penal" ||
-    agent === "analista_ruta_procesal_ley906" ||
-    agent === "analista_representacion_victimas" ||
-    agent === "gestor_evidencia_y_soporte_probatorio" ||
-    agent === "preparador_estrategico_audiencias_penales" ||
-    agent === "redactor_documentos_juridicos_penales" ||
-    agent === "gestor_seguimiento_procesal_penal" ||
-    agent === "evaluador_derechos_fundamentales_tutela" ||
-    agent === "analista_calidad_juridica" ||
+    canonical === "coordinador_caso" ||
+    canonical === "analista_cronologia_hechos" ||
+    canonical === "analista_responsabilidad_tipicidad" ||
+    canonical === "analista_ruta_procesal" ||
+    canonical === "analista_representacion_victimas" ||
+    canonical === "analista_evidencia" ||
+    canonical === "analista_audiencias" ||
+    canonical === "redactor_documentos_juridicos" ||
+    canonical === "analista_seguimiento_procesal" ||
+    canonical === "analista_calidad_juridica" ||
     agent === "fallback" ||
     agent === "orquestador"
   ) {
-    return "Gerente del Caso Penal";
+    return "Coordinador del Caso";
   }
   // Compatibilidad con trazas legacy previas al rediseño penal.
   if (agent === "intake") return "Especialista intake (legacy)";
@@ -423,7 +455,6 @@ function formatAgentRoute(agent) {
   if (agent === "litigante_penal") return "Litigante penal (legacy)";
   if (agent === "redaccion_documental") return "Especialista redacción (legacy)";
   if (agent === "conceptos_juridicos") return "Especialista conceptos (legacy)";
-  if (agent === "tutela_constitucional") return "Especialista tutela (legacy)";
   if (agent === "dependiente_judicial") return "Dependiente judicial (legacy)";
   if (agent === "guardrail") return "Bloqueo de seguridad";
   if (agent === "error") return "Ruta de error controlado";
@@ -440,7 +471,7 @@ function inferTrace(options = {}, text = "") {
     trace_id: "local-inferido",
     session_id: null,
     route: options.agent || "unknown",
-    received_by_agent: "coordinador_expediente_penal",
+    received_by_agent: "coordinador_caso",
     sent_to_agent: options.agent || "none",
     skill_kan: "KAN-N/A",
     skill_reason: "Inferido localmente por falta de metadata backend.",
@@ -769,7 +800,7 @@ async function renderTracePanelForEntry(entry) {
       </li>
     `)
     .join("");
-  const receiver = trace.received_by_agent || "coordinador_expediente_penal";
+  const receiver = resolveAgentId(trace.received_by_agent) || "coordinador_caso";
   const destination = trace.sent_to_agent || trace.selected_agent || "none";
   const skill = trace.skill_kan || "KAN-N/A";
   const completion = trace.completion || { available: false, calls: [], summary: null, note: "Sin datos." };
@@ -799,6 +830,34 @@ async function renderTracePanelForEntry(entry) {
       </li>`
     )
     .join("");
+  const deliberation = trace.deliberation || {};
+  const deliberationTurns = Array.isArray(deliberation.turns) ? deliberation.turns : [];
+  const deliberationSummary = deliberation.summary || {};
+  const deliberatedSpecs = Array.isArray(deliberationSummary.specialists_consulted)
+    ? deliberationSummary.specialists_consulted
+    : [];
+  const deliberationRounds = deliberationSummary.rounds ?? deliberationTurns.filter((t) => t?.kind === "consult").length;
+  const deliberationRows = deliberationTurns
+    .map((turn) => {
+      const kind = turn.kind || "turn";
+      const area = turn.specialist_id
+        ? formatAgentRoute(turn.specialist_id)
+        : "Coordinador / síntesis";
+      const body =
+        kind === "consult"
+          ? turn.pedido || turn.reasoning || ""
+          : kind === "findings"
+            ? turn.respuesta || ""
+            : turn.reasoning || turn.respuesta || turn.pedido || "";
+      const truncated = String(body).length > 420 ? `${String(body).slice(0, 417)}...` : body;
+      return `
+      <li class="trace-span trace-span--done">
+        <strong>Ronda ${escapeHtml(String(turn.ronda ?? "—"))} · ${escapeHtml(kind)}</strong>
+        <span class="trace-span-kind">${escapeHtml(area)}</span>
+        <p>${escapeHtml(truncated || "(sin detalle)")}</p>
+      </li>`;
+    })
+    .join("");
   traceBodyEl.innerHTML = `
     <article class="trace-card">
       <h3>Resumen</h3>
@@ -806,6 +865,11 @@ async function renderTracePanelForEntry(entry) {
         <p><strong>Estado:</strong> ${escapeHtml(statusLabel)}</p>
         <p><strong>Skill determinado:</strong> ${escapeHtml(skill)}</p>
         <p><strong>Ruta usada:</strong> ${escapeHtml(formatAgentRoute(entry.agent || destination || trace.route || "Sin ruta"))}</p>
+        <p><strong>Deliberación:</strong> ${
+          deliberationTurns.length
+            ? escapeHtml(`${deliberationRounds} ronda(s) · ${deliberatedSpecs.length} especialista(s)`)
+            : "Sin junta interna en este turno"
+        }</p>
       </div>
     </article>
     <article class="trace-card">
@@ -837,6 +901,23 @@ async function renderTracePanelForEntry(entry) {
     <article class="trace-card">
       <h3>Historial cargado en este turno</h3>
       ${historyPreview}
+    </article>
+    <article class="trace-card">
+      <h3>Deliberación interna (${deliberationTurns.length} turnos)</h3>
+      <div class="trace-kv">
+        <p><strong>Protocolo:</strong> ${escapeHtml(deliberation.protocol || "—")}</p>
+        <p><strong>Especialistas:</strong> ${
+          deliberatedSpecs.length
+            ? escapeHtml(deliberatedSpecs.map((id) => formatAgentRoute(id)).join(", "))
+            : "Ninguno"
+        }</p>
+        <p><strong>Pendientes detectados:</strong> ${escapeHtml(
+          String((deliberationSummary.open_pendientes || []).length)
+        )}</p>
+      </div>
+      <ul class="trace-actions trace-spans-list">${
+        deliberationRows || "<li><span>Sin deliberación registrada en este turno.</span></li>"
+      }</ul>
     </article>
     <article class="trace-card">
       <h3>Completion LLM</h3>
@@ -964,20 +1045,9 @@ function hideTyping() {
 }
 
 function agentLabel(agentId) {
-  if (agentId === "coordinador_expediente_penal") return "Gerente del Caso Penal";
-  const labels = {
-    analista_cronologia_hechos_penales: "Cronología y hechos",
-    analista_tipicidad_y_responsabilidad_penal: "Tipicidad y responsabilidad",
-    analista_ruta_procesal_ley906: "Ruta procesal Ley 906",
-    analista_representacion_victimas: "Representación de víctimas",
-    gestor_evidencia_y_soporte_probatorio: "Evidencia y prueba",
-    preparador_estrategico_audiencias_penales: "Audiencias penales",
-    redactor_documentos_juridicos_penales: "Redacción penal",
-    gestor_seguimiento_procesal_penal: "Seguimiento procesal",
-    evaluador_derechos_fundamentales_tutela: "Tutela y derechos fundamentales",
-    analista_calidad_juridica: "Control de calidad jurídica",
-  };
-  const name = labels[agentId];
+  const canonical = resolveAgentId(agentId);
+  if (canonical === "coordinador_caso") return AGENT_DISPLAY_LABELS.coordinador_caso;
+  const name = AGENT_DISPLAY_LABELS[canonical];
   if (!name) return agentId || "";
   return `Equipo interno · ${name}`;
 }
@@ -995,10 +1065,6 @@ function renderPlanStepsHtml(steps) {
           <strong>${escapeHtml(String(step.order))}. ${escapeHtml(step.title || "")}</strong>
           <span class="plan-step-agent">${escapeHtml(agentLabel(step.agent_id || ""))}${escapeHtml(risk)}${escapeHtml(hitl)}</span>
           <p>${escapeHtml(step.user_summary || "")}</p>
-          <div class="plan-io">
-            <span><strong>Entrada:</strong> ${escapeHtml((step.inputs_expected || []).join("; ") || "—")}</span>
-            <span><strong>Salida:</strong> ${escapeHtml((step.outputs_promised || []).join("; ") || "—")}</span>
-          </div>
         </li>`;
     })
     .join("")}</ol>`;
@@ -1010,7 +1076,6 @@ function showPlanCard(plan, userEntryId, epochAtSend) {
 
   const templateLabels = {
     cronologia: "Cronología y hechos",
-    tutela: "Acción de tutela",
     audiencia: "Preparación de audiencia",
     indagacion_impulso: "Impulso / anti-archivo en indagación",
     vif_proteccion: "VIF y medidas de protección",
@@ -1239,7 +1304,7 @@ async function finalizePlanExecution({
   data,
 }) {
   const assistantText = data.text || "No hubo respuesta del asistente.";
-  const assistantAgent = data.agent || "coordinador_expediente_penal";
+  const assistantAgent = resolveAgentId(data.agent) || "coordinador_caso";
   const assistantPendingReview = Boolean(data.pending_review);
   const assistantTrace = data.trace || null;
   const assistantDraftId = data.draft_id || null;
@@ -2251,8 +2316,16 @@ async function sendMessage(text) {
   sendBtn.disabled = true;
   showTyping();
 
+  let assistantText =
+    "No pude completar la respuesta en este momento. Intente de nuevo en unos segundos; si el problema continúa, revise la conexión con el servidor.";
+  let assistantAgent = "error";
+  let assistantPendingReview = false;
+  let assistantTrace = null;
+  let assistantDraftId = null;
+  let offerPlan = false;
+
   try {
-    const res = await authFetch("/chat/plan", {
+    const res = await authFetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2264,29 +2337,31 @@ async function sendMessage(text) {
 
     if (abortIfStale()) return;
 
-    hideTyping();
-
     if (res.ok) {
       const data = await res.json();
-      showPlanCard(data.plan || { plan_id: data.plan_id, ...data }, userEntry.id, epochAtSend);
-      pendingChatMeta = null;
-      sendBtn.disabled = false;
-      inputEl.focus();
-      return;
+      assistantText = data.text || assistantText;
+      assistantAgent = resolveAgentId(data.agent) || "coordinador_caso";
+      assistantPendingReview = Boolean(data.pending_review);
+      assistantTrace = data.trace || null;
+      assistantDraftId = data.draft_id || null;
+      offerPlan =
+        Boolean(data.offer_plan) ||
+        data.trace?.route === "plan_required";
+    } else {
+      hideTyping();
+      assistantText =
+        "El despacho no pudo procesar su mensaje ahora. Intente de nuevo; no se inició ninguna actuación automática.";
     }
   } catch {
     if (abortIfStale()) return;
     hideTyping();
+    assistantText =
+      "No hay conexión con el servidor del despacho. Verifique que el servicio esté activo e intente de nuevo.";
   }
 
-  const assistantText =
-    "No pude generar el plan de ejecución. No ejecutaré por una ruta alterna sin aprobación; intente de nuevo en unos segundos.";
-  let assistantAgent = "error";
-  let assistantPendingReview = false;
-  let assistantTrace = null;
-  let assistantDraftId = null;
-
   if (abortIfStale()) return;
+
+  hideTyping();
 
   const latencyMs = pendingChatMeta ? Date.now() - pendingChatMeta.startedAt : null;
   const assistantEntry = appendChatLogEntry({
@@ -2311,7 +2386,6 @@ async function sendMessage(text) {
   if (assistantEl && assistantEntry.id) assistantEl.dataset.msgId = assistantEntry.id;
   setSelectedTraceMessage(assistantEntry.id, { skipSave: true });
   saveSessionState();
-  pendingChatMeta = null;
 
   if (assistantDraftId) {
     document.dispatchEvent(
@@ -2325,6 +2399,48 @@ async function sendMessage(text) {
     }
   }
 
+  if (offerPlan) {
+    showTyping();
+    try {
+      const planRes = await authFetch("/chat/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: trimmed,
+          channel: "web",
+          user_id: getUserId(),
+        }),
+      });
+      if (abortIfStale()) return;
+      hideTyping();
+      if (planRes.ok) {
+        const planData = await planRes.json();
+        showPlanCard(
+          planData.plan || { plan_id: planData.plan_id, ...planData },
+          userEntry.id,
+          epochAtSend
+        );
+      } else {
+        addMessageToUI(
+          "assistant",
+          "Entendí que pide una actuación de alto riesgo, pero no pude mostrar el plan para su aprobación. Intente de nuevo; no ejecuté nada sin su visto bueno.",
+          "",
+          { agent: "error" }
+        );
+      }
+    } catch {
+      if (abortIfStale()) return;
+      hideTyping();
+      addMessageToUI(
+        "assistant",
+        "No pude obtener el plan de ejecución. No ejecuté nada sin su aprobación; intente de nuevo en unos segundos.",
+        "",
+        { agent: "error" }
+      );
+    }
+  }
+
+  pendingChatMeta = null;
   sendBtn.disabled = false;
   inputEl.focus();
 }

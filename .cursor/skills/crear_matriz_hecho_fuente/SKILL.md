@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 949654d380d2e3f6 -->
 ---
 name: crear-matriz-hecho-fuente
 description: Skill operativo penal-victimas: relacionar cada hecho con su fuente exacta. Use when the workflow requires `crear_matriz_hecho_fuente`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
+- `analista_cronologia_hechos`
 - `analista_calidad_juridica`
 
 ## Purpose

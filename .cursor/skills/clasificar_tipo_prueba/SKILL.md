@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: c73422d52217808d -->
 ---
 name: clasificar-tipo-prueba
 description: Skill atomico penal-victimas: clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente. Use when the workflow requires `clasificar_tipo_prueba`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 
 ## Purpose
 Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.).

@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 
 ## Purpose
 Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.).

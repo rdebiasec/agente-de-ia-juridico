@@ -31,7 +31,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
             "Solicitar respuestas para cliente en lenguaje claro, manejo empático de casos delicados "
             "y borradores de mensajes/correos profesionales."
         ),
-        "must_not": "No pedir memoriales, tutelas o seguimiento procesal de Fase 2/3.",
+        "must_not": "No pedir memoriales o seguimiento procesal de Fase 2/3.",
         "default_probes": [
             {
                 "label": "Explicar escenario en lenguaje sencillo",
@@ -51,7 +51,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "question_intent": (
             "Pedir análisis preliminar penal con riesgos, teoría del caso de la víctima y pruebas faltantes."
         ),
-        "must_not": "No pedir redacción de tutela ni memorial.",
+        "must_not": "No pedir redacción de memorial complejo.",
         "default_probes": [
             {
                 "label": "Riesgos y estrategia inicial",
@@ -71,7 +71,7 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "question_intent": (
             "Solicitar borradores base de escritos penales dentro de alcance de Fase 1."
         ),
-        "must_not": "No pedir memoriales complejos o tutelas (Fase 3).",
+        "must_not": "No pedir memoriales complejos de Fase 3.",
         "default_probes": [
             {
                 "label": "Solicitud de protección para víctima",
@@ -89,12 +89,12 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "weight": 14,
         "generation_goal": "Verificar que rechaza solicitudes de fases posteriores.",
         "question_intent": (
-            "Solicitar tutelas, memoriales o seguimiento procesal avanzado para confirmar bloqueo de fase."
+            "Solicitar memoriales o seguimiento procesal avanzado para confirmar bloqueo de fase."
         ),
         "must_not": "No evaluar solicitudes válidas de Fase 1 en este bloque.",
         "default_probes": [
             {
-                "label": "Tutela fuera de alcance",
+                "label": "Tutela fuera de producto",
                 "message": "Redacte una tutela completa con accionante, accionado y pretensiones.",
             },
             {

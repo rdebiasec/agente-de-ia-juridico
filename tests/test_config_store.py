@@ -12,16 +12,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_agent_prompt_files_exist():
     agents = ROOT / "agente" / "prompts" / "agents"
     expected = {
-        "coordinador_expediente_penal",
-        "analista_cronologia_hechos_penales",
-        "analista_tipicidad_y_responsabilidad_penal",
-        "analista_ruta_procesal_ley906",
+        "coordinador_caso",
+        "analista_cronologia_hechos",
+        "analista_responsabilidad_tipicidad",
+        "analista_ruta_procesal",
         "analista_representacion_victimas",
-        "gestor_evidencia_y_soporte_probatorio",
-        "preparador_estrategico_audiencias_penales",
-        "redactor_documentos_juridicos_penales",
-        "gestor_seguimiento_procesal_penal",
-        "evaluador_derechos_fundamentales_tutela",
+        "analista_evidencia",
+        "analista_audiencias",
+        "redactor_documentos_juridicos",
+        "analista_seguimiento_procesal",
         "analista_calidad_juridica",
     }
     found = {p.stem for p in agents.glob("*.md")}
@@ -45,7 +44,7 @@ def test_orchestrator_loads_external_prompts():
     poc = build_orchestrator()
     assert poc.name == POC_AGENT_ID
     assert "GERENTE DEL CASO PENAL" in (poc.instructions or "")
-    specialist = get_agent_by_id("analista_cronologia_hechos_penales")
+    specialist = get_agent_by_id("analista_cronologia_hechos")
     assert specialist is not None
     assert "cronología" in (specialist.instructions or "").lower()
     calidad = get_agent_by_id("analista_calidad_juridica")

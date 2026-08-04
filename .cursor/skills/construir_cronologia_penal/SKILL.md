@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 8f394133a2bae7a0 -->
 ---
 name: construir-cronologia-penal
 description: Skill estrategico penal-victimas: ordenar hechos en linea de tiempo. Use when the workflow requires `construir_cronologia_penal`.
@@ -12,8 +13,8 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales` (skill primario del agente)
-- `preparador_estrategico_audiencias_penales`
+- `analista_cronologia_hechos` (skill primario del agente)
+- `analista_audiencias`
 
 ## Purpose
 Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos.

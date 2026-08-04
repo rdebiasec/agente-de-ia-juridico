@@ -34,7 +34,7 @@ def test_attach_session_continuity_enriches_trace():
             turn_index=1,
             payload={
                 "input_summary": "Quiero una tutela",
-                "sent_to_agent": "evaluador_derechos_fundamentales_tutela",
+                "sent_to_agent": "coordinador_caso",
                 "spans": [{}],
             },
         )
@@ -48,7 +48,7 @@ def test_attach_session_continuity_enriches_trace():
     assert any(s["name"] == "Sesión: encadenar turno anterior" for s in trace["spans"])
 
 
-def test_expediente_sync_from_tutela_message():
+def test_expediente_sync_from_tutela_message_no_marca_tipo_tutela():
     from src.services.expediente_sync import sync_expediente_from_chat
     from src.storage.memory import InMemoryRepository
     from src.gateway import expediente as exp_mod
@@ -62,15 +62,20 @@ def test_expediente_sync_from_tutela_message():
     )
     trace = {"timestamp": 1, "spans": []}
     result = sync_expediente_from_chat("web:tut", msg, [], trace=trace)
-    assert result["cambios"]
-    assert "tutela" in result["resumen"].lower() or "Expediente" in result["resumen"]
+    # Ya no se marca tipo_proceso=tutela (fuera del producto).
+    from src.gateway.expediente import expediente_store
+    exp = expediente_store.get("web:tut")
+    assert exp is not None
+    assert getattr(exp, "tipo_proceso", None) != "tutela"
+    assert getattr(exp, "etapa_actual", None) != "tutela_en_preparacion"
     assert any(s["name"] == "Expediente: sincronización" for s in trace["spans"])
 
 
-def test_post_validations_pide_datos_tutela():
-    trace = {"timestamp": 1, "sent_to_agent": "evaluador_derechos_fundamentales_tutela"}
+def test_post_validations_no_abre_flujo_tutela():
+    trace = {"timestamp": 1, "sent_to_agent": "coordinador_caso", "spans": []}
     text = run_post_validations("Redacte una tutela", "Borrador preliminar.", trace)
-    assert "accionante" in text.lower() or trace.get("conversation_continues")
+    assert "accionante" not in text.lower()
+    assert "tutela" not in "".join(s.get("name", "") for s in trace.get("spans", [])).lower()
 
 
 def test_session_and_trace_persist_in_memory():

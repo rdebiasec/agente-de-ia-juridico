@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 - `analista_representacion_victimas`
 
 ## Purpose
 Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Ejecutar tras `detectar_brechas_probatorias` o matriz hecho-prueba.
 
 ## Rol en analista_representacion_victimas

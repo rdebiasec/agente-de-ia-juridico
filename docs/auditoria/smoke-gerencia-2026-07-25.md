@@ -1,4 +1,4 @@
-# Smoke del Gerente del Caso Penal — 2026-07-25
+# Smoke del Coordinador del Caso — 2026-07-25
 
 Verificación funcional del gate de completitud sobre HTTP autenticado, en local y en producción, tras el deploy del commit `bb82c50`.
 
@@ -22,11 +22,11 @@ Script reutilizable: `scripts/smoke_gerencia_prod.py`
 Con el mensaje de alto riesgo sin datos (`"Redacte un memorial de impulso para la víctima."`):
 
 - Estado: `awaiting_input`
-- Pasos: solo `coordinador_expediente_penal`
+- Pasos: solo `coordinador_caso`
 - Faltantes reportados: `hechos mínimos del caso`
 - Aprobación rechazada: `El plan no está pendiente de aprobación (estado: awaiting_input).`
 
-Con radicado, hechos, poder, última actuación y partes, el plan pasa a `pending_approval` e incorpora `redactor_documentos_juridicos_penales` junto a los analistas.
+Con radicado, hechos, poder, última actuación y partes, el plan pasa a `pending_approval` e incorpora `redactor_documentos_juridicos` junto a los analistas.
 
 ## Ledger persistido en producción
 
@@ -64,7 +64,7 @@ Se publicaron el prompt y los tres guardrails en la base viva con `scripts/publi
 
 | Item | Antes | Después |
 |---|---|---|
-| `prompt/coordinador_expediente_penal` | v1, sin el rol de Gerente | v2, con el rol de Gerente |
+| `prompt/coordinador_caso` | v1, sin el rol de Gerente | v2, con el rol de Gerente |
 | `agent_guardrail/...__input` | v1 | v2 |
 | `agent_guardrail/...__output` | v1 | v2 |
 | `agent_guardrail/...__tools` | v1 | v2 |

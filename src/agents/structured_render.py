@@ -15,7 +15,7 @@ def render_structured_output(output: Any) -> str:
         return str(output)
 
     data = output.model_dump()
-    # BorradorDocumentoPenal / Tutela-like
+    # BorradorDocumentoPenal
     cuerpo = data.get("cuerpo")
     if isinstance(cuerpo, str) and cuerpo.strip():
         titulo = str(data.get("titulo") or "").strip()
@@ -120,22 +120,6 @@ def render_structured_output(output: Any) -> str:
                 lines.extend(f"- {x}" for x in items)
         return "\n".join(lines).strip()
 
-    # Tutela estructurada
-    if "derecho_vulnerado" in data and "fundamentos" in data:
-        lines = [
-            "Evaluación de tutela (borrador estructurado)",
-            f"Derecho: {data.get('derecho_vulnerado')}",
-            f"Fundamentos: {data.get('fundamentos')}",
-        ]
-        hechos = data.get("hechos") or []
-        if hechos:
-            lines.append("\nHechos:")
-            lines.extend(f"- {h}" for h in hechos)
-        pret = data.get("pretensiones") or []
-        if pret:
-            lines.append("\nPretensiones:")
-            lines.extend(f"- {p}" for p in pret)
-        return "\n".join(lines).strip()
 
     # RutaProcesalLey906
     if "ruta_recomendada" in data and "etapa_aparente" in data:

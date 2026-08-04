@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4b6bc89ee678382f -->
 ---
 name: controlar-separacion-hecho-inferencia
 description: Skill atomico penal-victimas: verificar que no se confundan hechos probados, narrados, inferidos y pendientes. Use when the workflow requires `controlar_separacion_hecho_inferencia`.
@@ -12,20 +13,20 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Autocontrol antes de entregar borrador.
 
 ## Rol en analista_calidad_juridica
 Control de calidad en documentos para uso externo.
 
 ## Inputs
-- Texto del memorial, tutela, petición o análisis.
+- Texto del memorial, petición o análisis.
 - Matriz hecho-fuente o cronología (si existe).
 
 ## Outputs

@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
+- `analista_cronologia_hechos`
 - `analista_representacion_victimas`
 
 ## Purpose

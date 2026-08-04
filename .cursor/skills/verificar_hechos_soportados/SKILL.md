@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: b2b037d073029466 -->
 ---
 name: verificar-hechos-soportados
 description: Skill operativo penal-victimas: revisar si cada afirmacion factual tiene fuente. Use when the workflow requires `verificar_hechos_soportados`.
@@ -12,9 +13,9 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales` (control de cierre del pipeline factual)
+- `analista_cronologia_hechos` (control de cierre del pipeline factual)
 - `analista_calidad_juridica`
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte.

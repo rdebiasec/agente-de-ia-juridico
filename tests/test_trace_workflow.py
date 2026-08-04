@@ -20,8 +20,8 @@ async def test_trace_allowed_drafting_sets_pending_review():
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
-    assert trace.get("received_by_agent") == "coordinador_expediente_penal"
-    assert trace.get("sent_to_agent") in {"redactor_documentos_juridicos_penales", "coordinador_expediente_penal"}
+    assert trace.get("received_by_agent") == "coordinador_caso"
+    assert trace.get("sent_to_agent") in {"redactor_documentos_juridicos", "coordinador_caso"}
     assert trace.get("skill_kan") in {"PEN-REDACCION", "PEN-COORD"}
     assert isinstance(trace.get("actions"), list)
     assert isinstance(trace.get("completion"), dict)
@@ -60,6 +60,8 @@ async def test_debug_trace_returns_session_history(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "trace-secret-pass")
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "trace-session-secret-key-32chars")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    get_settings.cache_clear()
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:

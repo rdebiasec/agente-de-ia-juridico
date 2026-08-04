@@ -41,7 +41,7 @@ _FALLBACK_GUARDRAILS = [
     {
         "id": "g4",
         "name": "Revision humana obligatoria",
-        "desc": "Escritos, estrategia, tutela y reportes a cliente requieren aprobacion.",
+        "desc": "Escritos, estrategia, memoriales y reportes a cliente requieren aprobacion.",
     },
     {
         "id": "g5",
@@ -111,36 +111,34 @@ def _load_guardrails() -> list[dict]:
 GUARDRAILS = _load_guardrails()
 
 AGENT_TITULOS: dict[str, str] = {
-    "coordinador_expediente_penal": "GERENCIA OPERATIVA DEL CASO PENAL — VÍCTIMAS",
-    "analista_cronologia_hechos_penales": "RECONSTRUCCIÓN CRONOLÓGICA DEL HECHO PENAL",
-    "analista_tipicidad_y_responsabilidad_penal": "ANÁLISIS DE TIPICIDAD Y RESPONSABILIDAD PENAL",
-    "analista_ruta_procesal_ley906": "ESTRATEGIA PROCESAL BAJO LA LEY 906 DE 2004",
+    "coordinador_caso": "COORDINACIÓN OPERATIVA DEL CASO — VÍCTIMAS",
+    "analista_cronologia_hechos": "RECONSTRUCCIÓN CRONOLÓGICA DEL HECHO PENAL",
+    "analista_responsabilidad_tipicidad": "ANÁLISIS DE TIPICIDAD Y RESPONSABILIDAD PENAL",
+    "analista_ruta_procesal": "ESTRATEGIA PROCESAL BAJO LA LEY 906 DE 2004",
     "analista_representacion_victimas": "REPRESENTACIÓN JURÍDICA CENTRADA EN LA VÍCTIMA",
-    "gestor_evidencia_y_soporte_probatorio": "GESTIÓN PROBATORIA Y SOPORTE DE EVIDENCIA",
-    "preparador_estrategico_audiencias_penales": "PREPARACIÓN ESTRATÉGICA DE AUDIENCIAS PENALES",
-    "redactor_documentos_juridicos_penales": "REDACCIÓN DE ESCRITOS Y MEMORIALES PENALES",
-    "gestor_seguimiento_procesal_penal": "SEGUIMIENTO Y CONTROL DEL EXPEDIENTE PENAL",
-    "evaluador_derechos_fundamentales_tutela": "EVALUACIÓN DE TUTELA Y DERECHOS FUNDAMENTALES",
+    "analista_evidencia": "GESTIÓN PROBATORIA Y SOPORTE DE EVIDENCIA",
+    "analista_audiencias": "PREPARACIÓN ESTRATÉGICA DE AUDIENCIAS PENALES",
+    "redactor_documentos_juridicos": "REDACCIÓN DE ESCRITOS Y MEMORIALES PENALES",
+    "analista_seguimiento_procesal": "SEGUIMIENTO Y CONTROL DEL EXPEDIENTE PENAL",
     "analista_calidad_juridica": "REVISIÓN DE CALIDAD Y CONTROL DE RIESGOS JURÍDICOS",
 }
 
 DESTINATARIO_BY_AGENT: dict[str, str] = {
-    "coordinador_expediente_penal": "Siguiente agente o guía operativa del caso",
-    "redactor_documentos_juridicos_penales": "Despacho (borrador para firma y radicación)",
+    "coordinador_caso": "Siguiente agente o guía operativa del caso",
+    "redactor_documentos_juridicos": "Despacho (borrador para firma y radicación)",
     "analista_calidad_juridica": "Despacho (dictamen de conformidad)",
-    "gestor_seguimiento_procesal_penal": "Despacho (alertas y estado del expediente)",
-    "preparador_estrategico_audiencias_penales": "Despacho (insumos para audiencia)",
-    "evaluador_derechos_fundamentales_tutela": "Despacho (evaluación constitucional preliminar)",
+    "analista_seguimiento_procesal": "Despacho (alertas y estado del expediente)",
+    "analista_audiencias": "Despacho (insumos para audiencia)",
 }
 
 AGENTS = [
     {
-        "id": "coordinador_expediente_penal",
-        "nombre_corto": "Gerente del Caso Penal",
-        "titulo_profesional": "GERENCIA OPERATIVA DEL CASO PENAL — VÍCTIMAS",
-        "proposito": "Gerencia el caso: recibe la consulta, verifica completitud y prioridad, asigna al especialista correcto y responde con una sola voz de despacho.",
+        "id": "coordinador_caso",
+        "nombre_corto": "Coordinador del Caso",
+        "titulo_profesional": "COORDINACIÓN OPERATIVA DEL CASO — VÍCTIMAS",
+        "proposito": "Coordina el caso: recibe la consulta, verifica completitud y prioridad, asigna al especialista correcto y responde con una sola voz de despacho.",
         "problema": "Evita respuestas mal enfocadas y actuaciones sobre expedientes incompletos; ordena el trabajo por prioridad legal y urgencia.",
-        "necesidad": "En penal-victimas la estrategia cambia por etapa Ley 906; esta gerencia reduce errores de enfoque y pérdida de términos.",
+        "necesidad": "En penal-victimas la estrategia cambia por etapa Ley 906; esta coordinación reduce errores de enfoque y pérdida de términos.",
         "no_reemplaza": "El analisis de fondo por especialidad ni la aprobacion y firma final del abogado titular.",
         "prompt_simple": [
             "Solo trabaja en casos de penal-victimas en Colombia.",
@@ -151,8 +149,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "analista_cronologia_hechos_penales",
-        "nombre_corto": "Analista de cronologia y hechos",
+        "id": "analista_cronologia_hechos",
+        "nombre_corto": "Cronología y Hechos",
         "titulo_profesional": "RECONSTRUCCIÓN CRONOLÓGICA DEL HECHO PENAL",
         "proposito": "Convierte relatos y documentos en una historia factual ordenada y verificable.",
         "problema": "Evita contradicciones y vacios de hecho que debilitan memoriales o solicitudes.",
@@ -166,8 +164,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "analista_tipicidad_y_responsabilidad_penal",
-        "nombre_corto": "Analista de tipicidad y responsabilidad",
+        "id": "analista_responsabilidad_tipicidad",
+        "nombre_corto": "Tipicidad y Responsabilidad",
         "titulo_profesional": "ANÁLISIS DE TIPICIDAD Y RESPONSABILIDAD PENAL",
         "proposito": "Traduce hechos y pruebas en hipotesis juridicas de tipicidad y responsabilidad preliminar.",
         "problema": "Evita pedir actuaciones sin base tipica suficiente o con riesgo de atipicidad.",
@@ -181,8 +179,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "analista_ruta_procesal_ley906",
-        "nombre_corto": "Analista de ruta procesal Ley 906",
+        "id": "analista_ruta_procesal",
+        "nombre_corto": "Ruta Procesal Ley 906",
         "titulo_profesional": "ESTRATEGIA PROCESAL BAJO LA LEY 906 DE 2004",
         "proposito": "Ubica la etapa exacta y la mejor ruta procesal para representar a la victima.",
         "problema": "Evita extemporaneidad, improcedencia y solicitudes mal dirigidas.",
@@ -197,7 +195,7 @@ AGENTS = [
     },
     {
         "id": "analista_representacion_victimas",
-        "nombre_corto": "Analista de representacion de victimas",
+        "nombre_corto": "Representación de Víctimas",
         "titulo_profesional": "REPRESENTACIÓN JURÍDICA CENTRADA EN LA VÍCTIMA",
         "proposito": "Garantiza que la estrategia este centrada en derechos, intereses y no revictimizacion.",
         "problema": "Evita estrategias tecnicamente correctas pero desconectadas del objetivo real de la victima.",
@@ -211,8 +209,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "gestor_evidencia_y_soporte_probatorio",
-        "nombre_corto": "Gestor de evidencia y prueba",
+        "id": "analista_evidencia",
+        "nombre_corto": "Evidencia y Pruebas",
         "titulo_profesional": "GESTIÓN PROBATORIA Y SOPORTE DE EVIDENCIA",
         "proposito": "Transforma evidencia dispersa en inventario util y plan probatorio accionable.",
         "problema": "Reduce perdida de evidencia, falta de cadena de custodia y brechas probatorias.",
@@ -226,8 +224,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "preparador_estrategico_audiencias_penales",
-        "nombre_corto": "Preparador de audiencias",
+        "id": "analista_audiencias",
+        "nombre_corto": "Audiencias Penales",
         "titulo_profesional": "PREPARACIÓN ESTRATÉGICA DE AUDIENCIAS PENALES",
         "proposito": "Prepara audiencias con objetivo, guion, preguntas y solicitudes.",
         "problema": "Evita improvisacion y omisiones tacticas.",
@@ -241,8 +239,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "redactor_documentos_juridicos_penales",
-        "nombre_corto": "Redactor de documentos penales",
+        "id": "redactor_documentos_juridicos",
+        "nombre_corto": "Redacción Documentos",
         "titulo_profesional": "REDACCIÓN DE ESCRITOS Y MEMORIALES PENALES",
         "proposito": "Convierte analisis juridico en escritos utilizables por el despacho.",
         "problema": "Reduce tiempo de redaccion y mejora estandar tecnico del primer borrador.",
@@ -256,8 +254,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "gestor_seguimiento_procesal_penal",
-        "nombre_corto": "Gestor de seguimiento procesal",
+        "id": "analista_seguimiento_procesal",
+        "nombre_corto": "Seguimiento Procesal",
         "titulo_profesional": "SEGUIMIENTO Y CONTROL DEL EXPEDIENTE PENAL",
         "proposito": "Monitorea estado de radicado, actuaciones, audiencias y terminos.",
         "problema": "Evita perdida de oportunidad por falta de control operativo.",
@@ -271,23 +269,8 @@ AGENTS = [
         ],
     },
     {
-        "id": "evaluador_derechos_fundamentales_tutela",
-        "nombre_corto": "Evaluador de tutela y derechos fundamentales",
-        "titulo_profesional": "EVALUACIÓN DE TUTELA Y DERECHOS FUNDAMENTALES",
-        "proposito": "Evalua si corresponde tutela o via alternativa, con criterio constitucional.",
-        "problema": "Evita tutelas prematuras o improcedentes.",
-        "necesidad": "En casos penales de victimas, tutela es excepcional y exige subsidiariedad e inmediatez.",
-        "no_reemplaza": "La decision final de litigio constitucional del despacho.",
-        "prompt_simple": [
-            "Evalua derechos fundamentales afectados.",
-            "Revisa subsidiariedad, inmediatez y perjuicio irremediable.",
-            "Recomienda tutela o via alternativa.",
-            "No convierte todo en tutela.",
-        ],
-    },
-    {
         "id": "analista_calidad_juridica",
-        "nombre_corto": "Analista de calidad juridica",
+        "nombre_corto": "Control de Calidad Jurídica",
         "titulo_profesional": "REVISIÓN DE CALIDAD Y CONTROL DE RIESGOS JURÍDICOS",
         "proposito": "Revisa salida final antes de compartir externamente.",
         "problema": "Disminuye riesgo de alucinacion legal, inconsistencia estrategica y filtracion de datos sensibles.",
@@ -506,7 +489,7 @@ AGENT_GROUP_LABELS = {
     "calidad": "Control de calidad",
 }
 
-COORDINADOR_ID = "coordinador_expediente_penal"
+COORDINADOR_ID = "coordinador_caso"
 CALIDAD_ID = "analista_calidad_juridica"
 
 
@@ -519,7 +502,6 @@ def agent_group(agent_id: str) -> str:
 
 
 CATEGORY_DESCRIPTIONS: dict[str, str] = {
-    "Skills constitucionales y tutela": "Tutela, subsidiariedad, inmediatez y derechos fundamentales.",
     "Skills de audiencias": "Preparación, guiones, solicitudes orales y riesgos en audiencias Ley 906.",
     "Skills de calidad juridica": "Control de alucinaciones, tono, confidencialidad y coherencia estratégica.",
     "Skills de evidencia y soporte probatorio": "Inventario probatorio, brechas, cadena de custodia y recaudo.",

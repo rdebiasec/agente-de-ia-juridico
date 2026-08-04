@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal` (skill primario del agente)
+- `analista_responsabilidad_tipicidad` (skill primario del agente)
 
 ## Purpose
 Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente.

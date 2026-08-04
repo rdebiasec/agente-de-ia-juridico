@@ -21,11 +21,10 @@ from lib.pasos_gerencia_matrix import get_skill_pasos  # noqa: E402
 
 PRIMARY: dict[str, str] = {
     "analista_representacion_victimas": "construir_teoria_caso_victima",
-    "gestor_evidencia_y_soporte_probatorio": "inventariar_evidencia",
-    "preparador_estrategico_audiencias_penales": "preparar_preguntas_audiencia",
-    "redactor_documentos_juridicos_penales": "redactar_memorial_penal",
-    "gestor_seguimiento_procesal_penal": "monitorear_radicado",
-    "evaluador_derechos_fundamentales_tutela": "evaluar_procedencia_tutela",
+    "analista_evidencia": "inventariar_evidencia",
+    "analista_audiencias": "preparar_preguntas_audiencia",
+    "redactor_documentos_juridicos": "redactar_memorial_penal",
+    "analista_seguimiento_procesal": "monitorear_radicado",
     "analista_calidad_juridica": "revisar_coherencia_estrategica",
 }
 
@@ -33,7 +32,7 @@ GUARDRAILS_STD = """## Guardrails (g1–g10)
 - **g1:** No inventar hechos, normas, sentencias ni radicados.
 - **g2:** Pedir datos faltantes (incl. plazos y etapa Ley 906) antes de concluir.
 - **g3:** Separar hecho confirmado, narrado, inferido y pendiente.
-- **g4:** HITL obligatorio en escritos, estrategia, tutela y reportes a cliente.
+- **g4:** HITL obligatorio en escritos, estrategia, memoriales y reportes a cliente.
 - **g5:** No revictimizar; lenguaje centrado en derechos de la víctima.
 - **g6:** Minimizar datos sensibles innecesarios.
 - **g7:** Fuera de alcance si no es penal-víctimas Colombia.
@@ -42,10 +41,7 @@ GUARDRAILS_STD = """## Guardrails (g1–g10)
 - **g10:** No sugerir descarte de evidencia sin revisar custodia y preservación."""
 
 EXTRA_HITL: dict[str, str] = {
-    "redactar_tutela_penal_preliminar": "- **Gate:** Solo si `evaluar_procedencia_tutela` recomendó tutela preliminarmente.",
-    "preparar_borrador_tutela_preliminar": "- **Gate:** Requiere dictamen previo de procedencia tutela.",
-    "evaluar_procedencia_tutela": "- **g4:** Dictamen preliminar; no autoriza radicación sin abogado.",
-    "clasificar_aprobacion_juridica": "- **g4:** Último filtro antes de salida externa.",
+                "clasificar_aprobacion_juridica": "- **g4:** Último filtro antes de salida externa.",
 }
 
 

@@ -14,7 +14,7 @@ def _step(step_id: str, order: int, depends_on: list[str] | None = None) -> Plan
     return PlanStep(
         step_id=step_id,
         order=order,
-        agent_id="coordinador_expediente_penal",
+        agent_id="coordinador_caso",
         title=step_id,
         user_summary=step_id,
         depends_on=depends_on or [],

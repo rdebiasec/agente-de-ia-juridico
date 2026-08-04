@@ -73,25 +73,7 @@ async def test_endpoints_terminos_crear_listar_cumplir():
 
 
 @pytest.mark.asyncio
-async def test_tutela_crea_termino_solo_al_registrar_radicacion():
-    draft = hitl.crear_borrador(session_id="web:tut", contenido="Tutela...", tipo="tutela")
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        ap = await client.post(f"/drafts/{draft.id}/approve", json={"revisor": "abogado"})
-        assert ap.status_code == 200
-        assert ap.json()["requiere_fecha_radicacion"] is True
-        assert "termino_creado" not in ap.json()
-        filed = await client.post(
-            f"/drafts/{draft.id}/filed",
-            json={"fecha_radicacion": "2026-07-24"},
-        )
-        assert filed.status_code == 200
-        assert filed.json()["termino_creado"]["fecha_base"] == "2026-07-24"
-        terms = await client.get("/deadlines", params={"session_id": "web:tut"})
-        assert any(d["tipo"] == "tutela_fallo" for d in terms.json()["deadlines"])
 
-
-# --- PDF (requiere libs de WeasyPrint) ---
 def test_generar_pdf_desde_borrador():
     from src.storage.models import Draft
 

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: cad0b30b9447f121 -->
 ---
 name: controlar-no-revictimizacion
 description: Skill critico penal-victimas: revisar que la salida no culpe ni exponga indebidamente a la victima. Use when the workflow requires `controlar_no_revictimizacion`.

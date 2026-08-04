@@ -99,6 +99,101 @@
     return data.drafts || [];
   }
 
+  async function fetchClienteInbox() {
+    const res = await api("/abogado/cliente-inbox?status=proposed");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.drafts || [];
+  }
+
+  function renderClienteDraft(d) {
+    const excerpt = esc((d.proposed_text || "").slice(0, 280));
+    const flags = Array.isArray(d.quality_flags) ? d.quality_flags : [];
+    const flagHtml = flags.length
+      ? `<p class="firma-card-flags" title="Revise estos puntos antes de aprobar">⚠️ Calidad: ${esc(flags.join(", "))}</p>`
+      : `<p class="firma-card-flags firma-card-flags--ok">Sin alertas de calidad automáticas</p>`;
+    const caseLabel = esc(d.case_label || d.cliente_session_id || "Caso");
+    return `<article class="firma-card firma-card--cliente" data-cliente-draft="${esc(d.id)}">
+      <header class="firma-card-head">
+        <strong>Respuesta al cliente</strong>
+        <span class="firma-chip${flags.length ? " firma-chip--warn" : ""}">${flags.length ? "Revisar" : "HITL"}</span>
+      </header>
+      <p class="firma-card-meta"><span class="firma-case">${caseLabel}</span> · ${esc(d.cliente_session_id || "")}</p>
+      ${flagHtml}
+      <p class="firma-card-body">${excerpt}${(d.proposed_text || "").length > 280 ? "…" : ""}</p>
+      <textarea class="firma-edit firma-edit--cliente" data-id="${esc(d.id)}" rows="4">${esc(d.proposed_text || "")}</textarea>
+      <div class="firma-card-actions">
+        <button type="button" class="btn-firma-primary" data-cliente-act="approve" data-id="${esc(d.id)}">Aprobar y enviar</button>
+        <button type="button" class="btn-firma-action" data-cliente-act="reject" data-id="${esc(d.id)}">Rechazar</button>
+      </div>
+    </article>`;
+  }
+
+  function bindClienteActions(root) {
+    root.querySelectorAll("[data-cliente-act]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        void handleClienteDraftAction(btn.dataset.clienteAct, btn.dataset.id);
+      });
+    });
+  }
+
+  async function handleClienteDraftAction(act, id) {
+    try {
+      if (act === "approve") {
+        const ta = document.querySelector(`textarea.firma-edit--cliente[data-id="${id}"]`);
+        const edited = ta ? ta.value.trim() : "";
+        const res = await api(
+          `/abogado/cliente-drafts/${id}/approve`,
+          jsonBody({ revisor: "abogado", edited_text: edited || null })
+        );
+        if (!res.ok) throw new Error("approve failed");
+        toast("Respuesta enviada a la víctima.", "success");
+      } else if (act === "reject") {
+        const comentario = window.prompt("Motivo del rechazo:") || "";
+        if (!comentario.trim()) {
+          toast("Indique un motivo para rechazar.", "error");
+          return;
+        }
+        const res = await api(
+          `/abogado/cliente-drafts/${id}/reject`,
+          jsonBody({ revisor: "abogado", comentario })
+        );
+        if (!res.ok) throw new Error("reject failed");
+        toast("Respuesta rechazada.", "info");
+      }
+      await loadClienteInbox();
+      await loadBandeja();
+    } catch {
+      toast("No se pudo actualizar la respuesta al cliente.", "error");
+    }
+  }
+
+  async function loadClienteInbox() {
+    const box = $("tab-cliente-inbox");
+    const headCount = $("cliente-inbox-count");
+    if (!box) return;
+    box.innerHTML = '<p class="firma-muted">Cargando…</p>';
+    try {
+      const drafts = await fetchClienteInbox();
+      if (headCount) {
+        headCount.textContent = drafts.length ? String(drafts.length) : "";
+        headCount.hidden = !drafts.length;
+      }
+      if (!drafts.length) {
+        box.innerHTML = '<p class="firma-muted">Sin respuestas al cliente pendientes.</p>';
+        return;
+      }
+      box.innerHTML = drafts.map(renderClienteDraft).join("");
+      bindClienteActions(box);
+    } catch {
+      box.innerHTML = '<p class="firma-error">No se pudo cargar el inbox del cliente.</p>';
+      if (headCount) {
+        headCount.hidden = true;
+        headCount.textContent = "";
+      }
+    }
+  }
+
   function renderDraftLists(drafts) {
     const drawerList = $("firma-bandeja-list");
     const tabList = $("tab-borrador-list");
@@ -115,7 +210,12 @@
       tabList.innerHTML = tabHtml;
       bindDraftActions(tabList);
     }
-    window.Workspace?.updateBandejaBadge?.(drafts.length);
+    // Badge = borradores documento + respuestas cliente pendientes
+    void fetchClienteInbox().then((clienteDrafts) => {
+      window.Workspace?.updateBandejaBadge?.(drafts.length + (clienteDrafts?.length || 0));
+    }).catch(() => {
+      window.Workspace?.updateBandejaBadge?.(drafts.length);
+    });
   }
 
   async function loadBandeja() {
@@ -131,6 +231,7 @@
       if (drawerList) drawerList.innerHTML = err;
       if (tabList) tabList.innerHTML = err;
     }
+    await loadClienteInbox();
   }
 
   async function handleDraftAction(act, id) {
@@ -147,7 +248,6 @@
         const data = await res.json();
         if (data.termino_creado) {
           toast(`Borrador aprobado. Término creado: ${data.termino_creado.descripcion}`, "success");
-          window.Workspace?.addHito?.("Tutela aprobada — término 10 días");
           window.Workspace?.smartTab?.("plazos");
           loadTerminos();
         } else {
@@ -247,7 +347,7 @@
   }
 
   function renderTermino(d) {
-    const urgente = d.tipo === "tutela" ? " firma-term--urgente" : "";
+    const urgente = "";
     return `<div class="firma-term firma-term--${esc(d.estado)}${urgente}">
       <div><strong>${esc(d.descripcion)}</strong> <span class="firma-badge">${esc(d.tipo)}</span></div>
       <div class="firma-muted">Límite: ${esc(d.fecha_limite || "-")} · ${esc(d.estado)}</div>
@@ -302,7 +402,7 @@
     window.Workspace?.addHito?.("Borrador enviado a bandeja");
   });
 
-  window.FirmaPanel = { loadBandeja, loadTerminos, fetchPendingDrafts };
+  window.FirmaPanel = { loadBandeja, loadTerminos, fetchPendingDrafts, loadClienteInbox };
 
   document.addEventListener("DOMContentLoaded", () => {
     autofillIds();

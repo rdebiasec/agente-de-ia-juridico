@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0468e938b87e4ffd -->
 ---
 name: redactar-ampliacion-denuncia
 description: Skill atomico penal-victimas: estructurar hechos nuevos, pruebas y anexos para ampliar denuncia. Use when the workflow requires `redactar_ampliacion_denuncia`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.

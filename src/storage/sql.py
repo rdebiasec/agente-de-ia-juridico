@@ -17,6 +17,8 @@ from src.storage.models import (
     AuditPortalProgress,
     AuditPortalUser,
     ChatSession,
+    ClientMessage,
+    ClientThread,
     ComplianceConsent,
     ConfigActive,
     ConfigVersion,
@@ -26,6 +28,8 @@ from src.storage.models import (
     EMBED_DIM,
     ExecutionPlanRecord,
     Expediente,
+    InternalTranscriptEntry,
+    OutboundClientDraft,
     SessionTrace,
 )
 
@@ -91,8 +95,11 @@ class ExpedienteRow(Base):
     faltantes_gerencia: Mapped[list] = mapped_column(JSON, default=list)
     tareas_gerencia: Mapped[list] = mapped_column(JSON, default=list)
     metricas_gerencia: Mapped[dict] = mapped_column(JSON, default=dict)
+    bitacora: Mapped[list] = mapped_column(JSON, default=list)
     involucra_menor: Mapped[bool] = mapped_column(Boolean, default=False)
     datos_sensibles: Mapped[bool] = mapped_column(Boolean, default=False)
+    lawyer_session_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    cliente_session_id: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     actualizado_en: Mapped[float] = mapped_column(Float, default=0.0)
 
 
@@ -227,6 +234,60 @@ class ConfigActiveRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class ClientThreadRow(Base):
+    __tablename__ = "client_threads"
+
+    thread_id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    cliente_session_id: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    lawyer_session_id: Mapped[str] = mapped_column(String(120), index=True)
+    expediente_session_id: Mapped[str] = mapped_column(String(120), default="")
+    subject_label: Mapped[str] = mapped_column(String(200), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ClientMessageRow(Base):
+    __tablename__ = "client_messages"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    thread_id: Mapped[str] = mapped_column(String(12), index=True)
+    role: Mapped[str] = mapped_column(String(20), default="cliente")
+    content: Mapped[str] = mapped_column(Text, default="")
+    visibility: Mapped[str] = mapped_column(String(20), default="client_visible")
+    outbound_draft_id: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class InternalTranscriptRow(Base):
+    __tablename__ = "internal_transcript"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(120), index=True)
+    from_actor: Mapped[str] = mapped_column(String(80), default="gerente")
+    to_actor: Mapped[str] = mapped_column(String(80), default="")
+    pedido: Mapped[str] = mapped_column(Text, default="")
+    respuesta: Mapped[str] = mapped_column(Text, default="")
+    turn_ref: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class OutboundClientDraftRow(Base):
+    __tablename__ = "outbound_client_drafts"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    thread_id: Mapped[str] = mapped_column(String(12), index=True)
+    lawyer_session_id: Mapped[str] = mapped_column(String(120), index=True)
+    cliente_session_id: Mapped[str] = mapped_column(String(120), index=True)
+    inbound_message_id: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    proposed_text: Mapped[str] = mapped_column(Text, default="")
+    final_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), index=True, default="proposed")
+    revisor: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 def _to_execution_plan(row: ExecutionPlanRow) -> ExecutionPlanRecord:
     return ExecutionPlanRecord(
         plan_id=row.plan_id,
@@ -291,8 +352,11 @@ def _to_expediente(row: ExpedienteRow) -> Expediente:
         faltantes_gerencia=getattr(row, "faltantes_gerencia", None) or [],
         tareas_gerencia=getattr(row, "tareas_gerencia", None) or [],
         metricas_gerencia=getattr(row, "metricas_gerencia", None) or {},
+        bitacora=getattr(row, "bitacora", None) or [],
         involucra_menor=bool(getattr(row, "involucra_menor", False)),
         datos_sensibles=bool(getattr(row, "datos_sensibles", False)),
+        lawyer_session_id=getattr(row, "lawyer_session_id", None),
+        cliente_session_id=getattr(row, "cliente_session_id", None),
         actualizado_en=row.actualizado_en or 0.0,
     )
 
@@ -320,6 +384,60 @@ def _to_session_trace(row: SessionTraceRow) -> SessionTrace:
         turn_index=row.turn_index,
         payload=row.payload or {},
         created_at=row.created_at,
+    )
+
+
+def _to_client_thread(row: ClientThreadRow) -> ClientThread:
+    return ClientThread(
+        thread_id=row.thread_id,
+        cliente_session_id=row.cliente_session_id,
+        lawyer_session_id=row.lawyer_session_id,
+        expediente_session_id=row.expediente_session_id,
+        subject_label=row.subject_label or "",
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+def _to_client_message(row: ClientMessageRow) -> ClientMessage:
+    return ClientMessage(
+        id=row.id,
+        thread_id=row.thread_id,
+        role=row.role,
+        content=row.content,
+        visibility=row.visibility,
+        outbound_draft_id=row.outbound_draft_id,
+        created_at=row.created_at,
+    )
+
+
+def _to_internal_entry(row: InternalTranscriptRow) -> InternalTranscriptEntry:
+    return InternalTranscriptEntry(
+        id=row.id,
+        session_id=row.session_id,
+        from_actor=row.from_actor,
+        to_actor=row.to_actor,
+        pedido=row.pedido or "",
+        respuesta=row.respuesta or "",
+        turn_ref=row.turn_ref,
+        created_at=row.created_at,
+    )
+
+
+def _to_outbound_draft(row: OutboundClientDraftRow) -> OutboundClientDraft:
+    return OutboundClientDraft(
+        id=row.id,
+        thread_id=row.thread_id,
+        lawyer_session_id=row.lawyer_session_id,
+        cliente_session_id=row.cliente_session_id,
+        inbound_message_id=row.inbound_message_id,
+        proposed_text=row.proposed_text,
+        final_text=row.final_text,
+        status=row.status,
+        revisor=row.revisor,
+        comentario=row.comentario,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
     )
 
 
@@ -598,8 +716,11 @@ class SqlRepository:
             row.faltantes_gerencia = expediente.faltantes_gerencia
             row.tareas_gerencia = expediente.tareas_gerencia
             row.metricas_gerencia = expediente.metricas_gerencia
+            row.bitacora = getattr(expediente, "bitacora", None) or []
             row.involucra_menor = bool(expediente.involucra_menor)
             row.datos_sensibles = bool(expediente.datos_sensibles)
+            row.lawyer_session_id = getattr(expediente, "lawyer_session_id", None)
+            row.cliente_session_id = getattr(expediente, "cliente_session_id", None)
             row.actualizado_en = expediente.actualizado_en
             s.commit()
         return expediente
@@ -632,8 +753,11 @@ class SqlRepository:
             row.faltantes_gerencia = expediente.faltantes_gerencia
             row.tareas_gerencia = expediente.tareas_gerencia
             row.metricas_gerencia = expediente.metricas_gerencia
+            row.bitacora = getattr(expediente, "bitacora", None) or []
             row.involucra_menor = bool(expediente.involucra_menor)
             row.datos_sensibles = bool(expediente.datos_sensibles)
+            row.lawyer_session_id = getattr(expediente, "lawyer_session_id", None)
+            row.cliente_session_id = getattr(expediente, "cliente_session_id", None)
             row.actualizado_en = expediente.actualizado_en
             s.commit()
             return expediente
@@ -1138,3 +1262,136 @@ class SqlRepository:
                 )
                 for r in rows
             ]
+
+    # --- Triple chat (Fase 1) ---
+    def get_client_thread(self, thread_id: str) -> ClientThread | None:
+        with self._session() as s:
+            row = s.get(ClientThreadRow, thread_id)
+            return _to_client_thread(row) if row else None
+
+    def get_client_thread_by_cliente_session(self, cliente_session_id: str) -> ClientThread | None:
+        with self._session() as s:
+            row = s.scalar(
+                select(ClientThreadRow).where(
+                    ClientThreadRow.cliente_session_id == cliente_session_id
+                )
+            )
+            return _to_client_thread(row) if row else None
+
+    def save_client_thread(self, thread: ClientThread) -> ClientThread:
+        with self._session() as s:
+            row = s.get(ClientThreadRow, thread.thread_id)
+            if row is None:
+                row = ClientThreadRow(thread_id=thread.thread_id)
+                s.add(row)
+            row.cliente_session_id = thread.cliente_session_id
+            row.lawyer_session_id = thread.lawyer_session_id
+            row.expediente_session_id = thread.expediente_session_id
+            row.subject_label = thread.subject_label
+            row.created_at = thread.created_at
+            row.updated_at = thread.updated_at
+            s.commit()
+        return thread
+
+    def add_client_message(self, message: ClientMessage) -> ClientMessage:
+        with self._session() as s:
+            s.add(
+                ClientMessageRow(
+                    id=message.id,
+                    thread_id=message.thread_id,
+                    role=message.role,
+                    content=message.content,
+                    visibility=message.visibility,
+                    outbound_draft_id=message.outbound_draft_id,
+                    created_at=message.created_at,
+                )
+            )
+            s.commit()
+        return message
+
+    def list_client_messages(self, thread_id: str, *, limit: int = 200) -> list[ClientMessage]:
+        with self._session() as s:
+            rows = s.scalars(
+                select(ClientMessageRow)
+                .where(ClientMessageRow.thread_id == thread_id)
+                .order_by(ClientMessageRow.created_at.asc())
+                .limit(limit)
+            ).all()
+            return [_to_client_message(r) for r in rows]
+
+    def add_internal_transcript_entry(
+        self, entry: InternalTranscriptEntry
+    ) -> InternalTranscriptEntry:
+        with self._session() as s:
+            s.add(
+                InternalTranscriptRow(
+                    id=entry.id,
+                    session_id=entry.session_id,
+                    from_actor=entry.from_actor,
+                    to_actor=entry.to_actor,
+                    pedido=entry.pedido,
+                    respuesta=entry.respuesta,
+                    turn_ref=entry.turn_ref,
+                    created_at=entry.created_at,
+                )
+            )
+            s.commit()
+        return entry
+
+    def list_internal_transcript(
+        self, session_id: str, *, limit: int = 100
+    ) -> list[InternalTranscriptEntry]:
+        with self._session() as s:
+            rows = s.scalars(
+                select(InternalTranscriptRow)
+                .where(InternalTranscriptRow.session_id == session_id)
+                .order_by(InternalTranscriptRow.created_at.asc())
+                .limit(limit)
+            ).all()
+            return [_to_internal_entry(r) for r in rows]
+
+    def get_outbound_client_draft(self, draft_id: str) -> OutboundClientDraft | None:
+        with self._session() as s:
+            row = s.get(OutboundClientDraftRow, draft_id)
+            return _to_outbound_draft(row) if row else None
+
+    def save_outbound_client_draft(self, draft: OutboundClientDraft) -> OutboundClientDraft:
+        with self._session() as s:
+            row = s.get(OutboundClientDraftRow, draft.id)
+            if row is None:
+                row = OutboundClientDraftRow(id=draft.id)
+                s.add(row)
+            row.thread_id = draft.thread_id
+            row.lawyer_session_id = draft.lawyer_session_id
+            row.cliente_session_id = draft.cliente_session_id
+            row.inbound_message_id = draft.inbound_message_id
+            row.proposed_text = draft.proposed_text
+            row.final_text = draft.final_text
+            row.status = draft.status
+            row.revisor = draft.revisor
+            row.comentario = draft.comentario
+            row.created_at = draft.created_at
+            row.updated_at = draft.updated_at
+            s.commit()
+        return draft
+
+    def list_outbound_client_drafts(
+        self,
+        *,
+        status: str | None = None,
+        thread_id: str | None = None,
+        lawyer_session_id: str | None = None,
+        limit: int = 100,
+    ) -> list[OutboundClientDraft]:
+        with self._session() as s:
+            stmt = select(OutboundClientDraftRow)
+            if status:
+                stmt = stmt.where(OutboundClientDraftRow.status == status)
+            if thread_id:
+                stmt = stmt.where(OutboundClientDraftRow.thread_id == thread_id)
+            if lawyer_session_id:
+                stmt = stmt.where(
+                    OutboundClientDraftRow.lawyer_session_id == lawyer_session_id
+                )
+            stmt = stmt.order_by(OutboundClientDraftRow.updated_at.desc()).limit(limit)
+            return [_to_outbound_draft(r) for r in s.scalars(stmt).all()]

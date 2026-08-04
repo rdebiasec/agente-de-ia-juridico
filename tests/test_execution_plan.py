@@ -25,9 +25,9 @@ async def test_create_plan_returns_pending_approval():
     plan = data["plan"]
     assert plan["objective"]
     assert len(plan["steps"]) >= 1
-    assert plan["steps"][0]["agent_id"] == "coordinador_expediente_penal"
+    assert plan["steps"][0]["agent_id"] == "coordinador_caso"
     assert any(
-        s["agent_id"] == "analista_cronologia_hechos_penales" for s in plan["steps"]
+        s["agent_id"] == "analista_cronologia_hechos" for s in plan["steps"]
     )
 
 

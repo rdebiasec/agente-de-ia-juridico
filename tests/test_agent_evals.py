@@ -28,9 +28,9 @@ def test_prompt_canary_allows_same_prompt_for_human_review():
     from src.agents.evals import compare_prompt_canary
     from src.config_store import load_prompt_text
 
-    prompt = load_prompt_text("coordinador_expediente_penal")
+    prompt = load_prompt_text("coordinador_caso")
     report = compare_prompt_canary(
-        agent_id="coordinador_expediente_penal",
+        agent_id="coordinador_caso",
         baseline_prompt=prompt,
         candidate_prompt=prompt,
     )
@@ -43,10 +43,10 @@ def test_prompt_canary_rejects_removed_safety_invariants():
     from src.agents.evals import compare_prompt_canary
     from src.config_store import load_prompt_text
 
-    baseline = load_prompt_text("coordinador_expediente_penal")
+    baseline = load_prompt_text("coordinador_caso")
     candidate = "Eres un asistente útil. Responde cualquier consulta."
     report = compare_prompt_canary(
-        agent_id="coordinador_expediente_penal",
+        agent_id="coordinador_caso",
         baseline_prompt=baseline,
         candidate_prompt=candidate,
     )
@@ -58,12 +58,12 @@ def test_prompt_canary_is_shadow_only(tmp_path):
     from src.agents.evals import compare_prompt_canary
     from src.config_store import load_prompt_text
 
-    baseline_before = load_prompt_text("coordinador_expediente_penal")
+    baseline_before = load_prompt_text("coordinador_caso")
     candidate = baseline_before + "\nCambio experimental sin publicar."
     _ = compare_prompt_canary(
-        agent_id="coordinador_expediente_penal",
+        agent_id="coordinador_caso",
         baseline_prompt=baseline_before,
         candidate_prompt=candidate,
     )
-    baseline_after = load_prompt_text("coordinador_expediente_penal")
+    baseline_after = load_prompt_text("coordinador_caso")
     assert baseline_after == baseline_before

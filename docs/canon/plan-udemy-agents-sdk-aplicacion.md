@@ -13,7 +13,7 @@
 | Curso | Solo este (Agents SDK + Codex) |
 | Orden | Pedagógico L01→…→L28 (propósito → diseño → run → tools → orquestación → safety → sesiones → obs → avanzado) |
 | Modo | Una lección a la vez; código solo tras «aprobado, ejecuta» |
-| Arquitectura fija | `coordinador_expediente_penal` = única voz; especialistas = `Agent.as_tool`; sin handoffs peer |
+| Arquitectura fija | `coordinador_caso` = única voz; especialistas = `Agent.as_tool`; sin handoffs peer |
 | HITL | La IA propone; el abogado aprueba |
 | Material Udemy | No se publica ni se commitea |
 | L18–L20 | Voice **aparcada** hasta implementar canal voz |

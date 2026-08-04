@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: b7ed0df8fbeecbb9 -->
+<!-- config-version: 5; checksum: 657e8e76e371ef3b -->
 ---
 name: clasificar-tarea-y-etapa
 description: Skill operativo penal-victimas: clasificar la solicitud del usuario interno y detectar la etapa aparente del caso. Use when the workflow requires `clasificar_tarea_y_etapa`.
@@ -16,8 +16,8 @@ disable-model-invocation: true
 Triage del turno: tipo de tarea + etapa aparente + agente destino o faltantes.
 
 ## Used By Agents
-- `coordinador_expediente_penal` (skill primario del agente)
-- `analista_ruta_procesal_ley906`
+- `coordinador_caso` (skill primario del agente)
+- `analista_ruta_procesal`
 
 ## Purpose
 Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes.
@@ -33,7 +33,7 @@ Primer skill en cada consulta nueva. En runtime el contrato lo materializa `buil
 
 ## Outputs
 Alineados a `TriageResult` (`src/agents/schemas.py`):
-- `tipo_tarea`: `redaccion` | `analisis_factual` | `tipicidad` | `ruta_906` | `representacion_victima` | `evidencia` | `audiencia` | `tutela_constitucional` | `seguimiento` | `fuera_de_alcance`.
+- `tipo_tarea`: `redaccion` | `analisis_factual` | `tipicidad` | `ruta_906` | `representacion_victima` | `evidencia` | `audiencia` | `seguimiento` | `fuera_de_alcance`.
 - `etapa_aparente`: `indagacion` | `investigacion` | `imputacion` | `juicio` | `ejecucion` | `desconocida` | `pendiente_verificar`.
 - `agente_destino` recomendado (agent id).
 - `datos_faltantes_bloqueantes` (lista corta de labels) o confirmación de derivación.
@@ -62,15 +62,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `clasifica
 - **g1:** No inventar etapa, radicado ni actuaciones para justificar derivación.
 - **g2:** Sin radicado ni actuaciones mínimas, no concluir etapa; marcar `desconocida` y pedir datos.
 - **g3:** Etapa aparente es hipótesis de enrutamiento, no conclusión procesal definitiva.
-- **g4:** Derivación con implicación estratégica (tutela, memorial, audiencia) requiere revisión del abogado.
+- **g4:** Derivación con implicación estratégica (memorial, audiencia, impulso) requiere revisión del abogado.
 - **g7:** Consultas no penales o ajenas a representación de víctimas en Colombia → declarar fuera de alcance y no derivar a redactor.
 - **g8:** Cerrar con aviso de revisión profesional.
 
 ## Handoff
-- Análisis factual → `analista_cronologia_hechos_penales` (`extraer_hechos_relevantes`).
-- Tipicidad / calificación → `analista_tipicidad_y_responsabilidad_penal` (solo con hechos mínimos).
-- Ruta Ley 906 → `analista_ruta_procesal_ley906`.
-- Tutela → `evaluador_derechos_fundamentales_tutela` (nunca redactor directo).
+- Análisis factual → `analista_cronologia_hechos` (`extraer_hechos_relevantes`).
+- Tipicidad / calificación → `analista_responsabilidad_tipicidad` (solo con hechos mínimos).
+- Ruta Ley 906 → `analista_ruta_procesal`.
+- Pedido de tutela / constitucional → `fuera_de_alcance` (producto sin vía tutela); ofrecer impulso/petición/seguimiento.
 - Urgencia detectada → contrato `detectar_urgencia_penal` / `assess_urgency` antes de derivar.
 
 ## No duplicar

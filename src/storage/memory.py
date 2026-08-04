@@ -11,6 +11,8 @@ from src.storage.models import (
     AuditPortalProgress,
     AuditPortalUser,
     ChatSession,
+    ClientMessage,
+    ClientThread,
     ComplianceConsent,
     ConfigActive,
     ConfigVersion,
@@ -19,6 +21,8 @@ from src.storage.models import (
     Draft,
     ExecutionPlanRecord,
     Expediente,
+    InternalTranscriptEntry,
+    OutboundClientDraft,
     SessionTrace,
     SCOPE_KB,
 )
@@ -48,6 +52,10 @@ class InMemoryRepository:
         self._compliance_consents: list[ComplianceConsent] = []
         self._execution_plans: dict[str, ExecutionPlanRecord] = {}
         self._audit_access_logs: list[AuditPortalAccessLog] = []
+        self._client_threads: dict[str, ClientThread] = {}
+        self._client_messages: list[ClientMessage] = []
+        self._internal_transcript: list[InternalTranscriptEntry] = []
+        self._outbound_client_drafts: dict[str, OutboundClientDraft] = {}
         self._audit_progress_history: list[tuple[str, dict, datetime]] = []
         self._config_versions: list[ConfigVersion] = []
         self._config_active: dict[tuple[str, str], ConfigActive] = {}
@@ -501,3 +509,74 @@ class InMemoryRepository:
                 rows = [r for r in rows if r.kind == kind]
             rows.sort(key=lambda r: (r.kind, r.key))
             return rows
+
+    # --- Triple chat (Fase 1) ---
+    def get_client_thread(self, thread_id: str) -> ClientThread | None:
+        with self._lock:
+            return self._client_threads.get(thread_id)
+
+    def get_client_thread_by_cliente_session(self, cliente_session_id: str) -> ClientThread | None:
+        with self._lock:
+            for thread in self._client_threads.values():
+                if thread.cliente_session_id == cliente_session_id:
+                    return thread
+            return None
+
+    def save_client_thread(self, thread: ClientThread) -> ClientThread:
+        with self._lock:
+            self._client_threads[thread.thread_id] = thread
+            return thread
+
+    def add_client_message(self, message: ClientMessage) -> ClientMessage:
+        with self._lock:
+            self._client_messages.append(message)
+            return message
+
+    def list_client_messages(self, thread_id: str, *, limit: int = 200) -> list[ClientMessage]:
+        with self._lock:
+            rows = [m for m in self._client_messages if m.thread_id == thread_id]
+            rows.sort(key=lambda m: m.created_at)
+            return rows[:limit]
+
+    def add_internal_transcript_entry(
+        self, entry: InternalTranscriptEntry
+    ) -> InternalTranscriptEntry:
+        with self._lock:
+            self._internal_transcript.append(entry)
+            return entry
+
+    def list_internal_transcript(
+        self, session_id: str, *, limit: int = 100
+    ) -> list[InternalTranscriptEntry]:
+        with self._lock:
+            rows = [e for e in self._internal_transcript if e.session_id == session_id]
+            rows.sort(key=lambda e: e.created_at)
+            return rows[:limit]
+
+    def get_outbound_client_draft(self, draft_id: str) -> OutboundClientDraft | None:
+        with self._lock:
+            return self._outbound_client_drafts.get(draft_id)
+
+    def save_outbound_client_draft(self, draft: OutboundClientDraft) -> OutboundClientDraft:
+        with self._lock:
+            self._outbound_client_drafts[draft.id] = draft
+            return draft
+
+    def list_outbound_client_drafts(
+        self,
+        *,
+        status: str | None = None,
+        thread_id: str | None = None,
+        lawyer_session_id: str | None = None,
+        limit: int = 100,
+    ) -> list[OutboundClientDraft]:
+        with self._lock:
+            rows = list(self._outbound_client_drafts.values())
+            if status:
+                rows = [d for d in rows if d.status == status]
+            if thread_id:
+                rows = [d for d in rows if d.thread_id == thread_id]
+            if lawyer_session_id:
+                rows = [d for d in rows if d.lawyer_session_id == lawyer_session_id]
+            rows.sort(key=lambda d: d.updated_at, reverse=True)
+            return rows[:limit]

@@ -14,6 +14,8 @@ def _audit_env(monkeypatch) -> None:
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "audit-test-session-secret-key-32chars")
     monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
     monkeypatch.setenv("DATABASE_URL", "")
     monkeypatch.setenv("AUDIT_CONFIG_WRITE_FILE", "0")
     monkeypatch.delenv("RENDER", raising=False)
@@ -117,8 +119,8 @@ async def test_agent_guardrail_save_and_agents_api(monkeypatch):
         payload = agents.json()
         assert payload["ok"] is True
         assert payload["global"]["prompt_key"] == "sistema"
-        assert len(payload["agents"]) >= 11
-        coord = next(a for a in payload["agents"] if a["id"] == "coordinador_expediente_penal")
+        assert len(payload["agents"]) >= 10
+        coord = next(a for a in payload["agents"] if a["id"] == "coordinador_caso")
         assert coord["grupo"] == "coordinacion"
         assert set(coord["guardrails"].keys()) == {"input", "output", "tools"}
         assert coord["guardrails"]["input"].endswith("__input")

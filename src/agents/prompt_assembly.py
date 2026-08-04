@@ -20,7 +20,7 @@ _SLIM_POLICY_HINT = (
     "g7 fuera de alcance; g8 aviso de borrador; g9 oportunidad/términos Ley 906; "
     "g10 integridad probatoria. "
     "Código/SDK: alcance duro, PII, tripwires de salida vacía, "
-    "routing tutela→evaluador y gates de plan/completitud — no reexpongas textos largos."
+    "gates de plan/completitud — no reexpongas textos largos."
 )
 
 

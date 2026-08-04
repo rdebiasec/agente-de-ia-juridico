@@ -13,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal` (uso principal)
-- `analista_cronologia_hechos_penales` (solo vacíos factuales con impacto tipico preliminar)
+- `analista_responsabilidad_tipicidad` (uso principal)
+- `analista_cronologia_hechos` (solo vacíos factuales con impacto tipico preliminar)
 
 ## Purpose
 Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad.
@@ -32,7 +32,7 @@ Formular preguntas para completar elementos del tipo penal, sin presuponer culpa
 
 ## Outputs
 - Preguntas: `pregunta`, `elemento_factual_que_aclara`, `riesgo_induccion` (alto | medio | bajo).
-- Nota de derivación a `analista_tipicidad_y_responsabilidad_penal` si el vacío es jurídico-dogmático.
+- Nota de derivación a `analista_responsabilidad_tipicidad` si el vacío es jurídico-dogmático.
 - Etiqueta: `NO SUSTITUYE ANÁLISIS DE TIPICIDAD`.
 
 ## Steps

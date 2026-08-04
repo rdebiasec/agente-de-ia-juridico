@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: ca29f370b3f7ec34 -->
 ---
 name: identificar-conductas-punibles-preliminares
 description: Skill operativo penal-victimas: proponer posibles conductas punibles con base en hechos, sin conclusion definitiva. Use when the workflow requires `identificar_conductas_punibles_preliminares`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 
 ## Purpose
 Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación.
@@ -61,7 +62,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 - **g8:** Aviso de revisión profesional.
 
 ## Handoff
-- Requiere entrada de `analista_cronologia_hechos_penales`: cronología + `verificar_hechos_soportados` con recomendación apta.
+- Requiere entrada de `analista_cronologia_hechos`: cronología + `verificar_hechos_soportados` con recomendación apta.
 - Salida alimenta `identificar_conductas_punibles_preliminares` → `descomponer_elementos_tipo_penal` → `mapear_tipo_penal_hecho_prueba`.
 - Si `detectar_riesgos_atipicidad` = alto → alertar coordinador y abogado antes de ruta penal.
 

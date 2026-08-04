@@ -9,18 +9,44 @@
         calidad: 'CALIDAD',
     };
 
+    /** Legacy agent IDs → canonical (stored traces / old catalog keys). */
+    const LEGACY_AGENT_ALIASES = {
+        coordinador_expediente_penal: 'coordinador_caso',
+        gerente: 'coordinador_caso',
+        gerente_caso: 'coordinador_caso',
+        analista_cronologia_hechos_penales: 'analista_cronologia_hechos',
+        analista_tipicidad_y_responsabilidad_penal: 'analista_responsabilidad_tipicidad',
+        analista_ruta_procesal_ley906: 'analista_ruta_procesal',
+        gestor_evidencia_y_soporte_probatorio: 'analista_evidencia',
+        preparador_estrategico_audiencias_penales: 'analista_audiencias',
+        redactor_documentos_juridicos_penales: 'redactor_documentos_juridicos',
+        gestor_seguimiento_procesal_penal: 'analista_seguimiento_procesal',
+    };
+
+    function resolveAgentId(agentId) {
+        if (!agentId) return '';
+        return LEGACY_AGENT_ALIASES[agentId] || agentId;
+    }
+
     /** Etiquetas de pestaña (MAYÚSCULAS). Preferir nombre_corto del catálogo si existe. */
     const AGENT_TAB_LABEL = {
-        coordinador_expediente_penal: 'GERENTE DEL CASO',
-        analista_cronologia_hechos_penales: 'CRONOLOGÍA HECHOS',
-        analista_tipicidad_y_responsabilidad_penal: 'TIPICIDAD RESPONSABILIDAD',
-        analista_ruta_procesal_ley906: 'RUTA PROCESAL',
+        coordinador_caso: 'COORDINADOR DEL CASO',
+        coordinador_expediente_penal: 'COORDINADOR DEL CASO', // legacy alias
+        analista_cronologia_hechos: 'CRONOLOGÍA HECHOS',
+        analista_cronologia_hechos_penales: 'CRONOLOGÍA HECHOS', // legacy
+        analista_responsabilidad_tipicidad: 'TIPICIDAD RESPONSABILIDAD',
+        analista_tipicidad_y_responsabilidad_penal: 'TIPICIDAD RESPONSABILIDAD', // legacy
+        analista_ruta_procesal: 'RUTA PROCESAL',
+        analista_ruta_procesal_ley906: 'RUTA PROCESAL', // legacy
         analista_representacion_victimas: 'REPRESENTACIÓN VÍCTIMAS',
-        gestor_evidencia_y_soporte_probatorio: 'EVIDENCIA PRUEBA',
-        preparador_estrategico_audiencias_penales: 'PREPARADOR AUDIENCIAS',
-        redactor_documentos_juridicos_penales: 'REDACTOR DOCUMENTOS',
-        gestor_seguimiento_procesal_penal: 'SEGUIMIENTO PROCESAL',
-        evaluador_derechos_fundamentales_tutela: 'EVALUADOR TUTELA',
+        analista_evidencia: 'EVIDENCIA PRUEBA',
+        gestor_evidencia_y_soporte_probatorio: 'EVIDENCIA PRUEBA', // legacy
+        analista_audiencias: 'AUDIENCIAS PENALES',
+        preparador_estrategico_audiencias_penales: 'AUDIENCIAS PENALES', // legacy
+        redactor_documentos_juridicos: 'REDACTOR DOCUMENTOS',
+        redactor_documentos_juridicos_penales: 'REDACTOR DOCUMENTOS', // legacy
+        analista_seguimiento_procesal: 'SEGUIMIENTO PROCESAL',
+        gestor_seguimiento_procesal_penal: 'SEGUIMIENTO PROCESAL', // legacy
         analista_calidad_juridica: 'CALIDAD JURÍDICA',
     };
 
@@ -797,7 +823,7 @@
             <div class="cfg-anatomy-field">
                 <label class="cfg-anatomy-field-label" for="cfg-anatomy-funcion">Función (título / rol)</label>
                 <p class="cfg-anatomy-field-hint">Quién es, qué cargo cumple y qué gerencia frente al abogado.</p>
-                ${richEditorHtml('cfg-anatomy-funcion', 'Ej.: Gerente del Caso Penal; único interlocutor; gerencia el caso de extremo a extremo…')}
+                ${richEditorHtml('cfg-anatomy-funcion', 'Ej.: Coordinador del Caso; único interlocutor; coordina el caso de extremo a extremo…')}
             </div>
             <div class="cfg-anatomy-field">
                 <label class="cfg-anatomy-field-label" for="cfg-anatomy-alcance">Alcance de su función</label>
@@ -829,7 +855,7 @@
             <div class="cfg-anatomy-field">
                 <label class="cfg-anatomy-field-label" for="cfg-anatomy-tool-routing">A qué área interna pedir ayuda</label>
                 <p class="cfg-anatomy-field-hint">Cuándo consultar cada especialista / tool interna.</p>
-                ${richEditorHtml('cfg-anatomy-tool-routing', 'Ej.: Cronología → analista_cronologia_hechos_penales…')}
+                ${richEditorHtml('cfg-anatomy-tool-routing', 'Ej.: Cronología → analista_cronologia_hechos…')}
             </div>
         `;
         renderPasosList([]);
@@ -1680,7 +1706,7 @@
         ],
         tools: [
             { id: 'allowed_tools_policy', label: 'Tools permitidas', hint: 'Qué tools se pueden invocar y restricción de relevancia al turno.' },
-            { id: 'routing_constraints', label: 'Restricciones de enrutamiento', hint: 'Reglas de a qué especialista derivar (tutela, redacción, calidad…).' },
+            { id: 'routing_constraints', label: 'Restricciones de enrutamiento', hint: 'Reglas de a qué especialista derivar (redacción, calidad, seguimiento…).' },
             { id: 'needs_approval_tools', label: 'Tools con aprobación', hint: 'Tools que requieren HITL / plan aprobado antes de invocarse.' },
             { id: 'approval_prompt', label: 'Prompt de aprobación', hint: 'Texto de solicitud de aprobación al abogado.' },
             { id: 'args_sensitivity_policy', label: 'Sensibilidad de argumentos', hint: 'Qué PII no pasar en argumentos de tools.' },
@@ -3720,7 +3746,7 @@
         $('map-go-gerente')?.addEventListener('click', async () => {
             await setWorkspaceView('editor');
             const gerente = (agentsMeta.agents || []).find(
-                (a) => a.id === 'coordinador_expediente_penal' || a.grupo === 'coordinacion',
+                (a) => resolveAgentId(a.id) === 'coordinador_caso' || a.grupo === 'coordinacion',
             );
             if (gerente) await selectAgent(gerente.id, { groupAlreadySet: true });
         });

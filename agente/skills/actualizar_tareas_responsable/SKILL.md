@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 72e22328967617a2 -->
+<!-- config-version: 4; checksum: 61381da726794598 -->
 ---
 name: actualizar-tareas-responsable
 description: Skill atomico penal-victimas: mantener lista de tareas por agente o abogado. Use when the workflow requires `actualizar_tareas_responsable`.
@@ -16,8 +16,8 @@ disable-model-invocation: true
 Registra tareas del triage (faltantes, urgencias, derivaciones) con responsable y plazo.
 
 ## Used By Agents
-- `coordinador_expediente_penal`
-- `gestor_seguimiento_procesal_penal`
+- `coordinador_caso`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento.
@@ -64,7 +64,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM de CRUD de
 - **g8:** Cerrar con aviso de que la asignación y plazos requieren revisión profesional.
 
 ## Handoff
-- Seguimiento continuo de radicado/términos → `gestor_seguimiento_procesal_penal`.
+- Seguimiento continuo de radicado/términos → `analista_seguimiento_procesal`.
 - Tareas de recolección documental → permanecen visibles para el abogado vía POC.
 
 ## No duplicar

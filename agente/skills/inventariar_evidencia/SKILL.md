@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio` (skill primario del agente)
+- `analista_evidencia` (skill primario del agente)
 
 ## Purpose
 Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar.

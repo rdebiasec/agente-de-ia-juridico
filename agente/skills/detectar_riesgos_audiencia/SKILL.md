@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Identificar riesgos tácticos y procesales específicos de una audiencia programada.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Antecede simulación y guion oral.
 
 ## Rol en analista_calidad_juridica

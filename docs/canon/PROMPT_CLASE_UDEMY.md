@@ -29,7 +29,7 @@ Al final: mensaje high-level DEJAR QUIETO / AJUSTAR / DIFERIR.
   + una sola voz (NO “más rápido a cualquier costo”).
 
 ## Premisas
-- coordinador_expediente_penal = única voz
+- coordinador_caso = única voz
 - especialistas = Agent.as_tool (PROHIBIDO handoffs peer)
 - La IA propone; el abogado aprueba
 - No inventar sentencias/radicados/normas

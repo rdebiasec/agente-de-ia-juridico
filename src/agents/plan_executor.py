@@ -19,7 +19,7 @@ from src.agents.guardrails import apply_output_guardrails, needs_human_review
 from src.agents.orchestrator import (
     POC_AGENT_ID,
     SPECIALIST_AGENT_IDS,
-    build_coordinador_agent,
+    build_coordinador_caso_agent,
     get_agent_by_id,
 )
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
@@ -80,13 +80,13 @@ def _step_prompt(
 
     if step.agent_id == POC_AGENT_ID:
         directive = (
-            "Ejecuta este paso como Gerente del Caso Penal (coordinador). "
+            "Ejecuta este paso como Coordinador del Caso (coordinador). "
             "Clasifica, verifica completitud y cierra el paso sin ceder la voz."
         )
     elif step.agent_id in SPECIALIST_AGENT_IDS:
         directive = (
             "Ejecuta este paso como especialista de BACKOFFICE (equipo interno). "
-            "Devuelve hallazgos operativos claros para que el Gerente del Caso sintetice. "
+            "Devuelve hallazgos operativos claros para que el Coordinador del Caso sintetice. "
             "No saludes al abogado ni firmes como interlocutor del despacho. "
             "Ajusta la salida al contrato de capacidad del paso."
         )
@@ -117,7 +117,7 @@ def _resolve_step_agent(step: PlanStep):
         agent = get_agent_by_id(step.agent_id)
         if agent is not None:
             return agent
-    return build_coordinador_agent()
+    return build_coordinador_caso_agent()
 
 
 def _final_output_text(result: Any) -> str:
@@ -340,7 +340,7 @@ async def _run_single_step(
     received_from = (
         "user"
         if step.order == 1
-        else (step.depends_on[-1] if step.depends_on else "coordinador_expediente_penal")
+        else (step.depends_on[-1] if step.depends_on else "coordinador_caso")
     )
 
     if broker and plan_id and record is not None:
@@ -473,9 +473,10 @@ async def _run_single_step(
                         prompt,
                         session=None,
                         context=firm_ctx,
-                        # Watchdog por criticidad: especialistas acotados.
+                        # Watchdog: tope por paso vía AGENT_MAX_TURNS_PLAN_STEP
+                        # (antes había un hardcap 4 que impedía demos de plantillas largas).
                         max_turns=(
-                            min(settings.agent_max_turns_plan_step, 4)
+                            max(1, int(settings.agent_max_turns_plan_step))
                             if step.agent_id in SPECIALIST_AGENT_IDS
                             else min(
                                 settings.agent_max_turns,
@@ -511,6 +512,25 @@ async def _run_single_step(
                 backoffice_agent=step.agent_id if step.agent_id in SPECIALIST_AGENT_IDS else POC_AGENT_ID,
             )
             status: str = "blocked" if blocked_quality else "done"
+            if (
+                status == "done"
+                and step.agent_id in SPECIALIST_AGENT_IDS
+            ):
+                try:
+                    from src.services.triple_chat import record_specialist_exchange
+
+                    record_specialist_exchange(
+                        session_id=session_id,
+                        specialist_id=step.agent_id,
+                        pedido=step.user_summary or step.title or "",
+                        respuesta=text,
+                        turn_ref=step.step_id,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Transcript interno (plan) no persistido step=%s",
+                        step.step_id,
+                    )
             if blocked_quality:
                 trace.setdefault("spans", []).append(
                     {
@@ -560,6 +580,7 @@ async def _run_single_step(
             status = "blocked"
 
         from src.agents.completeness import record_specialist_result
+        from src.services.bitacora import append_entries, area_label
 
         ledger_result = record_specialist_result(
             session_id,
@@ -567,6 +588,34 @@ async def _run_single_step(
             text=text,
             status=status,
         )
+        try:
+            append_entries(
+                session_id,
+                [
+                    {
+                        "autor": step.agent_id,
+                        "tipo": "analisis" if status == "done" else "alerta",
+                        "resumen": (text or "")[:600],
+                        "fuentes": [area_label(step.agent_id)],
+                        "pendientes": [],
+                        "hallazgos": [f"paso:{step.step_id}:{status}"],
+                        "confidencialidad": "normal",
+                    },
+                    {
+                        "autor": "gerente_caso",
+                        "tipo": "retorno_especialista",
+                        "resumen": (
+                            f"Paso de plan «{step.title}» ({status}) vía área "
+                            f"{area_label(step.agent_id)}."
+                        ),
+                        "fuentes": ["plan", area_label(step.agent_id)],
+                        "pendientes": [],
+                        "confidencialidad": "normal",
+                    },
+                ],
+            )
+        except Exception:
+            logger.exception("Bitácora de paso de plan no persistida step=%s", step.step_id)
         report = AgentIOReport(
             step_id=step.step_id,
             agent_id=step.agent_id,
@@ -681,7 +730,7 @@ async def execute_approved_plan(
     expediente = expediente_store.get_or_create(session_id)
     exp_resumen = expediente.resumen()
     requested_destination = (plan.triage_snapshot or {}).get(
-        "agente_destino", "coordinador_expediente_penal"
+        "agente_destino", "coordinador_caso"
     )
     ok_pre, pre_err = run_pre_validations(
         message,
@@ -714,7 +763,7 @@ async def execute_approved_plan(
 
     prior_summary = ""
     last_text = ""
-    destination_agent = plan.agents_involved[-1] if plan.agents_involved else "coordinador_expediente_penal"
+    destination_agent = plan.agents_involved[-1] if plan.agents_involved else "coordinador_caso"
     io_reports: list[dict] = list((record.payload or {}).get("agent_io_reports") or [])
     execution_failed = False
 
@@ -949,6 +998,22 @@ async def execute_approved_plan(
     )
 
     _finalize_trace(trace, text)
+    try:
+        from src.services.bitacora import record_gerente_turn
+
+        record_gerente_turn(
+            session_id,
+            message=message,
+            reply=text,
+            route="plan_execute",
+            backoffice_agent=destination_agent,
+            blocked=False,
+            pending_review=pending_review,
+            involucra_menor=bool(getattr(expediente, "involucra_menor", False)),
+            datos_sensibles=bool(getattr(expediente, "datos_sensibles", False)),
+        )
+    except Exception:
+        logger.exception("Bitácora maestra de plan no persistida plan=%s", plan_id)
     get_repository().append_chat_message(
         session_id, channel=channel, user_id=uid, role="user", content=message,
         max_messages=settings.session_max_messages,

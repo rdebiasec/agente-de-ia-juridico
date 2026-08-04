@@ -34,10 +34,10 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = _parser().parse_args()
     if args.candidate:
-        baseline = load_prompt_text("coordinador_expediente_penal")
+        baseline = load_prompt_text("coordinador_caso")
         candidate = args.candidate.read_text(encoding="utf-8")
         report = compare_prompt_canary(
-            agent_id="coordinador_expediente_penal",
+            agent_id="coordinador_caso",
             baseline_prompt=baseline,
             candidate_prompt=candidate,
             eval_path=args.eval_set,

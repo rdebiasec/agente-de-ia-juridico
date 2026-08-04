@@ -8,11 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.storage.models import Expediente
 
-_TUTELA_FIELDS = (
-    ("accionante", re.compile(r"\baccionante\b", re.I)),
-    ("accionado", re.compile(r"\baccionado\b", re.I)),
-    ("derecho vulnerado", re.compile(r"\bderecho\b.*\bvulnerad", re.I)),
-)
 _MEMORIAL_FIELDS = (
     ("radicado", re.compile(r"\bradicad[oa]\b", re.I)),
     ("partes", re.compile(r"\bparte[s]?\b", re.I)),
@@ -181,7 +176,7 @@ def run_pre_validations(
         )
         # G02: no spamear ledger en chit-chat trivial al POC.
         if not (
-            destination == "coordinador_expediente_penal"
+            destination == "coordinador_caso"
             and is_trivial_consultation(message, destination=destination)
         ):
             persist_verification(
@@ -239,29 +234,6 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
     lower_msg = message.lower()
     missing: list[str] = []
 
-    if "tutela" in lower_msg or trace.get("sent_to_agent") in {
-        "evaluador_derechos_fundamentales_tutela",
-        "tutela_constitucional",  # compatibilidad con trazas legacy
-    }:
-        combined = f"{message}\n{text}"
-        for label, pattern in _TUTELA_FIELDS:
-            if not pattern.search(combined):
-                missing.append(label)
-        if missing:
-            _span(
-                trace,
-                "Validación: completitud tutela",
-                "pending",
-                f"Faltan datos: {', '.join(missing)}. Se sugiere continuar el diálogo.",
-            )
-            follow = (
-                "\n\nPara continuar con el borrador de tutela, indíqueme: "
-                + ", ".join(missing)
-                + "."
-            )
-            if follow.strip() not in text:
-                text = text.rstrip() + follow
-
     if any(w in lower_msg for w in ("memorial", "radicado", "impulso procesal")):
         combined = f"{message}\n{text}"
         for label, pattern in _MEMORIAL_FIELDS:
@@ -283,7 +255,7 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
 
     sent = str(trace.get("sent_to_agent") or "")
     actionable = sent in (HIGH_RISK_AGENTS | HITL_OUTPUT_AGENTS) or bool(
-        re.search(r"\b(memorial|tutela|recurso|guion)\b", lower_msg, re.I)
+        re.search(r"\b(memorial|recurso|guion|petici[oó]n|impulso)\b", lower_msg, re.I)
     )
     needs_pending = citation_hints_without_pending(text) and actionable
     if needs_pending:
@@ -303,7 +275,7 @@ def run_post_validations(message: str, text: str, trace: dict) -> str:
         if "control de calidad" not in text.lower():
             text = (
                 text.rstrip()
-                + "\n\nRecomendación del Gerente: antes de uso externo, solicite un paso "
+                + "\n\nRecomendación del Coordinador del Caso: antes de uso externo, solicite un paso "
                 "de control de calidad jurídica en el plan de ejecución."
             )
         trace["quality_check"] = {

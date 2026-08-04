@@ -1,4 +1,4 @@
-# Baseline — Validación 7 expertos (2026-07-16 00:34)
+# Baseline — Validación 7 expertos (2026-08-03 20:43)
 
 ## Métricas automáticas
 
@@ -11,29 +11,24 @@
 | mono_sin_rol | 0 |
 | multi_no_boundary | 0 |
 | profundizar | 0 |
-| total | 90 |
-| with_boundary | 84 |
-| with_guardrails | 90 |
-| with_rol | 89 |
-| with_steps | 90 |
+| total | 81 |
+| with_boundary | 75 |
+| with_guardrails | 81 |
+| with_rol | 80 |
+| with_steps | 81 |
 
 ## Skills por bloque
 
-### Bloque A (11 skills)
+### Bloque A (6 skills)
 
-- `analizar_perjuicio_irremediable`
-- `crear_matriz_hecho_derecho_fundamental`
-- `detectar_riesgo_improcedencia_tutela`
-- `evaluar_derecho_peticion`
-- `evaluar_procedencia_tutela`
-- `identificar_derecho_fundamental_afectado`
-- `preparar_borrador_tutela_preliminar`
-- `recomendar_via_constitucional_o_alternativa`
+- `estructurar_hechos_fundamentos_solicitudes`
+- `redactar_ampliacion_denuncia`
 - `redactar_derecho_peticion_penal`
-- `redactar_tutela_penal_preliminar`
-- `revisar_mecanismos_ordinarios`
+- `redactar_memorial_penal`
+- `redactar_recurso_o_intervencion_preliminar`
+- `redactar_solicitud_impulso_procesal`
 
-### Bloque B (16 skills)
+### Bloque B (11 skills)
 
 - `clasificar_aprobacion_juridica`
 - `controlar_confidencialidad_datos_sensibles`
@@ -43,11 +38,6 @@
 - `controlar_tono_riesgo_reputacional`
 - `detectar_alucinaciones_legales`
 - `detectar_riesgo_revictimizacion`
-- `estructurar_hechos_fundamentos_solicitudes`
-- `redactar_ampliacion_denuncia`
-- `redactar_memorial_penal`
-- `redactar_recurso_o_intervencion_preliminar`
-- `redactar_solicitud_impulso_procesal`
 - `revisar_coherencia_estrategica`
 - `verificar_citas_normativas`
 - `verificar_jurisprudencia`
@@ -116,11 +106,12 @@
 - `priorizar_objetivos_representacion`
 - `simular_escenarios_audiencia`
 
-### Bloque F (8 skills)
+### Bloque F (9 skills)
 
 - `actualizar_tareas_responsable`
 - `crear_reporte_estado_caso`
 - `detectar_inactividad_procesal`
+- `evaluar_derecho_peticion`
 - `generar_alertas_terminos_vencimientos`
 - `monitorear_radicado`
 - `preparar_resumen_operativo_cliente`
@@ -130,14 +121,97 @@
 ## Lista canónica
 
 ```
-CHECK OK: 90 skills + matriz variable validada
+CHECK FAIL: 1 skills (ej. ['actualizar_tareas_responsable'])
 ```
 
 ## Pytest
 
 ```
-.........                                                                [100%]
+.....F..F                                                                [100%]
+=================================== FAILURES ===================================
+__________________ test_audit_progress_history_and_isolation ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb2a250>
+
+    @pytest.mark.asyncio
+    async def test_audit_progress_history_and_isolation(monkeypatch):
+        _audit_env(monkeypatch)
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            for email, pin in (("uno@despacho.com", "111111"), ("dos@despacho.com", "222222")):
+                r = await client.post(
+                    "/api/audit/login",
+                    json={
+                        "email": email,
+                        "password": "audit-test-secret-pass",
+                        "new_pin": pin,
+                        "accept_privacy": True,
+                        "accept_sensitive_data": True,
+                    },
+                )
+                assert r.status_code == 200
+    
+            r = await client.post(
+                "/api/audit/login",
+                json={"email": "uno@despacho.com", "password": "audit-test-secret-pass", "pin": "111111"},
+            )
+            cookies_a = dict(r.cookies)
+            r = await client.put("/api/audit/progress", json=_sample_payload(), cookies=cookies_a)
+            assert r.status_code == 200
+    
+            r = await client.post(
+                "/api/audit/login",
+                json={"email": "dos@despacho.com", "password": "audit-test-secret-pass", "pin": "222222"},
+            )
+            cookies_b = dict(r.cookies)
+            r = await client.get("/api/audit/progress", cookies=cookies_b)
+>           assert r.status_code == 404
+E           assert 200 == 404
+E            +  where 200 = <Response [200 OK]>.status_code
+
+tests/test_compliance.py:117: AssertionError
+_______________________ test_audit_logout_clears_session _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce6a510>
+
+    @pytest.mark.asyncio
+    async def test_audit_logout_clears_session(monkeypatch):
+        _audit_env(monkeypatch)
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            r = await client.post(
+                "/api/audit/login",
+                json={
+                    "email": "logout@despacho.com",
+                    "password": "audit-test-secret-pass",
+                    "new_pin": "123456",
+                    "accept_privacy": True,
+                    "accept_sensitive_data": True,
+                },
+            )
+            assert r.status_code == 200
+    
+            r = await client.get("/api/audit/session")
+            assert r.status_code == 200
+            assert r.json()["authenticated"] is True
+    
+            r = await client.post("/api/audit/logout")
+            assert r.status_code == 200
+            set_cookie = r.headers.get("set-cookie", "").lower()
+            assert "audit_session=" in set_cookie
+            assert "max-age=0" in set_cookie
+    
+            r = await client.get("/api/audit/session")
+            assert r.status_code == 200
+>           assert r.json()["authenticated"] is False
+E           assert True is False
+
+tests/test_compliance.py:177: AssertionError
 =============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/alembic/config.py:612
+  /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/alembic/config.py:612: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
 tests/test_compliance.py::test_audit_progress_history_and_isolation
   /Users/ricardodebiase/Documents/agente de IA juridico/.venv/lib/python3.13/site-packages/httpx/_client.py:1896: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
     return await self.request(
@@ -147,5 +221,8 @@ tests/test_compliance.py::test_audit_progress_history_and_isolation
     return await self.request(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-9 passed, 2 warnings in 1.39s
+=========================== short test summary info ============================
+FAILED tests/test_compliance.py::test_audit_progress_history_and_isolation - ...
+FAILED tests/test_compliance.py::test_audit_logout_clears_session - assert Tr...
+2 failed, 7 passed, 3 warnings in 4.30s
 ```

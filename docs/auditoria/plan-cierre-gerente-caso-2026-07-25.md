@@ -1,4 +1,4 @@
-# Plan de cierre — Gerente del Caso Penal y ship a producción
+# Plan de cierre — Coordinador del Caso y ship a producción
 
 **Fecha:** 2026-07-25
 **Alcance:** convertir la gerencia del caso en invariante de runtime, publicarla en producción y dejar constancia de lo que solo puede cerrar una persona.
@@ -7,7 +7,7 @@
 
 ## 1. Qué quedó implementado
 
-El coordinador pasó de enrutador a **Gerente del Caso Penal**. El cambio no es de nombre: la verificación de completitud dejó de ser una instrucción al modelo y pasó a ser una regla de código.
+El coordinador pasó de enrutador a **Coordinador del Caso**. El cambio no es de nombre: la verificación de completitud dejó de ser una instrucción al modelo y pasó a ser una regla de código.
 
 | Área | Antes | Después |
 |---|---|---|
@@ -24,7 +24,7 @@ El coordinador pasó de enrutador a **Gerente del Caso Penal**. El cambio no es 
 - `src/agents/completeness.py` — gate, ledger y captura de pendientes de especialistas.
 - `migrations/versions/0008_gerencia_loop.py` — columnas de ledger y métricas en `expedientes`.
 - `tests/test_gerencia_loop.py` — invariantes del loop.
-- `config/guardrails/agents/coordinador_expediente_penal/{input,output,tools}.md` — políticas editables del agente.
+- `config/guardrails/agents/coordinador_caso/{input,output,tools}.md` — políticas editables del agente.
 
 ### El agent loop resultante
 

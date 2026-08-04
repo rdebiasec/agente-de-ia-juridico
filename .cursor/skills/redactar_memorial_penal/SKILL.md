@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: b1bafa79284061e5 -->
 ---
 name: redactar-memorial-penal
 description: Skill critico penal-victimas: crear borrador de memorial penal para firma humana. Use when the workflow requires `redactar_memorial_penal`.
@@ -12,12 +13,12 @@ disable-model-invocation: true
 - Tier: `critico`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (skill primario del agente)
+- `redactor_documentos_juridicos` (skill primario del agente)
 
 ## Purpose
 Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Skill primario del agente; ejecutar antes de pasar a calidad jurídica.
 
 ## Inputs

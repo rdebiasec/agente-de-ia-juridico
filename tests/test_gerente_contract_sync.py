@@ -40,7 +40,7 @@ def test_gerente_prompt_reflects_system_gate_and_plan_boundary():
             / "agente"
             / "prompts"
             / "agents"
-            / "coordinador_expediente_penal.md"
+            / "coordinador_caso.md"
         ).read_text(encoding="utf-8")
     )
     lowered = prompt.lower()
@@ -48,7 +48,7 @@ def test_gerente_prompt_reflects_system_gate_and_plan_boundary():
     assert "triage_sistema" in lowered or "no re-clasific" in lowered
     assert "plan aprobado" in lowered
     chat_section = prompt.split("### Solo vía plan")[0]
-    assert "redactor_documentos_juridicos_penales" not in chat_section
+    assert "redactor_documentos_juridicos" not in chat_section
 
 
 def test_chat_orchestrator_tools_match_contract():
@@ -56,7 +56,7 @@ def test_chat_orchestrator_tools_match_contract():
 
     poc = build_orchestrator(
         include_high_risk_tools=False,
-        focus_agent_id="analista_cronologia_hechos_penales",
+        focus_agent_id="analista_cronologia_hechos",
         include_kb_search_tool=False,
         include_full_read_tools=False,
         include_list_areas_tool=False,
@@ -65,7 +65,7 @@ def test_chat_orchestrator_tools_match_contract():
     names = {getattr(t, "name", "") for t in (poc.tools or [])}
     assert "listar_areas_derecho" not in names
     assert "buscar_en_expediente" in names
-    assert "redactor_documentos_juridicos_penales" not in names
+    assert "redactor_documentos_juridicos" not in names
     assert "evaluador_derechos_fundamentales_tutela" not in names
     # Skills POC no se exponen como function_tools
     for sid in POC_SKILLS:
@@ -86,8 +86,8 @@ def test_listar_areas_off_chat_on_specialists_and_plan():
     """Política: chat Gerente slim sin listar/leer_*; plan/especialistas sí pueden."""
     from src.agents.agent_cache import clear_agent_cache
     from src.agents.orchestrator import (
-        build_analista_cronologia_hechos_penales_agent,
-        build_coordinador_agent,
+        build_analista_cronologia_hechos_agent,
+        build_coordinador_caso_agent,
         build_orchestrator,
     )
     from src.mcp.tools import get_knowledge_tools
@@ -101,14 +101,14 @@ def test_listar_areas_off_chat_on_specialists_and_plan():
     assert "listar_areas_derecho" not in default_names
 
     coord_names = {
-        getattr(t, "name", "") for t in (build_coordinador_agent().tools or [])
+        getattr(t, "name", "") for t in (build_coordinador_caso_agent().tools or [])
     }
     assert "listar_areas_derecho" not in coord_names
     assert "leer_area_derecho" not in coord_names
 
     spec_names = {
         getattr(t, "name", "")
-        for t in (build_analista_cronologia_hechos_penales_agent().tools or [])
+        for t in (build_analista_cronologia_hechos_agent().tools or [])
     }
     assert "listar_areas_derecho" in spec_names
     assert "leer_area_derecho" in spec_names
@@ -135,7 +135,7 @@ def test_prompt_canary_invariants_still_hold():
             / "agente"
             / "prompts"
             / "agents"
-            / "coordinador_expediente_penal.md"
+            / "coordinador_caso.md"
         ).read_text(encoding="utf-8")
     )
     health = evaluate_prompt_health(prompt)
@@ -216,7 +216,7 @@ def test_triage_urgency_and_faltantes_detalle_contract():
 
     incomplete = assess_completeness(
         "Redacte un memorial de impulso.",
-        destination="redactor_documentos_juridicos_penales",
+        destination="redactor_documentos_juridicos",
     )
     assert incomplete.puede_continuar is False
     assert incomplete.faltantes
@@ -234,7 +234,7 @@ def test_record_specialist_result_structures_pendientes():
     get_repository().save_expediente(Expediente(session_id=session_id))
     out = record_specialist_result(
         session_id,
-        agent_id="analista_cronologia_hechos_penales",
+        agent_id="analista_cronologia_hechos",
         text=(
             "- [PENDIENTE DE VERIFICAR] Confirmar radicado del proceso.\n"
             "- [FALTANTE] Fecha de la audiencia preparatoria."

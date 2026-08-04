@@ -13,9 +13,9 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales` (control de cierre del pipeline factual)
+- `analista_cronologia_hechos` (control de cierre del pipeline factual)
 - `analista_calidad_juridica`
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte.

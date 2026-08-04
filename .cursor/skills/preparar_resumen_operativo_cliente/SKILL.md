@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 1a756b8f7c5a0552 -->
 ---
 name: preparar-resumen-operativo-cliente
 description: Skill atomico penal-victimas: crear version simple del estado del proceso para cliente, sin estrategia sensible. Use when the workflow requires `preparar_resumen_operativo_cliente`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose
 Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible.
 
-## Rol en gestor_seguimiento_procesal_penal
+## Rol en analista_seguimiento_procesal
 Comunicación periódica de avance procesal.
 
 ## Rol en analista_calidad_juridica

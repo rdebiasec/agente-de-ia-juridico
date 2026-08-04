@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 
 ## Purpose
 Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal.

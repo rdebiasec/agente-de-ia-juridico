@@ -261,6 +261,8 @@ from src.gateway.compliance_api import router as compliance_router
 from src.gateway.firma_api import router as firma_router
 from src.gateway.slack_interactivity import router as slack_router
 from src.gateway.support_api import router as support_router
+from src.gateway.triple_chat_api import abogado_router as triple_chat_abogado_router
+from src.gateway.triple_chat_api import cliente_router as triple_chat_cliente_router
 from src.gateway.twilio_webhook import router as twilio_router
 
 app.include_router(audit_portal_router)
@@ -268,6 +270,8 @@ app.include_router(compliance_router)
 app.include_router(firma_router)
 app.include_router(slack_router)
 app.include_router(support_router)
+app.include_router(triple_chat_cliente_router)
+app.include_router(triple_chat_abogado_router)
 app.include_router(twilio_router)
 
 _static_dir = get_settings().project_root / "static"
@@ -348,6 +352,15 @@ async def abogado_desk(
     if index.is_file():
         return FileResponse(index)
     raise HTTPException(status_code=404, detail="Escritorio del abogado no encontrado.")
+
+
+@app.get("/cliente")
+async def cliente_front_office():
+    """Front-office víctima (sin gate del escritorio abogado). Solo local/dev hasta OK explícito de prod."""
+    page = _static_dir / "desk" / "cliente.html"
+    if page.is_file():
+        return FileResponse(page)
+    raise HTTPException(status_code=404, detail="Front-office cliente no encontrado.")
 
 
 @app.get("/soporte")
@@ -546,6 +559,7 @@ class ChatResponse(BaseModel):
     draft_id: str | None = None
     trace: dict | None = None
     plan_id: str | None = None
+    offer_plan: bool = False
 
 
 class ChatPlanRequest(BaseModel):
@@ -644,7 +658,19 @@ async def chat(
         InboundMessage(channel=req.channel, user_id=uid, text=req.message)
     )
     return ChatResponse(
-        **{k: result[k] for k in ("text", "agent", "pending_review", "draft_id", "trace") if k in result}
+        **{
+            k: result[k]
+            for k in (
+                "text",
+                "agent",
+                "pending_review",
+                "draft_id",
+                "trace",
+                "plan_id",
+                "offer_plan",
+            )
+            if k in result
+        }
     )
 
 

@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
+- `analista_cronologia_hechos`
 - `analista_calidad_juridica`
 
 ## Purpose
@@ -63,7 +63,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 ## No duplicar
 - No señalar solo inconsistencias temporales en línea de tiempo (`construir_cronologia_penal` paso 3).
 - No generar batería completa de preguntas (`generar_preguntas_aclaracion`).
-- No evaluar tipicidad por contradicción (`analista_tipicidad_y_responsabilidad_penal`).
+- No evaluar tipicidad por contradicción (`analista_responsabilidad_tipicidad`).
 
 ## Riesgo si se omite
 Estrategia basada en versión única que colapsa ante informe de policía o declaración de testigo.

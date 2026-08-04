@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: eb7b485a65190d41 -->
 ---
 name: evaluar-suficiencia-probatoria
 description: Skill estrategico penal-victimas: evaluar preliminarmente fuerza de soporte probatorio. Use when the workflow requires `evaluar_suficiencia_probatoria`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 - `analista_representacion_victimas`
 
 ## Purpose
 Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Cierre analítico tras matriz hecho-prueba e inventario.
 
 ## Rol en analista_representacion_victimas

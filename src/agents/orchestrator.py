@@ -2,7 +2,7 @@
 
 Arquitectura penal enfocada en representación de víctimas en Colombia:
 un coordinador del expediente (POC) es el único interlocutor del abogado;
-10 especialistas operan como backoffice interno (tools + trazas).
+9 especialistas operan como backoffice interno (tools + trazas).
 """
 
 from __future__ import annotations
@@ -23,7 +23,6 @@ from src.agents.schemas import (
     RepresentacionVictimas,
     RutaProcesalLey906,
     SeguimientoProcesal,
-    Tutela,
 )
 from src.agents.sdk_guardrails import (
     calidad_output_guardrails,
@@ -33,7 +32,6 @@ from src.agents.sdk_guardrails import (
     poc_tool_output_guardrails,
     redactor_output_guardrails,
     specialist_output_guardrails,
-    tutela_output_guardrails,
 )
 from src.agents.skill_catalog import (
     HIGH_RISK_AGENTS,
@@ -44,7 +42,7 @@ from src.agents.structured_render import render_structured_output
 from src.config import get_settings
 from src.mcp.tools import get_knowledge_tools
 
-POC_AGENT_ID = "coordinador_expediente_penal"
+POC_AGENT_ID = "coordinador_caso"
 
 _BACKOFFICE_VOICE = """
 Modo BACKOFFICE (equipo interno):
@@ -57,50 +55,45 @@ Modo BACKOFFICE (equipo interno):
 
 # Contratos as_tool: skill primario + cuándo usar / no usar (routing L10).
 _SPECIALIST_TOOL_DESCRIPTIONS: dict[str, str] = {
-    "analista_cronologia_hechos_penales": (
+    "analista_cronologia_hechos": (
         "Cronología y hechos (skill: construir_cronologia_penal). "
         "Usar para línea de tiempo, actores, contradicciones y vacíos fácticos. "
-        "No usar para tipicidad, redacción de memoriales ni tutela."
+        "No usar para tipicidad, redacción de memoriales ni piezas constitucionales."
     ),
-    "analista_tipicidad_y_responsabilidad_penal": (
+    "analista_responsabilidad_tipicidad": (
         "Tipicidad y responsabilidad (skill: descomponer_elementos_tipo_penal). "
         "Usar para elementos del tipo, autoría, dolo/culpa, agravantes y riesgo de atipicidad. "
         "No usar para inventariar pruebas ni redactar memoriales."
     ),
-    "analista_ruta_procesal_ley906": (
+    "analista_ruta_procesal": (
         "Ruta procesal Ley 906 (skill: identificar_etapa_procesal_ley906). "
         "Usar para etapa, oportunidades de intervención, términos y riesgos procesales. "
-        "No usar para redacción de tutela ni inventario de evidencia."
+        "No usar para redacción de memoriales ni inventario de evidencia."
     ),
     "analista_representacion_victimas": (
         "Representación de víctimas (skill: construir_teoria_caso_victima). "
         "Usar para teoría del caso, derechos, daño/afectación, enfoque diferencial y no revictimización. "
         "No usar para tipicidad pura ni seguimiento de radicados."
     ),
-    "gestor_evidencia_y_soporte_probatorio": (
+    "analista_evidencia": (
         "Evidencia y soporte probatorio (skill: inventariar_evidencia). "
         "Usar para inventario, matriz hecho-prueba, brechas y plan de recaudo. "
-        "No usar para redactar memoriales ni evaluar tutela."
+        "No usar para redactar memoriales ni dictamen de calidad."
     ),
-    "preparador_estrategico_audiencias_penales": (
+    "analista_audiencias": (
         "Audiencias penales (skill: preparar_preguntas_audiencia). "
         "Usar para objetivos, guiones, solicitudes orales, preguntas y checklist de audiencia. "
         "No usar para memorial escrito ni tipicidad aislada."
     ),
-    "redactor_documentos_juridicos_penales": (
+    "redactor_documentos_juridicos": (
         "Redacción jurídica penal (skill: redactar_memorial_penal). "
         "Usar para borradores internos: memoriales, solicitudes, ampliaciones o derecho de petición. "
-        "No usar para tutela constitucional (derivar a evaluador_tutela) ni dictamen de calidad."
+        "No usar para dictamen de calidad ni seguimiento de radicados."
     ),
-    "gestor_seguimiento_procesal_penal": (
+    "analista_seguimiento_procesal": (
         "Seguimiento procesal (skill: monitorear_radicado). "
         "Usar para radicados, actuaciones, audiencias calendarizadas, términos e inactividad. "
         "No usar para redactar memoriales ni tipicidad."
-    ),
-    "evaluador_derechos_fundamentales_tutela": (
-        "Derechos fundamentales / tutela (skill: evaluar_procedencia_tutela). "
-        "Usar para procedencia preliminar de tutela vinculada al caso penal. "
-        "No usar para memorial ordinario ni inventario de evidencia."
     ),
     "analista_calidad_juridica": (
         "Calidad jurídica (skill: revisar_coherencia_estrategica). "
@@ -115,73 +108,65 @@ APPROVAL_REQUIRED_TOOL_IDS = _APPROVAL_REQUIRED_TOOLS
 
 # Vecinos tipicos: destino inferido + 1–2 adyacentes (superficie dinamica).
 _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
-    "analista_cronologia_hechos_penales": frozenset(
+    "analista_cronologia_hechos": frozenset(
         {
-            "gestor_evidencia_y_soporte_probatorio",
+            "analista_evidencia",
             "analista_calidad_juridica",
-            "analista_tipicidad_y_responsabilidad_penal",
-            "analista_ruta_procesal_ley906",  # G04: hechos ↔ etapa
+            "analista_responsabilidad_tipicidad",
+            "analista_ruta_procesal",  # G04: hechos ↔ etapa
         }
     ),
-    "analista_tipicidad_y_responsabilidad_penal": frozenset(
+    "analista_responsabilidad_tipicidad": frozenset(
         {
-            "gestor_evidencia_y_soporte_probatorio",
+            "analista_evidencia",
             "analista_calidad_juridica",
-            "analista_cronologia_hechos_penales",
-            "analista_ruta_procesal_ley906",  # G04
+            "analista_cronologia_hechos",
+            "analista_ruta_procesal",  # G04
         }
     ),
-    "analista_ruta_procesal_ley906": frozenset(
+    "analista_ruta_procesal": frozenset(
         {
-            "gestor_seguimiento_procesal_penal",
-            "preparador_estrategico_audiencias_penales",
+            "analista_seguimiento_procesal",
+            "analista_audiencias",
             "analista_calidad_juridica",
         }
     ),
     "analista_representacion_victimas": frozenset(
         {
-            "analista_cronologia_hechos_penales",
-            "analista_calidad_juridica",
-            "evaluador_derechos_fundamentales_tutela",
-        }
-    ),
-    "gestor_evidencia_y_soporte_probatorio": frozenset(
-        {
-            "analista_cronologia_hechos_penales",
-            "analista_tipicidad_y_responsabilidad_penal",
+            "analista_cronologia_hechos",
             "analista_calidad_juridica",
         }
     ),
-    "preparador_estrategico_audiencias_penales": frozenset(
+    "analista_evidencia": frozenset(
         {
-            "analista_ruta_procesal_ley906",
+            "analista_cronologia_hechos",
+            "analista_responsabilidad_tipicidad",
+            "analista_calidad_juridica",
+        }
+    ),
+    "analista_audiencias": frozenset(
+        {
+            "analista_ruta_procesal",
             "analista_representacion_victimas",
             "analista_calidad_juridica",
         }
     ),
-    "gestor_seguimiento_procesal_penal": frozenset(
+    "analista_seguimiento_procesal": frozenset(
         {
-            "analista_ruta_procesal_ley906",
+            "analista_ruta_procesal",
             "analista_calidad_juridica",
         }
     ),
     "analista_calidad_juridica": frozenset(
         {
-            "analista_cronologia_hechos_penales",
-            "analista_ruta_procesal_ley906",
+            "analista_cronologia_hechos",
+            "analista_ruta_procesal",
         }
     ),
-    "redactor_documentos_juridicos_penales": frozenset(
+    "redactor_documentos_juridicos": frozenset(
         {
             "analista_calidad_juridica",
-            "analista_ruta_procesal_ley906",
-        }
-    ),
-    "evaluador_derechos_fundamentales_tutela": frozenset(
-        {
-            "analista_calidad_juridica",
-            "analista_ruta_procesal_ley906",
-            "analista_representacion_victimas",
+            "analista_ruta_procesal",
         }
     ),
 }
@@ -189,10 +174,9 @@ _SPECIALIST_NEIGHBORS: dict[str, frozenset[str]] = {
 # Overrides por costo/complejidad; techo duro evita loops caros (L10).
 _NESTED_MAX_TURNS_BY_AGENT: dict[str, int] = {
     "analista_calidad_juridica": 4,
-    "redactor_documentos_juridicos_penales": 5,
-    "preparador_estrategico_audiencias_penales": 5,
-    "evaluador_derechos_fundamentales_tutela": 4,
-    "gestor_evidencia_y_soporte_probatorio": 4,
+    "redactor_documentos_juridicos": 5,
+    "analista_audiencias": 5,
+    "analista_evidencia": 4,
 }
 _NESTED_MAX_TURNS_CEILING = 8
 
@@ -263,23 +247,23 @@ def _build_agent(
     return Agent(**kwargs)
 
 
-def build_analista_cronologia_hechos_penales_agent() -> Agent:
+def build_analista_cronologia_hechos_agent() -> Agent:
     return _build_agent(
-        "analista_cronologia_hechos_penales",
+        "analista_cronologia_hechos",
         output_type=CronologiaPenal,
     )
 
 
-def build_analista_tipicidad_y_responsabilidad_penal_agent() -> Agent:
+def build_analista_responsabilidad_tipicidad_agent() -> Agent:
     return _build_agent(
-        "analista_tipicidad_y_responsabilidad_penal",
+        "analista_responsabilidad_tipicidad",
         output_type=MatrizTipicidad,
     )
 
 
-def build_analista_ruta_procesal_ley906_agent() -> Agent:
+def build_analista_ruta_procesal_agent() -> Agent:
     return _build_agent(
-        "analista_ruta_procesal_ley906",
+        "analista_ruta_procesal",
         output_type=RutaProcesalLey906,
     )
 
@@ -291,41 +275,34 @@ def build_analista_representacion_victimas_agent() -> Agent:
     )
 
 
-def build_gestor_evidencia_y_soporte_probatorio_agent() -> Agent:
+def build_analista_evidencia_agent() -> Agent:
     return _build_agent(
-        "gestor_evidencia_y_soporte_probatorio",
+        "analista_evidencia",
         output_type=InventarioEvidencia,
     )
 
 
-def build_preparador_estrategico_audiencias_penales_agent() -> Agent:
+def build_analista_audiencias_agent() -> Agent:
     return _build_agent(
-        "preparador_estrategico_audiencias_penales",
+        "analista_audiencias",
         output_type=PreparacionAudiencia,
     )
 
 
-def build_redactor_documentos_juridicos_penales_agent() -> Agent:
+def build_redactor_documentos_juridicos_agent() -> Agent:
     return _build_agent(
-        "redactor_documentos_juridicos_penales",
+        "redactor_documentos_juridicos",
         output_type=BorradorDocumentoPenal,
         output_guardrails=redactor_output_guardrails(),
     )
 
 
-def build_gestor_seguimiento_procesal_penal_agent() -> Agent:
+def build_analista_seguimiento_procesal_agent() -> Agent:
     return _build_agent(
-        "gestor_seguimiento_procesal_penal",
+        "analista_seguimiento_procesal",
         output_type=SeguimientoProcesal,
     )
 
-
-def build_evaluador_derechos_fundamentales_tutela_agent() -> Agent:
-    return _build_agent(
-        "evaluador_derechos_fundamentales_tutela",
-        output_type=Tutela,
-        output_guardrails=tutela_output_guardrails(),
-    )
 
 
 def build_analista_calidad_juridica_agent() -> Agent:
@@ -336,7 +313,7 @@ def build_analista_calidad_juridica_agent() -> Agent:
     )
 
 
-def build_coordinador_agent(*, slim_instructions: bool = True) -> Agent:
+def build_coordinador_caso_agent(*, slim_instructions: bool = True) -> Agent:
     """POC sin especialistas (pasos de plan / consultas directas al coordinador)."""
     instructions = assemble_instructions(
         POC_AGENT_ID,
@@ -360,37 +337,38 @@ def build_coordinador_agent(*, slim_instructions: bool = True) -> Agent:
 
 
 _AGENT_BUILDERS: dict[str, object] = {
-    "coordinador_expediente_penal": build_coordinador_agent,
-    "analista_cronologia_hechos_penales": build_analista_cronologia_hechos_penales_agent,
-    "analista_tipicidad_y_responsabilidad_penal": build_analista_tipicidad_y_responsabilidad_penal_agent,
-    "analista_ruta_procesal_ley906": build_analista_ruta_procesal_ley906_agent,
+    "coordinador_caso": build_coordinador_caso_agent,
+    "analista_cronologia_hechos": build_analista_cronologia_hechos_agent,
+    "analista_responsabilidad_tipicidad": build_analista_responsabilidad_tipicidad_agent,
+    "analista_ruta_procesal": build_analista_ruta_procesal_agent,
     "analista_representacion_victimas": build_analista_representacion_victimas_agent,
-    "gestor_evidencia_y_soporte_probatorio": build_gestor_evidencia_y_soporte_probatorio_agent,
-    "preparador_estrategico_audiencias_penales": build_preparador_estrategico_audiencias_penales_agent,
-    "redactor_documentos_juridicos_penales": build_redactor_documentos_juridicos_penales_agent,
-    "gestor_seguimiento_procesal_penal": build_gestor_seguimiento_procesal_penal_agent,
-    "evaluador_derechos_fundamentales_tutela": build_evaluador_derechos_fundamentales_tutela_agent,
+    "analista_evidencia": build_analista_evidencia_agent,
+    "analista_audiencias": build_analista_audiencias_agent,
+    "redactor_documentos_juridicos": build_redactor_documentos_juridicos_agent,
+    "analista_seguimiento_procesal": build_analista_seguimiento_procesal_agent,
     "analista_calidad_juridica": build_analista_calidad_juridica_agent,
 }
 
 
 def get_agent_by_id(agent_id: str) -> Agent | None:
-    builder = _AGENT_BUILDERS.get(agent_id)
+    from src.agents.agent_ids import resolve_agent_id
+
+    canonical = resolve_agent_id(agent_id) or agent_id
+    builder = _AGENT_BUILDERS.get(canonical)
     if builder is None:
         return None
-    return get_cached_agent(agent_id, builder)  # type: ignore[arg-type]
+    return get_cached_agent(canonical, builder)  # type: ignore[arg-type]
 
 
 _SPECIALIST_BUILDERS = (
-    build_analista_cronologia_hechos_penales_agent,
-    build_analista_tipicidad_y_responsabilidad_penal_agent,
-    build_analista_ruta_procesal_ley906_agent,
+    build_analista_cronologia_hechos_agent,
+    build_analista_responsabilidad_tipicidad_agent,
+    build_analista_ruta_procesal_agent,
     build_analista_representacion_victimas_agent,
-    build_gestor_evidencia_y_soporte_probatorio_agent,
-    build_preparador_estrategico_audiencias_penales_agent,
-    build_redactor_documentos_juridicos_penales_agent,
-    build_gestor_seguimiento_procesal_penal_agent,
-    build_evaluador_derechos_fundamentales_tutela_agent,
+    build_analista_evidencia_agent,
+    build_analista_audiencias_agent,
+    build_redactor_documentos_juridicos_agent,
+    build_analista_seguimiento_procesal_agent,
     build_analista_calidad_juridica_agent,
 )
 
@@ -502,6 +480,35 @@ def _as_tool_failure_error(
 
 async def _tool_output_text(result: object) -> str:
     output = getattr(result, "final_output", result)
+    # Persist specialist notes into expediente bitácora when session is bound.
+    try:
+        from src.agents.session_context import get_active_session_id
+        from src.services.bitacora import extract_and_persist_specialist_output
+
+        sid = get_active_session_id()
+        agent_name = getattr(getattr(result, "last_agent", None), "name", None) or getattr(
+            result, "agent", None
+        )
+        if isinstance(agent_name, str) and agent_name and sid:
+            extract_and_persist_specialist_output(
+                sid, agent_id=agent_name, output=output
+            )
+        elif sid and hasattr(output, "notas_trabajo"):
+            # Fallback autor from first note or unknown specialist
+            autor = None
+            notas = getattr(output, "notas_trabajo", None) or []
+            if notas:
+                first = notas[0]
+                autor = getattr(first, "autor", None) or (
+                    first.get("autor") if isinstance(first, dict) else None
+                )
+            extract_and_persist_specialist_output(
+                sid,
+                agent_id=str(autor or "especialista"),
+                output=output,
+            )
+    except Exception:
+        pass
     return render_structured_output(output)
 
 

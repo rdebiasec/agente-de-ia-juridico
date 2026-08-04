@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial.

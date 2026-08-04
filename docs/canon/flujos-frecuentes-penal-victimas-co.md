@@ -23,7 +23,7 @@
 | 10,7% vida e integridad | Cronología + tipicidad + evidencia |
 | 93,2% activos en **indagación** | Trabajo típico *pre-juicio* |
 | 69,1% procedimiento **abreviado** | Querella / audiencia concentrada + seguimiento |
-| ~82% evacuaciones por **archivo** | Valor alto: anti-archivo, impulso, tutela por dilación |
+| ~82% evacuaciones por **archivo** | Valor alto: anti-archivo, impulso, seguimiento por dilación |
 
 ## Veredicto de encadenamiento
 
@@ -39,7 +39,7 @@ Implementación de plantillas: `src/agents/plan_templates.py`.
 | A. Impulso / anti-archivo en indagación | `indagacion_impulso` | cronología → tipicidad → ruta906 → evidencia → redacción → seguimiento → calidad | Memorial/solicitud + alertas |
 | B. Querella / abreviado | `querella_abreviado` | ruta906 → tipicidad → redacción → seguimiento | Pieza querellable + plan abreviado |
 | C. VIF / protección | `vif_proteccion` | víctimas → tipicidad → evidencia → audiencias → calidad | Estrategia + solicitudes art. 134 |
-| D. Dilación / tutela | `tutela` (existente) | tutela → redacción → calidad | Evaluación + borrador HITL |
+| D. Dilación / mora de petición | `indagacion_impulso` | impulso → redacción → seguimiento → calidad | Memorial / seguimiento HITL (sin tutela) |
 | E. Preparación audiencia | `audiencia` (existente) | audiencias → calidad | Guion + checklist |
 | F. Cronología / relato | `cronologia` (existente) | cronología → calidad | Línea de tiempo trazable |
 

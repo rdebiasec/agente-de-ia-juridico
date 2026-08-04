@@ -18,7 +18,6 @@ from src.agents.skill_catalog import (
 
 PlanTemplateKind = Literal[
     "cronologia",
-    "tutela",
     "audiencia",
     "indagacion_impulso",
     "vif_proteccion",
@@ -28,7 +27,6 @@ PlanTemplateKind = Literal[
 
 _TEMPLATE_LABELS: dict[PlanTemplateKind, str] = {
     "cronologia": "Cronología y hechos",
-    "tutela": "Acción de tutela",
     "audiencia": "Preparación de audiencia",
     "indagacion_impulso": "Impulso / anti-archivo en indagación",
     "vif_proteccion": "VIF y medidas de protección",
@@ -36,7 +34,7 @@ _TEMPLATE_LABELS: dict[PlanTemplateKind, str] = {
     "generico": "Consulta general",
 }
 
-_TUTELA_RE = re.compile(r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b", re.IGNORECASE)
+# Tutela fuera del producto: no plantilla constitucional.
 _VIF_RE = re.compile(
     r"\b(violencia\s+intrafamiliar|v\.?\s*i\.?\s*f\.?|inasistencia\s+alimentaria|"
     r"medidas?\s+de\s+protecci[oó]n|enfoque\s+diferencial|revictimizaci[oó]n)\b",
@@ -48,7 +46,8 @@ _QUERELLA_RE = re.compile(
 )
 _IMPULSO_RE = re.compile(
     r"\b(impulso|anti[- ]?archivo|archiv(o|ar|ado)|indagaci[oó]n|reactivar|"
-    r"inactividad|derecho\s+de\s+petici[oó]n\s+penal)\b",
+    r"inactividad|derecho\s+de\s+petici[oó]n|silencio\s+(?:administrativo|a\s+la\s+petici[oó]n)|"
+    r"mora\s+de\s+(?:respuesta|petici[oó]n)|insistencia)\b",
     re.IGNORECASE,
 )
 _AUDIENCIA_RE = re.compile(r"\b(audiencia|interrogatorio|contrainterrogatorio|juicio|alegato)\b", re.IGNORECASE)
@@ -58,8 +57,6 @@ _CRONOLOGIA_RE = re.compile(r"\b(cronolog[ií]a|linea de tiempo|hechos|narrativa
 def classify_plan_template(message: str) -> PlanTemplateKind:
     """Prioriza flujos de alto volumen SPOA (VIF, querella, impulso) antes que genéricos."""
     text = message or ""
-    if _TUTELA_RE.search(text):
-        return "tutela"
     if _VIF_RE.search(text):
         return "vif_proteccion"
     if _QUERELLA_RE.search(text):
@@ -154,10 +151,10 @@ def build_templated_steps(
         _step(
             step_id=f"s{order:02d}",
             order=order,
-            agent_id="coordinador_expediente_penal",
+            agent_id="coordinador_caso",
             title="Clasificar consulta y contexto del caso",
             user_summary=(
-                "Como Gerente del Caso Penal, identificaré la tarea, la etapa procesal "
+                "Como Coordinador del Caso, identificaré la tarea, la etapa procesal "
                 "aparente y pediré apoyo al equipo interno según esta plantilla."
             ),
         )
@@ -170,7 +167,7 @@ def build_templated_steps(
             order,
             [
                 (
-                    "analista_cronologia_hechos_penales",
+                    "analista_cronologia_hechos",
                     "Construir cronología y matriz hecho-fuente",
                     "Voy a pedir al equipo interno que extraiga hechos, ordene la línea de tiempo "
                     "y señale vacíos o contradicciones que requieran verificación.",
@@ -178,33 +175,8 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Control de calidad — cronología",
-                    "Como gerente, pediré al equipo de calidad revisar coherencia factual "
+                    "Como coordinador, pediré al equipo de calidad revisar coherencia factual "
                     "y separación hecho/inferencia antes de entregarle el resultado.",
-                ),
-            ],
-        )
-    elif kind == "tutela":
-        order = _append_chain(
-            steps,
-            order,
-            [
-                (
-                    "evaluador_derechos_fundamentales_tutela",
-                    "Evaluar procedencia y derecho fundamental",
-                    "Voy a pedir al equipo constitucional analizar subsidiariedad, inmediatez "
-                    "y el derecho fundamental presuntamente vulnerado.",
-                ),
-                (
-                    "redactor_documentos_juridicos_penales",
-                    "Borrador preliminar de tutela",
-                    "Si procede, pediré al equipo de redacción un borrador con hechos, "
-                    "fundamentos y pretensiones para su revisión.",
-                ),
-                (
-                    "analista_calidad_juridica",
-                    "Control de calidad — tutela",
-                    "Como gerente, pediré verificar tono, soporte normativo y riesgos "
-                    "de improcedencia antes de entregarle el borrador.",
                 ),
             ],
         )
@@ -214,7 +186,7 @@ def build_templated_steps(
             order,
             [
                 (
-                    "preparador_estrategico_audiencias_penales",
+                    "analista_audiencias",
                     "Objetivo y estrategia de audiencia",
                     "Voy a pedir al equipo de audiencias definir objetivo procesal, "
                     "solicitudes orales y preguntas clave.",
@@ -222,7 +194,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Checklist previo a audiencia",
-                    "Como gerente, pediré revisar riesgos procesales y coherencia "
+                    "Como coordinador, pediré revisar riesgos procesales y coherencia "
                     "estratégica antes de la intervención.",
                 ),
             ],
@@ -233,39 +205,39 @@ def build_templated_steps(
             order,
             [
                 (
-                    "analista_cronologia_hechos_penales",
+                    "analista_cronologia_hechos",
                     "Ordenar hechos para impulso en indagación",
                     "Voy a pedir al equipo de cronología consolidar hechos útiles para "
                     "reactivar o impulsar la noticia criminal.",
                 ),
                 (
-                    "analista_tipicidad_y_responsabilidad_penal",
+                    "analista_responsabilidad_tipicidad",
                     "Tipicidad preliminar del caso",
                     "Consultaré tipicidad y elementos del tipo para enfocar el impulso "
                     "sin afirmar conclusiones definitivas.",
                 ),
                 (
-                    "analista_ruta_procesal_ley906",
+                    "analista_ruta_procesal",
                     "Ruta procesal y riesgo de archivo",
                     "Pediré al equipo de ruta 906 identificar etapa, oportunidades de "
                     "intervención y riesgos de archivo o inactividad.",
                 ),
                 (
-                    "gestor_evidencia_y_soporte_probatorio",
+                    "analista_evidencia",
                     "Brechas probatorias y recaudo",
                     "Voy a pedir inventario de evidencia y plan de recaudo para sostener "
                     "el impulso ante Fiscalía.",
                 ),
                 (
-                    "redactor_documentos_juridicos_penales",
+                    "redactor_documentos_juridicos",
                     "Borrador de memorial o solicitud de impulso",
                     "Pediré al equipo de redacción el borrador revisable (memorial, "
                     "solicitud o derecho de petición penal).",
                 ),
                 (
-                    "gestor_seguimiento_procesal_penal",
+                    "analista_seguimiento_procesal",
                     "Alertas de seguimiento post-impulso",
-                    "Como gerente, pediré alertas de radicado, términos y seguimiento "
+                    "Como coordinador, pediré alertas de radicado, términos y seguimiento "
                     "operativo tras el impulso.",
                 ),
                 (
@@ -288,19 +260,19 @@ def build_templated_steps(
                     "diferencial y riesgos de revictimización.",
                 ),
                 (
-                    "analista_tipicidad_y_responsabilidad_penal",
+                    "analista_responsabilidad_tipicidad",
                     "Tipicidad VIF / familia",
                     "Consultaré tipicidad preliminar (p. ej. art. 229 C.P. u otras "
                     "conductas familiares) sin conclusiones definitivas.",
                 ),
                 (
-                    "gestor_evidencia_y_soporte_probatorio",
+                    "analista_evidencia",
                     "Soporte probatorio sensible",
                     "Pediré inventario de evidencia con cuidado de cadena de custodia "
                     "e intimidad de la víctima.",
                 ),
                 (
-                    "preparador_estrategico_audiencias_penales",
+                    "analista_audiencias",
                     "Solicitudes de protección (art. 134)",
                     "Voy a pedir preparación de solicitudes de atención/protección y "
                     "guion para control de garantías o juicio, según etapa.",
@@ -308,7 +280,7 @@ def build_templated_steps(
                 (
                     "analista_calidad_juridica",
                     "Control de calidad — VIF",
-                    "Como gerente, pediré verificar confidencialidad, tono y "
+                    "Como coordinador, pediré verificar confidencialidad, tono y "
                     "coherencia estratégica antes de entregarle la salida.",
                 ),
             ],
@@ -319,32 +291,32 @@ def build_templated_steps(
             order,
             [
                 (
-                    "analista_ruta_procesal_ley906",
+                    "analista_ruta_procesal",
                     "Procedencia querella / abreviado",
                     "Voy a pedir al equipo de ruta 906 confirmar si el caso encaja en "
                     "querella o procedimiento abreviado (Ley 1826) y próximos pasos.",
                 ),
                 (
-                    "analista_tipicidad_y_responsabilidad_penal",
+                    "analista_responsabilidad_tipicidad",
                     "Tipicidad de la conducta querellable",
                     "Consultaré tipicidad preliminar para delimitar la pieza querellable.",
                 ),
                 (
-                    "redactor_documentos_juridicos_penales",
+                    "redactor_documentos_juridicos",
                     "Borrador de querella o escrito abreviado",
                     "Pediré al equipo de redacción el borrador revisable para querella "
                     "o actuación en abreviado.",
                 ),
                 (
-                    "gestor_seguimiento_procesal_penal",
+                    "analista_seguimiento_procesal",
                     "Seguimiento de audiencia concentrada",
-                    "Como gerente, pediré plan de seguimiento (términos, audiencia "
+                    "Como coordinador, pediré plan de seguimiento (términos, audiencia "
                     "concentrada y alertas operativas).",
                 ),
             ],
         )
 
-    if destination not in {s.agent_id for s in steps} and destination != "coordinador_expediente_penal":
+    if destination not in {s.agent_id for s in steps} and destination != "coordinador_caso":
         steps.append(
             _step(
                 step_id=f"s{order:02d}",
@@ -352,7 +324,7 @@ def build_templated_steps(
                 agent_id=destination,
                 title=f"Consulta adicional — {desk_label(destination)}",
                 user_summary=(
-                    f"Como gerente, pediré al equipo interno ({desk_label(destination)}) "
+                    f"Como coordinador, pediré al equipo interno ({desk_label(destination)}) "
                     f"el análisis adicional que requiere su consulta."
                 ),
                 depends_on=[steps[-1].step_id],

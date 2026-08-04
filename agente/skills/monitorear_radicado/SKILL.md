@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `atomico`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal` (skill primario del agente)
+- `analista_seguimiento_procesal` (skill primario del agente)
 
 ## Purpose
 Consultar o registrar estado del radicado con fuente y timestamp.

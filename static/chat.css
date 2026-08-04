@@ -3128,11 +3128,7 @@ body.manual-body {
   max-width: 280px;
 }
 
-.workspace-deadline-chip--tutela {
-  border-color: rgba(214, 106, 42, 0.55);
-  background: rgba(214, 106, 42, 0.14);
-  color: #ffb48a;
-}
+/* tutela chip removed from product */
 
 .btn-bandeja {
   position: relative;
@@ -3257,18 +3253,21 @@ body.manual-body {
   color: var(--muted);
 }
 
-.expediente-hitos {
+.expediente-hitos,
+.expediente-bitacora {
   padding: 0.65rem 1rem 0.85rem;
   border-top: 1px solid var(--line);
 }
 
-.expediente-hitos h3 {
+.expediente-hitos h3,
+.expediente-bitacora h3 {
   font-size: 0.82rem;
   margin-bottom: 0.45rem;
   color: var(--muted);
 }
 
-.expediente-hitos ul {
+.expediente-hitos ul,
+.expediente-bitacora-list {
   list-style: none;
   display: grid;
   gap: 0.35rem;
@@ -3278,6 +3277,18 @@ body.manual-body {
 .expediente-hitos li::before {
   content: "○ ";
   color: var(--accent);
+}
+
+.expediente-bitacora-list li {
+  line-height: 1.35;
+  color: var(--ink, inherit);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.expediente-bitacora-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
 .workspace-chat {
@@ -3706,4 +3717,105 @@ body.drawer-open {
     max-height: none;
     height: auto;
   }
+}
+
+/* Equipo interno — transcript legible (Fase 2) */
+.equipo-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+  padding-bottom: 0.5rem;
+}
+
+.equipo-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 0.4rem 0;
+}
+
+.equipo-turn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: color-mix(in srgb, var(--panel) 92%, var(--accent, #2c5f4a) 8%);
+}
+
+.equipo-turn-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+}
+
+.equipo-route {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.equipo-when {
+  font-size: 0.68rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.equipo-pedido,
+.equipo-respuesta {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.equipo-k {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 0.35rem;
+}
+
+.context-subhead {
+  margin: 1rem 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.firma-card--cliente {
+  border-color: rgba(61, 155, 122, 0.35);
+}
+
+.firma-card-flags {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.78rem;
+  color: #9a6b12;
+}
+
+.firma-card-flags--ok {
+  color: var(--muted, #6b7c74);
+}
+
+.firma-chip--warn {
+  background: rgba(201, 162, 39, 0.2);
+  color: #8a6410;
+}
+
+.firma-case {
+  font-weight: 700;
+}
+
+.bandeja-badge--inline {
+  display: inline-flex;
+  margin-left: 0.4rem;
+  vertical-align: middle;
 }

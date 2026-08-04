@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 2e9b7edd4ac727a8 -->
 ---
 name: preparar-contraargumentos
 description: Skill atomico penal-victimas: anticipar argumentos de defensa, Fiscalia u otros intervinientes. Use when the workflow requires `preparar_contraargumentos`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial.

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "fuente": "documentos/texto/GUIA_PROYECTO_AGENTE_JURIDICO.md",
-  "total": 50,
+  "total": 45,
   "requisitos": [
     {"id": "REQ-001", "prioridad": "Prioritario", "fase": 0, "tipo": "Perfil y áreas del derecho", "descripcion": "Contar con aproximadamente cinco años de experiencia en derecho en Colombia", "cita": "cinco años de experiencia en derecho en Colombia", "audio": "audio_001"},
     {"id": "REQ-002", "prioridad": "Prioritario", "fase": 0, "tipo": "Perfil y áreas del derecho", "descripcion": "Tener habilidad estratégica para el análisis y conducción de asuntos jurídicos", "cita": "habilidad estratégica", "audio": "audio_001"},
@@ -40,11 +40,6 @@
     {"id": "REQ-035", "prioridad": "Específico", "fase": 3, "tipo": "Redactar documentos", "descripcion": "Memoriales de solicitud de expediente", "activo": false},
     {"id": "REQ-036", "prioridad": "Específico", "fase": 3, "tipo": "Redactar documentos", "descripcion": "Memoriales de impulso procesal", "activo": false},
     {"id": "REQ-037", "prioridad": "Específico", "fase": 3, "tipo": "Redactar documentos", "descripcion": "Memoriales de solicitud de audiencias", "activo": false},
-    {"id": "REQ-038", "prioridad": "Específico", "fase": 3, "tipo": "Acciones de tutela", "descripcion": "Redactar acciones de tutela", "activo": false},
-    {"id": "REQ-039", "prioridad": "Específico", "fase": 3, "tipo": "Acciones de tutela", "descripcion": "Datos completos del accionante y accionado en tutela", "activo": false},
-    {"id": "REQ-040", "prioridad": "Específico", "fase": 3, "tipo": "Acciones de tutela", "descripcion": "Indicar derecho vulnerado y fundamentos", "activo": false},
-    {"id": "REQ-041", "prioridad": "Específico", "fase": 3, "tipo": "Acciones de tutela", "descripcion": "Seguimiento radicación tutelas en línea", "activo": false},
-    {"id": "REQ-042", "prioridad": "Específico", "fase": 3, "tipo": "Acciones de tutela", "descripcion": "Contabilizar 10 días hábiles respuesta fallo tutela", "activo": false},
     {"id": "REQ-043", "prioridad": "Específico", "fase": 2, "tipo": "Gestionar procesos", "descripcion": "Revisar correos del despacho", "activo": false},
     {"id": "REQ-044", "prioridad": "Específico", "fase": 2, "tipo": "Gestionar procesos", "descripcion": "Seguimiento a radicaciones de documentos", "activo": false},
     {"id": "REQ-045", "prioridad": "Específico", "fase": 2, "tipo": "Gestionar procesos", "descripcion": "Revisar procesos en Rama Judicial y entidades", "activo": false},

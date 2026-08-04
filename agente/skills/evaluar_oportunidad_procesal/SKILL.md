@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
+- `analista_ruta_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose

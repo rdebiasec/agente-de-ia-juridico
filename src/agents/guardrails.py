@@ -25,7 +25,7 @@ _PHASE_DRAFT_RE = re.compile(r"\n*\s*Fase\s*\d+\s*·\s*Borrador\s*", re.IGNORECA
 DRAFT_REVIEW_INTENT = re.compile(
     r"\b("
     r"redact(?:ar|e|ó|o)?|proyect(?:ar|e|ó)?|"
-    r"memorial|tutela|recurso|derecho\s+de\s+petici[oó]n|"
+    r"memorial|recurso|derecho\s+de\s+petici[oó]n|"
     r"ampliaci[oó]n\s+de\s+denuncia|escrito\s+(?:para\s+)?(?:juzgado|fiscal[ií]a)|"
     r"estrategia|teor[ií]a\s+del\s+caso|riesgo(?:s)?\s+(?:jur[ií]dicos?|procesales?)|"
     r"guion\s+de\s+audiencia|interrogatorio|contrainterrogatorio"

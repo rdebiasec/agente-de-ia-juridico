@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: a250d823c9f14b09 -->
 ---
 name: estructurar-hechos-fundamentos-solicitudes
 description: Skill atomico penal-victimas: ordenar cualquier documento juridico. Use when the workflow requires `estructurar_hechos_fundamentos_solicitudes`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito.

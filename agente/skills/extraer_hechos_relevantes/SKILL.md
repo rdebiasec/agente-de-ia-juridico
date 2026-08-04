@@ -13,9 +13,9 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales` (primer skill del pipeline factual)
-- `redactor_documentos_juridicos_penales`
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_cronologia_hechos` (primer skill del pipeline factual)
+- `redactor_documentos_juridicos`
+- `analista_evidencia`
 
 ## Purpose
 Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias.

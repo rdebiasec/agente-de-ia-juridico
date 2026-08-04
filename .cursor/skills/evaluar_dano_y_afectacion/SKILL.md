@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: db220061159d9492 -->
 ---
 name: evaluar-dano-y-afectacion
 description: Skill atomico penal-victimas: organizar danos y afectaciones alegadas. Use when the workflow requires `evaluar_dano_y_afectacion`.
@@ -13,16 +14,12 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_representacion_victimas`
-- `evaluador_derechos_fundamentales_tutela`
 
 ## Purpose
 Describir preliminarmente el daño o afectación a la víctima con base documentada (físico, psicológico, patrimonial, social).
 
 ## Rol en analista_representacion_victimas
 Insumo para teoría del caso y pretensiones de reparación.
-
-## Rol en evaluador_derechos_fundamentales_tutela
-Contexto factual para perjuicio; no sustituye `analizar_perjuicio_irremediable`.
 
 ## Inputs
 - Relatos, informes médicos/psicológicos, declaraciones (si constan).
@@ -61,7 +58,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_d
 - **g8:** Aviso de revisión profesional.
 
 ## No duplicar
-- No perjuicio irremediable constitucional (`analizar_perjuicio_irremediable`).
+- No pretensiones de reparación definitivas sin HITL.
 - No intereses subjetivos (`identificar_intereses_victima`).
 
 ## Riesgo si se omite

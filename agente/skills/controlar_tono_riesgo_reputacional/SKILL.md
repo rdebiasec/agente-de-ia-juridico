@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Filtro antes de radicar o comunicar.
 
 ## Rol en analista_calidad_juridica

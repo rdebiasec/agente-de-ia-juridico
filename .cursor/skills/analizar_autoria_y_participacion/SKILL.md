@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: bcb061bbe39bc7d5 -->
 ---
 name: analizar-autoria-y-participacion
 description: Skill operativo penal-victimas: evaluar posibles roles de los intervinientes de manera preliminar. Use when the workflow requires `analizar_autoria_y_participacion`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 
 ## Purpose
 Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal.

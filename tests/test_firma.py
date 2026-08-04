@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.agents.schemas import ConceptoJuridico, Memorial, Parte, Tutela
+from src.agents.schemas import ConceptoJuridico, Memorial, Parte
 from src.gateway.expediente import ExpedienteStore
 
 
@@ -18,15 +18,6 @@ def test_memorial_requiere_radicado():
             peticion="Solicito impulso.",
         )
 
-
-def test_tutela_requiere_derecho_vulnerado():
-    with pytest.raises(ValidationError):
-        Tutela(
-            accionante=Parte(nombre="Juan", rol="accionante"),
-            accionado=Parte(nombre="EPS", rol="accionado"),
-            derecho_vulnerado="",
-            fundamentos="Art. 86 C.P.",
-        )
 
 
 def test_concepto_valido():
@@ -52,31 +43,35 @@ def test_orquestador_tiene_roster_completo():
     from src.agents.orchestrator import SPECIALIST_AGENT_IDS, build_orchestrator
 
     orquestador = build_orchestrator()
-    assert orquestador.name == "coordinador_expediente_penal"
+    assert orquestador.name == "coordinador_caso"
     handoffs = getattr(orquestador, "handoffs", None) or []
     assert len(handoffs) == 0
     tool_names = {getattr(t, "name", "") for t in (orquestador.tools or [])}
     assert SPECIALIST_AGENT_IDS.issubset(tool_names)
-    assert len(SPECIALIST_AGENT_IDS) == 10
+    assert len(SPECIALIST_AGENT_IDS) == 9
 
 
 @pytest.mark.asyncio
-async def test_run_agent_gate_conserva_destino_sin_delegar():
-    """El gate conserva el destino solicitado, pero no invoca al especialista."""
+async def test_run_agent_tutela_queda_en_gerente_sin_especialista():
+    """Mensajes de tutela no abren especialista constitucional; quedan en el Gerente."""
     from src.agents import runner as runner_mod
+    from src.agents.triage import infer_destination_agent
 
+    msg = "Evalúe procedencia de tutela por vulneración de derecho fundamental"
+    assert infer_destination_agent(msg) == "coordinador_caso"
     result = await runner_mod.run_agent(
-        "Evalúe procedencia de tutela por vulneración de derecho fundamental",
+        msg,
         channel="web",
         session_id="web:poc-voice-test",
         user_id="poc-voice-test",
     )
-    assert result["agent"] == "guardrail"
-    assert result["trace"]["sent_to_agent"] == "none"
-    assert result["trace"]["gerencia_verification"]["destination"] == (
-        "evaluador_derechos_fundamentales_tutela"
-    )
-    assert result["trace"]["blocked"] is True
+    assert result["agent"] in {"coordinador_caso", "guardrail"}
+    assert result["trace"].get("sent_to_agent") in {None, "none", "coordinador_caso"}
+    dest = (result["trace"].get("gerencia_verification") or {}).get("destination")
+    if dest:
+        assert dest == "coordinador_caso"
+    text = (result.get("text") or "").lower()
+    assert "tutela" in text or "fuera" in text or "impulso" in text or "petición" in text or "peticion" in text
 
 
 def test_ensure_poc_voice_envuelve_especialista_residual():
@@ -84,16 +79,16 @@ def test_ensure_poc_voice_envuelve_especialista_residual():
 
     wrapped = _ensure_poc_voice(
         "Hallazgo interno de tipicidad.",
-        last_agent_name="analista_tipicidad_y_responsabilidad_penal",
-        backoffice_agent="analista_tipicidad_y_responsabilidad_penal",
+        last_agent_name="analista_responsabilidad_tipicidad",
+        backoffice_agent="analista_responsabilidad_tipicidad",
     )
-    assert wrapped.lower().startswith("como gerente del caso penal")
+    assert wrapped.lower().startswith("como coordinador del caso")
     assert "Hallazgo interno de tipicidad." in wrapped
     assert (
         _ensure_poc_voice(
             "Respuesta del POC.",
-            last_agent_name="coordinador_expediente_penal",
-            backoffice_agent="redactor_documentos_juridicos_penales",
+            last_agent_name="coordinador_caso",
+            backoffice_agent="redactor_documentos_juridicos",
         )
         == "Respuesta del POC."
     )

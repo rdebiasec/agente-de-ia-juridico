@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: bc078350d64e0c85 -->
 ---
 name: preparar-preguntas-audiencia
 description: Skill operativo penal-victimas: sugerir preguntas para victima, testigos o peritos en audiencia. Use when the workflow requires `preparar_preguntas_audiencia`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales` (skill primario del agente)
+- `analista_audiencias` (skill primario del agente)
 
 ## Purpose
 Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia.

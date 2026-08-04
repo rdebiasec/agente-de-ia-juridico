@@ -29,7 +29,7 @@ from lib.catalogo_aprobacion import (  # noqa: E402
 
 VALID_AGENT_IDS = {a["id"] for a in AGENTS}
 
-POC_AGENT_ID = "coordinador_expediente_penal"
+POC_AGENT_ID = "coordinador_caso"
 
 # Ownership real del Gerente (resto marcado MOVE → especialista).
 POC_OWNED_SKILLS = frozenset(
@@ -44,25 +44,21 @@ POC_OWNED_SKILLS = frozenset(
 
 # Dueños canónicos tras MOVE (si el archivo/DB aún listan al POC).
 _MOVED_SKILL_OWNERS: dict[str, list[str]] = {
-    "clasificar_fuente_factual": ["analista_cronologia_hechos_penales"],
-    "detectar_vacios_factuales": ["analista_cronologia_hechos_penales"],
-    "identificar_etapa_procesal_ley906": ["analista_ruta_procesal_ley906"],
-    "crear_ruta_procesal_recomendada": ["analista_ruta_procesal_ley906"],
+    "clasificar_fuente_factual": ["analista_cronologia_hechos"],
+    "detectar_vacios_factuales": ["analista_cronologia_hechos"],
+    "identificar_etapa_procesal_ley906": ["analista_ruta_procesal"],
+    "crear_ruta_procesal_recomendada": ["analista_ruta_procesal"],
     "priorizar_objetivos_representacion": ["analista_representacion_victimas"],
-    "recomendar_via_constitucional_o_alternativa": [
-        "evaluador_derechos_fundamentales_tutela"
-    ],
 }
 
-# Alto riesgo: salida con efecto externo (memorial/tutela) — needs_approval + modelo fuerte.
+# Alto riesgo: salida con efecto externo (memorial/petición) — needs_approval + modelo fuerte.
 HIGH_RISK_AGENTS = {
-    "redactor_documentos_juridicos_penales",
-    "evaluador_derechos_fundamentales_tutela",
+    "redactor_documentos_juridicos",
 }
 # Salidas que siempre pasan por revision humana en planes (HITL calibration / Ch8).
 HITL_OUTPUT_AGENTS = HIGH_RISK_AGENTS | {
-    "preparador_estrategico_audiencias_penales",
-    "gestor_seguimiento_procesal_penal",
+    "analista_audiencias",
+    "analista_seguimiento_procesal",
 }
 
 
@@ -94,16 +90,15 @@ def valid_skill_ids() -> frozenset[str]:
 def primary_skill_for_agent(agent_id: str) -> str | None:
     """Contrato primario del agente (para plan y anclaje de instrucciones)."""
     preferred = {
-        "coordinador_expediente_penal": "clasificar_tarea_y_etapa",
-        "analista_cronologia_hechos_penales": "construir_cronologia_penal",
-        "analista_tipicidad_y_responsabilidad_penal": "descomponer_elementos_tipo_penal",
-        "analista_ruta_procesal_ley906": "identificar_etapa_procesal_ley906",
+        "coordinador_caso": "clasificar_tarea_y_etapa",
+        "analista_cronologia_hechos": "construir_cronologia_penal",
+        "analista_responsabilidad_tipicidad": "descomponer_elementos_tipo_penal",
+        "analista_ruta_procesal": "identificar_etapa_procesal_ley906",
         "analista_representacion_victimas": "construir_teoria_caso_victima",
-        "gestor_evidencia_y_soporte_probatorio": "inventariar_evidencia",
-        "preparador_estrategico_audiencias_penales": "preparar_preguntas_audiencia",
-        "redactor_documentos_juridicos_penales": "redactar_memorial_penal",
-        "gestor_seguimiento_procesal_penal": "monitorear_radicado",
-        "evaluador_derechos_fundamentales_tutela": "evaluar_procedencia_tutela",
+        "analista_evidencia": "inventariar_evidencia",
+        "analista_audiencias": "preparar_preguntas_audiencia",
+        "redactor_documentos_juridicos": "redactar_memorial_penal",
+        "analista_seguimiento_procesal": "monitorear_radicado",
         "analista_calidad_juridica": "revisar_coherencia_estrategica",
     }
     if agent_id in preferred and preferred[agent_id] in valid_skill_ids():
@@ -162,37 +157,32 @@ def skill_contract_brief(skill_id: str | None, *, max_chars: int = 900) -> str:
 
 # Anclas secundarias cortas (primario + 2–3) sin explotar tokens.
 _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
-    "analista_cronologia_hechos_penales": (
+    "analista_cronologia_hechos": (
         "extraer_hechos_relevantes",
         "detectar_contradicciones_factuales",
         "detectar_vacios_factuales",
     ),
-    "analista_tipicidad_y_responsabilidad_penal": (
+    "analista_responsabilidad_tipicidad": (
         "identificar_conductas_punibles_preliminares",
         "detectar_riesgos_atipicidad",
         "mapear_tipo_penal_hecho_prueba",
     ),
-    "gestor_evidencia_y_soporte_probatorio": (
+    "analista_evidencia": (
         "detectar_brechas_probatorias",
         "construir_matriz_hecho_prueba",
         "crear_plan_recaudo_probatorio",
     ),
-    "redactor_documentos_juridicos_penales": (
+    "redactor_documentos_juridicos": (
         "estructurar_hechos_fundamentos_solicitudes",
         "marcar_pendientes_verificacion",
         "controlar_tono_juridico_documento",
-    ),
-    "evaluador_derechos_fundamentales_tutela": (
-        "identificar_derecho_fundamental_afectado",
-        "detectar_riesgo_improcedencia_tutela",
-        "recomendar_via_constitucional_o_alternativa",
     ),
     "analista_calidad_juridica": (
         "detectar_alucinaciones_legales",
         "controlar_confidencialidad_datos_sensibles",
         "clasificar_aprobacion_juridica",
     ),
-    "analista_ruta_procesal_ley906": (
+    "analista_ruta_procesal": (
         "evaluar_oportunidad_procesal",
         "crear_ruta_procesal_recomendada",
     ),
@@ -200,11 +190,11 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
         "analizar_derechos_victima",
         "detectar_riesgo_revictimizacion",
     ),
-    "preparador_estrategico_audiencias_penales": (
+    "analista_audiencias": (
         "identificar_objetivo_audiencia",
         "preparar_guion_intervencion_oral",
     ),
-    "gestor_seguimiento_procesal_penal": (
+    "analista_seguimiento_procesal": (
         "generar_alertas_terminos_vencimientos",
         "detectar_inactividad_procesal",
     ),
@@ -234,8 +224,8 @@ def agent_display_name(agent_id: str) -> str:
 
 def desk_label(agent_id: str) -> str:
     """Etiqueta de despacho para planes/chat (sin IDs tecnicos como interlocutor)."""
-    if agent_id == "coordinador_expediente_penal":
-        return "Gerente del Caso Penal"
+    if agent_id == "coordinador_caso":
+        return "Coordinador del Caso"
     name = agent_display_name(agent_id)
     if name == agent_id:
         return "Equipo interno"

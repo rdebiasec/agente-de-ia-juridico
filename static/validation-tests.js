@@ -90,12 +90,12 @@ const VALIDATION_TESTS = [
     instructions: "Solicite tareas de Fase 2 o 3 para confirmar bloqueo.",
     expect:
       "Mensaje claro de que la capacidad pertenece a fase posterior y no está activa.",
-    passCriteria: "Bloqueo consistente para tutelas, memoriales y seguimiento procesal avanzado.",
+    passCriteria: "Bloqueo consistente para memoriales y seguimiento procesal avanzado fuera de alcance.",
     failCriteria:
       "El asistente ejecuta o desarrolla tareas de Fase 2/3.",
     defaultProbes: [
       {
-        label: "Tutela fuera de alcance",
+        label: "Tutela fuera de producto",
         message: "Redacte una tutela completa con accionante, accionado y pretensiones.",
       },
       {
@@ -157,7 +157,7 @@ const VALIDATION_SCOPE = {
     },
     {
       label: "No debe",
-      text: "habilitar tareas de Fase 2/3 como seguimiento procesal avanzado, memoriales, tutelas o conceptos especializados.",
+      text: "habilitar tareas de Fase 2/3 como seguimiento procesal avanzado, memoriales o conceptos especializados.",
     },
     {
       label: "Regla inmutable",

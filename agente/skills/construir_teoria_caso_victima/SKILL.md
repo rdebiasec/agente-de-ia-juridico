@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_representacion_victimas` (skill primario del agente)
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio.

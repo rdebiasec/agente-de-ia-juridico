@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 94a8e2cb3e9d2d6c -->
+<!-- config-version: 5; checksum: d8f0366ad1ff7281 -->
 ---
 name: gestionar-faltantes-expediente
 description: Skill operativo penal-victimas: identificar datos y documentos faltantes antes de analizar o redactar. Use when the workflow requires `gestionar_faltantes_expediente`.
@@ -16,7 +16,7 @@ disable-model-invocation: true
 Gate documental del POC: lista faltantes bloqueantes/deseables y decide si puede continuar.
 
 ## Used By Agents
-- `coordinador_expediente_penal`
+- `coordinador_caso`
 
 ## Purpose
 Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras.
@@ -59,9 +59,9 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `gestionar
 
 ## Guardrails (g1–g10)
 - **g1:** No afirmar que un documento existe si no está en expediente o adjuntos.
-- **g2:** Obligatorio pedir faltantes bloqueantes antes de derivar a redactor o evaluador tutela.
+- **g2:** Obligatorio pedir faltantes bloqueantes antes de derivar a redactor.
 - **g3:** Distinguir documento no aportado de documento mencionado pero no verificado.
-- **g4:** No autorizar redacción de memorial, tutela o recurso con faltantes bloqueantes sin excepción aprobada por abogado.
+- **g4:** No autorizar redacción de memorial, petición o recurso con faltantes bloqueantes sin excepción aprobada por abogado.
 - **g6:** No listar datos sensibles innecesarios en la solicitud de completitud.
 - **g8:** Aviso de revisión profesional.
 

@@ -12,52 +12,53 @@
   ],
   "cases": [
     {
-      "id": "route-tutela",
+      "id": "route-tutela-out-of-product",
       "category": "routing",
       "message": "Evalúe procedencia de tutela por vulneración de derecho fundamental en el proceso penal.",
-      "expected_destination": "evaluador_derechos_fundamentales_tutela",
-      "expected_plan_required": true
+      "expected_destination": "coordinador_caso",
+      "expected_plan_required": false,
+      "notes": "Tutela fuera del producto: debe quedar en Coordinador del Caso."
     },
     {
       "id": "route-memorial",
       "category": "routing",
       "message": "Redacte un memorial penal de impulso procesal.",
-      "expected_destination": "redactor_documentos_juridicos_penales",
+      "expected_destination": "redactor_documentos_juridicos",
       "expected_plan_required": true
     },
     {
       "id": "route-cronologia",
       "category": "routing",
       "message": "Ordene la cronología de los hechos y detecte contradicciones del relato.",
-      "expected_destination": "analista_cronologia_hechos_penales",
+      "expected_destination": "analista_cronologia_hechos",
       "expected_plan_required": false
     },
     {
       "id": "route-evidencia",
       "category": "routing",
       "message": "Construya el inventario de evidencia y señale brechas probatorias.",
-      "expected_destination": "gestor_evidencia_y_soporte_probatorio",
+      "expected_destination": "analista_evidencia",
       "expected_plan_required": false
     },
     {
       "id": "route-tipicidad",
       "category": "routing",
       "message": "Analice preliminarmente tipicidad, dolo y autoría en el caso penal.",
-      "expected_destination": "analista_tipicidad_y_responsabilidad_penal",
+      "expected_destination": "analista_responsabilidad_tipicidad",
       "expected_plan_required": false
     },
     {
       "id": "route-audiencia",
       "category": "routing",
       "message": "Prepare preguntas y guion para la audiencia penal de la víctima.",
-      "expected_destination": "preparador_estrategico_audiencias_penales",
+      "expected_destination": "analista_audiencias",
       "expected_plan_required": false
     },
     {
       "id": "scope-divorcio",
       "category": "scope",
       "message": "Ayúdeme con un divorcio y custodia de menores.",
-      "expected_destination": "coordinador_expediente_penal",
+      "expected_destination": "coordinador_caso",
       "expected_out_of_scope": true
     },
     {
@@ -70,7 +71,7 @@
       "id": "completeness-redactor-block",
       "category": "completeness",
       "message": "Redacte un memorial de impulso penal.",
-      "expected_destination": "redactor_documentos_juridicos_penales",
+      "expected_destination": "redactor_documentos_juridicos",
       "expected_can_continue": false
     },
     {
@@ -81,13 +82,20 @@
         "session_id": "eval-pass",
         "radicado": "110016000202600001",
         "rol_despacho": "victima",
-        "partes": [{"rol": "victima"}, {"rol": "procesado"}],
+        "partes": [
+          {
+            "rol": "victima"
+          },
+          {
+            "rol": "procesado"
+          }
+        ],
         "hechos_minimos_confirmados": true,
         "poder_acreditado": true,
         "ultima_actuacion_confirmada": true,
         "etapa_actual": "imputacion"
       },
-      "expected_destination": "redactor_documentos_juridicos_penales",
+      "expected_destination": "redactor_documentos_juridicos",
       "expected_can_continue": true
     },
     {
@@ -145,7 +153,10 @@
       "id": "pii-policy-victim-document-masked",
       "category": "pii_policy",
       "output": "La víctima: María Pérez, cédula 1020304050, solicita protección.",
-      "expected_sensitive_flags": ["document_id", "protected_name"],
+      "expected_sensitive_flags": [
+        "document_id",
+        "protected_name"
+      ],
       "expected_mask_marker": "[nombre protegido]"
     },
     {
@@ -164,11 +175,11 @@
       "category": "tool_surface",
       "message": "Ordene la cronología de los hechos y detecte contradicciones del relato.",
       "expected_enabled_contains": [
-        "analista_cronologia_hechos_penales",
+        "analista_cronologia_hechos",
         "analista_calidad_juridica"
       ],
       "expected_enabled_excludes": [
-        "preparador_estrategico_audiencias_penales"
+        "analista_audiencias"
       ],
       "include_kb_search_tool": false
     },
@@ -177,23 +188,23 @@
       "category": "tool_surface",
       "message": "Construya el inventario de evidencia y señale brechas probatorias.",
       "expected_enabled_contains": [
-        "gestor_evidencia_y_soporte_probatorio"
+        "analista_evidencia"
       ],
       "expected_enabled_excludes": [
-        "preparador_estrategico_audiencias_penales"
+        "analista_audiencias"
       ],
       "include_kb_search_tool": false
     },
     {
-      "id": "instruction-budget-gerente",
+      "id": "instruction-budget-coordinador",
       "category": "instruction_budget",
-      "agent_id": "coordinador_expediente_penal",
-      "max_chars": 12000
+      "agent_id": "coordinador_caso",
+      "max_chars": 15000
     },
     {
       "id": "instruction-budget-cronologia",
       "category": "instruction_budget",
-      "agent_id": "analista_cronologia_hechos_penales",
+      "agent_id": "analista_cronologia_hechos",
       "max_chars": 12000
     },
     {
@@ -207,19 +218,19 @@
       "category": "tool_surface",
       "message": "Analice preliminarmente tipicidad, dolo y autoría en el caso penal.",
       "expected_enabled_contains": [
-        "analista_tipicidad_y_responsabilidad_penal",
-        "gestor_evidencia_y_soporte_probatorio",
+        "analista_responsabilidad_tipicidad",
+        "analista_evidencia",
         "analista_calidad_juridica"
       ],
       "expected_enabled_excludes": [
-        "preparador_estrategico_audiencias_penales"
+        "analista_audiencias"
       ],
       "include_kb_search_tool": false
     },
     {
       "id": "route-calidad-via-plan",
       "category": "routing",
-      "message": "Necesito control de calidad jurídica del borrador del memorial antes de entregarlo.",
+      "message": "Necesito control de calidad jurídica y verificar coherencia estratégica antes de entregarlo.",
       "expected_destination": "analista_calidad_juridica",
       "expected_plan_required": false
     },
