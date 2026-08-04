@@ -4,17 +4,21 @@
 (() => {
   "use strict";
 
-  const esc = (s) =>
-    String(s == null ? "" : s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+  const runtime = window.DeskRuntime || {};
+  const esc = runtime.esc
+    ? (s) => runtime.esc(s)
+    : (s) =>
+        String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
 
   let expedienteState = null;
   let hitos = [];
 
   function getSessionId() {
+    if (runtime.getSessionId) return runtime.getSessionId();
     const uid =
       typeof window.getChatUserId === "function"
         ? window.getChatUserId()
@@ -185,6 +189,7 @@
       const active = btn.dataset.tab === id;
       btn.classList.toggle("is-active", active);
       btn.setAttribute("aria-selected", String(active));
+      btn.setAttribute("tabindex", active ? "0" : "-1");
     });
     document.querySelectorAll(".context-tab-panel").forEach((panel) => {
       const active = panel.dataset.panel === id;
@@ -214,10 +219,14 @@
     if (id === "canal-victima") {
       window.CanalVictima?.startPoll?.();
     }
-    try {
-      document.dispatchEvent(new CustomEvent("workspace:tab", { detail: { tab: id } }));
-    } catch {
-      /* ignore */
+    if (runtime.emit) {
+      runtime.emit("workspace:tab", { tab: id });
+    } else {
+      try {
+        document.dispatchEvent(new CustomEvent("workspace:tab", { detail: { tab: id } }));
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -258,8 +267,35 @@
   }
 
   function initTabs() {
-    document.querySelectorAll(".context-tab").forEach((btn) => {
+    const tabs = Array.from(document.querySelectorAll(".context-tab"));
+    const moveTo = (nextIndex) => {
+      const safe = ((nextIndex % tabs.length) + tabs.length) % tabs.length;
+      const next = tabs[safe];
+      if (!next) return;
+      switchTab(next.dataset.tab);
+      next.focus();
+    };
+    tabs.forEach((btn, idx) => {
+      if (!btn.classList.contains("is-active")) btn.setAttribute("tabindex", "-1");
       btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      btn.addEventListener("keydown", (ev) => {
+        if (ev.key === "ArrowRight") {
+          ev.preventDefault();
+          moveTo(idx + 1);
+        } else if (ev.key === "ArrowLeft") {
+          ev.preventDefault();
+          moveTo(idx - 1);
+        } else if (ev.key === "Home") {
+          ev.preventDefault();
+          moveTo(0);
+        } else if (ev.key === "End") {
+          ev.preventDefault();
+          moveTo(tabs.length - 1);
+        } else if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          switchTab(btn.dataset.tab);
+        }
+      });
     });
   }
 
@@ -295,16 +331,62 @@
     badge.textContent = String(count);
   }
 
+  let lastFocusedBeforeDrawer = null;
+
+  function drawerFocusableElements() {
+    const drawer = document.getElementById("firma-drawer");
+    if (!drawer || drawer.hidden) return [];
+    return Array.from(
+      drawer.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+  }
+
+  function handleDrawerKeydown(ev) {
+    if (ev.key === "Escape") {
+      ev.preventDefault();
+      closeDrawer();
+      return;
+    }
+    if (ev.key !== "Tab") return;
+    const items = drawerFocusableElements();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (ev.shiftKey && document.activeElement === first) {
+      ev.preventDefault();
+      last.focus();
+    } else if (!ev.shiftKey && document.activeElement === last) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
   function openDrawer() {
+    // Camino principal de operación: pestaña Borrador.
+    switchTab("borrador");
+    // Drawer solo como apoyo en pantallas estrechas.
+    if (!window.matchMedia("(max-width: 1180px)").matches) return;
+    lastFocusedBeforeDrawer = document.activeElement;
     document.getElementById("firma-drawer")?.removeAttribute("hidden");
     document.getElementById("firma-drawer-backdrop")?.removeAttribute("hidden");
     document.body.classList.add("drawer-open");
+    document.addEventListener("keydown", handleDrawerKeydown);
+    setTimeout(() => {
+      drawerFocusableElements()[0]?.focus();
+    }, 0);
   }
 
   function closeDrawer() {
     document.getElementById("firma-drawer")?.setAttribute("hidden", "");
     document.getElementById("firma-drawer-backdrop")?.setAttribute("hidden", "");
     document.body.classList.remove("drawer-open");
+    document.removeEventListener("keydown", handleDrawerKeydown);
+    if (lastFocusedBeforeDrawer && typeof lastFocusedBeforeDrawer.focus === "function") {
+      lastFocusedBeforeDrawer.focus();
+    }
+    lastFocusedBeforeDrawer = null;
   }
 
   document.getElementById("firma-drawer-backdrop")?.addEventListener("click", closeDrawer);
@@ -326,7 +408,7 @@
     initTabs();
     initSidebarCollapse();
     autofillSessionIds();
-    document.getElementById("btn-open-actividad")?.addEventListener("click", () => switchTab("actividad"));
+    document.getElementById("btn-open-actividad")?.addEventListener("click", () => switchTab("equipo"));
     const hash = (location.hash || "").replace(/^#/, "");
     if (hash) switchTab(normalizeTabId(hash));
   });

@@ -261,21 +261,36 @@ def enqueue_client_message(
             from src.services.bitacora import append_entries
 
             actor = (lawyer_actor_id or "abogado").strip() or "abogado"
-            append_entries(
+            bitacora_entry = {
+                "autor": actor,
+                "tipo": "nota",
+                "resumen": (
+                    "Mensaje escrito como la víctima (impersonación del despacho) "
+                    f"en canal cliente; draft HITL {draft.id}."
+                ),
+                "fuentes": ["canal_victima", "lawyer_impersonation"],
+                "confidencialidad": "sensible",
+            }
+            persisted = append_entries(
                 lawyer_sid,
-                [
-                    {
-                        "autor": actor,
-                        "tipo": "nota",
-                        "resumen": (
-                            "Mensaje escrito como la víctima (impersonación del despacho) "
-                            f"en canal cliente; draft HITL {draft.id}."
-                        ),
-                        "fuentes": ["canal_victima", "lawyer_impersonation"],
-                        "confidencialidad": "sensible",
-                    }
-                ],
+                [bitacora_entry],
             )
+            # Garantiza espejo local del expediente incluso si el gateway externo usa otro store.
+            exp = repo.get_expediente(lawyer_sid)
+            has_local_note = any(
+                "impersonación" in str((row or {}).get("resumen") or "").lower()
+                for row in (list(getattr(exp, "bitacora", None) or []) if exp is not None else [])
+            )
+            if exp is not None and (not persisted or not has_local_note):
+                current = list(getattr(exp, "bitacora", None) or [])
+                current.append(
+                    {
+                        "ts": _now().isoformat(),
+                        **bitacora_entry,
+                    }
+                )
+                exp.bitacora = current[-200:]
+                repo.save_expediente(exp)
         except Exception:
             import logging
 

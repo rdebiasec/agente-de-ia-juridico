@@ -14,6 +14,7 @@ const WELCOME_DISPLAY_NAME = "Coordinador del Caso";
  * Bogotá vs Orlando se refinará con más detalle más adelante.
  */
 const DEFAULT_DESPACHO_TZ = "America/Bogota";
+const deskRuntime = window.DeskRuntime || {};
 
 function greetingForHour(hour) {
   if (hour >= 5 && hour <= 11) return "Buenos días";
@@ -653,6 +654,12 @@ let activityFingerprint = "";
 let activitySelectedTraceId = null;
 let activityServerTraces = [];
 
+function isActivityTabVisible() {
+  return deskRuntime.isTabActive
+    ? deskRuntime.isTabActive("actividad")
+    : Boolean(document.getElementById("tab-actividad")?.classList.contains("is-active"));
+}
+
 function activityLiveOn() {
   return Boolean(document.getElementById("activity-live-toggle")?.checked);
 }
@@ -722,6 +729,7 @@ function renderActivityOpsList(traces) {
 
 async function refreshActivityPanel(options = {}) {
   const { force = false } = options;
+  if (!force && (!isActivityTabVisible() || document.visibilityState === "hidden")) return;
   if (activityBusy) return;
   activityBusy = true;
   try {
@@ -777,7 +785,7 @@ function stopActivityLive() {
 
 function startActivityLive() {
   stopActivityLive();
-  if (!activityLiveOn()) return;
+  if (!activityLiveOn() || !isActivityTabVisible()) return;
   setActivityLivePill(true);
   activityLiveTimer = setInterval(() => {
     void refreshActivityPanel();
@@ -800,9 +808,28 @@ function initActivityPanel() {
   document.getElementById("activity-follow-toggle")?.addEventListener("change", () => {
     if (activityFollowOn()) void refreshActivityPanel({ force: true });
   });
+  document.addEventListener("workspace:tab", (ev) => {
+    const tab = ev?.detail?.tab;
+    if (tab === "actividad") {
+      if (activityLiveOn()) startActivityLive();
+      void refreshActivityPanel({ force: true });
+    } else {
+      stopActivityLive();
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      stopActivityLive();
+      return;
+    }
+    if (isActivityTabVisible() && activityLiveOn()) {
+      startActivityLive();
+      void refreshActivityPanel({ force: true });
+    }
+  });
   window.ChatActivity = { refresh: refreshActivityPanel, start: startActivityLive, stop: stopActivityLive };
   void refreshActivityPanel({ force: true });
-  startActivityLive();
+  if (isActivityTabVisible()) startActivityLive();
 }
 
 async function renderTracePanelForEntry(entry) {
@@ -1035,7 +1062,7 @@ function addMessageToUI(role, text, meta = "", options = {}) {
     ${metaHtml ? `<span class="message-meta">${metaHtml}</span>` : ""}
     <div class="message-body">${formatText(text)}</div>
     ${juntaActions}
-    ${role === "assistant" ? '<span class="message-phase-badge">Fase 1 · Borrador</span>' : ""}
+    ${role === "assistant" ? '<span class="message-phase-badge">Borrador sujeto a su firma</span>' : ""}
   `;
 
   el.querySelector(".message-block-badge")?.addEventListener("click", (e) => {
@@ -2372,8 +2399,8 @@ function updateConnectionStatus(connected) {
   const el = document.getElementById("connection-status");
   if (!el) return;
   el.textContent = connected
-    ? "Estado actual: Conectado · Fase 1 activa"
-    : "Estado actual: sin conexión o Fase 1 no confirmada";
+    ? "Estado actual: Conectado · coordinación activa"
+    : "Estado actual: sin conexión con el servicio";
   el.classList.toggle("is-ok", connected);
 }
 

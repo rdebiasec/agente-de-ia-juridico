@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Editor de configuración del asistente penal-víctimas — por agente: prompts, skills y guardrails">
-    <title>Lexiatek - Editor de configuración</title>
+    <title>LexiaTek - Editor de configuración</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="audit-portal.css?v=4.1">
     <style>
         :root {
-            --ui-font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --ui-font-family: 'Lato', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             --ui-button-font-weight: 700;
             --ui-surface: #1e293b;
             --ui-surface-inset: #0f172a;
@@ -1533,7 +1536,7 @@
     <div id="audit-auth-gate" class="fixed inset-0 z-[100] gate-checking">
         <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 px-6 py-6 text-white text-center">
-                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wide text-xl mb-3">Lexiatek</div>
+                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wide text-xl mb-3">LexiaTek</div>
                 <h2 class="text-xl font-bold ui-title">Entrar al editor del despacho</h2>
                 <p class="text-sm text-slate-400 mt-2">Revise e instruya cómo trabaja el asistente en sus casos</p>
             </div>
@@ -1572,14 +1575,14 @@
                 </div>
                 <button type="submit" id="audit-auth-submit" class="ui-btn w-full bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all">Entrar</button>
             </form>
-            <p id="audit-auth-gate-footer" class="text-sm text-slate-400 text-center px-6 pb-4">Datos de casos permitidos con autorización · ARCO: privacidad@dbxsolutions.com</p>
+            <p id="audit-auth-gate-footer" class="text-sm text-slate-400 text-center px-6 pb-4">Datos de casos permitidos con autorización · ARCO: contacto@lexiatek.com</p>
         </div>
     </div>
 
     <div id="audit-app-root" class="flex flex-col min-h-screen flex-1 app-gated">
         <header class="bg-slate-900 text-white px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 sticky top-0 z-40">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wide text-lg">Lexiatek</div>
+                <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wide text-lg">LexiaTek</div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white">Instrucciones del asistente</h1>
                     <p class="text-xs text-slate-400 mt-0.5 hidden md:block">La IA propone · usted revisa y aprueba</p>
@@ -1757,7 +1760,7 @@
                     </div>
                     <div id="cfg-map-panel" aria-label="Mapa y documentación del asistente">
                         <div class="map-hero">
-                            <h2>Cómo funciona Lexiatek</h2>
+                            <h2>Cómo funciona LexiaTek</h2>
                             <p>
                                 La IA propone; el abogado revisa y aprueba. Este portal versiona las instrucciones
                                 del despacho (prompts, skills y guardrails) sin inventar radicados, sentencias ni normas.

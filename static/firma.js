@@ -4,14 +4,17 @@
 (() => {
   "use strict";
 
+  const runtime = window.DeskRuntime || {};
   const api = (url, options) => (window.authFetch ? window.authFetch(url, options) : fetch(url, options));
   const $ = (id) => document.getElementById(id);
-  const esc = (s) =>
-    String(s == null ? "" : s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+  const esc = runtime.esc
+    ? (s) => runtime.esc(s)
+    : (s) =>
+        String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
   const toast = (msg, type = "info") => {
     if (typeof Toast !== "undefined" && Toast.show) Toast.show(msg, type);
   };
@@ -22,7 +25,7 @@
   const originals = new Map();
 
   function sessionId() {
-    return window.Workspace?.getSessionId?.() || "";
+    return (runtime.getSessionId ? runtime.getSessionId() : window.Workspace?.getSessionId?.()) || "";
   }
 
   function autofillIds() {
@@ -61,11 +64,22 @@
     return rows.join("") || '<p class="firma-muted">Sin cambios respecto al borrador original.</p>';
   }
 
-  function renderDraft(d, { compact = false } = {}) {
+  function renderDraft(d, { compact = false, readonly = false } = {}) {
     if (!originals.has(d.id)) originals.set(d.id, d.contenido || "");
     const original = originals.get(d.id);
     const preview = esc((d.contenido || "").slice(0, compact ? 280 : 600));
     const showDiff = d.contenido !== original;
+    const actionsHtml = readonly
+      ? '<p class="firma-muted">Abra «Operar · Firma» para aprobar o editar.</p>'
+      : `
+        <div class="firma-draft-actions">
+          <button type="button" class="btn-firma-primary" data-act="approve" data-id="${esc(d.id)}">Aprobar</button>
+          <button type="button" class="btn-firma-action" data-act="toggle-edit" data-id="${esc(d.id)}">Editar</button>
+          <button type="button" class="btn-firma-action" data-act="save-edit" data-id="${esc(d.id)}" hidden>Guardar edición</button>
+          <button type="button" class="btn-firma-danger" data-act="reject" data-id="${esc(d.id)}">Rechazar</button>
+          <a class="btn-firma-link" href="/drafts/${esc(d.id)}/docx">.docx</a>
+          <a class="btn-firma-link" href="/drafts/${esc(d.id)}/pdf">.pdf</a>
+        </div>`;
     return `
       <div class="firma-draft" data-id="${esc(d.id)}">
         <div class="firma-draft-head">
@@ -76,14 +90,7 @@
         <pre class="firma-draft-body">${preview}${(d.contenido || "").length > (compact ? 280 : 600) ? "…" : ""}</pre>
         ${showDiff ? `<details class="draft-diff"><summary>Ver cambios respecto al borrador de la IA</summary><div class="draft-diff-body">${simpleDiff(original, d.contenido)}</div></details>` : ""}
         <textarea class="firma-edit" data-id="${esc(d.id)}" hidden>${esc(d.contenido)}</textarea>
-        <div class="firma-draft-actions">
-          <button type="button" class="btn-firma-primary" data-act="approve" data-id="${esc(d.id)}">Aprobar</button>
-          <button type="button" class="btn-firma-action" data-act="toggle-edit" data-id="${esc(d.id)}">Editar</button>
-          <button type="button" class="btn-firma-action" data-act="save-edit" data-id="${esc(d.id)}" hidden>Guardar edición</button>
-          <button type="button" class="btn-firma-danger" data-act="reject" data-id="${esc(d.id)}">Rechazar</button>
-          <a class="btn-firma-link" href="/drafts/${esc(d.id)}/docx">.docx</a>
-          <a class="btn-firma-link" href="/drafts/${esc(d.id)}/pdf">.pdf</a>
-        </div>
+        ${actionsHtml}
       </div>`;
   }
 
@@ -113,7 +120,7 @@
       ? `<p class="firma-card-flags" title="Revise estos puntos antes de aprobar">⚠️ Calidad: ${esc(flags.join(", "))}</p>`
       : `<p class="firma-card-flags firma-card-flags--ok">Sin alertas de calidad automáticas</p>`;
     const caseLabel = esc(d.case_label || d.cliente_session_id || "Caso");
-    return `<article class="firma-card firma-card--cliente" data-cliente-draft="${esc(d.id)}">
+    return `<article class="firma-card firma-card--cliente" data-cliente-draft="${esc(d.id)}" data-quality-count="${flags.length}" data-quality-flags="${esc(flags.join(", "))}">
       <header class="firma-card-head">
         <strong>Respuesta al cliente</strong>
         <span class="firma-chip${flags.length ? " firma-chip--warn" : ""}">${flags.length ? "Revisar" : "HITL"}</span>
@@ -140,6 +147,20 @@
   async function handleClienteDraftAction(act, id) {
     try {
       if (act === "approve") {
+        const card = document.querySelector(`[data-cliente-draft="${id}"]`);
+        const qualityCount = Number(card?.dataset.qualityCount || 0);
+        const qualityFlags = String(card?.dataset.qualityFlags || "");
+        const confirmMsg = qualityCount
+          ? `Este mensaje tiene ${qualityCount} alerta(s) de calidad (${qualityFlags}).\n\n¿Confirma enviar de todos modos a la víctima?`
+          : "¿Confirma enviar esta respuesta al cliente?";
+        if (!window.confirm(confirmMsg)) return;
+        if (qualityCount > 0) {
+          const token = (window.prompt('Para continuar, escriba "ENVIAR":') || "").trim().toUpperCase();
+          if (token !== "ENVIAR") {
+            toast("Envío cancelado por seguridad de revisión.", "info");
+            return;
+          }
+        }
         const ta = document.querySelector(`textarea.firma-edit--cliente[data-id="${id}"]`);
         const edited = ta ? ta.value.trim() : "";
         const res = await api(
@@ -198,13 +219,17 @@
     const drawerList = $("firma-bandeja-list");
     const tabList = $("tab-borrador-list");
     const empty = '<p class="firma-muted">No hay borradores pendientes.</p>';
-    const html = drafts.length ? drafts.map((d) => renderDraft(d)).join("") : empty;
+    const html = drafts.length
+      ? `<p class="firma-muted">Vista rápida. La aprobación se hace en «Operar · Firma».</p>${drafts
+          .slice(0, 3)
+          .map((d) => renderDraft(d, { compact: true, readonly: true }))
+          .join("")}`
+      : empty;
     const tabHtml = drafts.length
-      ? drafts.slice(0, 2).map((d) => renderDraft(d, { compact: true })).join("")
+      ? drafts.map((d) => renderDraft(d)).join("")
       : '<p class="firma-muted">Sin borradores. Pida al asistente que redacte un documento.</p>';
     if (drawerList) {
       drawerList.innerHTML = html;
-      bindDraftActions(drawerList);
     }
     if (tabList) {
       tabList.innerHTML = tabHtml;

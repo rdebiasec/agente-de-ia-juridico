@@ -1,15 +1,21 @@
 :root {
-  --bg: #05060a;
-  --card: #171b27;
-  --accent: #4fd1c5;
-  --accent-soft: rgba(79, 209, 197, 0.15);
-  --text: #eef1ff;
-  --muted: rgba(238, 241, 255, 0.78);
-  --orange: #d66a2a;
-  --orange-dark: #2a1200;
-  --line: rgba(255, 255, 255, 0.1);
-  --panel: rgba(255, 255, 255, 0.045);
+  --bg: #0f172a;
+  --card: #14213f;
+  --surface: #1e3a8a;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.18);
+  --text: #e2e8f0;
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --orange: #d97706;
+  --orange-dark: #2b1a05;
+  --line: rgba(148, 163, 184, 0.3);
+  --border: rgba(148, 163, 184, 0.45);
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-soft: rgba(255, 255, 255, 0.08);
   --shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+  --font-heading: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Lato", system-ui, -apple-system, "Segoe UI", sans-serif;
   --text-size-xs: 0.86rem;
   --text-size-sm: 0.94rem;
   --text-size-md: 1rem;
@@ -33,7 +39,7 @@ body {
 }
 
 body {
-  font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
@@ -64,7 +70,7 @@ body {
   flex-shrink: 0;
   margin: 0;
   padding: 0.85rem 1.25rem 0.55rem;
-  font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.35rem, 2.2vw, 1.75rem);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -3065,25 +3071,24 @@ body.manual-body {
   justify-content: center;
   gap: 0.35rem;
   min-height: 44px;
-  padding: 0.55rem 1.15rem;
-  border: 2px solid rgba(79, 209, 197, 0.75);
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(240, 160, 112, 0.42);
   border-radius: 999px;
-  background: linear-gradient(160deg, rgba(79, 209, 197, 0.28), rgba(79, 209, 197, 0.12));
-  color: #eafffb;
+  background: rgba(214, 106, 42, 0.12);
+  color: #ffd9bf;
   font-family: inherit;
-  font-size: 0.92rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 700;
   line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(79, 209, 197, 0.22);
+  box-shadow: none;
   flex-shrink: 0;
 }
 
 .btn-reset-chat-primary:hover:not(:disabled) {
-  background: linear-gradient(160deg, rgba(79, 209, 197, 0.38), rgba(79, 209, 197, 0.18));
-  border-color: var(--accent);
-  box-shadow: 0 6px 24px rgba(79, 209, 197, 0.32);
+  background: rgba(214, 106, 42, 0.2);
+  border-color: rgba(240, 160, 112, 0.65);
 }
 
 .btn-reset-chat-primary:disabled {
@@ -3093,7 +3098,7 @@ body.manual-body {
 
 .btn-reset-chat-primary--compact {
   min-height: 36px;
-  padding: 0.4rem 0.85rem;
+  padding: 0.38rem 0.75rem;
   font-size: 0.82rem;
 }
 
@@ -3358,21 +3363,58 @@ body.manual-body {
     radial-gradient(circle at top right, rgba(214, 106, 42, 0.08), transparent 12rem);
 }
 
+.context-zones {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.context-zone-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.context-zone-chip--operar {
+  border-color: rgba(214, 106, 42, 0.4);
+  color: #ffd4b8;
+}
+
+.context-zone-chip--supervisar {
+  border-color: rgba(79, 209, 197, 0.4);
+  color: #b8fff6;
+}
+
+.context-zone-chip--gestionar {
+  border-color: rgba(125, 211, 252, 0.35);
+  color: #cfeeff;
+}
+
 .context-tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0;
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 
 .context-tab {
-  padding: 0.65rem 0.35rem;
+  padding: 0.58rem 0.35rem;
   border: none;
   background: transparent;
   color: var(--muted);
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.73rem;
   font-weight: 800;
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -3678,6 +3720,10 @@ body.drawer-open {
   .btn-reset-chat-primary {
     order: -1;
   }
+
+  .context-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 1180px) {
@@ -3981,7 +4027,7 @@ body.drawer-open {
 .canal-victima-meta {
   margin: 0 0 0.5rem;
   font-size: 0.8rem;
-  color: var(--muted, #6b7c74);
+  color: var(--muted);
 }
 
 .canal-victima-link {
@@ -4007,30 +4053,31 @@ body.drawer-open {
 .canal-victima-empty {
   margin: 0.5rem 0;
   font-size: 0.85rem;
-  color: var(--muted, #6b7c74);
+  color: var(--muted);
 }
 
 .canal-msg {
   padding: 0.55rem 0.7rem;
   border-radius: 10px;
-  border: 1px solid var(--line, rgba(0, 0, 0, 0.08));
-  background: var(--panel-soft, #f6f8f7);
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+  color: var(--text);
   font-size: 0.88rem;
   line-height: 1.4;
   white-space: pre-wrap;
 }
 
 .canal-msg--cliente {
-  border-color: rgba(45, 122, 95, 0.28);
+  border-color: rgba(79, 209, 197, 0.28);
 }
 
 .canal-msg--despacho {
-  border-color: rgba(180, 120, 40, 0.4);
-  background: rgba(201, 162, 39, 0.08);
+  border-color: rgba(240, 160, 112, 0.4);
+  background: rgba(214, 106, 42, 0.12);
 }
 
 .canal-msg--gerente {
-  border-color: rgba(60, 90, 140, 0.25);
+  border-color: rgba(96, 165, 250, 0.35);
 }
 
 .canal-badge {
@@ -4045,23 +4092,23 @@ body.drawer-open {
 }
 
 .canal-badge--victima {
-  background: rgba(45, 122, 95, 0.15);
-  color: #1f5c46;
+  background: rgba(79, 209, 197, 0.18);
+  color: #b8fff6;
 }
 
 .canal-badge--despacho {
-  background: rgba(201, 162, 39, 0.22);
-  color: #7a5a10;
+  background: rgba(240, 160, 112, 0.2);
+  color: #ffd4b8;
 }
 
 .canal-badge--coord {
-  background: rgba(60, 90, 140, 0.15);
-  color: #2a4570;
+  background: rgba(125, 211, 252, 0.18);
+  color: #dbeeff;
 }
 
 .canal-badge--pending {
-  background: rgba(150, 90, 40, 0.18);
-  color: #7a4510;
+  background: rgba(214, 106, 42, 0.24);
+  color: #ffd4b8;
 }
 
 .canal-pending-note {
@@ -4069,7 +4116,7 @@ body.drawer-open {
   margin-left: 0.35rem;
   font-size: 0.7rem;
   font-style: italic;
-  color: #7a4510;
+  color: #ffd4b8;
 }
 
 .canal-msg-body {
@@ -4085,25 +4132,27 @@ body.drawer-open {
   margin: 0;
   padding: 0.5rem 0.65rem;
   border-radius: 8px;
-  border: 1px solid rgba(201, 162, 39, 0.35);
-  background: rgba(201, 162, 39, 0.1);
+  border: 1px solid rgba(240, 160, 112, 0.38);
+  background: rgba(214, 106, 42, 0.14);
   font-size: 0.75rem;
   line-height: 1.35;
-  color: #6a5210;
+  color: #ffd9bf;
 }
 
 .canal-victima-label {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--muted, #6b7c74);
+  color: var(--muted);
 }
 
 #canal-victima-input {
   width: 100%;
   resize: vertical;
   min-height: 4rem;
-  border-radius: 8px;
-  border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(5, 6, 10, 0.72);
+  color: var(--text);
   padding: 0.55rem 0.65rem;
   font: inherit;
 }

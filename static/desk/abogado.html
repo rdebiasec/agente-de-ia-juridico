@@ -11,20 +11,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/chat.css" />
     <link rel="stylesheet" href="/static/desk.css" />
-    <title>Escritorio del abogado | Lexiatek</title>
+    <title>Escritorio del abogado | LexiaTek</title>
   </head>
   <body class="workspace-body desk-abogado">
     <a class="skip-link" href="#messages">Ir al chat</a>
 
     <div id="app-root" class="page workspace-page desk-page">
       <header class="site-header workspace-header desk-header">
-        <a class="logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
-          <img src="/static/dbx-logo.png" alt="Lexiatek" width="160" height="32" />
+        <a class="logo" href="https://lexiatek.com" target="_blank" rel="noopener">
+          <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="160" height="32" />
         </a>
         <div class="workspace-header-center">
           <span class="desk-product-label">Escritorio del abogado</span>
@@ -42,7 +42,7 @@
             ⟲ Reiniciar chat
           </button>
           <button type="button" class="btn-help btn-bandeja" id="btn-open-firma">
-            Bandeja
+            Ir a Firma
             <span class="bandeja-badge" id="bandeja-badge" hidden>0</span>
           </button>
           <a class="btn-help" href="/help">Manual</a>
@@ -51,7 +51,7 @@
       </header>
 
       <p class="desk-value-banner" id="desk-value-banner">
-        Un solo escritorio: chat, expediente, borradores, plazos y actividad en vivo — usted revisa y aprueba antes de usar cualquier salida.
+        Operación jurídica en un solo lugar: usted dirige, revisa y aprueba antes de cualquier salida al cliente.
       </p>
 
       <div class="workspace-layout desk-layout">
@@ -93,14 +93,6 @@
                 <button
                   type="button"
                   class="btn-reset-chat-primary btn-reset-chat-primary--compact"
-                  id="reset-chat-btn"
-                  title="Borra el historial del agente y empieza una conversación nueva"
-                >
-                  ⟲ Reiniciar
-                </button>
-                <button
-                  type="button"
-                  class="btn-reset-chat-primary btn-reset-chat-primary--compact"
                   id="arco-erase-btn"
                   title="Supresión ARCO: historial, trazas, borradores y expediente (Ley 1581)"
                 >
@@ -138,25 +130,84 @@
         </main>
 
         <aside class="context-panel" id="context-panel" aria-label="Panel contextual">
+          <div class="context-zones" aria-label="Zonas de trabajo">
+            <span class="context-zone-chip context-zone-chip--operar">Operar</span>
+            <span class="context-zone-chip context-zone-chip--supervisar">Supervisar</span>
+            <span class="context-zone-chip context-zone-chip--gestionar">Gestionar</span>
+          </div>
           <div class="context-tabs" role="tablist">
-            <button type="button" class="context-tab is-active" data-tab="borrador" role="tab">Borrador</button>
-            <button type="button" class="context-tab" data-tab="plazos" role="tab">Plazos</button>
-            <button type="button" class="context-tab" data-tab="actividad" role="tab" aria-controls="tab-actividad">
-              Actividad
+            <button
+              type="button"
+              class="context-tab is-active"
+              data-tab="borrador"
+              role="tab"
+              id="tab-btn-borrador"
+              aria-controls="tab-borrador"
+            >
+              Operar · Firma
+            </button>
+            <button
+              type="button"
+              class="context-tab"
+              data-tab="canal-victima"
+              role="tab"
+              id="tab-btn-canal-victima"
+              aria-controls="tab-canal-victima"
+            >
+              Operar · Víctima
+            </button>
+            <button
+              type="button"
+              class="context-tab"
+              data-tab="equipo"
+              role="tab"
+              id="tab-btn-equipo"
+              aria-controls="tab-equipo"
+            >
+              Supervisar · Junta
+            </button>
+            <button
+              type="button"
+              class="context-tab"
+              data-tab="actividad"
+              role="tab"
+              id="tab-btn-actividad"
+              aria-controls="tab-actividad"
+            >
+              Supervisar · Técnico
               <span class="activity-tab-dot" id="activity-tab-dot" hidden aria-hidden="true"></span>
             </button>
-            <button type="button" class="context-tab" data-tab="equipo" role="tab" aria-controls="tab-equipo">
-              Junta del caso
+            <button
+              type="button"
+              class="context-tab"
+              data-tab="plazos"
+              role="tab"
+              id="tab-btn-plazos"
+              aria-controls="tab-plazos"
+            >
+              Gestionar · Plazos
             </button>
-            <button type="button" class="context-tab" data-tab="canal-victima" role="tab" aria-controls="tab-canal-victima">
-              Canal víctima
+            <button
+              type="button"
+              class="context-tab"
+              data-tab="rag"
+              role="tab"
+              id="tab-btn-rag"
+              aria-controls="tab-rag"
+            >
+              Gestionar · RAG
             </button>
-            <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
           <div class="context-tab-panels">
-            <section class="context-tab-panel is-active" id="tab-borrador" data-panel="borrador" role="tabpanel">
+            <section
+              class="context-tab-panel is-active"
+              id="tab-borrador"
+              data-panel="borrador"
+              role="tabpanel"
+              aria-labelledby="tab-btn-borrador"
+            >
               <header class="context-panel-head">
-                <p>Pendientes de su firma</p>
+                <p>Operar · Pendientes de su firma</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-borrador-tab">Actualizar</button>
               </header>
               <p class="context-panel-hint">Todo documento accionable pasa por aquí antes de salir del despacho.</p>
@@ -171,9 +222,16 @@
               </p>
               <div class="firma-list" id="tab-cliente-inbox" aria-live="polite"></div>
             </section>
-            <section class="context-tab-panel" id="tab-plazos" data-panel="plazos" role="tabpanel" hidden>
+            <section
+              class="context-tab-panel"
+              id="tab-plazos"
+              data-panel="plazos"
+              role="tabpanel"
+              hidden
+              aria-labelledby="tab-btn-plazos"
+            >
               <header class="context-panel-head">
-                <p>Términos procesales</p>
+                <p>Gestionar · Términos procesales</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-terminos">Actualizar</button>
               </header>
               <form class="firma-form firma-form--compact" id="firma-term-form">
@@ -186,13 +244,20 @@
               </form>
               <div class="firma-list" id="firma-terminos-list" aria-live="polite"></div>
             </section>
-            <section class="context-tab-panel" id="tab-actividad" data-panel="actividad" role="tabpanel" hidden>
+            <section
+              class="context-tab-panel"
+              id="tab-actividad"
+              data-panel="actividad"
+              role="tabpanel"
+              hidden
+              aria-labelledby="tab-btn-actividad"
+            >
               <header class="context-panel-head">
-                <p>Actividad en vivo</p>
+                <p>Supervisar · Detalle técnico</p>
                 <span class="activity-live-pill" id="activity-live-pill">EN VIVO</span>
               </header>
               <p class="context-panel-hint">
-                Se actualiza sola: turnos, agentes, spans y OpenAI de esta sesión. No hace falta otra pantalla.
+                Vista técnica de soporte (spans/costos). La narrativa jurídica principal está en Junta del caso.
               </p>
               <div class="activity-toolbar">
                 <label class="activity-toggle">
@@ -208,22 +273,35 @@
               <div class="activity-ops" id="activity-ops-list" aria-live="polite"></div>
               <section class="trace-body" id="trace-body"></section>
             </section>
-            <section class="context-tab-panel" id="tab-equipo" data-panel="equipo" role="tabpanel" hidden>
+            <section
+              class="context-tab-panel"
+              id="tab-equipo"
+              data-panel="equipo"
+              role="tabpanel"
+              hidden
+              aria-labelledby="tab-btn-equipo"
+            >
               <header class="context-panel-head">
-                <p>Junta del caso</p>
+                <p>Supervisar · Junta del caso</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-equipo">Actualizar</button>
               </header>
               <p class="context-panel-hint">
-                Conversación interna Coordinador ↔ especialistas (solo despacho; el cliente nunca la ve).
-                Usted dirige al Coordinador en el chat principal. El detalle técnico de costos y spans está en Actividad.
+                Conversación interna Coordinador ↔ especialistas (solo despacho). Aquí valida criterio y pendientes.
               </p>
               <div class="junta-filters" id="junta-filters" aria-label="Filtros de la junta"></div>
               <aside class="junta-pendientes" id="junta-pendientes" hidden aria-live="polite"></aside>
               <div class="equipo-transcript junta-transcript" id="equipo-transcript" aria-live="polite"></div>
             </section>
-            <section class="context-tab-panel" id="tab-canal-victima" data-panel="canal-victima" role="tabpanel" hidden>
+            <section
+              class="context-tab-panel"
+              id="tab-canal-victima"
+              data-panel="canal-victima"
+              role="tabpanel"
+              hidden
+              aria-labelledby="tab-btn-canal-victima"
+            >
               <header class="context-panel-head">
-                <p>Canal víctima</p>
+                <p>Operar · Canal víctima</p>
                 <button type="button" class="btn-firma-action" id="btn-refresh-canal-victima">Actualizar</button>
               </header>
               <p class="context-panel-hint">
@@ -237,22 +315,28 @@
               <div class="canal-victima-thread" id="canal-victima-thread" aria-live="polite"></div>
               <form class="canal-victima-composer" id="canal-victima-form">
                 <p class="canal-victima-audit" role="note">
-                  Aviso permanente: al enviar, el mensaje se registra en el hilo de la víctima como escrito por el despacho
-                  y genera un borrador HITL para revisión.
+                  Aviso permanente: este mensaje queda auditado como registro del despacho y genera un borrador HITL.
                 </p>
-                <label class="canal-victima-label" for="canal-victima-input">Escribir como la víctima</label>
+                <label class="canal-victima-label" for="canal-victima-input">Registrar mensaje recibido de la víctima</label>
                 <textarea
                   id="canal-victima-input"
                   rows="3"
                   maxlength="4000"
-                  placeholder="Texto que la víctima diría…"
+                  placeholder="Texto reportado por la víctima…"
                   required
                 ></textarea>
-                <button type="submit" class="btn-firma-primary" id="canal-victima-send">Enviar como víctima</button>
+                <button type="submit" class="btn-firma-primary" id="canal-victima-send">Registrar en canal víctima</button>
               </form>
             </section>
-            <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
-              <header class="context-panel-head"><p>Conocimiento del despacho y del caso</p></header>
+            <section
+              class="context-tab-panel"
+              id="tab-rag"
+              data-panel="rag"
+              role="tabpanel"
+              hidden
+              aria-labelledby="tab-btn-rag"
+            >
+              <header class="context-panel-head"><p>Gestionar · Conocimiento del despacho y del caso</p></header>
               <form class="firma-form" id="firma-search-form">
                 <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: caducidad, impulso, término" required />
                 <label class="firma-check"><input type="checkbox" id="firma-search-kb" checked /> Base de la firma</label>
@@ -288,14 +372,15 @@
       </aside>
 
       <footer class="workspace-footer desk-footer">
-        <span>Human-supervised · Lexiatek</span>
-        <button type="button" class="desk-footer-link" id="btn-open-actividad">Ir a Actividad</button>
+        <span>Human-supervised · LexiaTek</span>
+        <button type="button" class="desk-footer-link" id="btn-open-actividad">Ir a Supervisar</button>
       </footer>
     </div>
 
     <script src="/static/auth.js"></script>
     <script src="/static/toast.js"></script>
     <script src="/static/report.js"></script>
+    <script src="/static/desk-runtime.js" defer></script>
     <script src="/static/workspace.js" defer></script>
     <script src="/static/firma.js" defer></script>
     <script src="/static/equipo-interno.js" defer></script>

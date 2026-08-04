@@ -20,6 +20,15 @@ def repo(monkeypatch):
     return mem
 
 
+def _start_cliente(tc, *, subject: str, lawyer: str = "web:abogada", nombre: str = "Víctima"):
+    return tc.start_cliente_session(
+        nombre=nombre,
+        consent_1581=True,
+        cliente_subject=subject,
+        lawyer_session_id=lawyer,
+    )
+
+
 def test_contextual_draft_uses_expediente(repo):
     from src.services.cliente_reply_draft import contextual_gerente_draft
 
@@ -50,6 +59,9 @@ def test_quality_flags_harsh_tone():
 
 def test_enqueue_builds_real_draft_with_quality(repo):
     from src.services.triple_chat import enqueue_client_message, list_cliente_inbox
+    from src.services import triple_chat as tc
+
+    _start_cliente(tc, subject="victima-mejora-1", nombre="VIF demo")
 
     out = enqueue_client_message(
         message="Necesito saber el estado de mi caso de violencia",
@@ -76,6 +88,9 @@ def test_list_cliente_status_labels(repo):
         enqueue_client_message,
         list_cliente_visible_messages,
     )
+    from src.services import triple_chat as tc
+
+    _start_cliente(tc, subject="victima-status-1")
 
     out = enqueue_client_message(
         message="Consulta estado",
@@ -134,7 +149,8 @@ def test_desk_and_cliente_ui_markers():
     cliente_js = Path("static/cliente.js").read_text(encoding="utf-8")
     assert "status_label" in cliente_js
     assert "CASO-" in cliente_js
-    assert "lexiatek_cliente_pin" in cliente_js
+    assert "lexiatek_cliente_started_v1" in cliente_js
+    assert "lexiatek_cliente_subject" in cliente_js
     assert "internal-transcript" not in cliente_js
     assert "Junta del caso" not in cliente_js
 

@@ -2,8 +2,10 @@
 (() => {
   "use strict";
 
+  const runtime = window.DeskRuntime || {};
   const POLL_MS = 4000;
   let pollTimer = null;
+  let tabPoller = null;
   let lastPayload = null;
 
   function esc(s) {
@@ -20,10 +22,18 @@
   }
 
   function sessionId() {
-    return (
-      window.Workspace?.getSessionId?.() ||
-      `web:${localStorage.getItem("agente-juridico-user-id") || "web"}`
-    );
+    if (runtime.getSessionId) return runtime.getSessionId();
+    return window.Workspace?.getSessionId?.() || `web:${localStorage.getItem("agente-juridico-user-id") || "web"}`;
+  }
+
+  function notify(message, type = "info") {
+    if (window.Toast?.show) {
+      window.Toast.show(message, type);
+      return;
+    }
+    if (window.showToast) {
+      window.showToast(message, type);
+    }
   }
 
   function isTabActive() {
@@ -114,6 +124,10 @@
   }
 
   function startPoll() {
+    if (tabPoller) {
+      tabPoller.start({ immediate: true });
+      return;
+    }
     stopPoll();
     void refresh();
     pollTimer = setInterval(() => {
@@ -122,6 +136,10 @@
   }
 
   function stopPoll() {
+    if (tabPoller) {
+      tabPoller.stop();
+      return;
+    }
     if (pollTimer) {
       clearInterval(pollTimer);
       pollTimer = null;
@@ -159,8 +177,7 @@
         await refresh();
         window.FirmaPanel?.loadClienteInbox?.();
       } catch (err) {
-        window.showToast?.(err?.message || "Error al enviar.", "error");
-        alert(err?.message || "Error al enviar como víctima.");
+        notify(err?.message || "No se pudo registrar el mensaje en el canal víctima.", "error");
       } finally {
         if (btn) btn.disabled = false;
       }
@@ -176,6 +193,16 @@
     if (location.hash.replace("#", "") === "canal-victima") {
       startPoll();
     }
+  }
+
+  if (runtime.createTabPoller) {
+    tabPoller = runtime.createTabPoller({
+      tabId: "canal-victima",
+      intervalMs: POLL_MS,
+      run: async () => {
+        await refresh();
+      },
+    });
   }
 
   if (document.readyState === "loading") {

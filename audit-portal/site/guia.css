@@ -5,7 +5,7 @@
   --guia-muted: #64748b;
   --guia-border: #e2e8f0;
   --guia-blue: #2563eb;
-  --guia-purple: #7c3aed;
+  --guia-purple: #06b6d4;
   --guia-amber: #d97706;
   --guia-green: #059669;
   --guia-max-prose: 42rem;
@@ -183,7 +183,7 @@
 .guia-value-list li { margin-bottom: 0.5rem; }
 .guia-flow-tag {
   font-size: 0.8125rem;
-  color: #7c3aed;
+  color: #0e7490;
   font-style: normal;
   font-weight: 600;
 }

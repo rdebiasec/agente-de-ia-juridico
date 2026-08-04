@@ -1,5 +1,6 @@
 /** Junta del caso — transcript legible Coordinador ↔ especialistas (solo abogado). */
 (function () {
+  const runtime = window.DeskRuntime || {};
   const POLL_MS = 3000;
   const COLLAPSE_AT = 420;
 
@@ -16,6 +17,7 @@
   let filterMode = "todos"; // todos | alto | specialist:<id>
   let focusState = null; // { turnRef, afterIso, entryId, highlightUntil }
   let knownSpecialists = [];
+  let tabPoller = null;
 
   const listEl = () => document.getElementById("equipo-transcript");
   const pendientesEl = () => document.getElementById("junta-pendientes");
@@ -30,10 +32,8 @@
   }
 
   function sessionId() {
-    return (
-      window.Workspace?.getSessionId?.() ||
-      `web:${window.getChatUserId?.() || window.getUserId?.() || "abogado"}`
-    );
+    if (runtime.getSessionId) return runtime.getSessionId();
+    return window.Workspace?.getSessionId?.() || `web:${window.getChatUserId?.() || window.getUserId?.() || "abogado"}`;
   }
 
   function authFetch(url, options) {
@@ -301,6 +301,10 @@
   }
 
   function startPoll() {
+    if (tabPoller) {
+      tabPoller.start({ immediate: true });
+      return;
+    }
     stopPoll();
     pollTimer = setInterval(() => {
       if (isTabVisible() && document.visibilityState !== "hidden") {
@@ -310,6 +314,10 @@
   }
 
   function stopPoll() {
+    if (tabPoller) {
+      tabPoller.stop();
+      return;
+    }
     if (pollTimer) {
       clearInterval(pollTimer);
       pollTimer = null;
@@ -341,6 +349,16 @@
     }
     void refresh().then(() => {
       renderEntries(lastEntries);
+    });
+  }
+
+  if (runtime.createTabPoller) {
+    tabPoller = runtime.createTabPoller({
+      tabId: "equipo",
+      intervalMs: POLL_MS,
+      run: async () => {
+        await refresh({ quiet: true });
+      },
     });
   }
 

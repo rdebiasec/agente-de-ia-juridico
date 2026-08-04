@@ -429,7 +429,7 @@ const SessionReport = (() => {
     body {
       margin: 0;
       padding: 1.25rem 1.5rem;
-      font-family: "Manrope", system-ui, sans-serif;
+      font-family: "Lato", system-ui, sans-serif;
       font-size: 12px;
       line-height: 1.45;
       color: #111;
@@ -523,7 +523,7 @@ const SessionReport = (() => {
   <title>${escapeHtml(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>${PRINT_STYLES}</style>
 </head>
 <body>

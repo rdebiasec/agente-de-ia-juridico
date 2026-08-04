@@ -49,7 +49,7 @@ def test_abogado_has_cliente_inbox_and_canal_victima():
     assert "Respuestas al cliente" in html
     assert "Canal víctima" in html
     assert 'id="tab-canal-victima"' in html
-    assert "Escribir como la víctima" in html
+    assert "Registrar mensaje recibido de la víctima" in html
     assert Path("static/canal-victima.js").is_file()
     firma = Path("static/firma.js").read_text(encoding="utf-8")
     assert "/abogado/cliente-inbox" in firma
