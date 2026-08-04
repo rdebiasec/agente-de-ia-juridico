@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import time
 from typing import Any, Literal
 
 from src.agents.pii import mask_pii
 
+logger = logging.getLogger(__name__)
+
 DELIBERATION_PROTOCOL = "gerente_especialista_v1"
 DELIBERATION_TEXT_CAP = 2400
+OPENAI_SPAN_TEXT_CAP = 800
 
 DeliberationKind = Literal["consult", "findings", "synthesize", "escalate"]
 
@@ -56,6 +60,56 @@ def next_ronda_for(trace: dict, specialist_id: str) -> int:
     return n + 1
 
 
+def emit_openai_deliberation_span(
+    kind: DeliberationKind,
+    *,
+    specialist_id: str = "",
+    pedido: str = "",
+    respuesta: str = "",
+    reasoning: str = "",
+    ronda: int | None = None,
+    extra: dict[str, Any] | None = None,
+) -> bool:
+    """Best-effort: custom span en el trace OpenAI activo (dashboard Traces).
+
+    Returns True si se emitió; False si no hay trace activo o falló (no rompe el turno).
+    """
+    try:
+        from agents.tracing import custom_span, get_current_trace
+    except Exception:
+        return False
+
+    try:
+        if get_current_trace() is None:
+            return False
+        data: dict[str, Any] = {
+            "protocol": DELIBERATION_PROTOCOL,
+            "kind": kind,
+            "specialist_id": specialist_id or "",
+            "ronda": int(ronda) if ronda else None,
+            "pedido": clip_deliberation_text(pedido, limit=OPENAI_SPAN_TEXT_CAP),
+            "respuesta": clip_deliberation_text(respuesta, limit=OPENAI_SPAN_TEXT_CAP),
+            "reasoning": clip_deliberation_text(reasoning, limit=OPENAI_SPAN_TEXT_CAP),
+        }
+        if extra:
+            for key, value in extra.items():
+                if value is None:
+                    continue
+                if isinstance(value, str):
+                    data[key] = clip_deliberation_text(value, limit=OPENAI_SPAN_TEXT_CAP)
+                elif isinstance(value, (list, dict, int, float, bool)):
+                    data[key] = value
+                else:
+                    data[key] = clip_deliberation_text(str(value), limit=OPENAI_SPAN_TEXT_CAP)
+        span_name = f"deliberation.{kind}"
+        with custom_span(name=span_name, data=data):
+            pass
+        return True
+    except Exception:
+        logger.debug("OpenAI deliberation span no emitido kind=%s", kind, exc_info=True)
+        return False
+
+
 def append_deliberation_turn(
     trace: dict,
     *,
@@ -65,6 +119,8 @@ def append_deliberation_turn(
     respuesta: str = "",
     reasoning: str = "",
     ronda: int | None = None,
+    emit_openai: bool = True,
+    openai_extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     block = ensure_deliberation(trace)
     turn: dict[str, Any] = {
@@ -77,6 +133,16 @@ def append_deliberation_turn(
         "at_ms": int(time.time() * 1000),
     }
     block["turns"].append(turn)
+    if emit_openai:
+        emit_openai_deliberation_span(
+            kind,
+            specialist_id=specialist_id,
+            pedido=pedido,
+            respuesta=respuesta,
+            reasoning=reasoning,
+            ronda=ronda,
+            extra=openai_extra,
+        )
     return turn
 
 
@@ -139,5 +205,10 @@ def finalize_deliberation_summary(trace: dict) -> dict[str, Any]:
                 f"{pendientes_note}"
             ),
             ronda=rounds,
+            openai_extra={
+                "specialists_consulted": specialists,
+                "rounds": rounds,
+                "open_pendientes_count": len(open_pendientes),
+            },
         )
     return summary

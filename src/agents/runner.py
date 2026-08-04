@@ -26,6 +26,7 @@ from src.agents.orchestrator import (
     enabled_specialists_for_focus,
 )
 from src.agents.deliberation import (
+    DELIBERATION_PROTOCOL,
     append_deliberation_turn,
     empty_deliberation,
     finalize_deliberation_summary,
@@ -308,6 +309,15 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             "done",
             f"Agente finalizó. Salida: {preview}",
         )
+        # Cerrar junta + custom span synthesize mientras el trace OpenAI sigue vivo.
+        if getattr(agent, "name", None) == POC_AGENT_ID:
+            try:
+                finalize_deliberation_summary(self.trace)
+            except Exception:
+                logger.debug(
+                    "No se pudo cerrar deliberation en on_agent_end",
+                    exc_info=True,
+                )
 
     async def on_handoff(self, context: Any, from_agent: Any, to_agent: Any) -> None:
         self._span(
@@ -1257,6 +1267,7 @@ async def run_agent(
             "session_id": session_id,
             "channel": channel,
             "turn_index": str(trace.get("turn_index", 0)),
+            "deliberation_protocol": DELIBERATION_PROTOCOL,
         },
     )
     try:
@@ -1318,6 +1329,12 @@ async def run_agent(
         finally:
             # No contaminar el Agent cacheado con el modelo de fallback.
             orchestrator.model = original_model
+            try:
+                from agents.tracing import flush_traces
+
+                flush_traces()
+            except Exception:
+                logger.debug("flush_traces OpenAI no disponible", exc_info=True)
         if result is None:  # pragma: no cover - defensa de invariantes
             raise RuntimeError("El runner terminó sin resultado.")
         if agent_session.last_compaction:
