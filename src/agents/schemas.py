@@ -24,6 +24,31 @@ def _no_vacio(valor: str, campo: str) -> str:
     return valor.strip()
 
 
+class NotaTrabajo(BaseModel):
+    """Nota de bitácora de un especialista (consumo Gerente / expediente)."""
+
+    autor: str = Field(..., description="Agent id del especialista que anota.")
+    tipo: Literal["analisis", "inventario", "alerta", "borrador_interno"] = Field(
+        default="analisis",
+        description="Tipo de nota de trabajo.",
+    )
+    resumen: str = Field(default="", description="Resumen denso de la nota.")
+    hallazgos: list[str] = Field(default_factory=list, description="1–7 hallazgos clave.")
+    pendientes: list[str] = Field(
+        default_factory=list,
+        description="Pendientes con dueño sugerido (gerente|abogado|área).",
+    )
+    confidencialidad: Literal["normal", "sensible", "menor"] = Field(
+        default="normal",
+        description="Nivel de confidencialidad de la nota.",
+    )
+
+    @field_validator("autor")
+    @classmethod
+    def _validar_autor(cls, v: str, info):
+        return _no_vacio(v, info.field_name)
+
+
 class ConceptoJuridico(BaseModel):
     """Concepto jurídico (REQ-029 a REQ-032)."""
 
@@ -55,26 +80,11 @@ class Memorial(BaseModel):
         return _no_vacio(v, info.field_name)
 
 
-class Tutela(BaseModel):
-    """Acción de tutela (REQ-038 a REQ-040)."""
-
-    accionante: Parte = Field(..., description="Datos completos del accionante (REQ-039).")
-    accionado: Parte = Field(..., description="Datos completos del accionado (REQ-039).")
-    derecho_vulnerado: str = Field(..., description="Derecho fundamental presuntamente vulnerado (REQ-040).")
-    fundamentos: str = Field(..., description="Fundamentos de derecho (REQ-040).")
-    hechos: list[str] = Field(default_factory=list, description="Hechos relevantes.")
-    pretensiones: list[str] = Field(default_factory=list, description="Pretensiones de la tutela.")
-
-    @field_validator("derecho_vulnerado", "fundamentos")
-    @classmethod
-    def _validar(cls, v: str, info):
-        return _no_vacio(v, info.field_name)
-
 
 class BorradorDocumentoPenal(BaseModel):
     """Salida estructurada del redactor penal (output_type del Agents SDK)."""
 
-    tipo: Literal["memorial", "tutela", "concepto", "solicitud", "otro"] = Field(
+    tipo: Literal["memorial", "concepto", "solicitud", "otro"] = Field(
         ...,
         description="Tipo de pieza jurídica borrador.",
     )
@@ -85,6 +95,10 @@ class BorradorDocumentoPenal(BaseModel):
         description="Hechos, citas o radicados que el abogado debe verificar.",
     )
     materia: str = Field(default="penal", description="Materia (penal-víctimas).")
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del redactor para el Gerente/expediente.",
+    )
 
     @field_validator("titulo", "cuerpo")
     @classmethod
@@ -106,7 +120,6 @@ class TriageResult(BaseModel):
         "representacion_victima",
         "evidencia",
         "audiencia",
-        "tutela_constitucional",
         "seguimiento",
         "fuera_de_alcance",
     ] = Field(..., description="Clasificación de la tarea del turno.")
@@ -158,6 +171,15 @@ class TriageResult(BaseModel):
         default="",
         description="Resumen corto del triage para el plan HITL.",
     )
+    rol_aparente: Literal[
+        "victima_o_despacho",
+        "investigado_o_conductor",
+        "fuera_penal_victimas",
+        "no_determinado",
+    ] = Field(
+        default="no_determinado",
+        description="Rol aparente del interlocutor para eco y alcance (no dictamen).",
+    )
 
     @field_validator("agente_destino")
     @classmethod
@@ -201,6 +223,10 @@ class CronologiaPenal(BaseModel):
         default_factory=list,
         description="Datos a verificar con el abogado o el expediente.",
     )
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del analista de cronología.",
+    )
 
     @field_validator("titulo")
     @classmethod
@@ -234,6 +260,10 @@ class MatrizTipicidad(BaseModel):
     agravantes_atenuantes: list[str] = Field(default_factory=list)
     riesgos_atipicidad: list[str] = Field(default_factory=list)
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del analista de tipicidad.",
+    )
 
     @field_validator("hipotesis_tipica")
     @classmethod
@@ -262,6 +292,10 @@ class InventarioEvidencia(BaseModel):
     brechas_probatorias: list[str] = Field(default_factory=list)
     plan_recaudo_sugerido: list[str] = Field(default_factory=list)
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del gestor de evidencia.",
+    )
 
     @field_validator("titulo")
     @classmethod
@@ -295,6 +329,10 @@ class DictamenCalidad(BaseModel):
         description="Resumen ejecutivo del dictamen para el gerente/abogado.",
     )
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del analista de calidad.",
+    )
 
     @field_validator("veredicto")
     @classmethod
@@ -325,6 +363,10 @@ class RutaProcesalLey906(BaseModel):
         description="Pasos o actuaciones sugeridas (preliminares).",
     )
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del analista de ruta 906.",
+    )
 
     @field_validator("resumen")
     @classmethod
@@ -342,6 +384,10 @@ class RepresentacionVictimas(BaseModel):
     riesgos_revictimizacion: list[str] = Field(default_factory=list)
     objetivos_representacion: list[str] = Field(default_factory=list)
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del analista de víctimas.",
+    )
 
     @field_validator("teoria_caso")
     @classmethod
@@ -359,6 +405,10 @@ class PreparacionAudiencia(BaseModel):
     riesgos_audiencia: list[str] = Field(default_factory=list)
     checklist: list[str] = Field(default_factory=list)
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del preparador de audiencias.",
+    )
 
     @field_validator("objetivo_audiencia")
     @classmethod
@@ -379,6 +429,10 @@ class SeguimientoProcesal(BaseModel):
     inactividad_detectada: str = Field(default="", description="Señal de inactividad o vacío.")
     proximas_acciones: list[str] = Field(default_factory=list)
     pendientes_verificacion: list[str] = Field(default_factory=list)
+    notas_trabajo: list[NotaTrabajo] = Field(
+        default_factory=list,
+        description="Notas de bitácora propias del gestor de seguimiento.",
+    )
 
     @field_validator("resumen")
     @classmethod

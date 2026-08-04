@@ -13,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_cronologia_hechos`
+- `analista_evidencia`
 
 ## Purpose
 Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke funcional del gate del Gerente del Caso Penal (local o producción).
+"""Smoke funcional del gate del Coordinador del Caso (local o producción).
 
 Verifica sobre HTTP autenticado que la verificación de completitud sea un
 invariante de runtime y no una promesa del prompt:
@@ -37,7 +37,7 @@ MENSAJE_COMPLETO = (
     "La víctima denunció lesiones y aportó el relato. Tengo poder firmado. "
     "Última actuación: audiencia de imputación. Partes: víctima y procesado."
 )
-GERENTE = "coordinador_expediente_penal"
+GERENTE = "coordinador_caso"
 
 
 def _load_vault_password() -> str:

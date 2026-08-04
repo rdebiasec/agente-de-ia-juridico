@@ -25,17 +25,25 @@ from src.agents.orchestrator import (
     build_orchestrator,
     enabled_specialists_for_focus,
 )
+from src.agents.deliberation import (
+    append_deliberation_turn,
+    empty_deliberation,
+    finalize_deliberation_summary,
+    next_ronda_for,
+)
 from src.agents.pipeline import attach_session_continuity, run_post_validations, run_pre_validations
 from src.agents.pii import mask_pii
 from src.agents.pricing import enrich_completion_with_cost
 from src.agents.resilience import run_with_retries
 from src.agents.session_context import FirmRunContext, bind_run_context
 from src.agents.skill_catalog import agent_display_name
+from src.agents.specialist_consult import consult_fields_from_raw
 from src.agents.triage import (
     build_triage_bundle,
     format_triage_sistema,
     has_penal_context,
     infer_destination_agent,
+    is_investigado_posture,
     is_non_penal_scope_request,
     is_trivial_consultation,
     requires_execution_plan,
@@ -49,20 +57,43 @@ from src.storage import get_repository
 logger = logging.getLogger(__name__)
 
 
+def _is_specialist_tool(tool_name: str) -> bool:
+    """True si la tool es especialista (IDs canónicos o legacy)."""
+    name = (tool_name or "").strip()
+    if not name:
+        return False
+    if name in SPECIALIST_AGENT_IDS:
+        return True
+    try:
+        from src.agents.agent_ids import AGENT_DISPLAY_LABELS, resolve_agent_id
+
+        resolved = resolve_agent_id(name)
+        if resolved in SPECIALIST_AGENT_IDS:
+            return True
+        if resolved in AGENT_DISPLAY_LABELS and resolved not in {
+            "coordinador_caso",
+            POC_AGENT_ID,
+            resolve_agent_id(POC_AGENT_ID),
+        }:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 class AgentBudgetExceeded(RuntimeError):
     """El workflow consumió más tokens que el presupuesto configurado."""
 
 _AGENT_SKILL_MAP = {
-    "coordinador_expediente_penal": "PEN-COORD",
-    "analista_cronologia_hechos_penales": "PEN-HECHOS",
-    "analista_tipicidad_y_responsabilidad_penal": "PEN-TIPICIDAD",
-    "analista_ruta_procesal_ley906": "PEN-RUTA906",
+    "coordinador_caso": "PEN-COORD",
+    "analista_cronologia_hechos": "PEN-HECHOS",
+    "analista_responsabilidad_tipicidad": "PEN-TIPICIDAD",
+    "analista_ruta_procesal": "PEN-RUTA906",
     "analista_representacion_victimas": "PEN-VICTIMAS",
-    "gestor_evidencia_y_soporte_probatorio": "PEN-EVIDENCIA",
-    "preparador_estrategico_audiencias_penales": "PEN-AUDIENCIAS",
-    "redactor_documentos_juridicos_penales": "PEN-REDACCION",
-    "gestor_seguimiento_procesal_penal": "PEN-SEGUIMIENTO",
-    "evaluador_derechos_fundamentales_tutela": "PEN-TUTELA",
+    "analista_evidencia": "PEN-EVIDENCIA",
+    "analista_audiencias": "PEN-AUDIENCIAS",
+    "redactor_documentos_juridicos": "PEN-REDACCION",
+    "analista_seguimiento_procesal": "PEN-SEGUIMIENTO",
     "analista_calidad_juridica": "PEN-CALIDAD",
     "fallback": "KAN-FALLBACK",
     "guardrail": "KAN-GUARDRAIL",
@@ -169,9 +200,68 @@ def _new_item_detail(item: object) -> str:
     return f"Evento {item_type}.{name_bit}{args_bit}".strip()
 
 
+def _raw_tool_arguments(context: Any) -> Any:
+    raw = getattr(context, "tool_arguments", None)
+    if raw is None and context is not None:
+        nested = getattr(context, "context", None)
+        if nested is not None:
+            raw = getattr(nested, "tool_arguments", None)
+    return raw
+
+
+def _pedido_from_tool_context(context: Any, tool_name: str, trace: dict) -> str:
+    """Extrae el pedido concreto del Gerente (SpecialistConsultInput) para el transcript."""
+    fields = consult_fields_from_raw(_raw_tool_arguments(context))
+    parts: list[str] = []
+    if fields.get("pedido"):
+        parts.append(fields["pedido"])
+    if fields.get("hechos_confirmados"):
+        parts.append(f"Hechos: {_truncate(fields['hechos_confirmados'], limit=180)}")
+    if fields.get("etapa"):
+        parts.append(f"Etapa: {fields['etapa']}")
+    text = " · ".join(parts)
+    if not text:
+        raw = _raw_tool_arguments(context)
+        if isinstance(raw, str) and raw.strip():
+            text = _truncate(raw.strip(), limit=400)
+    if not text:
+        summary = str(trace.get("input_summary") or "").strip()
+        if summary:
+            text = f"Sobre la consulta del abogado: {_truncate(summary, limit=220)}"
+    if not text:
+        text = f"Consulta al área «{tool_name}» (turno {trace.get('trace_id') or 'actual'})."
+    return text
+
+
+def _consult_meta_from_context(context: Any, tool_name: str, trace: dict) -> dict[str, Any]:
+    """Pedido + campos de deliberación para trace.deliberation."""
+    fields = consult_fields_from_raw(_raw_tool_arguments(context))
+    pedido = _pedido_from_tool_context(context, tool_name, trace)
+    ronda_raw = fields.get("ronda") or ""
+    try:
+        ronda_arg = int(ronda_raw) if ronda_raw else 0
+    except (TypeError, ValueError):
+        ronda_arg = 0
+    ronda = ronda_arg if ronda_arg >= 1 else next_ronda_for(trace, tool_name)
+    reasoning_parts = []
+    if fields.get("objetivo_deliberacion"):
+        reasoning_parts.append(fields["objetivo_deliberacion"])
+    if fields.get("modo") and fields["modo"] != "inicial":
+        reasoning_parts.append(f"modo={fields['modo']}")
+    if fields.get("contexto_previo"):
+        reasoning_parts.append(f"contexto: {_truncate(fields['contexto_previo'], limit=240)}")
+    return {
+        "pedido": pedido,
+        "reasoning": " · ".join(reasoning_parts),
+        "ronda": ronda,
+        "modo": fields.get("modo") or "inicial",
+    }
+
+
 class _TraceRunHooks(RunHooksBase[Any, Any]):
     def __init__(self, trace: dict):
         self.trace = trace
+        self._tool_pedidos: dict[str, dict[str, Any]] = {}
 
     def _span(self, name: str, kind: str, status: str, detail: str) -> None:
         self.trace.setdefault("spans", []).append(
@@ -183,6 +273,29 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
                 "at_ms": int(time.time() * 1000),
             }
         )
+
+    def _record_internal_exchange(
+        self, *, specialist_id: str, pedido: str, respuesta: str
+    ) -> None:
+        session_id = str(self.trace.get("session_id") or "")
+        if not session_id or not _is_specialist_tool(specialist_id):
+            return
+        try:
+            from src.services.triple_chat import record_specialist_exchange
+
+            record_specialist_exchange(
+                session_id=session_id,
+                specialist_id=specialist_id,
+                pedido=pedido,
+                respuesta=respuesta,
+                turn_ref=str(self.trace.get("trace_id") or "") or None,
+            )
+        except Exception:
+            logger.exception(
+                "Transcript interno no persistido session=%s tool=%s",
+                session_id,
+                specialist_id,
+            )
 
     async def on_agent_start(self, context: Any, agent: Any) -> None:
         self._span(f"agent:{getattr(agent, 'name', 'unknown')}", "agent", "in_progress", "Agente iniciado.")
@@ -207,21 +320,34 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             self.trace,
             action_type="handoff",
             status="done",
-            actor=getattr(from_agent, "name", "coordinador_expediente_penal"),
+            actor=getattr(from_agent, "name", "coordinador_caso"),
             detail=f"Handoff hacia {getattr(to_agent, 'name', 'especialista')}.",
         )
 
     async def on_tool_start(self, context: Any, agent: Any, tool: Any) -> None:
         tool_name = getattr(tool, "name", None) or type(tool).__name__
         self._span(f"tool:{tool_name}", "tool", "in_progress", f"Ejecutando {tool_name}.")
-        if tool_name in SPECIALIST_AGENT_IDS:
+        if _is_specialist_tool(tool_name):
             self.trace["backoffice_agent"] = tool_name
+            meta = _consult_meta_from_context(context, tool_name, self.trace)
+            self._tool_pedidos[tool_name] = meta
+            append_deliberation_turn(
+                self.trace,
+                kind="consult",
+                specialist_id=tool_name,
+                pedido=str(meta.get("pedido") or ""),
+                reasoning=str(meta.get("reasoning") or ""),
+                ronda=int(meta.get("ronda") or 1),
+            )
             _append_action(
                 self.trace,
                 action_type="backoffice_consult",
                 status="in_progress",
                 actor=POC_AGENT_ID,
-                detail=f"POC consultó equipo interno: {tool_name}.",
+                detail=(
+                    f"POC consultó equipo interno: {tool_name} "
+                    f"(ronda {meta.get('ronda')}) — {_truncate(str(meta.get('pedido') or ''), limit=120)}"
+                ),
             )
 
     async def on_tool_end(self, context: Any, agent: Any, tool: Any, result: object) -> None:
@@ -232,13 +358,32 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             "done",
             f"Resultado: {_truncate(_safe_json_preview(result, limit=200))}",
         )
-        if tool_name in SPECIALIST_AGENT_IDS:
+        if _is_specialist_tool(tool_name):
+            meta = self._tool_pedidos.pop(
+                tool_name, {"pedido": f"Consulta a {tool_name}", "ronda": 1, "reasoning": ""}
+            )
+            respuesta = _safe_json_preview(result, limit=2400)
+            pedido = str(meta.get("pedido") or f"Consulta a {tool_name}")
+            append_deliberation_turn(
+                self.trace,
+                kind="findings",
+                specialist_id=tool_name,
+                pedido=pedido,
+                respuesta=respuesta,
+                reasoning=str(meta.get("reasoning") or ""),
+                ronda=int(meta.get("ronda") or 1),
+            )
             _append_action(
                 self.trace,
                 action_type="backoffice_consult",
                 status="done",
                 actor=POC_AGENT_ID,
                 detail=f"Hallazgos internos de {tool_name} disponibles para síntesis del POC.",
+            )
+            self._record_internal_exchange(
+                specialist_id=tool_name,
+                pedido=pedido,
+                respuesta=respuesta,
             )
 
     async def on_llm_start(
@@ -308,16 +453,15 @@ def _kan_for_agent(agent_name: str | None) -> str:
 
 
 _AGENT_DRAFT_TIPO = {
-    "evaluador_derechos_fundamentales_tutela": "tutela",
-    "redactor_documentos_juridicos_penales": "documento",
-    "preparador_estrategico_audiencias_penales": "audiencia",
-    "gestor_seguimiento_procesal_penal": "seguimiento",
-    "analista_tipicidad_y_responsabilidad_penal": "analisis_penal",
-    "analista_ruta_procesal_ley906": "ruta_procesal",
+    "redactor_documentos_juridicos": "documento",
+    "analista_audiencias": "audiencia",
+    "analista_seguimiento_procesal": "seguimiento",
+    "analista_responsabilidad_tipicidad": "analisis_penal",
+    "analista_ruta_procesal": "ruta_procesal",
     "analista_representacion_victimas": "estrategia_victima",
-    "gestor_evidencia_y_soporte_probatorio": "plan_probatorio",
+    "analista_evidencia": "plan_probatorio",
     "analista_calidad_juridica": "control_calidad",
-    "analista_cronologia_hechos_penales": "cronologia",
+    "analista_cronologia_hechos": "cronologia",
 }
 
 
@@ -400,9 +544,9 @@ def _trace_step(step: str, status: str, detail: str, actor: str = "sistema") -> 
 
 
 def _base_trace(session_id: str, channel: str, message: str) -> dict:
-    receiver = "coordinador_expediente_penal"
+    receiver = "coordinador_caso"
     return {
-        "trace_version": "4.0",
+        "trace_version": "4.1",
         "trace_id": _trace_id(session_id, message),
         "session_id": session_id,
         "timestamp": int(time.time() * 1000),
@@ -425,6 +569,7 @@ def _base_trace(session_id: str, channel: str, message: str) -> dict:
             "summary": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
             "note": "Se llena cuando hay ejecución LLM con API key.",
         },
+        "deliberation": empty_deliberation(),
         "actions": [],
         "steps": [
             _trace_step("Recibí su consulta", "done", "Consulta recibida por el asistente."),
@@ -451,10 +596,26 @@ def _append_action(trace: dict, action_type: str, status: str, actor: str, detai
 
 def _finalize_trace(trace: dict, text: str) -> dict:
     has_disclaimer = "Borrador informativo" in text
+    deliberation_summary = finalize_deliberation_summary(trace)
     span_count = len(trace.get("spans") or [])
     step_count = len(trace.get("steps") or [])
     trace["span_count"] = span_count
     trace["step_count"] = step_count
+    rounds = int(deliberation_summary.get("rounds") or 0)
+    if rounds:
+        specs = deliberation_summary.get("specialists_consulted") or []
+        trace.setdefault("spans", []).append(
+            {
+                "name": "Deliberación: cierre de junta",
+                "kind": "deliberation",
+                "status": "done",
+                "detail": (
+                    f"{rounds} ronda(s) · {len(specs)} especialista(s) · "
+                    f"pendientes={len(deliberation_summary.get('open_pendientes') or [])}"
+                ),
+                "at_ms": int(time.time() * 1000),
+            }
+        )
     trace.setdefault("spans", []).append(
         {
             "name": "Traza: cierre de turno",
@@ -489,28 +650,23 @@ def _fallback_response(message: str) -> str:
     """Respuesta offline determinista cuando no hay OPENAI_API_KEY."""
     dest = infer_destination_agent(message)
     bodies = {
-        "evaluador_derechos_fundamentales_tutela": (
-            "Puedo evaluar la procedencia preliminar de tutela en un contexto penal. "
-            "Compárteme accionante, accionado, hechos, derecho fundamental vulnerado y por qué "
-            "las vías ordinarias no son suficientes en este caso."
-        ),
-        "gestor_seguimiento_procesal_penal": (
+        "analista_seguimiento_procesal": (
             "Puedo estructurar el seguimiento procesal penal: estado del radicado, últimas actuaciones, "
             "audiencias próximas y alertas operativas de términos."
         ),
-        "preparador_estrategico_audiencias_penales": (
+        "analista_audiencias": (
             "Puedo preparar la audiencia penal: objetivo de intervención, guion, solicitudes, "
             "preguntas clave y riesgos tácticos para representación de víctimas."
         ),
-        "gestor_evidencia_y_soporte_probatorio": (
+        "analista_evidencia": (
             "Puedo construir el plan probatorio: inventario de evidencia, matriz hecho-prueba, "
             "brechas y plan de recaudo sin comprometer cadena de custodia."
         ),
-        "analista_tipicidad_y_responsabilidad_penal": (
+        "analista_responsabilidad_tipicidad": (
             "Puedo hacer análisis preliminar de tipicidad y responsabilidad penal. "
             "Compárteme hechos cronológicos, actores y soportes para mapear elementos del tipo."
         ),
-        "analista_ruta_procesal_ley906": (
+        "analista_ruta_procesal": (
             "Puedo analizar ruta procesal Ley 906: etapa, actuaciones posibles para la víctima, "
             "riesgos procesales y próximos pasos."
         ),
@@ -518,20 +674,37 @@ def _fallback_response(message: str) -> str:
             "Puedo estructurar la estrategia de representación de víctimas: intereses, derechos, "
             "riesgos de revictimización y enfoque diferencial."
         ),
-        "analista_cronologia_hechos_penales": (
+        "analista_cronologia_hechos": (
             "Puedo ordenar la cronología penal del caso, identificar contradicciones y vacíos de información "
             "para fortalecer el análisis posterior."
         ),
-        "redactor_documentos_juridicos_penales": (
-            "Puedo redactar un borrador penal revisable (memorial, solicitud, recurso preliminar, "
-            "derecho de petición o pieza de tutela preliminar). Comparte radicado, hechos y petición."
+        "redactor_documentos_juridicos": (
+            "Puedo redactar un borrador penal revisable (memorial, solicitud, recurso preliminar "
+            "o derecho de petición). Comparte radicado, hechos y petición."
         ),
         "analista_calidad_juridica": (
             "Puedo revisar calidad jurídica: soporte fáctico, citas, coherencia estratégica "
             "y riesgos de confidencialidad o revictimización antes de salida externa."
         ),
+        POC_AGENT_ID: (
+            "La acción de tutela / vía constitucional está fuera del alcance de este producto. "
+            "Puedo apoyar impulso procesal, derecho de petición, seguimiento o memoriales penales. "
+            "¿Qué actuación en vía penal necesita?"
+        ),
     }
-    if is_non_penal_scope_request(message):
+    if is_investigado_posture(message):
+        body = (
+            "Entiendo su relato: parece situarse como conductor o persona investigada "
+            "(por ejemplo, un accidente de tránsito donde usted habría atropellado a alguien) "
+            "y busca orientación jurídica. "
+            "Este despacho representa a víctimas en el proceso penal colombiano; "
+            "no asumimos la defensa de quien figura como investigado o conductor. "
+            "Si usted es el abogado del despacho y el caso es de una víctima, "
+            "acláreme el rol de su cliente y los hechos desde esa postura. "
+            "Si necesita defensa del conductor, conviene reconducir a un profesional "
+            "en defensa penal."
+        )
+    elif is_non_penal_scope_request(message):
         body = (
             "Esta solicitud está fuera de alcance penal-víctimas. Solo atiendo representación de víctimas "
             "en contexto penal colombiano. Si existe componente penal, compárteme hechos, etapa Ley 906 "
@@ -542,16 +715,18 @@ def _fallback_response(message: str) -> str:
         for w in ("perfil", "experiencia", "quien eres", "quién eres")
     ):
         body = (
-            "Soy el Gerente del Caso Penal del despacho: tu único interlocutor. "
+            "Soy el Coordinador del Caso del despacho: tu único interlocutor. "
             "Cuando hace falta, consulto al equipo interno (cronología, tipicidad, ruta Ley 906, "
-            "evidencia, audiencias, redacción, seguimiento, tutela y calidad) y te entrego una sola "
+            "evidencia, audiencias, redacción, seguimiento y calidad) y te entrego una sola "
             "voz de despacho para tu revisión."
         )
+    elif re.search(r"\b(tutela|acci[oó]n\s+de\s+tutela)\b", message or "", re.I):
+        body = bodies[POC_AGENT_ID]
     else:
         body = bodies.get(
             dest,
             (
-                "Como Gerente del Caso Penal puedo apoyar estrategia de víctimas de extremo a "
+                "Como Coordinador del Caso puedo apoyar estrategia de víctimas de extremo a "
                 "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
                 "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
             ),
@@ -589,12 +764,43 @@ def _ensure_poc_voice(text: str, *, last_agent_name: str | None, backoffice_agen
         return text
     label = agent_display_name(backoffice_agent or last_agent_name)
     stripped = (text or "").strip()
-    if stripped.lower().startswith("como gerente del caso"):
+    if stripped.lower().startswith(("como gerente del caso", "como coordinador del caso")):
         return text
     return (
-        f"Como Gerente del Caso Penal, consolidé el trabajo del equipo interno "
+        f"Como Coordinador del Caso, consolidé el trabajo del equipo interno "
         f"({label}):\n\n{stripped}"
     )
+
+
+def _record_bitacora_turn(
+    *,
+    session_id: str,
+    message: str,
+    text: str,
+    trace: dict,
+    backoffice_agent: str | None = None,
+    pending_review: bool = False,
+    expediente=None,
+) -> None:
+    """Post-hook: bitácora maestra del Gerente (no depende del LLM)."""
+    try:
+        from src.services.bitacora import record_gerente_turn
+
+        exp = expediente
+        record_gerente_turn(
+            session_id,
+            message=message,
+            reply=text,
+            route=str(trace.get("route") or ""),
+            backoffice_agent=backoffice_agent or trace.get("sent_to_agent") or trace.get("selected_agent"),
+            blocked=bool(trace.get("blocked")),
+            pending_review=pending_review or bool(trace.get("human_review_required")),
+            involucra_menor=bool(getattr(exp, "involucra_menor", False)),
+            datos_sensibles=bool(getattr(exp, "datos_sensibles", False)),
+        )
+        trace["bitacora_recorded"] = True
+    except Exception:
+        logger.exception("Bitácora Gerente no persistida session=%s", session_id)
 
 
 def _persist_chat_turn(
@@ -673,6 +879,13 @@ async def run_agent(
         trace["selected_agent"] = "guardrail"
         text = err or pre_err or "Entrada no válida."
         _finalize_trace(trace, text)
+        _record_bitacora_turn(
+            session_id=session_id,
+            message=message,
+            text=text,
+            trace=trace,
+            expediente=expediente,
+        )
         _persist_chat_turn(
             session_id=session_id,
             channel=channel,
@@ -682,11 +895,90 @@ async def run_agent(
         )
         return {"text": text, "agent": "guardrail", "pending_review": False, "trace": trace, "session_id": session_id}
 
+    if is_investigado_posture(message):
+        text = apply_output_guardrails(
+            "Entiendo su relato: parece situarse como conductor o persona investigada "
+            "y busca orientación jurídica. "
+            "Este despacho representa a víctimas en el proceso penal colombiano; "
+            "no asumimos la defensa de quien figura como investigado o conductor. "
+            "Si usted es el abogado del despacho y el caso es de una víctima, "
+            "acláreme el rol de su cliente y los hechos desde esa postura. "
+            "Si necesita defensa del conductor, conviene reconducir a un profesional "
+            "en defensa penal.\n\n"
+            "Borrador informativo — requiere revisión y aprobación del abogado."
+        )
+        trace["route"] = "fuera_alcance_rol"
+        trace["blocked"] = True
+        trace["selected_agent"] = POC_AGENT_ID
+        trace["sent_to_agent"] = "none"
+        _finalize_trace(trace, text)
+        _record_bitacora_turn(
+            session_id=session_id,
+            message=message,
+            text=text,
+            trace=trace,
+            expediente=expediente,
+        )
+        _persist_chat_turn(
+            session_id=session_id,
+            channel=channel,
+            user_id=uid,
+            message=message,
+            text=text,
+        )
+        return {
+            "text": text,
+            "agent": POC_AGENT_ID,
+            "pending_review": False,
+            "offer_plan": False,
+            "session_id": session_id,
+            "trace": trace,
+        }
+
+    # Fase 4: atribución debug solo en chat abogado (nunca canal cliente).
+    if (channel or "").strip().lower() not in {"cliente", "victim", "victima"}:
+        from src.services.attribution import answer_attribution
+
+        attribution_text = answer_attribution(
+            message, session_id=session_id, channel=channel
+        )
+        if attribution_text:
+            text = apply_output_guardrails(attribution_text)
+            trace["route"] = "attribution_debug"
+            trace["blocked"] = False
+            trace["selected_agent"] = POC_AGENT_ID
+            trace["sent_to_agent"] = "none"
+            _finalize_trace(trace, text)
+            _record_bitacora_turn(
+                session_id=session_id,
+                message=message,
+                text=text,
+                trace=trace,
+                expediente=expediente,
+            )
+            _persist_chat_turn(
+                session_id=session_id,
+                channel=channel,
+                user_id=uid,
+                message=message,
+                text=text,
+            )
+            return {
+                "text": text,
+                "agent": POC_AGENT_ID,
+                "pending_review": False,
+                "offer_plan": False,
+                "session_id": session_id,
+                "trace": trace,
+            }
+
     if requires_execution_plan(requested_destination):
         text = (
-            "La verificación del expediente pasó. Por tratarse de una actuación de alto "
-            "riesgo, continúe mediante el plan de ejecución y apruébelo antes de usar al "
-            "equipo de redacción o tutela."
+            "Entiendo que pide una actuación de alto riesgo (redacción de pieza accionable). "
+            "Como Coordinador del Caso, no la ejecuto sola: debajo verá un plan breve para su "
+            "aprobación. Tras aprobarlo, el equipo interno preparará el borrador y usted "
+            "revisa antes de cualquier uso externo.\n\n"
+            "Borrador informativo — requiere revisión y aprobación del abogado."
         )
         trace["route"] = "plan_required"
         trace["blocked"] = True
@@ -694,6 +986,14 @@ async def run_agent(
         trace["sent_to_agent"] = "none"
         trace["human_review_required"] = True
         _finalize_trace(trace, text)
+        _record_bitacora_turn(
+            session_id=session_id,
+            message=message,
+            text=text,
+            trace=trace,
+            pending_review=True,
+            expediente=expediente,
+        )
         _persist_chat_turn(
             session_id=session_id,
             channel=channel,
@@ -705,6 +1005,7 @@ async def run_agent(
             "text": text,
             "agent": POC_AGENT_ID,
             "pending_review": True,
+            "offer_plan": True,
             "session_id": session_id,
             "trace": trace,
         }
@@ -782,6 +1083,18 @@ async def run_agent(
     from src.agents.context_security import wrap_untrusted_context
 
     context_block = format_triage_sistema(triage) + "\n"
+    if (channel or "").strip().lower() not in {"cliente", "victim", "victima"}:
+        try:
+            from src.services.attribution import (
+                format_attribution_context,
+                is_attribution_question,
+            )
+
+            if is_attribution_question(message):
+                context_block += format_attribution_context(session_id) + "\n"
+                trace["attribution_context"] = True
+        except Exception:
+            logger.exception("No se pudo inyectar contexto de atribución")
     trivial = is_trivial_consultation(
         message, destination=requested_destination
     )
@@ -882,14 +1195,13 @@ async def run_agent(
             }
         )
 
-    # Defensa estructural: el chat no recibe tools de redacción/tutela. Aunque
+    # Defensa estructural: el chat no recibe tools de redacción alto riesgo. Aunque
     # falle el clasificador, solo un plan aprobado puede instanciar esos agentes.
     # G1: superficie dinámica (focus + vecinos), sin lecturas MD completas,
     # sin tool KB si el prefetch ya inyectó fragmentos.
     chat_specialist_pool = SPECIALIST_AGENT_IDS - frozenset(
         {
-            "redactor_documentos_juridicos_penales",
-            "evaluador_derechos_fundamentales_tutela",
+            "redactor_documentos_juridicos",
         }
     )
     enabled_specialists = enabled_specialists_for_focus(
@@ -1048,7 +1360,7 @@ async def run_agent(
                 "Para continuar necesito su aprobación humana: el despacho está a punto de "
                 f"consultar al equipo de alto riesgo ({tools_label}). "
                 "Apruebe el plan de ejecución en el chat (web) o confirme con EJECUTAR en Slack "
-                "para autorizar redacción o evaluación de tutela.",
+                "para autorizar redacción de memoriales o piezas accionables.",
                 channel,
             )
             text = _ensure_poc_voice(
@@ -1322,6 +1634,15 @@ async def run_agent(
         _trace_step("Revisión humana", hr_status, hr_detail)
     )
     _finalize_trace(trace, text)
+    _record_bitacora_turn(
+        session_id=session_id,
+        message=message,
+        text=text,
+        trace=trace,
+        backoffice_agent=destination_agent,
+        pending_review=pending_review,
+        expediente=expediente,
+    )
     reconcile_turn_messages(session_id, user_text=message, assistant_text=text)
     return {
         "text": text,

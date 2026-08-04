@@ -15,7 +15,7 @@ def test_slim_instructions_under_budget():
     assert "Guardrails de agente (INPUT)" not in (poc.instructions or "")
     assert "Políticas obligatorias" in (poc.instructions or "")
 
-    crono = get_agent_by_id("analista_cronologia_hechos_penales")
+    crono = get_agent_by_id("analista_cronologia_hechos")
     assert crono is not None
     assert len(crono.instructions or "") <= 12000
     tool_names = {getattr(t, "name", "") for t in (crono.tools or [])}
@@ -33,13 +33,13 @@ def test_agent_cache_reuses_orchestrator():
     clear_agent_cache()
     a = build_orchestrator(
         include_high_risk_tools=False,
-        focus_agent_id="analista_cronologia_hechos_penales",
+        focus_agent_id="analista_cronologia_hechos",
         include_kb_search_tool=False,
         use_cache=True,
     )
     b = build_orchestrator(
         include_high_risk_tools=False,
-        focus_agent_id="analista_cronologia_hechos_penales",
+        focus_agent_id="analista_cronologia_hechos",
         include_kb_search_tool=False,
         use_cache=True,
     )
@@ -78,6 +78,30 @@ def test_specialist_consult_input_builder():
     assert "Pedido: Ordenar hechos" in text
     assert "Etapa: indagacion" in text
     assert "PENDIENTE DE VERIFICAR" in text
+    assert "Ronda: 1" in text
+    assert "Modo: inicial" in text
+
+
+def test_specialist_consult_input_builder_repregunta():
+    from src.agents.specialist_consult import (
+        SpecialistConsultInput,
+        specialist_input_builder,
+    )
+
+    payload = SpecialistConsultInput(
+        pedido="Profundizar dolo",
+        objetivo_deliberacion="Decidir si hay elemento subjetivo mínimo",
+        contexto_previo="Ronda 1: tipicidad objetiva ok; duda en dolo",
+        ronda=2,
+        modo="repregunta",
+    )
+    text = specialist_input_builder({"params": payload})
+    assert "Objetivo de deliberación:" in text
+    assert "Contexto previo" in text
+    assert "Ronda: 2" in text
+    assert "Modo: repregunta" in text
+    assert "objeciones_o_riesgos" in text
+    assert "preguntas_al_gerente" in text
 
 
 def test_eval_suite_includes_tool_surface():

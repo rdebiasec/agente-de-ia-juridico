@@ -1,3 +1,7 @@
+## Nota (2026-08-03)
+
+REQ-038…042 (acciones de tutela) **retirados del producto**. Checklist activo = 45 requisitos.
+
 # Checklist REQ-001…050 — estado de cierre
 
 Fuente: `agente/requisitos/requisitos_asistente.json`.  

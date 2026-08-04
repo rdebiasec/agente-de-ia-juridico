@@ -1,6 +1,6 @@
 # Agente Jurídico — Firma virtual penal-víctimas
 
-Asistente multi-agente para despacho colombiano especializado en **representación de víctimas en materia penal** (Ley 906). Un coordinador (POC) es la única voz frente al abogado; 10 especialistas operan como backoffice interno vía OpenAI Agents SDK (`agent.as_tool`).
+Asistente multi-agente para despacho colombiano especializado en **representación de víctimas en materia penal** (Ley 906). Un coordinador (POC) es la única voz frente al abogado; 9 especialistas operan como backoffice interno vía OpenAI Agents SDK (`agent.as_tool`).
 
 **Repo:** `agente-de-ia-juridico`  
 **Flujo:** Mac (desarrollo) → GitHub → Render (hosting)
@@ -71,10 +71,10 @@ Para desarrollo en el Mac (recomendado): `./scripts/start-local.sh` — la app c
 
 **Runtime (OpenAI Agents SDK).** Un solo interlocutor:
 
-- **POC** `coordinador_expediente_penal` — responde al abogado (web / Slack)
-- **10 especialistas** como tools internas (`as_tool`), no handoffs terminales:
+- **POC** `coordinador_caso` — responde al abogado (web / Slack)
+- **9 especialistas** como tools internas (`as_tool`), no handoffs terminales:
   cronología, tipicidad, ruta Ley 906, víctimas, evidencia, audiencias,
-  redacción, seguimiento, tutela, calidad jurídica
+  redacción, seguimiento, calidad jurídica
 - **Guardrails nativos** del SDK en el POC (`input_guardrails` / `output_guardrails`)
   + disclaimer / HITL post-proceso
 - Persona compartida: `agente/prompts/sistema.md`

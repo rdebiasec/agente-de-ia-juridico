@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0e90e23e6e9a4966 -->
 ---
 name: preparar-guion-intervencion-oral
 description: Skill critico penal-victimas: estructurar intervencion oral clara y breve. Use when the workflow requires `preparar_guion_intervencion_oral`.
@@ -12,12 +13,12 @@ disable-model-invocation: true
 - Tier: `critico`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales` (skill crítico de intervención oral)
+- `analista_audiencias` (skill crítico de intervención oral)
 
 ## Purpose
 Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Producto táctico para audiencia; requiere `identificar_objetivo_audiencia` y hechos soportados.
 
 ## Inputs

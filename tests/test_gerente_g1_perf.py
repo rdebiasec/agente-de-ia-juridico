@@ -11,7 +11,7 @@ def test_nested_max_turns_defaults():
     assert Settings.model_fields["agent_max_turns"].default == 10
     assert Settings.model_fields["agent_nested_max_turns"].default == 3
     settings = get_settings()
-    assert nested_max_turns_for("analista_cronologia_hechos_penales") == (
+    assert nested_max_turns_for("analista_cronologia_hechos") == (
         settings.agent_nested_max_turns
     )
     assert nested_max_turns_for("analista_calidad_juridica") == 4
@@ -25,17 +25,16 @@ def test_enabled_specialists_focus_narrows_surface():
     )
 
     chat_pool = SPECIALIST_AGENT_IDS - {
-        "redactor_documentos_juridicos_penales",
-        "evaluador_derechos_fundamentales_tutela",
+        "redactor_documentos_juridicos",
     }
     focused = enabled_specialists_for_focus(
-        "analista_cronologia_hechos_penales", chat_pool
+        "analista_cronologia_hechos", chat_pool
     )
-    assert "analista_cronologia_hechos_penales" in focused
-    assert "gestor_evidencia_y_soporte_probatorio" in focused
+    assert "analista_cronologia_hechos" in focused
+    assert "analista_evidencia" in focused
     assert "analista_calidad_juridica" in focused
-    assert "preparador_estrategico_audiencias_penales" not in focused
-    assert len(focused) <= 4
+    assert "analista_audiencias" not in focused
+    assert len(focused) <= 5  # destino + vecinos tipicos (G04: hechos ↔ etapa)
 
     broad = enabled_specialists_for_focus(POC_AGENT_ID, chat_pool)
     assert broad == frozenset(chat_pool)
@@ -46,7 +45,7 @@ def test_orchestrator_is_enabled_and_nested_max_turns():
 
     poc = build_orchestrator(
         include_high_risk_tools=False,
-        focus_agent_id="analista_cronologia_hechos_penales",
+        focus_agent_id="analista_cronologia_hechos",
         include_kb_search_tool=False,
         include_full_read_tools=False,
     )
@@ -57,11 +56,11 @@ def test_orchestrator_is_enabled_and_nested_max_turns():
     assert "buscar_en_expediente" in by_name
     assert "listar_areas_derecho" not in by_name
 
-    crono = by_name["analista_cronologia_hechos_penales"]
+    crono = by_name["analista_cronologia_hechos"]
     assert crono.is_enabled is True
     assert crono.nested_max_turns == 3  # default settings.agent_nested_max_turns
 
-    audiencia = by_name["preparador_estrategico_audiencias_penales"]
+    audiencia = by_name["analista_audiencias"]
     assert audiencia.is_enabled is False
     assert audiencia.nested_max_turns == 5  # calibrado preparador
 

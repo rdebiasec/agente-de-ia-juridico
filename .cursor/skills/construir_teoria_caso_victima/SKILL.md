@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: c633dc9426b9a1d7 -->
 ---
 name: construir-teoria-caso-victima
 description: Skill critico penal-victimas: formular teoria preliminar del caso desde la victima. Use when the workflow requires `construir_teoria_caso_victima`.
@@ -13,7 +14,7 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_representacion_victimas` (skill primario del agente)
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio.

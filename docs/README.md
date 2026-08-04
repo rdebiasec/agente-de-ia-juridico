@@ -5,6 +5,7 @@
 | Carpeta | Contenido |
 |---|---|
 | [`canon/`](./canon/) | Fuente viva — editar aquí |
+| [`formacion/`](./formacion/) | Guiones docentes para abogados (caso multiagente) |
 | [`auditoria/`](./auditoria/) | Reportes de pasos por skill; [runbook progreso prod](./auditoria/runbook-progreso-auditoria.md) |
 | [`operaciones/`](./operaciones/) | DR / runbooks (p. ej. [plan de desastre](./operaciones/PLAN_DESASTRE.md)) |
 | [`entregables/`](./entregables/) | Versiones para abogada y comercial |
@@ -14,6 +15,8 @@
 
 ## Archivos clave
 
+- **Guión docente (caso Laura R. / VIF multiagente):** [`formacion/GUION_CASO_VIF_MULTIAGENTE.md`](./formacion/GUION_CASO_VIF_MULTIAGENTE.md)
+- **Anexo de hechos (pegar/adjuntar):** [`formacion/hechos_caso_laura_vif.md`](./formacion/hechos_caso_laura_vif.md)
 - **Catálogo canónico:** [`canon/lista-aprobacion-agentes-skills-pasos.md`](./canon/lista-aprobacion-agentes-skills-pasos.md)
 - **Guía de flujos:** [`canon/guia-aprobacion-abogada-flujos-penal-victimas.md`](./canon/guia-aprobacion-abogada-flujos-penal-victimas.md)
 - **Plan firma virtual:** [`canon/plan-rediseno-firma.md`](./canon/plan-rediseno-firma.md)
@@ -30,6 +33,7 @@
 - **Runbook cumplimiento operativo:** [`operaciones/RUNBOOK_CUMPLIMIENTO_1581.md`](./operaciones/RUNBOOK_CUMPLIMIENTO_1581.md)
 - **Forecast $/turno:** [`operaciones/FORECAST_COSTOS_TURNOS.md`](./operaciones/FORECAST_COSTOS_TURNOS.md)
 - **Slack HITL Render:** [`operaciones/SLACK_HITL_RENDER.md`](./operaciones/SLACK_HITL_RENDER.md)
+- **Google Drive Lexiatek (bitácora Gerente):** [`operaciones/GOOGLE_DRIVE_LEXIATEK.md`](./operaciones/GOOGLE_DRIVE_LEXIATEK.md)
 - **Plantilla DPA encargados:** [`operaciones/PLANTILLA_DPA_ENCARGADOS.md`](./operaciones/PLANTILLA_DPA_ENCARGADOS.md)
 - **Checklist RNBD/SIC:** [`operaciones/CHECKLIST_RNBD_SIC.md`](./operaciones/CHECKLIST_RNBD_SIC.md)
 - **Auditoría viva Gerente + agentes (un solo doc):** [`auditoria/AUDITORIA_GERENTE_Y_AGENTES.md`](./auditoria/AUDITORIA_GERENTE_Y_AGENTES.md)

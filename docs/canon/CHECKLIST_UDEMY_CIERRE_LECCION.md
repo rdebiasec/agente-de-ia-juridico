@@ -90,7 +90,7 @@ Para cada Lxx, al cerrar:
 
 ### L06 — Basic Agents (POC)
 
-- [x] Definir Agent = coordinador_expediente_penal
+- [x] Definir Agent = coordinador_caso
 - [x] Caption gap → código `orchestrator.py`
 - [x] Listas actualizadas
 

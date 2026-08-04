@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c3f4d6392fa48e12 -->
+<!-- config-version: 4; checksum: 3b54a26e87ebef1a -->
 ---
 name: clasificar-fuente-factual
 description: Skill estrategico penal-victimas: distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente. Use when the workflow requires `clasificar_fuente_factual`.
@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
+- `analista_cronologia_hechos`
 
 ## Purpose
 Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados.
@@ -64,12 +64,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `clasifica
 - **g8:** Cerrar con aviso de revisión profesional antes de usar en estrategia o redacción.
 
 ## Handoff
-- Entregar matriz preliminar a `analista_cronologia_hechos_penales` → `crear_matriz_hecho_fuente` (referencias exactas).
+- Entregar matriz preliminar a `analista_cronologia_hechos` → `crear_matriz_hecho_fuente` (referencias exactas).
 - No enviar a tipicidad ni redacción sin pasar por verificación factual.
 
 ## No duplicar
-- No ordenar línea de tiempo (`construir_cronologia_penal` → `analista_cronologia_hechos_penales`).
-- No vincular hechos con prueba (`construir_matriz_hecho_prueba` → `gestor_evidencia_y_soporte_probatorio`).
+- No ordenar línea de tiempo (`construir_cronologia_penal` → `analista_cronologia_hechos`).
+- No vincular hechos con prueba (`construir_matriz_hecho_prueba` → `analista_evidencia`).
 - No detectar contradicciones entre versiones (`detectar_contradicciones_factuales`).
 
 ## Riesgo si se omite

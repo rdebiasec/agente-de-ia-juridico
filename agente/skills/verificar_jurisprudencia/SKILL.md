@@ -14,12 +14,12 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_calidad_juridica`
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Control en borrador antes de calidad.
 
 ## Rol en analista_calidad_juridica

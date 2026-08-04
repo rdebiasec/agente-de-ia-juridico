@@ -13,6 +13,8 @@ from src.storage.models import (
     AuditPortalProgress,
     AuditPortalUser,
     ChatSession,
+    ClientMessage,
+    ClientThread,
     ComplianceConsent,
     ConfigActive,
     ConfigVersion,
@@ -21,6 +23,8 @@ from src.storage.models import (
     Draft,
     ExecutionPlanRecord,
     Expediente,
+    InternalTranscriptEntry,
+    OutboundClientDraft,
     SessionTrace,
 )
 
@@ -153,3 +157,35 @@ class Repository(Protocol):
     def upsert_config_active(self, row: ConfigActive) -> ConfigActive: ...
 
     def list_config_active(self, *, kind: str | None = None) -> list[ConfigActive]: ...
+
+    # --- Triple chat (Fase 1) ---
+    def get_client_thread(self, thread_id: str) -> ClientThread | None: ...
+
+    def get_client_thread_by_cliente_session(self, cliente_session_id: str) -> ClientThread | None: ...
+
+    def save_client_thread(self, thread: ClientThread) -> ClientThread: ...
+
+    def add_client_message(self, message: ClientMessage) -> ClientMessage: ...
+
+    def list_client_messages(self, thread_id: str, *, limit: int = 200) -> list[ClientMessage]: ...
+
+    def add_internal_transcript_entry(
+        self, entry: InternalTranscriptEntry
+    ) -> InternalTranscriptEntry: ...
+
+    def list_internal_transcript(
+        self, session_id: str, *, limit: int = 100
+    ) -> list[InternalTranscriptEntry]: ...
+
+    def get_outbound_client_draft(self, draft_id: str) -> OutboundClientDraft | None: ...
+
+    def save_outbound_client_draft(self, draft: OutboundClientDraft) -> OutboundClientDraft: ...
+
+    def list_outbound_client_drafts(
+        self,
+        *,
+        status: str | None = None,
+        thread_id: str | None = None,
+        lawyer_session_id: str | None = None,
+        limit: int = 100,
+    ) -> list[OutboundClientDraft]: ...

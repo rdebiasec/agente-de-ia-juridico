@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 09a4fee7817169f0 -->
 ---
 name: controlar-tono-riesgo-reputacional
 description: Skill atomico penal-victimas: revisar tono profesional y evitar lenguaje riesgoso. Use when the workflow requires `controlar_tono_riesgo_reputacional`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Filtro antes de radicar o comunicar.
 
 ## Rol en analista_calidad_juridica

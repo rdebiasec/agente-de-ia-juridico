@@ -15,10 +15,13 @@ from src.agents.schemas import TriageResult
 from src.agents.urgency import UrgencyResult, assess_urgency
 from src.storage.models import Expediente
 
-POC_AGENT_ID = "coordinador_expediente_penal"
+POC_AGENT_ID = "coordinador_caso"
 
-_TUTELA_RE = re.compile(
-    r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b", re.I
+# Tutela / constitucional queda fuera del producto: no hay destino especialista.
+_TUTELA_OUT_RE = re.compile(
+    r"\b(tutela|acci[oó]n\s+de\s+tutela|derecho\s+fundamental|"
+    r"subsidiariedad|inmediatez)\b",
+    re.I,
 )
 _SEGUIMIENTO_RE = re.compile(
     r"\b(seguimiento|radicado|actuaci[oó]n|vencimiento|t[eé]rmino|inactividad)\b",
@@ -53,8 +56,8 @@ _REDACCION_RE = re.compile(
     r"(?:"
     r"\b(?:memorial|solicitud|recurso|derecho de petici[oó]n)\b|"
     r"\bredact(?:ar|e|ame|emos)\b|"
-    r"\bborrador\s+de\s+(?:memorial|solicitud|recurso|tutela|escrito)\b|"
-    r"\bescrito\s+(?:de\s+)?(?:impulso|solicitud|memorial|tutela)\b"
+    r"\bborrador\s+de\s+(?:memorial|solicitud|recurso|escrito)\b|"
+    r"\bescrito\s+(?:de\s+)?(?:impulso|solicitud|memorial)\b"
     r")",
     re.I,
 )
@@ -73,6 +76,19 @@ _OUT_OF_SCOPE_RE = re.compile(
     r"contrato|divorcio|custodia|alimentos|arrendamiento)\b",
     re.I,
 )
+# Postura aparente de conductor/investigado (no víctima) — despacho es penal-víctimas.
+_INVESTIGADO_RE = re.compile(
+    r"(?:"
+    r"\batropell[eé]\b|"
+    r"\bchoqu[eé]\b|"
+    r"\bme\s+(?:van\s+a\s+)?imput(?:ar|an|aron)\b|"
+    r"\bsoy\s+(?:el|la)\s+(?:sindicad[oa]|indagad[oa]|imputad[oa])\b|"
+    r"\bme\s+acus(?:an|aron)\b|"
+    r"\bnecesito\s+(?:un\s+)?abogado\s+de\s+defensa\b|"
+    r"\bme\s+detuv(?:ieron|o)\b"
+    r")",
+    re.I,
+)
 _KNOWLEDGE_RE = re.compile(
     r"\b(ley 906|proceso penal|despacho penal|rutas penales)\b", re.I
 )
@@ -80,7 +96,6 @@ _PROFILE_RE = re.compile(
     r"\b(perfil|experiencia|qu[ií]en eres|quien eres)\b", re.I
 )
 _PENAL_CONTEXT_PATTERNS = (
-    _TUTELA_RE,
     _SEGUIMIENTO_RE,
     _AUDIENCIA_RE,
     _EVIDENCIA_RE,
@@ -92,23 +107,21 @@ _PENAL_CONTEXT_PATTERNS = (
 )
 
 _DEST_TO_TAREA: dict[str, str] = {
-    "analista_cronologia_hechos_penales": "analisis_factual",
-    "analista_tipicidad_y_responsabilidad_penal": "tipicidad",
-    "analista_ruta_procesal_ley906": "ruta_906",
+    "analista_cronologia_hechos": "analisis_factual",
+    "analista_responsabilidad_tipicidad": "tipicidad",
+    "analista_ruta_procesal": "ruta_906",
     "analista_representacion_victimas": "representacion_victima",
-    "gestor_evidencia_y_soporte_probatorio": "evidencia",
-    "preparador_estrategico_audiencias_penales": "audiencia",
-    "redactor_documentos_juridicos_penales": "redaccion",
-    "gestor_seguimiento_procesal_penal": "seguimiento",
-    "evaluador_derechos_fundamentales_tutela": "tutela_constitucional",
+    "analista_evidencia": "evidencia",
+    "analista_audiencias": "audiencia",
+    "redactor_documentos_juridicos": "redaccion",
+    "analista_seguimiento_procesal": "seguimiento",
     "analista_calidad_juridica": "seguimiento",
     POC_AGENT_ID: "seguimiento",
 }
 
 HIGH_RISK_DESTINATIONS = frozenset(
     {
-        "redactor_documentos_juridicos_penales",
-        "evaluador_derechos_fundamentales_tutela",
+        "redactor_documentos_juridicos",
     }
 )
 
@@ -123,37 +136,43 @@ def is_non_penal_scope_request(message: str) -> bool:
     )
 
 
+def is_investigado_posture(message: str) -> bool:
+    """True si el relato sugiere rol de conductor/investigado, no víctima."""
+    return bool(_INVESTIGADO_RE.search(message or ""))
+
+
 def infer_destination_agent(message: str) -> str:
     """Unica funcion de destino: usada por chat, planner y gates."""
-    if is_non_penal_scope_request(message):
+    if is_non_penal_scope_request(message) or is_investigado_posture(message):
         return POC_AGENT_ID
-    if _TUTELA_RE.search(message):
-        return "evaluador_derechos_fundamentales_tutela"
+    # Pedido de tutela/constitucional → Gerente (fuera de alcance del producto).
+    if _TUTELA_OUT_RE.search(message):
+        return POC_AGENT_ID
     # La intención explícita de producir un escrito prevalece sobre términos
     # contextuales como "última actuación" o "radicado".
     if _REDACCION_RE.search(message):
-        return "redactor_documentos_juridicos_penales"
+        return "redactor_documentos_juridicos"
     if _AUDIENCIA_RE.search(message):
-        return "preparador_estrategico_audiencias_penales"
+        return "analista_audiencias"
     if _EVIDENCIA_RE.search(message):
-        return "gestor_evidencia_y_soporte_probatorio"
+        return "analista_evidencia"
     if _TIPICIDAD_RE.search(message):
-        return "analista_tipicidad_y_responsabilidad_penal"
+        return "analista_responsabilidad_tipicidad"
     if _CRONOLOGIA_RE.search(message):
-        return "analista_cronologia_hechos_penales"
+        return "analista_cronologia_hechos"
     if _RUTA906_RE.search(message):
-        return "analista_ruta_procesal_ley906"
+        return "analista_ruta_procesal"
     if _VICTIMAS_RE.search(message):
         return "analista_representacion_victimas"
     if _SEGUIMIENTO_RE.search(message):
-        return "gestor_seguimiento_procesal_penal"
+        return "analista_seguimiento_procesal"
     # Calidad después del fondo: evita que "verificar tipicidad" robe el destino (G03).
     if _CALIDAD_RE.search(message):
         return "analista_calidad_juridica"
     if _PROFILE_RE.search(message):
         return POC_AGENT_ID
     if _KNOWLEDGE_RE.search(message):
-        return "analista_ruta_procesal_ley906"
+        return "analista_ruta_procesal"
     return POC_AGENT_ID
 
 
@@ -174,7 +193,7 @@ def _summarize(message: str, limit: int = 240) -> str:
 
 
 _OPERATIONAL_HINT = re.compile(
-    r"\b(redact|memorial|tutela|audiencia|tipicidad|cronolog|evidencia|"
+    r"\b(redact|memorial|audiencia|tipicidad|cronolog|evidencia|"
     r"radicado|impulso|recurso|vencimiento|urgente)\w*",
     re.I,
 )
@@ -183,7 +202,7 @@ _OPERATIONAL_HINT = re.compile(
 def is_trivial_consultation(message: str, *, destination: str | None = None) -> bool:
     """Consultas donde no conviene interrumpir con escalamiento de urgencia."""
     dest = destination or infer_destination_agent(message)
-    if is_non_penal_scope_request(message):
+    if is_non_penal_scope_request(message) or is_investigado_posture(message):
         return True
     if _PROFILE_RE.search(message or ""):
         return True
@@ -202,11 +221,13 @@ def format_triage_sistema(triage: TriageResult) -> str:
     motivos = (
         "; ".join(triage.motivos_urgencia) if triage.motivos_urgencia else "(ninguno)"
     )
+    rol = getattr(triage, "rol_aparente", None) or "no_determinado"
     return (
         "[TRIAGE_SISTEMA — evaluación determinista; no re-clasificar]\n"
         f"- tipo_tarea: {triage.tipo_tarea}\n"
         f"- etapa_aparente: {triage.etapa_aparente}\n"
         f"- agente_destino: {triage.agente_destino}\n"
+        f"- rol_aparente: {rol}\n"
         f"- puede_continuar: {triage.puede_continuar}\n"
         f"- faltantes_bloqueantes: {faltantes}\n"
         f"- nivel_urgencia: {triage.nivel_urgencia}\n"
@@ -225,8 +246,14 @@ def build_triage_bundle(
     """Triage + completeness + urgency en una sola pass (G02)."""
     dest = destination or infer_destination_agent(message)
     urgency = assess_urgency(message, expediente)
-    fuera = is_non_penal_scope_request(message)
+    fuera = is_non_penal_scope_request(message) or is_investigado_posture(message)
     tipo = "fuera_de_alcance" if fuera else _DEST_TO_TAREA.get(dest, "seguimiento")
+    if is_investigado_posture(message):
+        rol_aparente = "investigado_o_conductor"
+    elif fuera:
+        rol_aparente = "fuera_penal_victimas"
+    else:
+        rol_aparente = "victima_o_despacho"
     completeness = assess_completeness(
         message,
         destination=dest,
@@ -245,6 +272,7 @@ def build_triage_bundle(
         escalar_humano=urgency.escalar_humano,
         accion_inmediata_urgencia=urgency.accion_inmediata_sugerida,
         resumen_triage=_summarize(message),
+        rol_aparente=rol_aparente,  # type: ignore[arg-type]
     )
     return TriageBundle(triage=triage, completeness=completeness, urgency=urgency)
 

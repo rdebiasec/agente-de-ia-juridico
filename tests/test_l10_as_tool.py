@@ -28,15 +28,14 @@ def test_high_risk_needs_approval_aligned():
 
     assert APPROVAL_REQUIRED_TOOL_IDS == frozenset(HIGH_RISK_AGENTS)
     assert HIGH_RISK_AGENTS == {
-        "redactor_documentos_juridicos_penales",
-        "evaluador_derechos_fundamentales_tutela",
+        "redactor_documentos_juridicos",
     }
 
     poc = build_orchestrator(require_tool_approval=True, use_cache=False)
     by_name = {getattr(t, "name", None): t for t in (poc.tools or [])}
     for aid in HIGH_RISK_AGENTS:
         assert by_name[aid].needs_approval is True
-    assert by_name["analista_cronologia_hechos_penales"].needs_approval is False
+    assert by_name["analista_cronologia_hechos"].needs_approval is False
 
 
 def test_no_handoffs_on_poc():
@@ -53,15 +52,15 @@ def test_nested_max_turns_ceiling_and_overrides():
         nested_max_turns_for,
     )
 
-    assert nested_max_turns_for("redactor_documentos_juridicos_penales") == 5
-    assert nested_max_turns_for("analista_cronologia_hechos_penales") <= _NESTED_MAX_TURNS_CEILING
-    assert 1 <= nested_max_turns_for("analista_cronologia_hechos_penales")
+    assert nested_max_turns_for("redactor_documentos_juridicos") == 5
+    assert nested_max_turns_for("analista_cronologia_hechos") <= _NESTED_MAX_TURNS_CEILING
+    assert 1 <= nested_max_turns_for("analista_cronologia_hechos")
 
     poc = __import__("src.agents.orchestrator", fromlist=["build_orchestrator"]).build_orchestrator(
         use_cache=False
     )
     by_name = {getattr(t, "name", None): t for t in (poc.tools or [])}
-    red = by_name["redactor_documentos_juridicos_penales"]
+    red = by_name["redactor_documentos_juridicos"]
     assert getattr(red, "nested_max_turns", None) == 5
     # El SDK guarda max_turns en el wrapper interno; el atributo de producto es nested_max_turns.
 

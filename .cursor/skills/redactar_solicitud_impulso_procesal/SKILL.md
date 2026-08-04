@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: cf314adbe7ba9671 -->
 ---
 name: redactar-solicitud-impulso-procesal
 description: Skill atomico penal-victimas: crear borrador para solicitar impulso procesal o actuaciones. Use when the workflow requires `redactar_solicitud_impulso_procesal`.
@@ -12,16 +13,16 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
-- `gestor_seguimiento_procesal_penal`
+- `redactor_documentos_juridicos`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Redacta borrador formal.
 
-## Rol en gestor_seguimiento_procesal_penal
+## Rol en analista_seguimiento_procesal
 Aporta hechos de inactividad (`detectar_inactividad_procesal`); no redacta texto final.
 
 ## Inputs

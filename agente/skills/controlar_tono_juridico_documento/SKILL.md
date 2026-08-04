@@ -13,20 +13,20 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Revisión de tono antes de pasar a calidad.
 
 ## Rol en analista_calidad_juridica
 Control final de estilo en salidas externas.
 
 ## Inputs
-- Borrador de memorial, petición, tutela o solicitud.
+- Borrador de memorial, petición o solicitud.
 - Destinatario (juez, Fiscalía, autoridad administrativa).
 
 ## Outputs

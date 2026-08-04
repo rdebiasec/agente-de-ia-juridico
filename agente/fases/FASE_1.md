@@ -50,7 +50,7 @@ Primera versión funcional: atender consultas, analizar riesgos, redactar contra
 ## Fuera de alcance en Fase 1
 
 - Fase 2: REQ-022, REQ-023 y REQ-043..050 (seguimiento de procesos y rol estratégico ampliado).
-- Fase 3: REQ-029..042 (conceptos, memoriales y tutelas).
+- Fase 3: REQ-029..037 (conceptos y memoriales; tutelas REQ-038…042 retiradas).
 - Integraciones operativas por canales externos (Slack/WhatsApp) para atención productiva.
 
 ## Criterios de aceptación

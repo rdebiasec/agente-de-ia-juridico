@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906` (skill primario del agente)
+- `analista_ruta_procesal` (skill primario del agente)
 
 ## Purpose
 Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres.

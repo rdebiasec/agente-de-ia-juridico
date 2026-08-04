@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 2402135b57e58ee0 -->
 ---
 name: redactar-derecho-peticion-penal
 description: Skill atomico penal-victimas: redactar derecho de peticion relacionado con autoridad o informacion del caso. Use when the workflow requires `redactar_derecho_peticion_penal`.
@@ -12,12 +13,12 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (único ejecutor de redacción)
+- `redactor_documentos_juridicos` (único ejecutor de redacción)
 
 ## Purpose
 Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Ejecutar redacción solo con evaluación favorable preliminar de petición.
 
 ## Inputs

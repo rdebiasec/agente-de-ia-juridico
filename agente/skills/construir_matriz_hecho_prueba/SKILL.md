@@ -13,9 +13,9 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio` (uso principal operativo)
-- `analista_tipicidad_y_responsabilidad_penal` (vista factual para tipicidad)
-- `preparador_estrategico_audiencias_penales`
+- `analista_evidencia` (uso principal operativo)
+- `analista_responsabilidad_tipicidad` (vista factual para tipicidad)
+- `analista_audiencias`
 
 ## Purpose
 Vincular hechos relevantes con prueba existente, faltante o en trámite, priorizando brechas críticas.

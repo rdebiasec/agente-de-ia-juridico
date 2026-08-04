@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 05afd581783a7e7b -->
 ---
 name: controlar-audiencias
 description: Skill atomico penal-victimas: administrar fechas, horas, enlaces y preparacion de audiencias. Use when the workflow requires `controlar_audiencias`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Checklist de control previo a audiencia.
 
 ## Rol en analista_calidad_juridica

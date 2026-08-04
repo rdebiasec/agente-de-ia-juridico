@@ -287,7 +287,7 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
             not exposed,
             [],
             exposed,
-            "El chat no expone tools de redacción/tutela",
+            "El chat no expone tools de redacción alto riesgo",
         )
 
     if category == "tool_surface":
@@ -300,8 +300,7 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
         message = str(case.get("message") or "")
         focus = str(case.get("focus_agent_id") or infer_destination_agent(message))
         chat_pool = SPECIALIST_AGENT_IDS - {
-            "redactor_documentos_juridicos_penales",
-            "evaluador_derechos_fundamentales_tutela",
+            "redactor_documentos_juridicos",
         }
         enabled = enabled_specialists_for_focus(focus, chat_pool)
         include_kb = bool(case.get("include_kb_search_tool", False))
@@ -367,8 +366,8 @@ def _assert_case(case: dict[str, Any]) -> EvalAssertion:
 
         clear_agent_cache()
         max_chars = int(case.get("max_chars") or 12000)
-        agent_id = str(case.get("agent_id") or "coordinador_expediente_penal")
-        if agent_id == "coordinador_expediente_penal":
+        agent_id = str(case.get("agent_id") or "coordinador_caso")
+        if agent_id == "coordinador_caso":
             agent = build_orchestrator(
                 include_high_risk_tools=False,
                 use_cache=False,
@@ -483,8 +482,8 @@ def compare_prompt_canary(
     candidate_prompt: str,
     eval_path: Path | None = None,
 ) -> CanaryReport:
-    if agent_id != "coordinador_expediente_penal":
-        raise ValueError("El canary de invariantes está definido para el Gerente del Caso.")
+    if agent_id != "coordinador_caso":
+        raise ValueError("El canary de invariantes está definido para el Coordinador del Caso.")
     baseline = evaluate_prompt_health(baseline_prompt)
     candidate = evaluate_prompt_health(candidate_prompt)
     regressions = sorted(

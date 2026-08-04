@@ -13,16 +13,16 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
-- `analista_cronologia_hechos_penales`
+- `analista_audiencias`
+- `analista_cronologia_hechos`
 
 ## Purpose
 Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Uso principal en preparación de audiencia.
 
-## Rol en analista_cronologia_hechos_penales
+## Rol en analista_cronologia_hechos
 Solo para aclarar huecos factuales vía terceros; no preguntas a víctima.
 
 ## Inputs

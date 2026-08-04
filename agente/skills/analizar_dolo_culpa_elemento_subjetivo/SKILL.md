@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 
 ## Purpose
 Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza.

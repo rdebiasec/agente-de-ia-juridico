@@ -13,12 +13,12 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Ejecutar tras `identificar_objetivo_audiencia` y antes o junto al guion oral.
 
 ## Inputs

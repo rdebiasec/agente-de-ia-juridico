@@ -48,8 +48,6 @@ def _detect_materia(text: str) -> str | None:
             "victima",
             "acción penal",
             "accion penal",
-            "tutela",
-            "derecho fundamental",
         )
     ):
         return "penal"
@@ -88,10 +86,6 @@ def sync_expediente_from_chat(
         if exp.materia != materia:
             exp.materia = materia
             cambios.append(f"materia={materia}")
-        if "tutela" in text.lower() and exp.tipo_proceso != "tutela":
-            exp.tipo_proceso = "tutela"
-            cambios.append("tipo_proceso=tutela")
-
     radicados = _RADICADO_RE.findall(text)
     if radicados:
         rad = radicados[-1].strip()
@@ -123,11 +117,6 @@ def sync_expediente_from_chat(
                 parte["documento"] = f"NIT {nits[0]}"
                 cambios.append("doc:accionado")
                 break
-
-    if "derecho" in text.lower() and "vulnerad" in text.lower():
-        if exp.etapa_actual != "tutela_en_preparacion":
-            exp.etapa_actual = "tutela_en_preparacion"
-            cambios.append("etapa=tutela_en_preparacion")
 
     lower = text.lower()
     if not exp.involucra_menor and re.search(

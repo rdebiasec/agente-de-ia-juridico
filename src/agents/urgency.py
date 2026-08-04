@@ -150,7 +150,7 @@ def assess_urgency(
     return UrgencyResult(
         nivel_urgencia="baja",
         motivos=[],
-        accion_inmediata_sugerida="Continuar flujo normal del Gerente del Caso.",
+        accion_inmediata_sugerida="Continuar flujo normal del Coordinador del Caso.",
         escalar_humano=False,
         evaluada_en=now,
     )

@@ -1,4 +1,4 @@
-"""Gate determinista de completitud para el loop del Gerente del Caso Penal."""
+"""Gate determinista de completitud para el loop del Coordinador del Caso."""
 
 from __future__ import annotations
 
@@ -10,11 +10,10 @@ from typing import Literal
 
 from src.storage.models import Expediente
 
-POC_AGENT_ID = "coordinador_expediente_penal"
+POC_AGENT_ID = "coordinador_caso"
 
 _HIGH_RISK_DESTINATIONS = {
-    "redactor_documentos_juridicos_penales",
-    "evaluador_derechos_fundamentales_tutela",
+    "redactor_documentos_juridicos",
 }
 _FACT_RE = re.compile(
     r"\b(ocurri[oó]|sucedi[oó]|denunci[éeó]|agredi[oó]|amenaz[óo]|hurt[óo]|"
@@ -34,12 +33,12 @@ _LAST_ACTION_RE = re.compile(
 )
 _STAGE_RE = re.compile(
     r"\b(indagaci[oó]n|investigaci[oó]n|imputaci[oó]n|acusaci[oó]n|juicio|"
-    r"ejecuci[oó]n|tutela\s+en\s+preparaci[oó]n)\b",
+    r"ejecuci[oó]n)\b",
     re.I,
 )
 _OPERATIONAL_RE = re.compile(
     r"\b(redact|proyect|prepar|elabor|analiz|eval[uú]|seguimiento|cronolog|"
-    r"tipicidad|ruta\s+procesal|estrateg|riesgo|audiencia|tutela|memorial|"
+    r"tipicidad|ruta\s+procesal|estrateg|riesgo|audiencia|memorial|"
     r"recurso|informe|impulso|vac[ií]os?\s+probatorios?)\w*",
     re.I,
 )
@@ -51,12 +50,12 @@ PendienteImpacto = Literal["alto", "medio", "bajo"]
 # Checklist documental real del gate (labels canónicos → motivo).
 _CHECKLIST_MOTIVOS: dict[str, str] = {
     "hechos mínimos del caso": "Sin hechos mínimos no se puede analizar ni redactar con soporte.",
-    "número de radicado": "Alto riesgo: memorial/tutela/seguimiento requieren radicado verificable.",
+    "número de radicado": "Alto riesgo: memorial/seguimiento requieren radicado verificable.",
     "poder o calidad en que actúa el despacho": (
         "Alto riesgo: falta acreditar poder o rol del despacho."
     ),
     "última actuación procesal": "Necesaria para ubicar oportunidad y no actuar a ciegas.",
-    "partes relevantes": "Identificar víctima/procesado/accionado evita piezas incompletas.",
+    "partes relevantes": "Identificar víctima/procesado/agresor evita piezas incompletas.",
     "etapa o última actuación procesal": (
         "Ruta 906 / audiencia / seguimiento requieren etapa o última actuación."
     ),
@@ -149,9 +148,9 @@ def assess_completeness(
             ]
         )
     elif destination in {
-        "preparador_estrategico_audiencias_penales",
-        "gestor_seguimiento_procesal_penal",
-        "analista_ruta_procesal_ley906",
+        "analista_audiencias",
+        "analista_seguimiento_procesal",
+        "analista_ruta_procesal",
     }:
         required.extend(
             [

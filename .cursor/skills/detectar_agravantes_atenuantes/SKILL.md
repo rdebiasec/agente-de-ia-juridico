@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: a7210394ff5cd215 -->
 ---
 name: detectar-agravantes-atenuantes
 description: Skill operativo penal-victimas: identificar circunstancias relevantes que puedan afectar gravedad juridica. Use when the workflow requires `detectar_agravantes_atenuantes`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 
 ## Purpose
 Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar.

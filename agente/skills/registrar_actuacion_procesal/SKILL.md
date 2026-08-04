@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `atomico`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Registrar en el sistema una actuación procesal nueva con fuente y fecha.

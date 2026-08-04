@@ -39,8 +39,8 @@ EXPERTS = {
 BLOCK_RULES: list[tuple[str, str, list[str]]] = [
     (
         "A",
-        "Constitucional/tutela",
-        ["Skills constitucionales y tutela", "redactar_tutela", "redactar_derecho_peticion"],
+        "Redacción petición / memorial",
+        ["Skills de redaccion juridica penal", "redactar_derecho_peticion"],
     ),
     (
         "B",
@@ -74,12 +74,10 @@ BLOCK_RULES: list[tuple[str, str, list[str]]] = [
 ]
 
 CHAINS: dict[str, list[str]] = {
-    "tutela": [
-        "recomendar_via_constitucional_o_alternativa",
-        "revisar_mecanismos_ordinarios",
-        "evaluar_procedencia_tutela",
-        "preparar_borrador_tutela_preliminar",
-        "redactar_tutela_penal_preliminar",
+    "peticion_impulso": [
+        "evaluar_derecho_peticion",
+        "redactar_derecho_peticion_penal",
+        "redactar_solicitud_impulso_procesal",
         "clasificar_aprobacion_juridica",
     ],
     "recursos_906": [
@@ -103,17 +101,7 @@ CHAINS: dict[str, list[str]] = {
     ],
 }
 
-TUTELA_SKILLS = {
-    "evaluar_procedencia_tutela",
-    "preparar_borrador_tutela_preliminar",
-    "redactar_tutela_penal_preliminar",
-    "recomendar_via_constitucional_o_alternativa",
-    "detectar_riesgo_improcedencia_tutela",
-    "revisar_mecanismos_ordinarios",
-    "analizar_perjuicio_irremediable",
-    "identificar_derecho_fundamental_afectado",
-    "crear_matriz_hecho_derecho_fundamental",
-}
+TUTELA_SKILLS = set()  # retiradas del producto
 
 CLIENT_SKILLS = {
     "preparar_resumen_operativo_cliente",
@@ -364,26 +352,17 @@ def expert_e3(sd: SkillData) -> ExpertResult:
 
 
 def expert_e4(sd: SkillData) -> ExpertResult:
-    tutela = sd.sid in TUTELA_SKILLS or "tutela" in sd.sid
     gate_ok = True
     msg = ""
-    if sd.sid == "redactar_tutela_penal_preliminar":
-        gate_ok = (
-            "evaluar_procedencia_tutela" in sd.text
-            and "evaluador_derechos_fundamentales_tutela" not in _section(sd.text, "Used By Agents")
-        )
-        msg = "Redactor de tutela sin gate o evaluador como ejecutor"
-    if sd.sid == "recomendar_via_constitucional_o_alternativa":
-        gate_ok = "NO REDACTAR TUTELA" in sd.text
-        msg = "Coordinador sin etiqueta anti-tutela directa"
     if sd.sid == "detectar_alucinaciones_legales":
         gate_ok = "aprobable" not in sd.outputs.lower() or "DICTAMEN" not in sd.outputs
+        msg = "Alucinaciones no debe emitir dictamen de aprobación"
     checks = [
         ("purpose", bool(sd.purpose), ""),
         ("inputs", len(sd.inputs) > 25, ""),
         ("outputs", len(sd.outputs) > 25, ""),
         ("steps", len(sd.steps) >= 2, ""),
-        ("guardrails", "g4" in sd.text if tutela else True, "Tutela sin HITL"),
+        ("guardrails", True, ""),
         ("boundaries", True, ""),
         ("risk", GENERIC_RISK not in sd.text, ""),
         ("business", gate_ok, msg),
@@ -542,14 +521,9 @@ def synthesize(sd: SkillData, results: list[ExpertResult]) -> dict:
 def validate_chain(chain_name: str, sids: list[str], skills: dict[str, SkillData]) -> dict:
     issues = []
     texts = {s: skills[s].text for s in sids if s in skills}
-    if chain_name == "tutela":
-        if "evaluador_derechos_fundamentales_tutela" in texts.get("redactar_tutela_penal_preliminar", ""):
-            issues.append("redactar_tutela: evaluador no debe ser ejecutor de redacción")
-        if "NO REDACTAR TUTELA" not in texts.get("recomendar_via_constitucional_o_alternativa", ""):
-            issues.append("recomendar_via: falta etiqueta anti-tutela directa")
-        for s in ("preparar_borrador_tutela_preliminar", "redactar_tutela_penal_preliminar"):
-            if s in texts and "evaluar_procedencia_tutela" not in texts[s]:
-                issues.append(f"{s}: falta gate evaluar_procedencia_tutela")
+    missing = [s for s in sids if s not in skills]
+    if missing:
+        issues.append(f"skills ausentes: {', '.join(missing)}")
     if chain_name == "recursos_906":
         t = texts.get("redactar_recurso_o_intervencion_preliminar", "")
         if t and "redactor" not in t.lower() and "NO ES BORRADOR" not in t:
@@ -639,11 +613,11 @@ def write_report(
     cond = [s for s, r in all_results.items() if r["synthesis"]["veredicto"] == "APROBADO_CON_OBSERVACIONES"]
 
     consensus = [
-        "Cadena tutela con gates explícitos (evaluador → insumos → redactor).",
+        "Cadena petición/impulso en vía penal (sin tutela constitucional).",
         "Ruta Ley 906 no redacta recursos finales sin pasar por redactor.",
         "Calidad: detectar alucinaciones separado de clasificar aprobación.",
         "HITL y etiquetas en comunicación con cliente.",
-        "90/90 skills con Steps, Guardrails y sin plantillas genéricas I/O/riesgo.",
+        "Skills con Steps, Guardrails y sin plantillas genéricas I/O/riesgo.",
         "Lista canónica y matriz alineadas (CHECK OK).",
         "Multi-agente con No duplicar o Handoff en todos los skills compartidos.",
         "10 reglas globales g1–g10 (plazos Ley 906 y custodia probatoria).",
@@ -659,7 +633,7 @@ def write_report(
         "RAG y herramientas citadas no verificadas en esta auditoría estática.",
         "Validación experta automatizada (rúbrica) no sustituye revisión humana de la abogada.",
         "Skills atómicos de seguimiento (bloque F) con menor profundidad táctica penal.",
-        "Evolución normativa/jurisprudencial requiere re-validación periódica de skills constitucionales.",
+        "Evolución normativa/jurisprudencial requiere re-validación periódica de skills penales.",
     ]
     if rechazados:
         risks.insert(0, f"{len(rechazados)} skills RECHAZADO requieren remediación.")
@@ -691,13 +665,9 @@ def write_report(
         obs = "; ".join(ch["issues"]) if ch["issues"] else "Sin contradicciones"
         lines.append(f"| {ch['chain']} | {ch['status']} | {obs} |")
 
-    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela solo tras evaluador | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |", f"| Guardrails globales g1–g10 | {'OK' if len(GUARDRAILS) == 10 else 'FAIL'} |"])
+    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela fuera del producto | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |", f"| Guardrails globales g1–g10 | {'OK' if len(GUARDRAILS) == 10 else 'FAIL'} |"])
 
     remediation = [
-        ("analizar_perjuicio_irremediable", "Añadido g4 HITL en cadena tutela."),
-        ("revisar_mecanismos_ordinarios", "Añadido g4 HITL subsidiariedad."),
-        ("crear_matriz_hecho_derecho_fundamental", "Añadido g4 HITL matriz preliminar."),
-        ("identificar_derecho_fundamental_afectado", "Añadidos g3 separación hecho/inferencia y g4 HITL."),
         ("crear_resumen_ejecutivo_litigante", "Añadido g4 HITL uso interno abogado."),
         ("detectar_riesgos_audiencia", "Añadido g4 HITL antes de audiencia."),
         ("preparar_contraargumentos", "Añadido g4 HITL antes de memorial/audiencia."),

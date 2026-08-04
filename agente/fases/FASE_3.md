@@ -1,15 +1,13 @@
-# Fase 3 — Especialidades (conceptos, memoriales, tutelas)
+# Fase 3 — Especialidades (conceptos y memoriales)
 
-<!-- FASE NO ACTIVA — stub para roadmap -->
-
-**Épica Jira:** KAN-8  
-**Tareas:** KAN-17…KAN-20  
-**Prerequisito:** Completar Fase 2
+> Stub histórico de roadmap (gating por fase **obsoleto**). Capacidades viven en la firma virtual.
+> **Tutela retirada del producto (2026-08-03):** REQ-038…042 fuera de alcance.
 
 ## Objetivo
 
-Conceptos jurídicos, memoriales procesales y tutelas con seguimiento de plazos.
+Conceptos jurídicos y memoriales procesales (impulso, solicitud de expediente, audiencias) con seguimiento de plazos en vía penal.
 
-## Requisitos (inactivos)
+## Notas
 
-REQ-029…042
+- Derecho de petición / impulso / seguimiento = herramientas penales.
+- No hay especialista ni plantilla de acción de tutela.

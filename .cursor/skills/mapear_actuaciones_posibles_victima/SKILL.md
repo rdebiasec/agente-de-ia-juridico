@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 388fef5b6b3e4763 -->
 ---
 name: mapear-actuaciones-posibles-victima
 description: Skill operativo penal-victimas: indicar que puede hacer la representacion de victimas segun etapa Ley 906. Use when the workflow requires `mapear_actuaciones_posibles_victima`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
+- `analista_ruta_procesal`
 - `analista_representacion_victimas`
 
 ## Purpose
@@ -67,7 +68,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_ac
 
 ## No duplicar
 - No evaluar oportunidad concreta (`evaluar_oportunidad_procesal`).
-- No redactar memorial (`redactor_documentos_juridicos_penales`).
+- No redactar memorial (`redactor_documentos_juridicos`).
 - No teoría del caso (`construir_teoria_caso_victima`).
 
 ## Riesgo si se omite

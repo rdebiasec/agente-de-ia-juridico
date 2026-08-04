@@ -1,4 +1,4 @@
-<!doctype html>
+abre las<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -68,6 +68,10 @@
           </div>
           <div class="expediente-fields" id="expediente-fields">
             <p class="expediente-empty">Sin datos de expediente aún. Describa el caso en el chat.</p>
+          </div>
+          <div class="expediente-bitacora" id="expediente-bitacora" hidden>
+            <h3>Bitácora del caso</h3>
+            <ul id="expediente-bitacora-list" class="expediente-bitacora-list"></ul>
           </div>
           <div class="expediente-hitos" id="expediente-hitos" hidden>
             <h3>Hitos del caso</h3>
@@ -141,6 +145,9 @@
               Actividad
               <span class="activity-tab-dot" id="activity-tab-dot" hidden aria-hidden="true"></span>
             </button>
+            <button type="button" class="context-tab" data-tab="equipo" role="tab" aria-controls="tab-equipo">
+              Equipo interno
+            </button>
             <button type="button" class="context-tab" data-tab="rag" role="tab">RAG</button>
           </div>
           <div class="context-tab-panels">
@@ -151,6 +158,15 @@
               </header>
               <p class="context-panel-hint">Todo documento accionable pasa por aquí antes de salir del despacho.</p>
               <div class="firma-list" id="tab-borrador-list" aria-live="polite"></div>
+              <h3 class="context-subhead">
+                Respuestas al cliente
+                <span class="bandeja-badge bandeja-badge--inline" id="cliente-inbox-count" hidden></span>
+              </h3>
+              <p class="context-panel-hint">
+                Mensajes del Coordinador del Caso hacia la víctima. Apruebe o edite antes de que ella los vea.
+                Si hay alerta de calidad, revise el texto con cuidado.
+              </p>
+              <div class="firma-list" id="tab-cliente-inbox" aria-live="polite"></div>
             </section>
             <section class="context-tab-panel" id="tab-plazos" data-panel="plazos" role="tabpanel" hidden>
               <header class="context-panel-head">
@@ -189,10 +205,21 @@
               <div class="activity-ops" id="activity-ops-list" aria-live="polite"></div>
               <section class="trace-body" id="trace-body"></section>
             </section>
+            <section class="context-tab-panel" id="tab-equipo" data-panel="equipo" role="tabpanel" hidden>
+              <header class="context-panel-head">
+                <p>Chat Coordinador ↔ especialistas</p>
+                <button type="button" class="btn-firma-action" id="btn-refresh-equipo">Actualizar</button>
+              </header>
+              <p class="context-panel-hint">
+                Solo lectura. El Coordinador del Caso delega al equipo interno; usted dirige al Coordinador en el chat principal.
+                La pestaña Actividad sigue mostrando trazas técnicas.
+              </p>
+              <div class="equipo-transcript" id="equipo-transcript" aria-live="polite"></div>
+            </section>
             <section class="context-tab-panel" id="tab-rag" data-panel="rag" role="tabpanel" hidden>
               <header class="context-panel-head"><p>Conocimiento del despacho y del caso</p></header>
               <form class="firma-form" id="firma-search-form">
-                <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: caducidad, tutela, término" required />
+                <input class="firma-input" id="firma-search-q" type="text" placeholder="Ej.: caducidad, impulso, término" required />
                 <label class="firma-check"><input type="checkbox" id="firma-search-kb" checked /> Base de la firma</label>
                 <input class="firma-input" id="firma-search-exp" type="hidden" />
                 <button type="submit" class="btn-firma-primary" id="btn-search">Buscar</button>
@@ -236,6 +263,7 @@
     <script src="/static/report.js"></script>
     <script src="/static/workspace.js" defer></script>
     <script src="/static/firma.js" defer></script>
+    <script src="/static/equipo-interno.js" defer></script>
     <script src="/static/chat.js" defer></script>
   </body>
 </html>

@@ -115,7 +115,7 @@ def test_audit_catalog_live(base_url: str):
     assert r.status_code == 200
     data = r.json()
     assert len(data.get("skills") or []) == 90
-    assert len(data.get("agentes") or []) == 11
+    assert len(data.get("agentes") or []) == 10
 
 
 def test_web_chat_with_trace(base_url: str, web_session: dict[str, str]):

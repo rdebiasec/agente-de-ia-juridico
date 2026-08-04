@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0b2ea6c6662243a8 -->
 ---
 name: detectar-inactividad-procesal
 description: Skill operativo penal-victimas: alertar falta de movimientos por periodo relevante. Use when the workflow requires `detectar_inactividad_procesal`.
@@ -12,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
-- `gestor_seguimiento_procesal_penal`
+- `analista_ruta_procesal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde.

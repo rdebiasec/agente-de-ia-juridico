@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: 1245aecd690206e4 -->
+<!-- config-version: 2; checksum: 2bdff98055ebae51 -->
 ---
 name: detectar-vacios-factuales
 description: Skill operativo penal-victimas: identificar lo que falta para comprender o probar el caso. Use when the workflow requires `detectar_vacios_factuales`.
@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_cronologia_hechos_penales`
+- `analista_cronologia_hechos`
 
 ## Purpose
 Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero.
@@ -28,7 +28,7 @@ Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `
 ## Inputs
 - Relato disponible (víctima, abogado, documentos).
 - Matriz hecho-fuente preliminar (si existe).
-- Tipo de actuación pretendida (denuncia, memorial, audiencia, tutela preliminar).
+- Tipo de actuación pretendida (denuncia, memorial, audiencia, petición).
 - Etapa procesal aparente.
 
 ## Outputs

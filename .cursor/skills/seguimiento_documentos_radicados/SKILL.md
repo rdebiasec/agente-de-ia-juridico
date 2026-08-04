@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 832d683f212ba195 -->
 ---
 name: seguimiento-documentos-radicados
 description: Skill atomico penal-victimas: controlar documentos enviados y respuestas pendientes. Use when the workflow requires `seguimiento_documentos_radicados`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.

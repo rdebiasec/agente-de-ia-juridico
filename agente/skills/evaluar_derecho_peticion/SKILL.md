@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 386849bac40da393 -->
+<!-- config-version: 3; checksum: pending -->
 ---
 name: evaluar-derecho-peticion
 description: Skill estrategico penal-victimas: revisar si existe derecho de peticion incumplido. Use when the workflow requires `evaluar_derecho_peticion`.
@@ -8,22 +8,22 @@ disable-model-invocation: true
 # evaluar_derecho_peticion
 
 ## Scope
-- Category: `Skills constitucionales y tutela`
+- Category: `Skills de redaccion y seguimiento procesal`
 - Skill ID: `evaluar_derecho_peticion`
 - Tier: `estrategico`
 
 ## Used By Agents
-- `evaluador_derechos_fundamentales_tutela`
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
+- `analista_seguimiento_procesal`
 
 ## Purpose
-Verificar si hay petición previa incumplida y si procede derecho de petición antes de tutela u otra vía.
+Verificar si hay petición previa incumplida y si procede un nuevo derecho de petición, impulso o seguimiento en vía penal.
 
-## Rol en evaluador_derechos_fundamentales_tutela
-Evaluar agotamiento vía petición para subsidiariedad tutelar.
+## Rol en redactor_documentos_juridicos
+Solo redactar petición o impulso si este skill dictamina procedencia preliminar de petición / insistencia.
 
-## Rol en redactor_documentos_juridicos_penales
-Solo redactar petición si este skill dictamina procedencia preliminar de petición.
+## Rol en analista_seguimiento_procesal
+Insumo para alertas de silencio administrativo y términos de respuesta.
 
 ## Inputs
 - Copia o datos de petición previa (fecha, destinatario, objeto, radicado si consta).
@@ -33,15 +33,15 @@ Solo redactar petición si este skill dictamina procedencia preliminar de petici
 ## Outputs
 - `peticion_existe`: sí | no | `[PENDIENTE DE VERIFICAR]`.
 - `incumplimiento`: sí | no | parcial | no_evaluable.
-- `via_recomendada`: nueva_peticion | tutela_por_silencio | solicitud_906 | aguardar_respuesta.
+- `via_recomendada`: nueva_peticion | impulso_procesal | solicitud_906 | aguardar_respuesta.
 - `plazos_clave` y actuación siguiente.
-- Etiqueta: `EVALUACIÓN PETICIÓN — NO SUSTITUYE evaluar_procedencia_tutela`.
+- Etiqueta: `EVALUACIÓN PETICIÓN — VÍA PENAL (NO TUTELA)`.
 
 ## Steps
 1. Verificar existencia de petición previa, destinatario y objeto solicitado.
 2. Constatar plazo de respuesta y silencio administrativo si aplica.
-3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-4. Documentar requisitos faltantes para interponer nueva petición o tutela.
+3. Determinar si procede nuevo derecho de petición, memorial de impulso u otra vía penal.
+4. Documentar requisitos faltantes para interponer nueva petición o impulso.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
 ## Tools
@@ -57,17 +57,17 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_d
 
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `calendar_terms_calculator` — no implementada
-- `rag_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar peticiones ni fechas de radicación.
 - **g3:** Silencio administrativo solo si consta plazo y vencimiento.
-- **g4:** Redactor solo actúa con evaluación favorable a petición.
+- **g4:** Redactor solo actúa con evaluación favorable a petición/impulso.
 - **g8:** Aviso de revisión profesional.
+- **g9:** No recomendar acción de tutela (fuera del producto).
 
 ## No duplicar
 - No redactar petición (`redactar_derecho_peticion_penal` — redactor).
-- No dictaminar tutela completa (`evaluar_procedencia_tutela`).
+- No memorial de impulso (`redactar_solicitud_impulso_procesal` — redactor).
 
 ## Riesgo si se omite
-Tutela por silencio sin petición previa válida, o demora innecesaria cuando la petición es la vía más rápida.
+Impulso o nueva petición sin constatar silencio válido, o demora innecesaria cuando la petición es la vía más rápida.

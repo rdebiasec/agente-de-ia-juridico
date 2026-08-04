@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: b1cb2e30aa58b0d3 -->
 ---
 name: detectar-riesgos-audiencia
 description: Skill atomico penal-victimas: detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion. Use when the workflow requires `detectar_riesgos_audiencia`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Identificar riesgos tácticos y procesales específicos de una audiencia programada.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Antecede simulación y guion oral.
 
 ## Rol en analista_calidad_juridica

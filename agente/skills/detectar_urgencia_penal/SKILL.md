@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4171e562a65d48f3 -->
+<!-- config-version: 5; checksum: 31661367324d50f7 -->
 ---
 name: detectar-urgencia-penal
 description: Skill estrategico penal-victimas: identificar si el caso requiere atencion humana inmediata. Use when the workflow requires `detectar_urgencia_penal`.
@@ -16,8 +16,8 @@ disable-model-invocation: true
 Clasifica urgencia (critica/alta/media/baja) y si hay que escalar al humano antes del fondo.
 
 ## Used By Agents
-- `coordinador_expediente_penal`
-- `gestor_seguimiento_procesal_penal`
+- `coordinador_caso`
+- `analista_seguimiento_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose
@@ -68,12 +68,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - **g8:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
 
 ## Handoff
-- critica/alta → notificación humana +, si aplica, `gestor_seguimiento_procesal_penal` o especialista según motivo.
+- critica/alta → notificación humana +, si aplica, `analista_seguimiento_procesal` o especialista según motivo.
 - media/baja → continuar triage (`clasificar_tarea_y_etapa` / faltantes).
 
 ## No duplicar
 - No calcular todos los términos del caso (`generar_alertas_terminos_vencimientos`).
-- No evaluar procedencia de tutela (`evaluar_procedencia_tutela`).
+- No proponer acción de tutela (fuera del producto).
 - No preservar evidencia digital (`preservar_evidencia_digital`).
 
 ## Best Practices

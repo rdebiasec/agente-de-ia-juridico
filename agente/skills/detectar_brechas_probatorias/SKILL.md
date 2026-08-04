@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 - `analista_representacion_victimas`
 
 ## Purpose
 Identificar hechos relevantes sin prueba suficiente en el expediente.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Antecede plan de recaudo.
 
 ## Rol en analista_representacion_victimas

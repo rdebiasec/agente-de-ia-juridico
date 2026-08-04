@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.

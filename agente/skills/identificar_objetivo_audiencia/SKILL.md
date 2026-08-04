@@ -13,12 +13,12 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales` (primer skill del flujo de audiencia)
+- `analista_audiencias` (primer skill del flujo de audiencia)
 
 ## Purpose
 Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal).
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Antecede guion, preguntas, solicitudes orales y simulación de escenarios.
 
 ## Inputs

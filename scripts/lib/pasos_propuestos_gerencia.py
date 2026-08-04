@@ -77,14 +77,6 @@ CATEGORY_DICTAMENS: dict[str, dict[str, str]] = {
         "sobran": "Reporte a cliente en skills puramente operativos.",
         "dictamen": "REESCRIBIR — operación vs reporte vs alertas.",
     },
-    "Skills constitucionales y tutela": {
-        "proposito_plantilla": "Derecho fundamental, procedencia de tutela, vía alternativa.",
-        "encajan": "evaluar_procedencia_tutela, revisar_mecanismos_ordinarios.",
-        "no_encajan": "evaluar_derecho_peticion, preparar_borrador_tutela_preliminar.",
-        "faltan": "Análisis específico de petición y de perjuicio irremediable.",
-        "sobran": "Bloque tutela idéntico en los 9 skills de la categoría.",
-        "dictamen": "REESCRIBIR — subsidiariedad, petición, perjuicio y borrador diferenciados.",
-    },
     "Skills de calidad juridica": {
         "proposito_plantilla": "Auditoría de soporte, riesgos y clasificación de aprobación.",
         "encajan": "clasificar_aprobacion_juridica, detectar_alucinaciones_legales.",
@@ -100,8 +92,7 @@ PRIORITY_SKILLS: dict[str, list[str]] = {
         "clasificar_fuente_factual",
         "marcar_pendientes_verificacion",
         "controlar_cadena_custodia_preliminar",
-        "evaluar_procedencia_tutela",
-        "detectar_riesgo_improcedencia_tutela",
+                "detectar_riesgo_improcedencia_tutela",
     ],
     "P1": [
         "preparar_guion_intervencion_oral",
@@ -121,7 +112,6 @@ CATEGORY_ORDER = [
     "Skills de audiencias",
     "Skills de redaccion juridica penal",
     "Skills de seguimiento procesal",
-    "Skills constitucionales y tutela",
     "Skills de calidad juridica",
 ]
 

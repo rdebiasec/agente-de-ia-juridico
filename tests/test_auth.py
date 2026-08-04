@@ -192,6 +192,10 @@ async def test_dev_auto_login_blocked_in_production_like_env(monkeypatch):
     monkeypatch.setenv("DEV_AUTO_LOGIN", "true")
     monkeypatch.setenv("SESSION_COOKIE_SECURE", "true")
     monkeypatch.setenv("RENDER", "true")
+    # Este test mide auth/auto-login, no allowlist: con RENDER=true el loopback
+    # deja de bypassar y un .env local con IP_ALLOWLIST_ENABLED=true enmascara el assert.
+    monkeypatch.setenv("IP_ALLOWLIST_ENABLED", "false")
+    get_settings.cache_clear()
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", follow_redirects=False) as client:

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 275729d0f44a0be9 -->
 ---
 name: analizar-derechos-victima
 description: Skill atomico penal-victimas: mapear derechos de victima aplicables al caso. Use when the workflow requires `analizar_derechos_victima`.
@@ -13,16 +14,12 @@ disable-model-invocation: true
 
 ## Used By Agents
 - `analista_representacion_victimas`
-- `evaluador_derechos_fundamentales_tutela`
 
 ## Purpose
 Mapear derechos de la víctima en el proceso penal (participación, información, reparación, protección) y su vínculo con los hechos.
 
 ## Rol en analista_representacion_victimas
 Insumo para teoría del caso y plan de actuación ordinaria Ley 906.
-
-## Rol en evaluador_derechos_fundamentales_tutela
-Distinguir derechos procesales de víctima vs. derechos fundamentales para tutela; no dictamina procedencia.
 
 ## Inputs
 - Hechos verificados y etapa procesal Ley 906.
@@ -33,7 +30,7 @@ Distinguir derechos procesales de víctima vs. derechos fundamentales para tutel
 - `derechos_mapeados`: participación | información | reparación | protección | otros.
 - Por derecho: `hecho_vinculado`, `autoridad_responsable`, `estado` (vulnerado | en_riesgo | respetado | pendiente).
 - `prioridad_atencion` (alta | media | baja).
-- Etiqueta: `MAPEO DERECHOS VÍCTIMA — NO SUSTITUYE TUTELA`.
+- Etiqueta: `MAPEO DERECHOS VÍCTIMA — VÍA PENAL`.
 
 ## Steps
 1. Mapear derechos de participación, información, reparación y protección aplicables.
@@ -58,14 +55,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 
 ## Guardrails (g1–g10)
 - **g1:** No inventar vulneraciones ni normas.
-- **g3:** Derecho procesal de víctima ≠ automáticamente tutela.
+- **g3:** Derecho procesal de víctima se atiende en vía Ley 906 / petición / impulso.
 - **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
 - **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
 - **g8:** Aviso de revisión profesional.
 
 ## No duplicar
 - No intereses subjetivos (`identificar_intereses_victima`).
-- No derechos fundamentales para tutela (`identificar_derecho_fundamental_afectado`).
+- No redactar memoriales (`redactor_documentos_juridicos`).
 
 ## Riesgo si se omite
 Estrategia que ignora derechos procesales de la víctima ya vulnerados en el expediente.

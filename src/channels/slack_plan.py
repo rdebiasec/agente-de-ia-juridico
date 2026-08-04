@@ -80,13 +80,13 @@ def _format_plan_message(plan_dict: dict) -> str:
         bullets = "\n".join(f"• {item}" for item in missing)
         return (
             "*Verificación del expediente incompleta*\n"
-            "Como Gerente del Caso Penal, no delegaré todavía. Envíe:\n"
+            "Como Coordinador del Caso, no delegaré todavía. Envíe:\n"
             f"{bullets}\n\n"
             "Cuando aporte los datos, volveré a verificar y propondré el plan."
         )
     kind = plan_dict.get("template_kind") or "generico"
     lines = [
-        "*Plan de ejecución propuesto* (voz del Gerente del Caso Penal)",
+        "*Plan de ejecución propuesto* (voz del Coordinador del Caso)",
         f"*Plantilla:* {template_label(kind)} (`{kind}`)",
         f"*Objetivo:* {plan_dict.get('objective', '')}",
         "",

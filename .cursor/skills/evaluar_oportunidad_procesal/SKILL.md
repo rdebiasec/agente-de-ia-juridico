@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 5a6e7413e5e37cf9 -->
 ---
 name: evaluar-oportunidad-procesal
 description: Skill operativo penal-victimas: determinar si una solicitud o intervencion es oportuna, prematura o extemporanea. Use when the workflow requires `evaluar_oportunidad_procesal`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
+- `analista_ruta_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose

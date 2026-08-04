@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: f1fefe95cef39495 -->
 ---
 name: crear-checklist-previo-audiencia
 description: Skill atomico penal-victimas: listar requisitos antes de audiencia. Use when the workflow requires `crear_checklist_previo_audiencia`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Generar lista verificable de tareas y documentos antes de una audiencia penal.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Checklist operativo tras definir objetivo de audiencia.
 
 ## Rol en analista_calidad_juridica

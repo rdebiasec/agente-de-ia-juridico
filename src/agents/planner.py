@@ -40,17 +40,17 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
     steps: list[PlanStep] = []
     order = 1
 
-    coord_skill = primary_skill_for_agent("coordinador_expediente_penal")
+    coord_skill = primary_skill_for_agent("coordinador_caso")
     cin, cout = skill_io_lists(coord_skill)
     steps.append(
         PlanStep(
             step_id=f"s{order:02d}",
             order=order,
-            agent_id="coordinador_expediente_penal",
+            agent_id="coordinador_caso",
             skill_id=coord_skill,
             title="Clasificar consulta y etapa aparente",
             user_summary=(
-                "Como Gerente del Caso Penal, revisaré su consulta, identificaré la tarea "
+                "Como Coordinador del Caso, revisaré su consulta, identificaré la tarea "
                 "y la etapa procesal aparente, y pediré apoyo al equipo interno cuando haga falta."
             ),
             inputs_expected=cin or ["solicitud del despacho", "resumen de caso", "documentos disponibles"],
@@ -61,7 +61,7 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
     )
     order += 1
 
-    if destination_agent != "coordinador_expediente_penal":
+    if destination_agent != "coordinador_caso":
         spec_skill = primary_skill_for_agent(destination_agent)
         if spec_skill and spec_skill not in valid_skill_ids():
             spec_skill = None
@@ -97,7 +97,7 @@ def _build_plan_steps(destination_agent: str, user_message: str) -> list[PlanSte
                     skill_id=cal_skill,
                     title="Control de calidad jurídica",
                     user_summary=(
-                        "Como gerente, pediré al equipo de calidad revisar coherencia "
+                        "Como coordinador, pediré al equipo de calidad revisar coherencia "
                         "estratégica, soporte fáctico y riesgos antes de entregarte la salida."
                     ),
                     inputs_expected=cin2 or ["borrador del especialista", "fuentes citadas"],
@@ -151,10 +151,10 @@ def create_execution_plan(
     steps: list[PlanStep] | None = None
 
     if not completeness_ok:
-        steps = _build_plan_steps("coordinador_expediente_penal", message)
+        steps = _build_plan_steps("coordinador_caso", message)
         steps[0].title = "Completar verificación del expediente"
         steps[0].user_summary = (
-            "Como Gerente del Caso Penal, detendré la delegación hasta recibir: "
+            "Como Coordinador del Caso, detendré la delegación hasta recibir: "
             + ", ".join(triage.datos_faltantes_bloqueantes)
             + "."
         )
@@ -175,11 +175,11 @@ def create_execution_plan(
     agents = list(dict.fromkeys(s.agent_id for s in steps))
     objective = _summarize_input(message)
     if len(objective) < 20:
-        objective = f"Atender consulta penal-víctimas: {objective}"
+        objective = f"Atender su consulta: {objective}"
     if template_kind != "generico":
-        objective = f"[{template_label(template_kind)}] {objective}"
+        objective = f"{template_label(template_kind)} — {objective}"
     if not completeness_ok:
-        objective = f"[EXPEDIENTE INCOMPLETO] {objective}"
+        objective = f"Completar expediente antes de continuar — {objective}"
 
     plan = ExecutionPlan(
         plan_id=_new_plan_id(),

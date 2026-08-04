@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Generar lista verificable de tareas y documentos antes de una audiencia penal.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Checklist operativo tras definir objetivo de audiencia.
 
 ## Rol en analista_calidad_juridica

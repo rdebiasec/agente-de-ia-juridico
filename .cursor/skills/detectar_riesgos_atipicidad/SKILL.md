@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 5c1b57f7dcc68555 -->
 ---
 name: detectar-riesgos-atipicidad
 description: Skill operativo penal-victimas: detectar cuando un caso puede ser atipico o tener naturaleza no penal. Use when the workflow requires `detectar_riesgos_atipicidad`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_tipicidad_y_responsabilidad_penal`
+- `analista_responsabilidad_tipicidad`
 - `analista_calidad_juridica`
 
 ## Purpose
@@ -62,7 +63,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 
 ## No duplicar
 - No descomponer elementos (`descomponer_elementos_tipo_penal`).
-- No evaluar procedencia tutela (`evaluar_procedencia_tutela`).
+- No acción de tutela (fuera del producto).
 - No calidad final (`clasificar_aprobacion_juridica` en calidad).
 
 ## Riesgo si se omite

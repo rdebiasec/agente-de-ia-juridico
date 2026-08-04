@@ -34,8 +34,12 @@ class Expediente:
     faltantes_gerencia: list[str] = field(default_factory=list)
     tareas_gerencia: list[dict] = field(default_factory=list)
     metricas_gerencia: dict = field(default_factory=dict)
+    bitacora: list[dict] = field(default_factory=list)
     involucra_menor: bool = False
     datos_sensibles: bool = False
+    # Triple chat: vínculo desk abogado ↔ front-office víctima
+    lawyer_session_id: str | None = None
+    cliente_session_id: str | None = None
     actualizado_en: float = field(default_factory=time.time)
 
     def resumen(self) -> str:
@@ -55,6 +59,8 @@ class Expediente:
         tareas_pendientes = [t for t in self.tareas_gerencia if t.get("estado") == "pendiente"]
         if tareas_pendientes:
             partes.append(f"- Tareas de gerencia pendientes: {len(tareas_pendientes)}")
+        if self.bitacora:
+            partes.append(f"- Entradas de bitácora: {len(self.bitacora)}")
         if self.involucra_menor:
             partes.append("- Atención: involucra menor de edad — minimización y no revictimización reforzada.")
         if self.datos_sensibles:
@@ -421,3 +427,130 @@ def aggregate_execution_plan_stats(records: list[ExecutionPlanRecord]) -> dict:
         "recent": recent,
         "generated_at": _now().isoformat(),
     }
+
+
+# --- Triple chat (Fase 1): hilos cliente, transcript interno, drafts outbound ---
+
+OUTBOUND_PROPOSED = "proposed"
+OUTBOUND_APPROVED = "approved"
+OUTBOUND_REJECTED = "rejected"
+OUTBOUND_SENT = "sent"
+
+OUTBOUND_STATUSES = {
+    OUTBOUND_PROPOSED,
+    OUTBOUND_APPROVED,
+    OUTBOUND_REJECTED,
+    OUTBOUND_SENT,
+}
+
+MSG_VIS_CLIENT = "client_visible"
+MSG_VIS_PENDING = "pending_hitl"
+MSG_VIS_INTERNAL = "internal_only"
+
+
+@dataclass
+class ClientThread:
+    """Hilo front-office víctima ↔ Gerente (vía HITL del abogado)."""
+
+    thread_id: str = field(default_factory=_new_id)
+    cliente_session_id: str = ""
+    lawyer_session_id: str = ""
+    expediente_session_id: str = ""
+    subject_label: str = ""
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "thread_id": self.thread_id,
+            "cliente_session_id": self.cliente_session_id,
+            "lawyer_session_id": self.lawyer_session_id,
+            "expediente_session_id": self.expediente_session_id,
+            "subject_label": self.subject_label,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+@dataclass
+class ClientMessage:
+    """Mensaje en el hilo cliente (visible o pendiente de HITL)."""
+
+    id: str = field(default_factory=_new_id)
+    thread_id: str = ""
+    role: str = "cliente"  # cliente | gerente | system
+    content: str = ""
+    visibility: str = MSG_VIS_CLIENT
+    outbound_draft_id: str | None = None
+    created_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "thread_id": self.thread_id,
+            "role": self.role,
+            "content": self.content,
+            "visibility": self.visibility,
+            "outbound_draft_id": self.outbound_draft_id,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+@dataclass
+class InternalTranscriptEntry:
+    """Turno legible Gerente ↔ especialista (visible al abogado)."""
+
+    id: str = field(default_factory=_new_id)
+    session_id: str = ""
+    from_actor: str = "gerente"
+    to_actor: str = ""
+    pedido: str = ""
+    respuesta: str = ""
+    turn_ref: str | None = None
+    created_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "session_id": self.session_id,
+            "from_actor": self.from_actor,
+            "to_actor": self.to_actor,
+            "pedido": self.pedido,
+            "respuesta": self.respuesta,
+            "turn_ref": self.turn_ref,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+@dataclass
+class OutboundClientDraft:
+    """Propuesta de respuesta al cliente; no se publica sin aprobación."""
+
+    id: str = field(default_factory=_new_id)
+    thread_id: str = ""
+    lawyer_session_id: str = ""
+    cliente_session_id: str = ""
+    inbound_message_id: str | None = None
+    proposed_text: str = ""
+    final_text: str | None = None
+    status: str = OUTBOUND_PROPOSED
+    revisor: str | None = None
+    comentario: str | None = None
+    created_at: datetime = field(default_factory=_now)
+    updated_at: datetime = field(default_factory=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "thread_id": self.thread_id,
+            "lawyer_session_id": self.lawyer_session_id,
+            "cliente_session_id": self.cliente_session_id,
+            "inbound_message_id": self.inbound_message_id,
+            "proposed_text": self.proposed_text,
+            "final_text": self.final_text,
+            "status": self.status,
+            "revisor": self.revisor,
+            "comentario": self.comentario,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

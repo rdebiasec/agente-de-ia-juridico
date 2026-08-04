@@ -12,7 +12,7 @@ from src.hitl.drafts import TransicionInvalida
 from src.hitl.slack_review import notificar_borrador, slack_habilitado
 from src.main import app
 from src.services.documentos import extraer_texto, generar_docx
-from src.services.plazos import crear_termino, es_dia_habil, sumar_dias_habiles, termino_fallo_tutela
+from src.services.plazos import crear_termino, es_dia_habil, sumar_dias_habiles
 from src.storage.memory import InMemoryRepository
 from src.storage.models import (
     ESTADO_APROBADO,
@@ -36,11 +36,16 @@ def test_sumar_dias_habiles_salta_fin_de_semana():
     assert sumar_dias_habiles(base, 0) == base
 
 
-def test_termino_tutela_es_pendiente_con_fecha_limite():
-    term = termino_fallo_tutela("web:user", fecha_base=date(2026, 2, 6))
-    assert term.dias_habiles == 10
+def test_crear_termino_generico_es_pendiente_con_fecha_limite():
+    term = crear_termino(
+        session_id="web:user",
+        descripcion="Término de impulso (5 días hábiles)",
+        dias_habiles=5,
+        tipo="impulso",
+        fecha_base=date(2026, 2, 6),
+    )
     assert term.estado == "pendiente"
-    assert term.fecha_limite is not None and term.fecha_limite > term.fecha_base
+    assert term.fecha_limite is not None
 
 
 def test_crear_termino_calcula_limite():

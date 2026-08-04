@@ -1,7 +1,7 @@
 # Documento Unico de Aprobacion — Sistema Penal-Victimas (Colombia)
 
 **Version:** 1.0  
-**Fecha de generacion:** 2026-07-05 22:09  
+**Fecha de generacion:** 2026-08-03 20:44  
 **Audiencia:** Abogada lider del despacho  
 **Proposito:** Revisar, aprobar o editar los 11 agentes, 90 skills y reglas del sistema en un solo lugar.
 
@@ -26,17 +26,16 @@ Este sistema tiene **11 agentes** y **90 skills** para apoyar la representacion 
 
 ### Los 11 agentes
 
-1. `coordinador_expediente_penal` — Gerente del Caso Penal
-2. `analista_cronologia_hechos_penales` — Analista de cronologia y hechos
-3. `analista_tipicidad_y_responsabilidad_penal` — Analista de tipicidad y responsabilidad
-4. `analista_ruta_procesal_ley906` — Analista de ruta procesal Ley 906
-5. `analista_representacion_victimas` — Analista de representacion de victimas
-6. `gestor_evidencia_y_soporte_probatorio` — Gestor de evidencia y prueba
-7. `preparador_estrategico_audiencias_penales` — Preparador de audiencias
-8. `redactor_documentos_juridicos_penales` — Redactor de documentos penales
-9. `gestor_seguimiento_procesal_penal` — Gestor de seguimiento procesal
-10. `evaluador_derechos_fundamentales_tutela` — Evaluador de tutela y derechos fundamentales
-11. `analista_calidad_juridica` — Analista de calidad juridica
+1. `coordinador_caso` — Coordinador del Caso
+2. `analista_cronologia_hechos` — Cronología y Hechos
+3. `analista_responsabilidad_tipicidad` — Tipicidad y Responsabilidad
+4. `analista_ruta_procesal` — Ruta Procesal Ley 906
+5. `analista_representacion_victimas` — Representación de Víctimas
+6. `analista_evidencia` — Evidencia y Pruebas
+7. `analista_audiencias` — Audiencias Penales
+8. `redactor_documentos_juridicos` — Redacción Documentos
+9. `analista_seguimiento_procesal` — Seguimiento Procesal
+10. `analista_calidad_juridica` — Control de Calidad Jurídica
 
 ### Que hace el sistema
 
@@ -120,16 +119,15 @@ Este sistema tiene **11 agentes** y **90 skills** para apoyar la representacion 
 
 ```mermaid
 flowchart TD
-  userConsulta[Consulta de la abogada] --> coordinator[coordinador_expediente_penal]
-  coordinator --> hechos[analista_cronologia_hechos_penales]
-  coordinator --> tipicidad[analista_tipicidad_y_responsabilidad_penal]
-  coordinator --> ruta906[analista_ruta_procesal_ley906]
+  userConsulta[Consulta de la abogada] --> coordinator[coordinador_caso]
+  coordinator --> hechos[analista_cronologia_hechos]
+  coordinator --> tipicidad[analista_responsabilidad_tipicidad]
+  coordinator --> ruta906[analista_ruta_procesal]
   coordinator --> victimas[analista_representacion_victimas]
-  coordinator --> evidencia[gestor_evidencia_y_soporte_probatorio]
-  coordinator --> audiencias[preparador_estrategico_audiencias_penales]
-  coordinator --> redaccion[redactor_documentos_juridicos_penales]
-  coordinator --> seguimiento[gestor_seguimiento_procesal_penal]
-  coordinator --> tutela[evaluador_derechos_fundamentales_tutela]
+  coordinator --> evidencia[analista_evidencia]
+  coordinator --> audiencias[analista_audiencias]
+  coordinator --> redaccion[redactor_documentos_juridicos]
+  coordinator --> seguimiento[analista_seguimiento_procesal]
   coordinator --> calidad[analista_calidad_juridica]
   calidad --> hitl[Revision humana de la abogada]
 ```
@@ -255,40 +253,35 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ## Parte 8 — Los 11 agentes (detalle para aprobacion)
 
-### 8.1 `coordinador_expediente_penal`
+### 8.1 `coordinador_caso`
 
-**Nombre corto:** Gerente del Caso Penal
+**Nombre corto:** Coordinador del Caso
 
-**Proposito:** Verifica la completitud del expediente, prioriza, delega al especialista correcto y controla los pendientes del caso.
+**Proposito:** Coordina el caso: recibe la consulta, verifica completitud y prioridad, asigna al especialista correcto y responde con una sola voz de despacho.
 
-**Problema que resuelve:** Evita delegar o redactar sobre expedientes incompletos y ordena el trabajo por prioridad legal.
+**Problema que resuelve:** Evita respuestas mal enfocadas y actuaciones sobre expedientes incompletos; ordena el trabajo por prioridad legal y urgencia.
 
-**Por que es necesario en Colombia:** En penal-victimas la estrategia cambia por etapa Ley 906; esta gerencia reduce errores de enfoque y pérdida de términos.
+**Por que es necesario en Colombia:** En penal-victimas la estrategia cambia por etapa Ley 906; esta coordinación reduce errores de enfoque y pérdida de términos.
 
-**No reemplaza:** El analisis de fondo por especialidad ni la aprobacion final.
+**No reemplaza:** El analisis de fondo por especialidad ni la aprobacion y firma final del abogado titular.
 
 **Prompt del agente (lenguaje simple):**
 
 - Solo trabaja en casos de penal-victimas en Colombia.
+- Antes de todo, verifica que el caso tenga los datos y documentos minimos.
 - Decide a que especialista enviar cada consulta segun necesidad del caso.
 - Si faltan datos importantes, primero los pide antes de dar una conclusion.
 - No inventa normas, sentencias, radicados ni hechos.
 
-**Skills asignados (11):**
+**Skills asignados (5):**
 
 - `actualizar_tareas_responsable` — ver seccion 9
-- `clasificar_fuente_factual` — ver seccion 9
 - `clasificar_tarea_y_etapa` — ver seccion 9
-- `crear_ruta_procesal_recomendada` — ver seccion 9
 - `detectar_urgencia_penal` — ver seccion 9
-- `detectar_vacios_factuales` — ver seccion 9
 - `gestionar_faltantes_expediente` — ver seccion 9
-- `identificar_etapa_procesal_ley906` — ver seccion 9
 - `marcar_pendientes_verificacion` — ver seccion 9
-- `priorizar_objetivos_representacion` — ver seccion 9
-- `recomendar_via_constitucional_o_alternativa` — ver seccion 9
 
-**Checklist de aprobacion — Agente coordinador_expediente_penal**
+**Checklist de aprobacion — Agente coordinador_caso**
 
 | Decision | Marcar |
 |---|---|
@@ -303,9 +296,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.2 `analista_cronologia_hechos_penales`
+### 8.2 `analista_cronologia_hechos`
 
-**Nombre corto:** Analista de cronologia y hechos
+**Nombre corto:** Cronología y Hechos
 
 **Proposito:** Convierte relatos y documentos en una historia factual ordenada y verificable.
 
@@ -322,19 +315,21 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - Detecta contradicciones y vacios factuales.
 - No inventa hechos ni fuentes.
 
-**Skills asignados (9):**
+**Skills asignados (11):**
 
+- `clasificar_fuente_factual` — ver seccion 9
 - `construir_cronologia_penal` — ver seccion 9
 - `crear_matriz_hecho_fuente` — ver seccion 9
 - `detectar_contradicciones_factuales` — ver seccion 9
 - `detectar_vacios_factuales` — ver seccion 9
 - `extraer_hechos_relevantes` — ver seccion 9
 - `generar_preguntas_aclaracion` — ver seccion 9
+- `generar_preguntas_testigos_peritos` — ver seccion 9
 - `generar_preguntas_tipicidad` — ver seccion 9
 - `identificar_actores_y_roles` — ver seccion 9
 - `verificar_hechos_soportados` — ver seccion 9
 
-**Checklist de aprobacion — Agente analista_cronologia_hechos_penales**
+**Checklist de aprobacion — Agente analista_cronologia_hechos**
 
 | Decision | Marcar |
 |---|---|
@@ -349,9 +344,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.3 `analista_tipicidad_y_responsabilidad_penal`
+### 8.3 `analista_responsabilidad_tipicidad`
 
-**Nombre corto:** Analista de tipicidad y responsabilidad
+**Nombre corto:** Tipicidad y Responsabilidad
 
 **Proposito:** Traduce hechos y pruebas en hipotesis juridicas de tipicidad y responsabilidad preliminar.
 
@@ -380,7 +375,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `identificar_conductas_punibles_preliminares` — ver seccion 9
 - `mapear_tipo_penal_hecho_prueba` — ver seccion 9
 
-**Checklist de aprobacion — Agente analista_tipicidad_y_responsabilidad_penal**
+**Checklist de aprobacion — Agente analista_responsabilidad_tipicidad**
 
 | Decision | Marcar |
 |---|---|
@@ -395,9 +390,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.4 `analista_ruta_procesal_ley906`
+### 8.4 `analista_ruta_procesal`
 
-**Nombre corto:** Analista de ruta procesal Ley 906
+**Nombre corto:** Ruta Procesal Ley 906
 
 **Proposito:** Ubica la etapa exacta y la mejor ruta procesal para representar a la victima.
 
@@ -430,7 +425,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `preparar_solicitudes_orales` — ver seccion 9
 - `redactar_recurso_o_intervencion_preliminar` — ver seccion 9
 
-**Checklist de aprobacion — Agente analista_ruta_procesal_ley906**
+**Checklist de aprobacion — Agente analista_ruta_procesal**
 
 | Decision | Marcar |
 |---|---|
@@ -447,7 +442,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ### 8.5 `analista_representacion_victimas`
 
-**Nombre corto:** Analista de representacion de victimas
+**Nombre corto:** Representación de Víctimas
 
 **Proposito:** Garantiza que la estrategia este centrada en derechos, intereses y no revictimizacion.
 
@@ -464,7 +459,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - Aplica enfoque diferencial cuando corresponda.
 - No promete resultados judiciales.
 
-**Skills asignados (13):**
+**Skills asignados (15):**
 
 - `alinear_estrategia_prueba_proceso` — ver seccion 9
 - `analizar_derechos_victima` — ver seccion 9
@@ -472,6 +467,8 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `construir_teoria_caso_victima` — ver seccion 9
 - `controlar_no_revictimizacion` — ver seccion 9
 - `crear_plan_recaudo_probatorio` — ver seccion 9
+- `crear_resumen_ejecutivo_litigante` — ver seccion 9
+- `detectar_brechas_probatorias` — ver seccion 9
 - `detectar_riesgo_revictimizacion` — ver seccion 9
 - `evaluar_dano_y_afectacion` — ver seccion 9
 - `evaluar_suficiencia_probatoria` — ver seccion 9
@@ -495,9 +492,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.6 `gestor_evidencia_y_soporte_probatorio`
+### 8.6 `analista_evidencia`
 
-**Nombre corto:** Gestor de evidencia y prueba
+**Nombre corto:** Evidencia y Pruebas
 
 **Proposito:** Transforma evidencia dispersa en inventario util y plan probatorio accionable.
 
@@ -514,23 +511,21 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - Marca escalamiento cuando la cadena de custodia es estricta.
 - No altera ni manipula evidencia.
 
-**Skills asignados (13):**
+**Skills asignados (11):**
 
 - `clasificar_tipo_prueba` — ver seccion 9
 - `construir_matriz_hecho_prueba` — ver seccion 9
 - `controlar_cadena_custodia_preliminar` — ver seccion 9
 - `crear_plan_recaudo_probatorio` — ver seccion 9
 - `detectar_brechas_probatorias` — ver seccion 9
-- `evaluar_dano_y_afectacion` — ver seccion 9
 - `evaluar_suficiencia_probatoria` — ver seccion 9
 - `extraer_hechos_relevantes` — ver seccion 9
 - `generar_preguntas_aclaracion` — ver seccion 9
-- `generar_preguntas_testigos_peritos` — ver seccion 9
 - `inventariar_evidencia` — ver seccion 9
 - `mapear_tipo_penal_hecho_prueba` — ver seccion 9
 - `preservar_evidencia_digital` — ver seccion 9
 
-**Checklist de aprobacion — Agente gestor_evidencia_y_soporte_probatorio**
+**Checklist de aprobacion — Agente analista_evidencia**
 
 | Decision | Marcar |
 |---|---|
@@ -545,9 +540,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.7 `preparador_estrategico_audiencias_penales`
+### 8.7 `analista_audiencias`
 
-**Nombre corto:** Preparador de audiencias
+**Nombre corto:** Audiencias Penales
 
 **Proposito:** Prepara audiencias con objetivo, guion, preguntas y solicitudes.
 
@@ -555,7 +550,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 **Por que es necesario en Colombia:** Las audiencias en Ley 906 son determinantes y exigen preparacion tecnica previa.
 
-**No reemplaza:** La intervencion oral de la abogada en estrados.
+**No reemplaza:** La intervencion oral de quien representa en estrados.
 
 **Prompt del agente (lenguaje simple):**
 
@@ -564,7 +559,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - Entrega checklist previo a la audiencia.
 - No reemplaza la intervencion oral del abogado.
 
-**Skills asignados (16):**
+**Skills asignados (15):**
 
 - `analizar_intervencion_victima` — ver seccion 9
 - `construir_cronologia_penal` — ver seccion 9
@@ -573,7 +568,6 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `controlar_audiencias` — ver seccion 9
 - `crear_checklist_previo_audiencia` — ver seccion 9
 - `crear_resumen_ejecutivo_litigante` — ver seccion 9
-- `detectar_riesgo_revictimizacion` — ver seccion 9
 - `detectar_riesgos_audiencia` — ver seccion 9
 - `generar_preguntas_testigos_peritos` — ver seccion 9
 - `identificar_objetivo_audiencia` — ver seccion 9
@@ -583,7 +577,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `preparar_solicitudes_orales` — ver seccion 9
 - `simular_escenarios_audiencia` — ver seccion 9
 
-**Checklist de aprobacion — Agente preparador_estrategico_audiencias_penales**
+**Checklist de aprobacion — Agente analista_audiencias**
 
 | Decision | Marcar |
 |---|---|
@@ -598,11 +592,11 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.8 `redactor_documentos_juridicos_penales`
+### 8.8 `redactor_documentos_juridicos`
 
-**Nombre corto:** Redactor de documentos penales
+**Nombre corto:** Redacción Documentos
 
-**Proposito:** Convierte analisis juridico en escritos utilizables por la abogada.
+**Proposito:** Convierte analisis juridico en escritos utilizables por el despacho.
 
 **Problema que resuelve:** Reduce tiempo de redaccion y mejora estandar tecnico del primer borrador.
 
@@ -617,7 +611,7 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - Marca pendientes de verificacion.
 - No inventa hechos, citas, radicados ni anexos.
 
-**Skills asignados (16):**
+**Skills asignados (15):**
 
 - `controlar_separacion_hecho_inferencia` — ver seccion 9
 - `controlar_tono_juridico_documento` — ver seccion 9
@@ -626,17 +620,16 @@ El sistema consulta solo estos archivos de conocimiento penal:
 - `evaluar_derecho_peticion` — ver seccion 9
 - `evaluar_solicitud_fiscalia_juez` — ver seccion 9
 - `extraer_hechos_relevantes` — ver seccion 9
-- `preparar_borrador_tutela_preliminar` — ver seccion 9
 - `redactar_ampliacion_denuncia` — ver seccion 9
 - `redactar_derecho_peticion_penal` — ver seccion 9
 - `redactar_memorial_penal` — ver seccion 9
 - `redactar_recurso_o_intervencion_preliminar` — ver seccion 9
 - `redactar_solicitud_impulso_procesal` — ver seccion 9
-- `redactar_tutela_penal_preliminar` — ver seccion 9
 - `verificar_citas_normativas` — ver seccion 9
 - `verificar_hechos_soportados` — ver seccion 9
+- `verificar_jurisprudencia` — ver seccion 9
 
-**Checklist de aprobacion — Agente redactor_documentos_juridicos_penales**
+**Checklist de aprobacion — Agente redactor_documentos_juridicos**
 
 | Decision | Marcar |
 |---|---|
@@ -651,9 +644,9 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.9 `gestor_seguimiento_procesal_penal`
+### 8.9 `analista_seguimiento_procesal`
 
-**Nombre corto:** Gestor de seguimiento procesal
+**Nombre corto:** Seguimiento Procesal
 
 **Proposito:** Monitorea estado de radicado, actuaciones, audiencias y terminos.
 
@@ -673,19 +666,19 @@ El sistema consulta solo estos archivos de conocimiento penal:
 **Skills asignados (12):**
 
 - `actualizar_tareas_responsable` — ver seccion 9
-- `controlar_audiencias` — ver seccion 9
 - `controlar_terminos_procesales_preliminares` — ver seccion 9
-- `crear_checklist_previo_audiencia` — ver seccion 9
 - `crear_reporte_estado_caso` — ver seccion 9
 - `detectar_inactividad_procesal` — ver seccion 9
 - `detectar_urgencia_penal` — ver seccion 9
+- `evaluar_derecho_peticion` — ver seccion 9
 - `generar_alertas_terminos_vencimientos` — ver seccion 9
 - `monitorear_radicado` — ver seccion 9
 - `preparar_resumen_operativo_cliente` — ver seccion 9
+- `redactar_solicitud_impulso_procesal` — ver seccion 9
 - `registrar_actuacion_procesal` — ver seccion 9
 - `seguimiento_documentos_radicados` — ver seccion 9
 
-**Checklist de aprobacion — Agente gestor_seguimiento_procesal_penal**
+**Checklist de aprobacion — Agente analista_seguimiento_procesal**
 
 | Decision | Marcar |
 |---|---|
@@ -700,67 +693,17 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 ---
 
-### 8.10 `evaluador_derechos_fundamentales_tutela`
+### 8.10 `analista_calidad_juridica`
 
-**Nombre corto:** Evaluador de tutela y derechos fundamentales
-
-**Proposito:** Evalua si corresponde tutela o via alternativa, con criterio constitucional.
-
-**Problema que resuelve:** Evita tutelas prematuras o improcedentes.
-
-**Por que es necesario en Colombia:** En casos penales de victimas, tutela es excepcional y exige subsidiariedad e inmediatez.
-
-**No reemplaza:** La decision final de litigio constitucional del despacho.
-
-**Prompt del agente (lenguaje simple):**
-
-- Evalua derechos fundamentales afectados.
-- Revisa subsidiariedad, inmediatez y perjuicio irremediable.
-- Recomienda tutela o via alternativa.
-- No convierte todo en tutela.
-
-**Skills asignados (13):**
-
-- `analizar_derechos_victima` — ver seccion 9
-- `analizar_enfoque_diferencial` — ver seccion 9
-- `analizar_perjuicio_irremediable` — ver seccion 9
-- `crear_matriz_hecho_derecho_fundamental` — ver seccion 9
-- `detectar_riesgo_improcedencia_tutela` — ver seccion 9
-- `evaluar_derecho_peticion` — ver seccion 9
-- `evaluar_procedencia_tutela` — ver seccion 9
-- `identificar_derecho_fundamental_afectado` — ver seccion 9
-- `preparar_borrador_tutela_preliminar` — ver seccion 9
-- `recomendar_via_constitucional_o_alternativa` — ver seccion 9
-- `redactar_derecho_peticion_penal` — ver seccion 9
-- `redactar_tutela_penal_preliminar` — ver seccion 9
-- `revisar_mecanismos_ordinarios` — ver seccion 9
-
-**Checklist de aprobacion — Agente evaluador_derechos_fundamentales_tutela**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
----
-
-### 8.11 `analista_calidad_juridica`
-
-**Nombre corto:** Analista de calidad juridica
+**Nombre corto:** Control de Calidad Jurídica
 
 **Proposito:** Revisa salida final antes de compartir externamente.
 
 **Problema que resuelve:** Disminuye riesgo de alucinacion legal, inconsistencia estrategica y filtracion de datos sensibles.
 
-**Por que es necesario en Colombia:** Refuerza responsabilidad profesional de la abogada y soporte de auditoria interna.
+**Por que es necesario en Colombia:** Refuerza responsabilidad profesional del despacho y soporte de auditoria interna.
 
-**No reemplaza:** La aprobacion final de la abogada.
+**No reemplaza:** La aprobacion final de quien representa.
 
 **Prompt del agente (lenguaje simple):**
 
@@ -772,25 +715,25 @@ El sistema consulta solo estos archivos de conocimiento penal:
 **Skills asignados (26):**
 
 - `alinear_estrategia_prueba_proceso` — ver seccion 9
+- `analizar_enfoque_diferencial` — ver seccion 9
 - `clasificar_aprobacion_juridica` — ver seccion 9
+- `controlar_audiencias` — ver seccion 9
 - `controlar_cadena_custodia_preliminar` — ver seccion 9
 - `controlar_confidencialidad_datos_sensibles` — ver seccion 9
 - `controlar_no_revictimizacion` — ver seccion 9
 - `controlar_separacion_hecho_inferencia` — ver seccion 9
 - `controlar_tono_juridico_documento` — ver seccion 9
 - `controlar_tono_riesgo_reputacional` — ver seccion 9
+- `crear_checklist_previo_audiencia` — ver seccion 9
 - `crear_matriz_hecho_fuente` — ver seccion 9
 - `detectar_alucinaciones_legales` — ver seccion 9
-- `detectar_brechas_probatorias` — ver seccion 9
 - `detectar_contradicciones_factuales` — ver seccion 9
-- `detectar_riesgo_improcedencia_tutela` — ver seccion 9
 - `detectar_riesgo_revictimizacion` — ver seccion 9
 - `detectar_riesgos_atipicidad` — ver seccion 9
 - `detectar_riesgos_audiencia` — ver seccion 9
 - `detectar_riesgos_procesales` — ver seccion 9
 - `detectar_urgencia_penal` — ver seccion 9
 - `evaluar_oportunidad_procesal` — ver seccion 9
-- `evaluar_procedencia_tutela` — ver seccion 9
 - `mapear_tipo_penal_hecho_prueba` — ver seccion 9
 - `preparar_resumen_operativo_cliente` — ver seccion 9
 - `revisar_coherencia_estrategica` — ver seccion 9
@@ -817,464 +760,78 @@ El sistema consulta solo estos archivos de conocimiento penal:
 
 Cada skill es una capacidad atomica que un agente usa para una tarea especifica.
 
-### Categoria: Skills constitucionales y tutela
-
-#### 9.1 `analizar_perjuicio_irremediable`
-
-**Para que sirve:** identificar urgencia constitucional.
-
-**Archivo:** `agente/skills/analizar_perjuicio_irremediable/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`
-
-**Instruccion tipo:** Identificar urgencia constitucional.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-gravedad, urgencia, impostergabilidad, prueba, riesgo.
-
-**Pasos del skill:**
-
-1. Identificar el perjuicio alegado y su carácter actual o inminente.
-2. Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.
-3. Contrastar con mecanismos ordinarios y plazos procesales vigentes.
-4. Profundizar análisis de «Identificar urgencia constitucional» con referencia al expediente y norma aplicable.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_corte_constitucional_search``, ``rag_expediente_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill analizar_perjuicio_irremediable**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.2 `crear_matriz_hecho_derecho_fundamental`
-
-**Para que sirve:** relacionar hechos con derechos afectados.
-
-**Archivo:** `agente/skills/crear_matriz_hecho_derecho_fundamental/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`
-
-**Instruccion tipo:** Relacionar hechos con derechos afectados.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-hecho, derecho, prueba, autoridad, solicitud.
-
-**Pasos del skill:**
-
-1. Listar hechos verificables y narrados relevantes para la vulneración alegada.
-2. Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.
-3. Señalar vacíos probatorios y norma constitucional de soporte preliminar.
-4. Profundizar análisis de «Relacionar hechos con derechos afectados» con referencia al expediente y norma aplicable.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_expediente_search``, ``rag_constitucion_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill crear_matriz_hecho_derecho_fundamental**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.3 `detectar_riesgo_improcedencia_tutela`
-
-**Para que sirve:** detectar si tutela puede ser prematura, subsidiaria o improcedente.
-
-**Archivo:** `agente/skills/detectar_riesgo_improcedencia_tutela/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`, `analista_calidad_juridica`
-
-**Instruccion tipo:** Detectar si tutela puede ser prematura, subsidiaria o improcedente.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-riesgo, razon, alternativa sugerida.
-
-**Pasos del skill:**
-
-1. Inventariar vías ordinarias disponibles en la etapa penal actual.
-2. Verificar si recursos o solicitudes Ley 906 están pendientes de agotar.
-3. Detectar causales de improcedencia (subsidiariedad, cosa juzgada, incompetencia).
-4. Evaluar si el daño es actual o remediabile por vía ordinaria.
-5. Documentar probabilidad de rechazo y costo de tutela prematura.
-6. Recomendar vía alternativa preferente si la tutela es improcedente.
-7. Señalar plazo y actuación ordinaria recomendada antes de tutela.
-8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_corte_constitucional_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill detectar_riesgo_improcedencia_tutela**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.4 `evaluar_derecho_peticion`
-
-**Para que sirve:** revisar si existe derecho de peticion incumplido.
-
-**Archivo:** `agente/skills/evaluar_derecho_peticion/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
-
-**Instruccion tipo:** Revisar si existe derecho de peticion incumplido.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-solicitud, fecha, autoridad, termino, respuesta, riesgo.
-
-**Pasos del skill:**
-
-1. Verificar existencia de petición previa, destinatario y objeto solicitado.
-2. Constatar plazo de respuesta y silencio administrativo si aplica.
-3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-4. Profundizar análisis de «Revisar si existe derecho de peticion incumplido» con referencia al expediente y norma aplicable.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``calendar_terms_calculator``, ``rag_constitucional_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill evaluar_derecho_peticion**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.5 `evaluar_procedencia_tutela`
-
-**Para que sirve:** evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-
-**Archivo:** `agente/skills/evaluar_procedencia_tutela/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`, `analista_calidad_juridica`
-
-**Instruccion tipo:** Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-procedencia preliminar, riesgos, datos faltantes.
-
-**Pasos del skill:**
-
-1. Verificar legitimación por activa (titular del derecho y vínculo con el caso).
-2. Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).
-3. Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.
-4. Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.
-5. Evaluar inmediatez del perjuicio y necesidad de medida urgente.
-6. Evaluar conexidad constitucional y relevancia del derecho invocado.
-7. Documentar requisitos faltantes y riesgo de improcedencia.
-8. Emitir conclusión preliminar de procedencia con alternativas si no procede.
-9. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_corte_constitucional_search``, ``citation_checker``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill evaluar_procedencia_tutela**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.6 `identificar_derecho_fundamental_afectado`
-
-**Para que sirve:** identificar posibles derechos fundamentales comprometidos.
-
-**Archivo:** `agente/skills/identificar_derecho_fundamental_afectado/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`
-
-**Instruccion tipo:** Identificar posibles derechos fundamentales comprometidos.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-derecho, hecho vulnerador, soporte, accionado potencial.
-
-**Pasos del skill:**
-
-1. Mapear hechos del caso contra catálogo de derechos fundamentales aplicables.
-2. Precisar titular del derecho y autoridad o sujeto vulnerador.
-3. Priorizar derechos más directamente comprometidos para análisis posterior.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_constitucion_search``, ``rag_expediente_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill identificar_derecho_fundamental_afectado**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.7 `preparar_borrador_tutela_preliminar`
-
-**Para que sirve:** preparar insumos para borrador de tutela.
-
-**Archivo:** `agente/skills/preparar_borrador_tutela_preliminar/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
-
-**Instruccion tipo:** Preparar insumos para borrador de tutela.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-hechos, derechos, pruebas, pretensiones, medidas provisionales si aplica.
-
-**Pasos del skill:**
-
-1. Consolidar hechos, derechos afectados y pretensiones con fuentes.
-2. Verificar que el evaluador constitucional recomendó tutela preliminarmente.
-3. Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.
-4. Profundizar análisis de «Preparar insumos para borrador de tutela» con referencia al expediente y norma aplicable.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_plantillas_search``, ``rag_corte_constitucional_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill preparar_borrador_tutela_preliminar**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.8 `recomendar_via_constitucional_o_alternativa`
-
-**Para que sirve:** recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
-
-**Archivo:** `agente/skills/recomendar_via_constitucional_o_alternativa/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`, `coordinador_expediente_penal`
-
-**Instruccion tipo:** Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-via, razon, riesgos, siguiente accion.
-
-**Pasos del skill:**
-
-1. Inventariar vías disponibles: tutela, petición, solicitud Ley 906, queja, etc.
-2. Comparar oportunidad, celeridad y probabilidad de éxito de cada vía.
-3. Recomendar ruta preferente con justificación y riesgos.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_constitucional_search``, ``rag_ley906_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill recomendar_via_constitucional_o_alternativa**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.9 `revisar_mecanismos_ordinarios`
-
-**Para que sirve:** verificar si hay vias ordinarias antes de tutela.
-
-**Archivo:** `agente/skills/revisar_mecanismos_ordinarios/SKILL.md`
-
-**Agentes que lo usan:** `evaluador_derechos_fundamentales_tutela`
-
-**Instruccion tipo:** Verificar si hay vias ordinarias antes de tutela.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-mecanismos existentes, idoneidad, eficacia, riesgo de improcedencia.
-
-**Pasos del skill:**
-
-1. Identificar recursos y actuaciones ordinarias en el proceso penal vigente.
-2. Verificar si están pendientes de interponer o ya agotados.
-3. Determinar si la tutela es subsidiaria respecto de dichos mecanismos.
-4. Profundizar análisis de «Verificar si hay vias ordinarias antes de tutela» con referencia al expediente y norma aplicable.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_ley906_search``, ``rag_corte_constitucional_search``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill revisar_mecanismos_ordinarios**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
 ### Categoria: Skills de audiencias
 
-#### 9.10 `crear_checklist_previo_audiencia`
+#### 9.1 `controlar_audiencias`
 
-**Para que sirve:** listar requisitos antes de audiencia.
+**Para que sirve:** Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención.
+
+**Archivo:** `agente/skills/controlar_audiencias/SKILL.md`
+
+**Agentes que lo usan:** `analista_audiencias`, `analista_calidad_juridica`
+
+**Instruccion tipo:** Administrar fechas, horas, enlaces y preparacion de audiencias.
+
+**Que necesita para funcionar (entradas):**
+
+- Tipo de audiencia, fecha y etapa procesal.
+- Objetivo, guion, preguntas y solicitudes orales preparadas.
+- Plazos y requisitos de intervención de la víctima.
+
+**Que produce (salidas):**
+
+- `checklist`: ítem | cumple | no_cumple | pendiente.
+- `bloqueantes` que impiden intervenir sin corrección.
+- Etiqueta: `CONTROL AUDIENCIA — REVISAR CON ABOGADO`.
+
+**Pasos del skill:**
+
+1. Registrar fechas, horas, enlaces y tipo de audiencia.
+2. Vincular audiencia con checklist de preparación.
+3. Alertar conflictos de agenda o datos incompletos.
+4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
+
+**Cuidados y riesgos:**
+
+- **g4:** HITL obligatorio antes de audiencia.
+- **g8:** Aviso de revisión profesional.
+
+**Checklist de aprobacion — Skill controlar_audiencias**
+
+| Decision | Marcar |
+|---|---|
+| APROBAR | [ ] |
+| AJUSTAR | [ ] |
+| ELIMINAR | [ ] |
+| PENDIENTE | [ ] |
+
+**Observaciones / cambios sugeridos:**
+
+> (espacio para la abogada)
+
+#### 9.2 `crear_checklist_previo_audiencia`
+
+**Para que sirve:** Generar lista verificable de tareas y documentos antes de una audiencia penal.
 
 **Archivo:** `agente/skills/crear_checklist_previo_audiencia/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`, `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_audiencias`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Listar requisitos antes de audiencia.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de audiencia y fecha.
+- Objetivo de audiencia (`identificar_objetivo_audiencia`).
+- Materiales preparados (guion, preguntas, pruebas).
 
 **Que produce (salidas):**
 
-poder, radicado, enlace, hora, documentos, anexos, identificacion, estrategia, responsables.
+- Checklist: `ítem`, `responsable`, `estado` (listo | pendiente | no_aplica).
+- `documentos_requeridos` y plazos internos.
+- Etiqueta: `CHECKLIST PRE-AUDIENCIA`.
 
 **Pasos del skill:**
 
@@ -1283,14 +840,12 @@ poder, radicado, enlace, hora, documentos, anexos, identificacion, estrategia, r
 3. Cerrar checklist con responsables y plazos de preparación.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``calendar_event_reader``, ``document_bundle_builder``, ``task_manager_create``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** HITL antes de audiencia.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill crear_checklist_previo_audiencia**
 
@@ -1305,70 +860,27 @@ poder, radicado, enlace, hora, documentos, anexos, identificacion, estrategia, r
 
 > (espacio para la abogada)
 
-#### 9.11 `crear_resumen_ejecutivo_litigante`
+#### 9.3 `detectar_riesgos_audiencia`
 
-**Para que sirve:** crear resumen de una pagina para el abogado que interviene.
-
-**Archivo:** `agente/skills/crear_resumen_ejecutivo_litigante/SKILL.md`
-
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
-
-**Instruccion tipo:** Crear resumen de una pagina para el abogado que interviene.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-resumen, hechos clave, pruebas clave, solicitudes, alertas.
-
-**Pasos del skill:**
-
-1. Sintetizar objetivo, etapa procesal y postura de la víctima en una página.
-2. Incluir hechos clave, riesgos y decisiones tácticas pendientes.
-3. Formato listo para lectura previa del abogado en estrados.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``rag_expediente_search``, ``case_state_reader``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill crear_resumen_ejecutivo_litigante**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.12 `detectar_riesgos_audiencia`
-
-**Para que sirve:** detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
+**Para que sirve:** Identificar riesgos tácticos y procesales específicos de una audiencia programada.
 
 **Archivo:** `agente/skills/detectar_riesgos_audiencia/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_audiencias`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de audiencia, postura de Fiscalía/defensa (hipótesis).
+- Debilidades probatorias y objetivo de audiencia.
+- Antecedentes de audiencias previas en el caso.
 
 **Que produce (salidas):**
 
-riesgo, severidad, mitigacion.
+- `riesgos`: descripción | probabilidad | impacto | mitigación sugerida.
+- `riesgo_global`: alto | medio | bajo.
+- Etiqueta: `RIESGOS AUDIENCIA PRELIMINARES`.
 
 **Pasos del skill:**
 
@@ -1377,14 +889,13 @@ riesgo, severidad, mitigacion.
 3. Proponer mitigaciones y líneas rojas para la intervención.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``revictimization_risk_checker``, ``rag_ley906_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g3:** Riesgos son hipótesis, no predicciones certas.
+- **g4:** HITL obligatorio antes de usar en audiencia o comunicar a terceros.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_riesgos_audiencia**
 
@@ -1399,40 +910,96 @@ riesgo, severidad, mitigacion.
 
 > (espacio para la abogada)
 
-#### 9.13 `identificar_objetivo_audiencia`
+#### 9.4 `generar_preguntas_testigos_peritos`
 
-**Para que sirve:** definir objetivo juridico y tactico de la audiencia para la victima.
+**Para que sirve:** Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar.
+
+**Archivo:** `agente/skills/generar_preguntas_testigos_peritos/SKILL.md`
+
+**Agentes que lo usan:** `analista_audiencias`, `analista_cronologia_hechos`
+
+**Instruccion tipo:** Preparar preguntas neutrales para testigos o peritos.
+
+**Que necesita para funcionar (entradas):**
+
+- Matriz hecho-prueba y vacíos factuales.
+- Tipo de testigo/perito y objeto de su declaración.
+- Objetivo probatorio por bloque.
+
+**Que produce (salidas):**
+
+- Preguntas: `destinatario` (testigo | perito), `pregunta`, `hecho_que_aclara`, `riesgo` (bajo | medio).
+- Etiqueta: `PREGUNTAS TERCEROS — NO VÍCTIMA`.
+
+**Pasos del skill:**
+
+1. Seleccionar testigos/peritos según hechos a esclarecer.
+2. Formular preguntas neutrales alineadas con matriz hecho-prueba.
+3. Evitar preguntas inductivas o revictimizantes.
+4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
+
+**Cuidados y riesgos:**
+
+- **g4:** HITL antes de audiencia.
+- **g8:** Aviso de revisión profesional.
+
+**Checklist de aprobacion — Skill generar_preguntas_testigos_peritos**
+
+| Decision | Marcar |
+|---|---|
+| APROBAR | [ ] |
+| AJUSTAR | [ ] |
+| ELIMINAR | [ ] |
+| PENDIENTE | [ ] |
+
+**Observaciones / cambios sugeridos:**
+
+> (espacio para la abogada)
+
+#### 9.5 `identificar_objetivo_audiencia`
+
+**Para que sirve:** Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal).
 
 **Archivo:** `agente/skills/identificar_objetivo_audiencia/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_audiencias`
 
 **Instruccion tipo:** Definir objetivo juridico y tactico de la audiencia para la victima.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de audiencia programada (legalización, formulación, juicio, etc.).
+- Etapa procesal y actuación que se discute.
+- Teoría del caso y matriz hecho-prueba (preliminar).
+- Peticiones o pretensiones ya planteadas en expediente.
 
 **Que produce (salidas):**
 
-objetivo, limites, solicitudes posibles, riesgos.
+- `tipo_audiencia` y norma Ley 906 habilitante.
+- `objetivo_juridico`: qué se pide al juez/Fiscalía según la ley.
+- `objetivo_tactico`: postura procesal (presionar recaudo, oponerse, participar, etc.).
+- `peticiones_orientativas` alineadas al objetivo.
+- `coherencia_teoria_caso`: alineado | parcial | `[PENDIENTE DE VERIFICAR]`.
+- Etiqueta: `OBJETIVO AUDIENCIA — VALIDAR CON ABOGADO`.
 
 **Pasos del skill:**
 
 1. Precisar tipo de audiencia y marco normativo Ley 906 aplicable.
 2. Definir objetivo jurídico y táctico para la representación de la víctima.
 3. Alinear objetivo con teoría del caso y prueba disponible.
-4. Profundizar análisis de «Definir objetivo juridico y tactico de la audiencia para la victima» con referencia al expediente y norma aplicable.
+4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``calendar_event_reader``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar tipo de audiencia ni competencias.
+- **g3:** Objetivo táctico separado de hechos probados.
+- **g4:** HITL antes de audiencia.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill identificar_objetivo_audiencia**
 
@@ -1447,23 +1014,26 @@ objetivo, limites, solicitudes posibles, riesgos.
 
 > (espacio para la abogada)
 
-#### 9.14 `preparar_contraargumentos`
+#### 9.6 `preparar_contraargumentos`
 
-**Para que sirve:** anticipar argumentos de defensa, Fiscalia u otros intervinientes.
+**Para que sirve:** Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial.
 
 **Archivo:** `agente/skills/preparar_contraargumentos/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_audiencias`
 
 **Instruccion tipo:** Anticipar argumentos de defensa, Fiscalia u otros intervinientes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Teoría del caso contraria (hipótesis documentada).
+- Prueba disponible y matriz hecho-prueba.
+- Tipo de audiencia u escrito objetivo.
 
 **Que produce (salidas):**
 
-argumento esperado, respuesta posible, fuente, riesgo.
+- `contraargumentos`: argumento_ajeno | réplica_sugerida | prueba_de_apoyo | riesgo.
+- Etiqueta: `HIPÓTESIS TÁCTICA — NO AFIRMAR HECHOS NO PROBADOS`.
 
 **Pasos del skill:**
 
@@ -1472,14 +1042,13 @@ argumento esperado, respuesta posible, fuente, riesgo.
 3. Priorizar contraargumentos según objetivo de audiencia.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``rag_jurisprudencia_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g3:** Réplicas basadas en hechos soportados, no en especulación.
+- **g4:** HITL obligatorio antes de usar en audiencia o memorial.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preparar_contraargumentos**
 
@@ -1494,23 +1063,29 @@ argumento esperado, respuesta posible, fuente, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.15 `preparar_guion_intervencion_oral`
+#### 9.7 `preparar_guion_intervencion_oral`
 
-**Para que sirve:** estructurar intervencion oral clara y breve.
+**Para que sirve:** Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones.
 
 **Archivo:** `agente/skills/preparar_guion_intervencion_oral/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_audiencias`
 
 **Instruccion tipo:** Estructurar intervencion oral clara y breve.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Objetivo jurídico y táctico (`identificar_objetivo_audiencia`).
+- Cronología verificada y matriz hecho-prueba.
+- Tipo de audiencia, etapa Ley 906 y tiempo estimado de intervención.
+- Contraargumentos anticipados (`preparar_contraargumentos`, si existe).
 
 **Que produce (salidas):**
 
-apertura, puntos, solicitudes, cierre, advertencias.
+- Guion por bloques: `apertura`, `nucleo_argumentativo`, `replicas_criticas`, `cierre_peticiones`.
+- Tiempo estimado por bloque (minutos).
+- Frases marcadas `REVISAR_TONO` si riesgo de revictimización.
+- Etiqueta: `GUION PRELIMINAR — ENSAYAR CON ABOGADO ANTES DE AUDIENCIA`.
 
 **Pasos del skill:**
 
@@ -1523,14 +1098,15 @@ apertura, puntos, solicitudes, cierre, advertencias.
 7. Cerrar con peticiones concretas alineadas al objetivo de audiencia.
 8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``hearing_template_loader``, ``rag_ley906_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar hechos ni normas en el argumento oral.
+- **g3:** Distinguir hechos soportados de hipótesis tácticas.
+- **g4:** HITL obligatorio; no usar guion sin ensayo del abogado.
+- **g5:** Lenguaje respetuoso; no exponer detalles gráficos innecesarios.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preparar_guion_intervencion_oral**
 
@@ -1545,23 +1121,27 @@ apertura, puntos, solicitudes, cierre, advertencias.
 
 > (espacio para la abogada)
 
-#### 9.16 `preparar_preguntas_audiencia`
+#### 9.8 `preparar_preguntas_audiencia`
 
-**Para que sirve:** sugerir preguntas para victima, testigos o peritos.
+**Para que sirve:** Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia.
 
 **Archivo:** `agente/skills/preparar_preguntas_audiencia/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_audiencias`
 
 **Instruccion tipo:** Sugerir preguntas para victima, testigos o peritos.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Objetivo de audiencia (`identificar_objetivo_audiencia`).
+- Matriz hecho-prueba y cronología verificada.
+- Tipo de audiencia y etapa Ley 906.
 
 **Que produce (salidas):**
 
-pregunta, objetivo, tipo, riesgo, fundamento.
+- Preguntas por bloque: `destinatario`, `objetivo_probatorio`, `pregunta`, `riesgo`, `alternativa_segura`.
+- Orden lógico; preguntas de alto riesgo señaladas.
+- Etiqueta: `REVISAR CON ABOGADO — ESPECIALMENTE PREGUNTAS A VÍCTIMA`.
 
 **Pasos del skill:**
 
@@ -1573,14 +1153,13 @@ pregunta, objetivo, tipo, riesgo, fundamento.
 6. Alinear preguntas con solicitudes orales previstas en la audiencia.
 7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** HITL obligatorio antes de audiencia.
+- **g5:** No revictimizar; evitar preguntas sobre vida íntima no pertinente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preparar_preguntas_audiencia**
 
@@ -1595,23 +1174,26 @@ pregunta, objetivo, tipo, riesgo, fundamento.
 
 > (espacio para la abogada)
 
-#### 9.17 `preparar_solicitudes_orales`
+#### 9.9 `preparar_solicitudes_orales`
 
-**Para que sirve:** formular solicitudes orales posibles segun etapa.
+**Para que sirve:** Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia.
 
 **Archivo:** `agente/skills/preparar_solicitudes_orales/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`, `analista_ruta_procesal_ley906`
+**Agentes que lo usan:** `analista_audiencias`, `analista_ruta_procesal`
 
 **Instruccion tipo:** Formular solicitudes orales posibles segun etapa.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Etapa procesal y tipo de audiencia.
+- Objetivo de intervención (`analizar_intervencion_victima`).
+- Hechos y prueba disponibles.
 
 **Que produce (salidas):**
 
-solicitud, fundamento, hecho soporte, prueba, riesgo.
+- Lista: `solicitud`, `fundamento_normativo`, `hecho_soporte`, `prioridad`, `riesgo`.
+- Etiqueta en ruta 906: `PRELIMINAR — DETALLE EN PREPARADOR AUDIENCIAS`.
 
 **Pasos del skill:**
 
@@ -1620,14 +1202,14 @@ solicitud, fundamento, hecho soporte, prueba, riesgo.
 3. Ordenar por prioridad y dependencias probatorias.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``citation_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Fundamentos desde RAG.
+- **g4:** HITL antes de audiencia.
+- **g5:** Solicitudes que expongan víctima: señalar riesgo.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preparar_solicitudes_orales**
 
@@ -1642,40 +1224,46 @@ solicitud, fundamento, hecho soporte, prueba, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.18 `simular_escenarios_audiencia`
+#### 9.10 `simular_escenarios_audiencia`
 
-**Para que sirve:** plantear escenarios probables y preparacion del abogado.
+**Para que sirve:** Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado.
 
 **Archivo:** `agente/skills/simular_escenarios_audiencia/SKILL.md`
 
-**Agentes que lo usan:** `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_audiencias`
 
 **Instruccion tipo:** Plantear escenarios probables y preparacion del abogado.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Objetivo de audiencia y teoría del caso.
+- Contraargumentos anticipados (`preparar_contraargumentos`, si existe).
+- Fortalezas y debilidades probatorias preliminares.
+- Postura probable de Fiscalía y defensa (hipótesis, no certezas).
 
 **Que produce (salidas):**
 
-escenario, probabilidad preliminar, impacto, respuesta sugerida.
+- Tres escenarios: `favorable`, `intermedio`, `adverso` con descripción breve.
+- `respuesta_tactica` por escenario (qué decir, qué pedir, qué evitar).
+- `senales_cambio_escenario` durante la audiencia.
+- Etiqueta: `SIMULACIÓN PRELIMINAR — NO PREDICE DECISIÓN DEL JUEZ`.
 
 **Pasos del skill:**
 
 1. Plantear escenarios favorable, intermedio y adverso probables.
 2. Definir respuesta táctica para cada escenario.
 3. Listar señales en audiencia que indiquen cambio de escenario.
-4. Profundizar análisis de «Plantear escenarios probables y preparacion del abogado» con referencia al expediente y norma aplicable.
+4. Cruzar escenario adverso con plan de contingencia procesal.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No predecir decisiones del juez ni declaraciones de testigos no documentadas.
+- **g3:** Escenarios son hipótesis tácticas, no hechos.
+- **g4:** HITL; simulación para preparación del abogado, no para la víctima sin filtro.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill simular_escenarios_audiencia**
 
@@ -1692,9 +1280,9 @@ escenario, probabilidad preliminar, impacto, respuesta sugerida.
 
 ### Categoria: Skills de calidad juridica
 
-#### 9.19 `clasificar_aprobacion_juridica`
+#### 9.11 `clasificar_aprobacion_juridica`
 
-**Para que sirve:** clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar.
+**Para que sirve:** Emitir dictamen final de aprobación sobre salidas destinadas a uso externo o comunicación con cliente.
 
 **Archivo:** `agente/skills/clasificar_aprobacion_juridica/SKILL.md`
 
@@ -1704,11 +1292,16 @@ escenario, probabilidad preliminar, impacto, respuesta sugerida.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Salida a evaluar (documento, análisis, recomendación).
+- Hallazgos de: `detectar_alucinaciones_legales`, `verificar_hechos_soportados`, `controlar_no_revictimizacion`, `controlar_confidencialidad_datos_sensibles`, tono.
+- Contexto del caso y tier del skill origen.
 
 **Que produce (salidas):**
 
-decision, razones, cambios, aprobador humano requerido.
+- `dictamen`: aprobable | con_cambios | rechazar | escalar.
+- `hallazgos_por_categoria`: factual | normativo | tono | confidencialidad | revictimización | estrategia.
+- `cambios_requeridos` (lista priorizada si aplica).
+- Etiqueta: `ULTIMO_FILTRO_SALIDA_EXTERNA`.
 
 **Pasos del skill:**
 
@@ -1716,14 +1309,12 @@ decision, razones, cambios, aprobador humano requerido.
 2. Aplicar checklist de riesgos (alucinación, confidencialidad, tono, revictimización).
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``approval_gate_decision``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** Nunca aprobar automáticamente con hallazgos críticos sin marcar `con_cambios` o `rechazar`.
+- **g8:** Aviso de revisión profesional; dictamen preliminar de la IA.
 
 **Checklist de aprobacion — Skill clasificar_aprobacion_juridica**
 
@@ -1738,9 +1329,9 @@ decision, razones, cambios, aprobador humano requerido.
 
 > (espacio para la abogada)
 
-#### 9.20 `controlar_confidencialidad_datos_sensibles`
+#### 9.12 `controlar_confidencialidad_datos_sensibles`
 
-**Para que sirve:** detectar datos sensibles o innecesarios.
+**Para que sirve:** Detectar y mitigar exposición innecesaria de datos personales sensibles en salidas del sistema.
 
 **Archivo:** `agente/skills/controlar_confidencialidad_datos_sensibles/SKILL.md`
 
@@ -1750,11 +1341,14 @@ decision, razones, cambios, aprobador humano requerido.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto o documento a revisar.
+- Destinatario previsto (interno, cliente, juzgado, tercero).
 
 **Que produce (salidas):**
 
-dato, riesgo, accion, anonimizar si aplica.
+- `datos_sensibles_detectados`: tipo | fragmento | necesidad (necesario | reducible | eliminar).
+- `recomendacion`: publicar | redactar | solo_abogado.
+- Etiqueta: `CONTROL LEY 1581 / DATOS SENSIBLES`.
 
 **Pasos del skill:**
 
@@ -1762,14 +1356,13 @@ dato, riesgo, accion, anonimizar si aplica.
 2. Proponer redacción alternativa o anonimización.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``pii_detector``, ``sensitive_data_classifier``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g6:** Minimización de datos por defecto.
+- **g4:** HITL antes de compartir externamente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill controlar_confidencialidad_datos_sensibles**
 
@@ -1784,9 +1377,9 @@ dato, riesgo, accion, anonimizar si aplica.
 
 > (espacio para la abogada)
 
-#### 9.21 `controlar_no_revictimizacion`
+#### 9.13 `controlar_no_revictimizacion`
 
-**Para que sirve:** revisar que la salida no culpe ni exponga indebidamente a la victima.
+**Para que sirve:** Detectar lenguaje, preguntas o estrategias que culpen, minimicen o expongan indebidamente a la víctima; proponer reformulaciones.
 
 **Archivo:** `agente/skills/controlar_no_revictimizacion/SKILL.md`
 
@@ -1796,11 +1389,16 @@ dato, riesgo, accion, anonimizar si aplica.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto a revisar (memorial, guion, preguntas, resumen cliente, teoría del caso).
+- Tipo de audiencia o documento y destinatario (juez, víctima, Fiscalía).
+- Contexto del delito (violencia sexual, intrafamiliar, etc.) si consta.
 
 **Que produce (salidas):**
 
-fragmento, riesgo, alternativa.
+- `hallazgos`: lista con `fragmento`, `tipo_riesgo` (culpabilización | minimización | exposición_gráfica | dato_sensible_innecesario | pregunta_inductiva), `severidad` (alta | media | baja).
+- `reformulaciones_sugeridas` por hallazgo.
+- `riesgo_residual` y decisión recomendada: `ajustar` | `escalar_abogado` | `sin_hallazgos`.
+- Etiqueta: `REVISIÓN REVICTIMIZACIÓN — NO ENVIAR SIN ABOGADO`.
 
 **Pasos del skill:**
 
@@ -1811,14 +1409,15 @@ fragmento, riesgo, alternativa.
 5. Documentar riesgos residuales para decisión del abogado.
 6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``revictimization_risk_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar conductas de la víctima ni contexto no documentado.
+- **g5:** Prohibido sugerir que la víctima “provocó”, “consintió tácitamente” o “debió denunciar antes” sin prueba.
+- **g6:** No reproducir detalles gráficos innecesarios en reformulaciones.
+- **g4:** HITL obligatorio; no aprobar salida con hallazgos de severidad alta.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill controlar_no_revictimizacion**
 
@@ -1833,23 +1432,26 @@ fragmento, riesgo, alternativa.
 
 > (espacio para la abogada)
 
-#### 9.22 `controlar_separacion_hecho_inferencia`
+#### 9.14 `controlar_separacion_hecho_inferencia`
 
-**Para que sirve:** verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
+**Para que sirve:** Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida.
 
 **Archivo:** `agente/skills/controlar_separacion_hecho_inferencia/SKILL.md`
 
-**Agentes que lo usan:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto del memorial, petición o análisis.
+- Matriz hecho-fuente o cronología (si existe).
 
 **Que produce (salidas):**
 
-problema, fragmento, correccion sugerida.
+- `fragmentos`: texto | clasificación (confirmado | narrado | inferido | pendiente) | observación.
+- `correcciones_sugeridas` para separar hecho de argumentación.
+- Etiqueta: `CONTROL HECHO-INFERENCIA`.
 
 **Pasos del skill:**
 
@@ -1858,14 +1460,13 @@ problema, fragmento, correccion sugerida.
 3. Exigir corrección o marcación antes de uso externo.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``source_reference_validator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g3:** No reclasificar hecho confirmado sin fuente.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill controlar_separacion_hecho_inferencia**
 
@@ -1880,23 +1481,75 @@ problema, fragmento, correccion sugerida.
 
 > (espacio para la abogada)
 
-#### 9.23 `controlar_tono_riesgo_reputacional`
+#### 9.15 `controlar_tono_juridico_documento`
 
-**Para que sirve:** revisar tono profesional y evitar lenguaje riesgoso.
+**Para que sirve:** Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo.
+
+**Archivo:** `agente/skills/controlar_tono_juridico_documento/SKILL.md`
+
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_calidad_juridica`
+
+**Instruccion tipo:** Asegurar tono formal, preciso, no agresivo y no especulativo.
+
+**Que necesita para funcionar (entradas):**
+
+- Borrador de memorial, petición o solicitud.
+- Destinatario (juez, Fiscalía, autoridad administrativa).
+
+**Que produce (salidas):**
+
+- `hallazgos_tono`: agresivo | coloquial | emocional_excesivo | procesal_inadecuado | ok.
+- `reformulaciones` sugeridas por fragmento.
+- Etiqueta: `CONTROL TONO JURÍDICO`.
+
+**Pasos del skill:**
+
+1. Revisar borrador completo con criterios de tono formal y preciso.
+2. Detectar agresividad, especulación o lenguaje no profesional.
+3. Proponer correcciones manteniendo contenido jurídico.
+4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
+
+**Cuidados y riesgos:**
+
+- **g5:** Tono respetuoso con la víctima y las autoridades.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
+
+**Checklist de aprobacion — Skill controlar_tono_juridico_documento**
+
+| Decision | Marcar |
+|---|---|
+| APROBAR | [ ] |
+| AJUSTAR | [ ] |
+| ELIMINAR | [ ] |
+| PENDIENTE | [ ] |
+
+**Observaciones / cambios sugeridos:**
+
+> (espacio para la abogada)
+
+#### 9.16 `controlar_tono_riesgo_reputacional`
+
+**Para que sirve:** Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario.
 
 **Archivo:** `agente/skills/controlar_tono_riesgo_reputacional/SKILL.md`
 
-**Agentes que lo usan:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Revisar tono profesional y evitar lenguaje riesgoso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto destinado a terceros (cliente, prensa, redes, contraparte no procesal).
+- Contexto del caso y perfil público de las partes.
 
 **Que produce (salidas):**
 
-fragmento, riesgo, sugerencia.
+- `riesgos_reputacionales`: exposición_mediática | dato_sensible | acusación_pública | ok.
+- `mitigaciones` recomendadas.
+- Etiqueta: `SOLO_ABOGADO` si hay riesgo alto.
 
 **Pasos del skill:**
 
@@ -1905,14 +1558,13 @@ fragmento, riesgo, sugerencia.
 3. Sugerir ajustes de redacción profesional.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``tone_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g6:** No amplificar datos sensibles en comunicaciones.
+- **g4:** HITL obligatorio antes de comunicación externa.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill controlar_tono_riesgo_reputacional**
 
@@ -1927,9 +1579,9 @@ fragmento, riesgo, sugerencia.
 
 > (espacio para la abogada)
 
-#### 9.24 `detectar_alucinaciones_legales`
+#### 9.17 `detectar_alucinaciones_legales`
 
-**Para que sirve:** detectar fuentes, hechos, conclusiones o citas inventadas.
+**Para que sirve:** Detectar citas normativas, sentencias, radicados o hechos inventados o no localizables en fuentes verificables.
 
 **Archivo:** `agente/skills/detectar_alucinaciones_legales/SKILL.md`
 
@@ -1939,11 +1591,16 @@ fragmento, riesgo, sugerencia.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Documento, análisis o recomendación a revisar.
+- Referencias citadas (artículos, sentencias, radicados, folios).
+- Acceso RAG: normativo, jurisprudencia, expediente.
 
 **Que produce (salidas):**
 
-item sospechoso, razon, severidad, accion.
+- `referencias_sospechosas`: lista con `tipo` (norma | sentencia | radicado | hecho), `fragmento`, `estado` (inventada | no_localizada | verificada | pendiente).
+- `conteo`: verificadas / sospechosas / pendientes.
+- `recomendacion`: `escalar_revision` | `corregir_antes_aprobacion` | `sin_hallazgos`.
+- Etiqueta: `DETECCIÓN ALUCINACIONES — NO ES DICTAMEN DE APROBACIÓN`.
 
 **Pasos del skill:**
 
@@ -1951,14 +1608,14 @@ item sospechoso, razon, severidad, accion.
 2. Marcar referencias inventadas o no localizadas en RAG.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_source_validator``, ``citation_checker``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar verificaciones; si RAG no resuelve, marcar `no_localizada`.
+- **g3:** Distinguir cita incorrecta de hecho no soportado.
+- **g4:** HITL antes de marcar referencia como inventada en salida externa.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_alucinaciones_legales**
 
@@ -1973,9 +1630,58 @@ item sospechoso, razon, severidad, accion.
 
 > (espacio para la abogada)
 
-#### 9.25 `revisar_coherencia_estrategica`
+#### 9.18 `detectar_riesgo_revictimizacion`
 
-**Para que sirve:** asegurar que documento o recomendacion sea coherente con la estrategia aprobada.
+**Para que sirve:** Alertar tempranamente sobre riesgo de revictimización en materiales o estrategia propuesta.
+
+**Archivo:** `agente/skills/detectar_riesgo_revictimizacion/SKILL.md`
+
+**Agentes que lo usan:** `analista_representacion_victimas`, `analista_calidad_juridica`
+
+**Instruccion tipo:** Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
+
+**Que necesita para funcionar (entradas):**
+
+- Texto o estrategia a evaluar (preguntas, teoría, resumen).
+- Tipo de delito y contexto (si consta).
+
+**Que produce (salidas):**
+
+- `nivel_riesgo`: alto | medio | bajo | no_detectado.
+- `indicadores` detectados (breve lista).
+- `derivar_a`: `controlar_no_revictimizacion` si riesgo medio/alto.
+
+**Pasos del skill:**
+
+1. Analizar preguntas, estrategias y lenguaje propuestos.
+2. Identificar conductas o formulaciones que revictimicen.
+3. Proponer alternativas respetuosas y centradas en derechos.
+4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
+
+**Cuidados y riesgos:**
+
+- **g5:** Priorizar dignidad y derechos de la víctima.
+- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **g8:** Aviso de revisión profesional.
+
+**Checklist de aprobacion — Skill detectar_riesgo_revictimizacion**
+
+| Decision | Marcar |
+|---|---|
+| APROBAR | [ ] |
+| AJUSTAR | [ ] |
+| ELIMINAR | [ ] |
+| PENDIENTE | [ ] |
+
+**Observaciones / cambios sugeridos:**
+
+> (espacio para la abogada)
+
+#### 9.19 `revisar_coherencia_estrategica`
+
+**Para que sirve:** Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivos aprobados de la víctima.
 
 **Archivo:** `agente/skills/revisar_coherencia_estrategica/SKILL.md`
 
@@ -1985,11 +1691,14 @@ item sospechoso, razon, severidad, accion.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Documento o recomendación a revisar.
+- Teoría del caso y objetivos aprobados (si constan).
+- Actuaciones previas del expediente.
 
 **Que produce (salidas):**
 
-coherente, inconsistencias, ajustes.
+- Coherencia: alineado | desalineado | `[PENDIENTE DE VERIFICAR]`.
+- Contradicciones detectadas y recomendación de ajuste o escalamiento.
 
 **Pasos del skill:**
 
@@ -1998,14 +1707,12 @@ coherente, inconsistencias, ajustes.
 3. Recomendar alineación o escalamiento estratégico.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``strategy_consistency_checker``, ``case_state_reader``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** No aprobar salida desalineada para uso externo.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill revisar_coherencia_estrategica**
 
@@ -2020,23 +1727,26 @@ coherente, inconsistencias, ajustes.
 
 > (espacio para la abogada)
 
-#### 9.26 `verificar_citas_normativas`
+#### 9.20 `verificar_citas_normativas`
 
-**Para que sirve:** verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
+**Para que sirve:** Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso.
 
 **Archivo:** `agente/skills/verificar_citas_normativas/SKILL.md`
 
-**Agentes que lo usan:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Lista de citas normativas en el documento.
+- Contexto del caso (penal-víctimas Colombia).
 
 **Que produce (salidas):**
 
-cita, estado, fuente, error, correccion sugerida.
+- Por cita: `referencia`, `existe_en_rag` (sí | no | pendiente), `vigente` (sí | no | pendiente), `pertinencia` (alta | media | baja).
+- `citas_a_corregir` priorizadas.
+- Etiqueta: `VERIFICACIÓN NORMATIVA — NO ES APROBACIÓN FINAL`.
 
 **Pasos del skill:**
 
@@ -2044,14 +1754,13 @@ cita, estado, fuente, error, correccion sugerida.
 2. Verificar vigencia y pertinencia al caso penal-víctimas.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``citation_checker``, ``rag_normativo_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No afirmar vigencia sin verificar en RAG.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill verificar_citas_normativas**
 
@@ -2066,23 +1775,25 @@ cita, estado, fuente, error, correccion sugerida.
 
 > (espacio para la abogada)
 
-#### 9.27 `verificar_jurisprudencia`
+#### 9.21 `verificar_jurisprudencia`
 
-**Para que sirve:** revisar sentencias, radicados, fechas y organos judiciales.
+**Para que sirve:** Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento.
 
 **Archivo:** `agente/skills/verificar_jurisprudencia/SKILL.md`
 
-**Agentes que lo usan:** `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_calidad_juridica`, `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Revisar sentencias, radicados, fechas y organos judiciales.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Citas jurisprudenciales en el documento.
+- Tema jurídico del argumento donde se citan.
 
 **Que produce (salidas):**
 
-jurisprudencia, estado verificacion, fuente, riesgo.
+- Por sentencia: `referencia`, `localizada` (sí | no | pendiente), `pertinencia`, `extracto_relevante` (si aplica).
+- Etiqueta: `VERIFICACIÓN JURISPRUDENCIAL`.
 
 **Pasos del skill:**
 
@@ -2091,14 +1802,13 @@ jurisprudencia, estado verificacion, fuente, riesgo.
 3. Marcar jurisprudencia no verificada como pendiente.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``citation_checker``, ``rag_jurisprudencia_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar sentencias ni extractos.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill verificar_jurisprudencia**
 
@@ -2115,23 +1825,25 @@ jurisprudencia, estado verificacion, fuente, riesgo.
 
 ### Categoria: Skills de evidencia y soporte probatorio
 
-#### 9.28 `clasificar_tipo_prueba`
+#### 9.22 `clasificar_tipo_prueba`
 
-**Para que sirve:** clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
+**Para que sirve:** Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.).
 
 **Archivo:** `agente/skills/clasificar_tipo_prueba/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_evidencia`
 
 **Instruccion tipo:** Clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Inventario de evidencia (`inventariar_evidencia`).
+- Descripción y origen de cada elemento.
 
 **Que produce (salidas):**
 
-item, tipo, justificacion, riesgo.
+- Por ítem: `id`, `tipo_prueba`, `fuerza_preliminar`, `observaciones`.
+- Etiqueta: `CLASIFICACIÓN PROBATORIA PRELIMINAR`.
 
 **Pasos del skill:**
 
@@ -2140,14 +1852,14 @@ item, tipo, justificacion, riesgo.
 3. Señalar elementos sin clasificación definitiva como pendientes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``metadata_extractor``, ``document_parser_extract_text``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar tipo ni origen.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill clasificar_tipo_prueba**
 
@@ -2162,23 +1874,26 @@ item, tipo, justificacion, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.29 `construir_matriz_hecho_prueba`
+#### 9.23 `construir_matriz_hecho_prueba`
 
-**Para que sirve:** relacionar hechos con pruebas existentes y faltantes.
+**Para que sirve:** Vincular hechos relevantes con prueba existente, faltante o en trámite, priorizando brechas críticas.
 
 **Archivo:** `agente/skills/construir_matriz_hecho_prueba/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `analista_tipicidad_y_responsabilidad_penal`, `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_evidencia`, `analista_responsabilidad_tipicidad`, `analista_audiencias`
 
 **Instruccion tipo:** Relacionar hechos con pruebas existentes y faltantes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hechos relevantes de la teoría del caso (cronología verificada).
+- Inventario probatorio disponible.
+- Objetivo: tipicidad | audiencia | memorial.
 
 **Que produce (salidas):**
 
-matriz hecho/prueba/fuente/fortaleza/brecha/riesgo/accion.
+- Matriz: `hecho`, `prueba_existente`, `prueba_faltante`, `en_tramite`, `fortaleza`, `brecha`, `accion_sugerida`.
+- Brechas priorizadas que afectan tipicidad o audiencia.
 
 **Pasos del skill:**
 
@@ -2187,14 +1902,15 @@ matriz hecho/prueba/fuente/fortaleza/brecha/riesgo/accion.
 3. Priorizar brechas que afecten tipicidad o audiencia.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``source_reference_validator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar pruebas ni estados “en trámite” sin constancia.
+- **g3:** Hecho sin prueba = brecha, no hecho probado.
+- **g4:** Matriz para memorial requiere revisión humana.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill construir_matriz_hecho_prueba**
 
@@ -2209,23 +1925,29 @@ matriz hecho/prueba/fuente/fortaleza/brecha/riesgo/accion.
 
 > (espacio para la abogada)
 
-#### 9.30 `controlar_cadena_custodia_preliminar`
+#### 9.24 `controlar_cadena_custodia_preliminar`
 
-**Para que sirve:** alertar si la evidencia puede requerir cadena de custodia.
+**Para que sirve:** Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad.
 
 **Archivo:** `agente/skills/controlar_cadena_custodia_preliminar/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_evidencia`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Alertar si la evidencia puede requerir cadena de custodia.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Inventario de evidencia (`inventariar_evidencia`) con origen, fecha y custodio.
+- Protocolo de recolección documentado (si existe).
+- Tipo de prueba: biológica, digital, arma, documento original, etc.
 
 **Que produce (salidas):**
 
-evidencia, riesgo, accion sugerida, necesidad de experto.
+- `requiere_cadena_formal`: sí | no | `[PENDIENTE DE VERIFICAR]`.
+- `registro_custodia`: quién recolectó, cuándo, dónde, traslados, almacenamiento.
+- `rupturas_detectadas`: lista con impacto en admisibilidad (alto | medio | bajo).
+- `medidas_correctivas`: perito, oficio, nueva copia forense, etc.
+- Etiqueta: `CUSTODIA PRELIMINAR — NO AFIRMAR ADMISIBILIDAD SIN PERITO/AUTORIDAD`.
 
 **Pasos del skill:**
 
@@ -2237,14 +1959,15 @@ evidencia, riesgo, accion sugerida, necesidad de experto.
 6. Proponer medidas correctivas sin alterar el elemento probatorio.
 7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``chain_of_custody_logger``, ``metadata_extractor``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar custodios, fechas ni protocolos.
+- **g3:** Ruptura documentada ≠ conclusión de inadmisibilidad automática.
+- **g4:** HITL antes de descartar evidencia en estrategia.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill controlar_cadena_custodia_preliminar**
 
@@ -2259,40 +1982,45 @@ evidencia, riesgo, accion sugerida, necesidad de experto.
 
 > (espacio para la abogada)
 
-#### 9.31 `crear_plan_recaudo_probatorio`
+#### 9.25 `crear_plan_recaudo_probatorio`
 
-**Para que sirve:** proponer plan para obtener pruebas faltantes.
+**Para que sirve:** Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal.
 
 **Archivo:** `agente/skills/crear_plan_recaudo_probatorio/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+**Agentes que lo usan:** `analista_evidencia`, `analista_representacion_victimas`
 
 **Instruccion tipo:** Proponer plan para obtener pruebas faltantes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Brechas probatorias (`detectar_brechas_probatorias`) o matriz hecho-prueba.
+- Etapa procesal y plazos de recaudo disponibles.
+- Recursos del despacho y acceso a víctima/testigos.
 
 **Que produce (salidas):**
 
-prueba requerida, fuente, medio, prioridad, responsable, riesgo.
+- Plan por ítem: `prueba_faltante`, `hecho_que_sostiene`, `via_obtencion` (oficio | solicitud | peritaje | declaración), `responsable`, `plazo`, `urgencia`.
+- Orden por impacto procesal (alto → bajo).
+- Etiqueta: `PLAN RECAUDO — EJECUCIÓN CON APROBACIÓN ABOGADO`.
 
 **Pasos del skill:**
 
 1. Listar pruebas faltantes críticas según matriz hecho-prueba.
 2. Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).
 3. Ordenar por impacto procesal y urgencia.
-4. Profundizar análisis de «Proponer plan para obtener pruebas faltantes» con referencia al expediente y norma aplicable.
+4. Señalar dependencias (custodia antes de peritaje, etc.).
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``task_manager_create``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar pruebas ya existentes en expediente.
+- **g4:** HITL antes de oficios o contacto con víctima para recaudo.
+- **g5:** Minimizar exposición de la víctima en vías de obtención innecesarias.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill crear_plan_recaudo_probatorio**
 
@@ -2307,23 +2035,26 @@ prueba requerida, fuente, medio, prioridad, responsable, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.32 `detectar_brechas_probatorias`
+#### 9.26 `detectar_brechas_probatorias`
 
-**Para que sirve:** identificar hechos relevantes sin soporte suficiente.
+**Para que sirve:** Identificar hechos relevantes sin prueba suficiente en el expediente.
 
 **Archivo:** `agente/skills/detectar_brechas_probatorias/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_evidencia`, `analista_representacion_victimas`
 
 **Instruccion tipo:** Identificar hechos relevantes sin soporte suficiente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Matriz hecho-prueba (`construir_matriz_hecho_prueba`).
+- Inventario de evidencia (`inventariar_evidencia`).
 
 **Que produce (salidas):**
 
-brecha, impacto, prueba sugerida, prioridad.
+- `brechas`: hecho | prueba_ausente_o_débil | impacto (alto | medio | bajo).
+- `prioridad_recaudo` ordenada.
+- Etiqueta: `BRECHAS PROBATORIAS PRELIMINARES`.
 
 **Pasos del skill:**
 
@@ -2332,14 +2063,14 @@ brecha, impacto, prueba sugerida, prioridad.
 3. Proponer acciones de cierre de brecha.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``case_state_reader``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No asumir prueba existente sin constar en inventario.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_brechas_probatorias**
 
@@ -2354,40 +2085,48 @@ brecha, impacto, prueba sugerida, prioridad.
 
 > (espacio para la abogada)
 
-#### 9.33 `evaluar_suficiencia_probatoria`
+#### 9.27 `evaluar_suficiencia_probatoria`
 
-**Para que sirve:** evaluar preliminarmente fuerza de soporte probatorio.
+**Para que sirve:** Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena.
 
 **Archivo:** `agente/skills/evaluar_suficiencia_probatoria/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+**Agentes que lo usan:** `analista_evidencia`, `analista_representacion_victimas`
 
 **Instruccion tipo:** Evaluar preliminarmente fuerza de soporte probatorio.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Matriz hecho-prueba (`construir_matriz_hecho_prueba`).
+- Inventario de evidencia y clasificación de prueba.
+- Elementos del tipo penal (preliminar, si existen).
 
 **Que produce (salidas):**
 
-hecho, fortaleza, debilidad, contradiccion, necesidad adicional.
+- Por elemento/hecho: `fuerza` (directa | indirecta | circunstancial | ausente).
+- `suficiencia_global_preliminar`: robusta | media | débil | no_evaluable.
+- Elementos críticos sin soporte adecuado.
+- Advertencia: `NO ES CERTEZA JUDICIAL NI DICTAMEN DE CULPABILIDAD`.
+- Etiqueta: `ANÁLISIS PRELIMINAR PROBATORIO`.
 
 **Pasos del skill:**
 
 1. Evaluar fuerza preliminar del soporte (directo, indirecto, circunstancial).
 2. Identificar elementos del tipo penal con soporte débil o ausente.
 3. Conclusión preliminar de suficiencia sin afirmar certeza judicial.
-4. Profundizar análisis de «Evaluar preliminarmente fuerza de soporte probatorio» con referencia al expediente y norma aplicable.
+4. Relacionar debilidades probatorias con plan de recaudo sugerido.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar pruebas ni testimonios.
+- **g3:** Suficiencia preliminar ≠ más allá de duda razonable demostrado.
+- **g5:** No usar lenguaje que culpe a la víctima por “falta de prueba”.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill evaluar_suficiencia_probatoria**
 
@@ -2402,70 +2141,25 @@ hecho, fortaleza, debilidad, contradiccion, necesidad adicional.
 
 > (espacio para la abogada)
 
-#### 9.34 `generar_preguntas_testigos_peritos`
+#### 9.28 `inventariar_evidencia`
 
-**Para que sirve:** preparar preguntas neutrales para testigos o peritos.
-
-**Archivo:** `agente/skills/generar_preguntas_testigos_peritos/SKILL.md`
-
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`, `preparador_estrategico_audiencias_penales`
-
-**Instruccion tipo:** Preparar preguntas neutrales para testigos o peritos.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-pregunta, objetivo, hecho que busca probar, riesgo de induccion.
-
-**Pasos del skill:**
-
-1. Seleccionar testigos/peritos según hechos a esclarecer.
-2. Formular preguntas neutrales alineadas con matriz hecho-prueba.
-3. Evitar preguntas inductivas o revictimizantes.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``sin_herramientas_obligatorias``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill generar_preguntas_testigos_peritos**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.35 `inventariar_evidencia`
-
-**Para que sirve:** crear inventario de todos los elementos disponibles.
+**Para que sirve:** Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar.
 
 **Archivo:** `agente/skills/inventariar_evidencia/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_evidencia`
 
 **Instruccion tipo:** Crear inventario de todos los elementos disponibles.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Documentos, audios, mensajes, objetos aportados o en expediente.
+- Metadatos disponibles (fecha, origen, formato).
 
 **Que produce (salidas):**
 
-evidencia, tipo, origen, fecha, custodia, estado, ubicacion.
+- Inventario numerado: `id`, `tipo`, `descripción`, `origen`, `fecha`, `ubicación_custodia`, `hash` (si aplica).
+- Elementos sin clasificar marcados `[PENDIENTE DE VERIFICAR]`.
 
 **Pasos del skill:**
 
@@ -2474,14 +2168,15 @@ evidencia, tipo, origen, fecha, custodia, estado, ubicacion.
 3. Emitir inventario numerado para el expediente.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``evidence_vault_store``, ``metadata_extractor``, ``file_hash_generator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar elementos ni hashes.
+- **g6:** Minimizar exposición de datos sensibles en descripciones.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill inventariar_evidencia**
 
@@ -2496,23 +2191,30 @@ evidencia, tipo, origen, fecha, custodia, estado, ubicacion.
 
 > (espacio para la abogada)
 
-#### 9.36 `preservar_evidencia_digital`
+#### 9.29 `preservar_evidencia_digital`
 
-**Para que sirve:** definir medidas para proteger evidencia digital sin alterarla.
+**Para que sirve:** Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar.
 
 **Archivo:** `agente/skills/preservar_evidencia_digital/SKILL.md`
 
-**Agentes que lo usan:** `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_evidencia`
 
 **Instruccion tipo:** Definir medidas para proteger evidencia digital sin alterarla.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Archivos digitales: chats, correos, fotos, videos, audios, capturas.
+- Origen (dispositivo, cuenta, fecha aproximada de obtención).
+- Urgencia de pérdida (plataforma que borra, dispositivo compartido, etc.).
 
 **Que produce (salidas):**
 
-item, accion preservacion, riesgo, responsable.
+- `hash_integridad` por archivo (algoritmo y valor).
+- `metadatos`: nombre, tamaño, fecha extracción, herramienta usada.
+- `copia_resguardo`: ubicación segura y custodio designado.
+- `cadena_preliminar`: accesos autorizados registrados.
+- `escalar`: perito | autoridad | ninguno.
+- Etiqueta: `NO MODIFICAR ORIGINAL — COPIA FORENSE SI ES CRÍTICO`.
 
 **Pasos del skill:**
 
@@ -2523,14 +2225,15 @@ item, accion preservacion, riesgo, responsable.
 5. Escalar a perito o autoridad si la evidencia es crítica para el caso.
 6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``file_hash_generator``, ``metadata_extractor``, ``evidence_vault_store``, ``chain_of_custody_logger``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar hashes ni metadatos.
+- **g6:** Minimizar copias innecesarias de material sensible.
+- **g4:** HITL antes de compartir evidencia digital fuera del despacho.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preservar_evidencia_digital**
 
@@ -2547,23 +2250,27 @@ item, accion preservacion, riesgo, responsable.
 
 ### Categoria: Skills de hechos y cronologia
 
-#### 9.37 `clasificar_fuente_factual`
+#### 9.30 `clasificar_fuente_factual`
 
-**Para que sirve:** distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.
+**Para que sirve:** Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados.
 
 **Archivo:** `agente/skills/clasificar_fuente_factual/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`
+**Agentes que lo usan:** `analista_cronologia_hechos`
 
 **Instruccion tipo:** Distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto del turno: consulta del abogado, relato de víctima, extractos documentales.
+- Documentos o fragmentos disponibles en el expediente (denuncia, informe de policía, actuaciones).
+- Referencias de fuente cuando existan (folio, fecha, remitente, timestamp).
 
 **Que produce (salidas):**
 
-clasificacion por hecho y nivel de soporte.
+- Matriz hecho-fuente preliminar por afirmación: `hecho`, `tipo_fuente` (`documento` | `relato_victima` | `relato_tercero` | `autoridad` | `inferencia` | `pendiente`), `nivel_soporte` (`confirmado` | `narrado` | `inferido` | `sin_fuente`).
+- Lista de afirmaciones marcadas `[PENDIENTE DE VERIFICAR]`.
+- Nota explícita: no es cronología ni conclusión de tipicidad.
 
 **Pasos del skill:**
 
@@ -2574,14 +2281,17 @@ clasificacion por hecho y nivel de soporte.
 5. Señalar afirmaciones sin fuente para verificación humana.
 6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``source_reference_validator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar fuentes, folios ni documentos no aportados.
+- **g2:** Si no hay insumos factuales, pedir relato o documentos antes de clasificar.
+- **g3:** Obligatorio: separar confirmado, narrado, inferido y pendiente en columnas distintas.
+- **g4:** La matriz es insumo interno; no usar como memorial ni escrito externo sin revisión.
+- **g5:** Al clasificar relatos de víctima, no usar lenguaje que implique culpa o incredibilidad.
+- **g6:** Minimizar datos sensibles en la matriz; referir al documento fuente cuando baste.
+- **g8:** Cerrar con aviso de revisión profesional antes de usar en estrategia o redacción.
 
 **Checklist de aprobacion — Skill clasificar_fuente_factual**
 
@@ -2596,40 +2306,49 @@ clasificacion por hecho y nivel de soporte.
 
 > (espacio para la abogada)
 
-#### 9.38 `construir_cronologia_penal`
+#### 9.31 `construir_cronologia_penal`
 
-**Para que sirve:** ordenar hechos en linea de tiempo.
+**Para que sirve:** Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos.
 
 **Archivo:** `agente/skills/construir_cronologia_penal/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_audiencias`
 
 **Instruccion tipo:** Ordenar hechos en linea de tiempo.
 
 **Que necesita para funcionar (entradas):**
 
-hechos extraidos, documentos, fechas, actores.
+- Hechos extraídos con referencia de fuente (`extraer_hechos_relevantes`).
+- Matriz hecho-fuente (si existe).
+- Mapa de actores (`identificar_actores_y_roles`).
+- Fechas/horas explícitas o aproximadas en documentos y relatos.
 
 **Que produce (salidas):**
 
-cronologia ordenada, hechos sin fecha, contradicciones temporales.
+- Cronología ordenada: `fecha_hora`, `evento`, `actores`, `nivel_soporte`, `fuente`.
+- Eventos sin fecha exacta (cola o rango estimado marcado `[PENDIENTE DE VERIFICAR]`).
+- Inconsistencias temporales señaladas (no resueltas).
+- Tres bloques separados: hechos confirmados | narrados | inferidos.
 
 **Pasos del skill:**
 
 1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
 2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
 3. Marcar inconsistencias entre versiones.
-4. Profundizar análisis de «Ordenar hechos en linea de tiempo» con referencia al expediente y norma aplicable.
+4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``date_extractor``, ``entity_extractor``, ``case_state_writer``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar fechas, horas ni eventos para completar la línea de tiempo.
+- **g2:** Sin fuentes con fecha, dejar evento en cola sin fecha; no inferir secuencia cerrada.
+- **g3:** Obligatorio: tres bloques (confirmado / narrado / inferido) en la salida final.
+- **g4:** Cronología para memorial o audiencia requiere revisión del abogado antes de uso externo.
+- **g5:** No ordenar relatos de víctima de forma que implique incredibilidad o culpa.
+- **g6:** Minimizar datos sensibles; referir a fuente documental cuando baste.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill construir_cronologia_penal**
 
@@ -2644,23 +2363,27 @@ cronologia ordenada, hechos sin fecha, contradicciones temporales.
 
 > (espacio para la abogada)
 
-#### 9.39 `crear_matriz_hecho_fuente`
+#### 9.32 `crear_matriz_hecho_fuente`
 
-**Para que sirve:** relacionar cada hecho con su fuente exacta.
+**Para que sirve:** Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte.
 
 **Archivo:** `agente/skills/crear_matriz_hecho_fuente/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Relacionar cada hecho con su fuente exacta.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Lista de hechos extraídos (`extraer_hechos_relevantes`).
+- Expediente y documentos disponibles.
+- Clasificación preliminar de fuentes (si viene del coordinador).
 
 **Que produce (salidas):**
 
-tabla hecho/fuente/tipo/nivel de soporte/pendientes.
+- Tabla: `hecho`, `fuente_exacta`, `tipo_fuente`, `nivel_soporte`, `pendiente` (sí/no).
+- Conteo de hechos sin fuente.
+- Lista de fuentes a solicitar al abogado.
 
 **Pasos del skill:**
 
@@ -2669,14 +2392,17 @@ tabla hecho/fuente/tipo/nivel de soporte/pendientes.
 3. Señalar hechos sin fuente como pendientes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``source_reference_validator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar folios, timestamps ni documentos.
+- **g2:** Sin acceso al documento citado, marcar fuente `[PENDIENTE DE VERIFICAR]`.
+- **g3:** Un hecho por fila; no mezclar inferencias con hechos documentados.
+- **g4:** Matriz usada en escrito requiere revisión humana.
+- **g6:** No exponer PII innecesaria en la columna hecho.
+- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill crear_matriz_hecho_fuente**
 
@@ -2691,23 +2417,27 @@ tabla hecho/fuente/tipo/nivel de soporte/pendientes.
 
 > (espacio para la abogada)
 
-#### 9.40 `detectar_contradicciones_factuales`
+#### 9.33 `detectar_contradicciones_factuales`
 
-**Para que sirve:** encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
+**Para que sirve:** Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad.
 
 **Archivo:** `agente/skills/detectar_contradicciones_factuales/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Cronología o matriz hecho-fuente.
+- Versiones de víctima, testigos, informes de autoridad, documentos.
+- Mapa de actores.
 
 **Que produce (salidas):**
 
-contradiccion, fuentes en tension, impacto, pregunta de aclaracion.
+- Registro por contradicción: `hecho_en_tension`, `fuente_A`, `fuente_B`, `tipo` (fecha | monto | actor | secuencia | otro), `impacto` (alto | medio | bajo).
+- Preguntas de aclaración sugeridas (no inductivas).
+- Nota: contradicción documentada ≠ hecho desmentido.
 
 **Pasos del skill:**
 
@@ -2716,14 +2446,15 @@ contradiccion, fuentes en tension, impacto, pregunta de aclaracion.
 3. Sugerir preguntas de aclaración no inductivas.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``entity_extractor``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar versiones ni citar documentos no aportados.
+- **g3:** Contradicción es tensión entre fuentes, no conclusión de falsedad.
+- **g4:** No comunicar contradicciones a contraparte sin revisión del abogado.
+- **g5:** No formular contradicciones en lenguaje que culpe a la víctima (ej. “la víctima miente”).
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_contradicciones_factuales**
 
@@ -2738,23 +2469,28 @@ contradiccion, fuentes en tension, impacto, pregunta de aclaracion.
 
 > (espacio para la abogada)
 
-#### 9.41 `detectar_vacios_factuales`
+#### 9.34 `detectar_vacios_factuales`
 
-**Para que sirve:** identificar lo que falta para comprender o probar el caso.
+**Para que sirve:** Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero.
 
 **Archivo:** `agente/skills/detectar_vacios_factuales/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `coordinador_expediente_penal`
+**Agentes que lo usan:** `analista_cronologia_hechos`
 
 **Instruccion tipo:** Identificar lo que falta para comprender o probar el caso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Relato disponible (víctima, abogado, documentos).
+- Matriz hecho-fuente preliminar (si existe).
+- Tipo de actuación pretendida (denuncia, memorial, audiencia, petición).
+- Etapa procesal aparente.
 
 **Que produce (salidas):**
 
-vacios, prioridad, agente responsable, pregunta sugerida.
+- Lista de vacíos: `descripción`, `impacto` (tipicidad | prueba | oportunidad_procesal | comprensión_caso), `prioridad` (crítica | media | baja).
+- Preguntas sugeridas al abogado o víctima (no inductivas).
+- Agente sugerido para profundizar (cronología, tipicidad, evidencia).
 
 **Pasos del skill:**
 
@@ -2763,14 +2499,16 @@ vacios, prioridad, agente responsable, pregunta sugerida.
 3. Formular solicitud de datos al abogado o cliente.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_reader``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No suponer hechos para “cerrar” vacíos.
+- **g2:** Pedir aclaración antes de recomendar actuación que dependa del dato faltante.
+- **g3:** Vacíos son lagunas de información, no inferencias presentadas como hechos.
+- **g4:** Preguntas a víctima requieren revisión del abogado (riesgo revictimización).
+- **g5:** Formular preguntas abiertas; no insinuar culpa o incredibilidad.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_vacios_factuales**
 
@@ -2785,23 +2523,27 @@ vacios, prioridad, agente responsable, pregunta sugerida.
 
 > (espacio para la abogada)
 
-#### 9.42 `extraer_hechos_relevantes`
+#### 9.35 `extraer_hechos_relevantes`
 
-**Para que sirve:** extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
+**Para que sirve:** Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias.
 
 **Archivo:** `agente/skills/extraer_hechos_relevantes/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `redactor_documentos_juridicos_penales`, `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `redactor_documentos_juridicos`, `analista_evidencia`
 
 **Instruccion tipo:** Extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
 
 **Que necesita para funcionar (entradas):**
 
-documentos, texto, transcripcion, objetivo del analisis.
+- Documentos PDF/imagen, textos, transcripciones de audio o mensajes del turno/expediente.
+- Objetivo del análisis (comprensión del caso, memorial, audiencia).
+- Tipos de hecho relevantes según consulta (conducta, lugar, fecha, daño, participantes).
 
 **Que produce (salidas):**
 
-lista de hechos con fuente, fecha, actor, tipo de fuente y soporte.
+- Lista de hechos: `descripción`, `fuente`, `fecha_si_consta`, `actor_si_consta`, `tipo_fuente`, `nivel_soporte`.
+- Opiniones e inferencias filtradas (listadas aparte, no como hechos).
+- Elementos no legibles o no procesables marcados `[PENDIENTE DE VERIFICAR]`.
 
 **Pasos del skill:**
 
@@ -2810,14 +2552,17 @@ lista de hechos con fuente, fecha, actor, tipo de fuente y soporte.
 3. Filtrar opiniones e inferencias no soportadas.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``document_parser_extract_text``, ``ocr_extract_text``, ``transcribe_audio``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No completar lagunas del relato con hechos inventados.
+- **g2:** Audio/documento ilegible → pedir nueva copia o transcripción humana.
+- **g3:** Separar hecho material de opinión del declarante o de la IA.
+- **g5:** En relatos de víctima, extraer sin juicio de credibilidad.
+- **g6:** No reproducir datos sensibles innecesarios en la lista de hechos.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill extraer_hechos_relevantes**
 
@@ -2832,23 +2577,28 @@ lista de hechos con fuente, fecha, actor, tipo de fuente y soporte.
 
 > (espacio para la abogada)
 
-#### 9.43 `generar_preguntas_aclaracion`
+#### 9.36 `generar_preguntas_aclaracion`
 
-**Para que sirve:** crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
+**Para que sirve:** Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado.
 
 **Archivo:** `agente/skills/generar_preguntas_aclaracion/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_evidencia`
 
 **Instruccion tipo:** Crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Vacíos factuales o contradicciones documentadas.
+- Cronología o matriz hecho-fuente.
+- Destinatario previsto: víctima | testigo | abogado interno.
+- Contexto de sensibilidad (violencia sexual, doméstica, etc.) si consta.
 
 **Que produce (salidas):**
 
-preguntas neutrales, objetivo de cada pregunta, riesgo asociado.
+- Preguntas numeradas: `pregunta`, `objetivo_probatorio`, `destinatario`, `prioridad`, `riesgo` (revictimización | inducción | bajo).
+- Orden por prioridad probatoria.
+- Etiqueta: `REVISAR CON ABOGADO ANTES DE ENVIAR A VÍCTIMA`.
 
 **Pasos del skill:**
 
@@ -2857,14 +2607,15 @@ preguntas neutrales, objetivo de cada pregunta, riesgo asociado.
 3. Ordenar preguntas por prioridad probatoria.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``sin_herramientas_obligatorias``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No presuponer respuesta en la formulación de la pregunta.
+- **g4:** HITL obligatorio antes de contacto con víctima.
+- **g5:** Evitar preguntas sobre vestimenta, conducta previa o vida íntima salvo estricta pertinencia probatoria y aprobación del abogado.
+- **g6:** No incluir datos sensibles de terceros en las preguntas.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill generar_preguntas_aclaracion**
 
@@ -2879,23 +2630,27 @@ preguntas neutrales, objetivo de cada pregunta, riesgo asociado.
 
 > (espacio para la abogada)
 
-#### 9.44 `identificar_actores_y_roles`
+#### 9.37 `identificar_actores_y_roles`
 
-**Para que sirve:** identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
+**Para que sirve:** Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar.
 
 **Archivo:** `agente/skills/identificar_actores_y_roles/SKILL.md`
 
-**Agentes que lo usan:** `analista_cronologia_hechos_penales`, `analista_representacion_victimas`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_representacion_victimas`
 
 **Instruccion tipo:** Identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hechos extraídos y documentos del expediente.
+- Denuncia, informes de policía, actuaciones procesales (si existen).
+- Nombres, alias, cargos y entidades mencionados en el turno.
 
 **Que produce (salidas):**
 
-mapa de actores, rol, fuente, relevancia, datos sensibles.
+- Mapa: `nombre_o_referencia`, `rol_preliminar` (víctima | indiciado/imputado | testigo | autoridad | tercero | entidad), `fuente`, `relevancia`, `datos_sensibles` (sí/no).
+- Actores sin rol claro marcados `[PENDIENTE DE VERIFICAR]`.
+- Alertas PII para control de confidencialidad.
 
 **Pasos del skill:**
 
@@ -2903,14 +2658,16 @@ mapa de actores, rol, fuente, relevancia, datos sensibles.
 2. Asignar rol procesal preliminar (víctima, imputado, testigo, autoridad, tercero).
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``entity_extractor``, ``pii_detector``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar personas no mencionadas en fuentes.
+- **g3:** Rol preliminar ≠ calidad procesal acreditada (imputado solo si consta en actuación).
+- **g6:** Marcar y minimizar PII; no listar documentos de identidad completos.
+- **g5:** No etiquetar a la víctima con roles que impliquen culpa compartida.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill identificar_actores_y_roles**
 
@@ -2927,70 +2684,27 @@ mapa de actores, rol, fuente, relevancia, datos sensibles.
 
 ### Categoria: Skills de redaccion juridica penal
 
-#### 9.45 `controlar_tono_juridico_documento`
+#### 9.38 `estructurar_hechos_fundamentos_solicitudes`
 
-**Para que sirve:** asegurar tono formal, preciso, no agresivo y no especulativo.
-
-**Archivo:** `agente/skills/controlar_tono_juridico_documento/SKILL.md`
-
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`, `analista_calidad_juridica`
-
-**Instruccion tipo:** Asegurar tono formal, preciso, no agresivo y no especulativo.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-texto corregido, riesgos de tono, cambios sugeridos.
-
-**Pasos del skill:**
-
-1. Revisar borrador completo con criterios de tono formal y preciso.
-2. Detectar agresividad, especulación o lenguaje no profesional.
-3. Proponer correcciones manteniendo contenido jurídico.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``tone_checker``, ``revictimization_risk_checker``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill controlar_tono_juridico_documento**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.46 `estructurar_hechos_fundamentos_solicitudes`
-
-**Para que sirve:** ordenar cualquier documento juridico.
+**Para que sirve:** Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito.
 
 **Archivo:** `agente/skills/estructurar_hechos_fundamentos_solicitudes/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Ordenar cualquier documento juridico.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hechos soportados y pretensiones.
+- Norma y plantilla aplicable.
+- Tipo de escrito (memorial, solicitud, recurso).
 
 **Que produce (salidas):**
 
-secciones de hechos, fundamentos, pruebas, solicitudes y anexos.
+- Esquema numerado: bloque hechos | fundamentos | peticiones con referencias cruzadas.
+- Pendientes `[PENDIENTE DE VERIFICAR]` por bloque.
+- Etiqueta: `ESQUEMA — NO ES BORRADOR FINAL`.
 
 **Pasos del skill:**
 
@@ -2999,14 +2713,13 @@ secciones de hechos, fundamentos, pruebas, solicitudes y anexos.
 3. Verificar coherencia interna y remisiones a anexos.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_plantillas_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g3:** Esquema separa hecho de argumento.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill estructurar_hechos_fundamentos_solicitudes**
 
@@ -3021,23 +2734,26 @@ secciones de hechos, fundamentos, pruebas, solicitudes y anexos.
 
 > (espacio para la abogada)
 
-#### 9.47 `redactar_ampliacion_denuncia`
+#### 9.39 `redactar_ampliacion_denuncia`
 
-**Para que sirve:** estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
+**Para que sirve:** Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.
 
 **Archivo:** `agente/skills/redactar_ampliacion_denuncia/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Denuncia o informe previo (si consta).
+- Nuevos hechos verificados o narrados con fuente.
+- Radicado o número de noticia criminal (si existe).
 
 **Que produce (salidas):**
 
-borrador, hechos nuevos, pruebas, anexos, pendientes.
+- Borrador de ampliación: hechos nuevos, relación con denuncia previa, peticiones.
+- Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 **Pasos del skill:**
 
@@ -3046,14 +2762,13 @@ borrador, hechos nuevos, pruebas, anexos, pendientes.
 3. Marcar hechos no verificados como pendientes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_plantillas_search``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar radicados ni hechos.
+- **g4:** HITL y firma humana.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill redactar_ampliacion_denuncia**
 
@@ -3068,23 +2783,27 @@ borrador, hechos nuevos, pruebas, anexos, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.48 `redactar_derecho_peticion_penal`
+#### 9.40 `redactar_derecho_peticion_penal`
 
-**Para que sirve:** redactar derecho de peticion relacionado con autoridad o informacion del caso.
+**Para que sirve:** Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia.
 
 **Archivo:** `agente/skills/redactar_derecho_peticion_penal/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+**Agentes que lo usan:** `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Redactar derecho de peticion relacionado con autoridad o informacion del caso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Salida de `evaluar_derecho_peticion` (procedencia preliminar).
+- Destinatario, objeto, hechos y anexos disponibles.
+- Plantilla y norma aplicable (RAG).
 
 **Que produce (salidas):**
 
-borrador, autoridad, peticiones, anexos, terminos, pendientes.
+- Borrador: hechos, fundamentos, peticiones, anexos referenciados.
+- `plazo_respuesta_esperado`.
+- Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 **Pasos del skill:**
 
@@ -3093,14 +2812,12 @@ borrador, autoridad, peticiones, anexos, terminos, pendientes.
 3. Incluir anexos y plazo de respuesta esperado.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_constitucional_search``, ``rag_plantillas_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** HITL y firma humana antes de radicar.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill redactar_derecho_peticion_penal**
 
@@ -3115,41 +2832,47 @@ borrador, autoridad, peticiones, anexos, terminos, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.49 `redactar_memorial_penal`
+#### 9.41 `redactar_memorial_penal`
 
-**Para que sirve:** crear borrador de memorial penal.
+**Para que sirve:** Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones.
 
 **Archivo:** `agente/skills/redactar_memorial_penal/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Crear borrador de memorial penal.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hechos verificados y cronología (`verificar_hechos_soportados`).
+- Evaluación de solicitud si aplica (`evaluar_solicitud_fiscalia_juez`).
+- Plantilla del despacho y norma Ley 906 (RAG).
+- Tipicidad y matriz hecho-prueba (preliminar).
 
 **Que produce (salidas):**
 
-documento borrador, fuentes, anexos, pendientes.
+- Memorial: hechos, fundamentos, peticiones, anexos referenciados.
+- Pendientes `[PENDIENTE DE VERIFICAR]` antes de firma.
+- Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 **Pasos del skill:**
 
 1. Recopilar hechos soportados y pretensiones de la víctima.
-2. Redactar memorial con estructura hechos-fundamentos-peticiones.
-3. Verificar citas y marcar pendientes antes de firma humana.
-4. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
-5. Profundizar análisis de «Crear borrador de memorial penal» con referencia al expediente y norma aplicable.
+2. Verificar citas normativas aplicables al memorial.
+3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
+4. Redactar memorial integrando hechos, fundamentos y peticiones.
+5. Marcar pendientes de verificación antes de firma humana.
 6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_plantillas_search``, ``rag_normativo_search``, ``rag_expediente_search``, ``document_version_create``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar hechos, citas ni anexos.
+- **g3:** Hechos separados de argumentación y peticiones.
+- **g4:** HITL y firma humana obligatorias.
+- **g5:** Lenguaje respetuoso con la víctima.
+- **g8:** Aviso de borrador.
 
 **Checklist de aprobacion — Skill redactar_memorial_penal**
 
@@ -3164,23 +2887,27 @@ documento borrador, fuentes, anexos, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.50 `redactar_recurso_o_intervencion_preliminar`
+#### 9.42 `redactar_recurso_o_intervencion_preliminar`
 
-**Para que sirve:** crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
+**Para que sirve:** Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor.
 
 **Archivo:** `agente/skills/redactar_recurso_o_intervencion_preliminar/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`, `analista_ruta_procesal_ley906`
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_ruta_procesal`
 
 **Instruccion tipo:** Crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Acto a impugnar o intervención objetivo.
+- `evaluar_oportunidad_procesal` y términos (`controlar_terminos_procesales_preliminares`).
+- Hechos soportados y fundamentos normativos (RAG).
 
 **Que produce (salidas):**
 
-borrador, decision atacada, agravios, fundamento, termino, pendientes.
+- `tipo_recurso_intervencion`, `oportunidad`, `agravios_preliminares`, `terminos_pendientes_verificar`.
+- `derivar_a`: `redactor_documentos_juridicos`.
+- Etiqueta: `NO ES BORRADOR — SOLO INSUMOS PROCESALES`.
 
 **Pasos del skill:**
 
@@ -3189,14 +2916,13 @@ borrador, decision atacada, agravios, fundamento, termino, pendientes.
 3. Alertar términos y requisitos de forma pendientes de verificación.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``rag_jurisprudencia_search``, ``calendar_terms_calculator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar actos procesales ni plazos.
+- **g4:** HITL y firma humana antes de radicar.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill redactar_recurso_o_intervencion_preliminar**
 
@@ -3211,23 +2937,26 @@ borrador, decision atacada, agravios, fundamento, termino, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.51 `redactar_solicitud_impulso_procesal`
+#### 9.43 `redactar_solicitud_impulso_procesal`
 
-**Para que sirve:** crear borrador para solicitar impulso procesal o actuaciones.
+**Para que sirve:** Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez.
 
 **Archivo:** `agente/skills/redactar_solicitud_impulso_procesal/SKILL.md`
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Crear borrador para solicitar impulso procesal o actuaciones.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Registro de inactividad y última actuación.
+- Etapa procesal y actuación solicitada.
+- Norma Ley 906 que fundamente el impulso.
 
 **Que produce (salidas):**
 
-solicitud, hechos, fundamento, peticiones, anexos, pendientes.
+- Borrador: hechos de parálisis, fundamentos, petición concreta de actuación.
+- Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 **Pasos del skill:**
 
@@ -3236,14 +2965,13 @@ solicitud, hechos, fundamento, peticiones, anexos, pendientes.
 3. Proponer peticiones concretas y plazos.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_plantillas_search``, ``rag_ley906_search``, ``citation_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar actuaciones ni fechas.
+- **g4:** HITL antes de radicar.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill redactar_solicitud_impulso_procesal**
 
@@ -3258,47 +2986,51 @@ solicitud, hechos, fundamento, peticiones, anexos, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.52 `redactar_tutela_penal_preliminar`
+### Categoria: Skills de redaccion y seguimiento procesal
 
-**Para que sirve:** crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
+#### 9.44 `evaluar_derecho_peticion`
 
-**Archivo:** `agente/skills/redactar_tutela_penal_preliminar/SKILL.md`
+**Para que sirve:** Verificar si hay petición previa incumplida y si procede un nuevo derecho de petición, impulso o seguimiento en vía penal.
 
-**Agentes que lo usan:** `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+**Archivo:** `agente/skills/evaluar_derecho_peticion/SKILL.md`
 
-**Instruccion tipo:** Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
+**Agentes que lo usan:** `redactor_documentos_juridicos`, `analista_seguimiento_procesal`
+
+**Instruccion tipo:** Revisar si existe derecho de peticion incumplido.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Copia o datos de petición previa (fecha, destinatario, objeto, radicado si consta).
+- Plazo legal de respuesta y fecha de vencimiento.
+- Respuesta recibida o constancia de silencio (si existe).
 
 **Que produce (salidas):**
 
-borrador, derechos, hechos, accionado, pruebas, pretensiones, pendientes.
+- `peticion_existe`: sí | no | `[PENDIENTE DE VERIFICAR]`.
+- `incumplimiento`: sí | no | parcial | no_evaluable.
+- `via_recomendada`: nueva_peticion | impulso_procesal | solicitud_906 | aguardar_respuesta.
+- `plazos_clave` y actuación siguiente.
+- Etiqueta: `EVALUACIÓN PETICIÓN — VÍA PENAL (NO TUTELA)`.
 
 **Pasos del skill:**
 
-1. Confirmar dictamen previo de procedencia tutela (no redactar si improcedente).
-2. Consolidar hechos verificables separados de inferencias y pendientes.
-3. Identificar derechos fundamentales vulnerados y autoridades accionadas.
-4. Redactar fundamentos constitucionales con citas verificadas en RAG.
-5. Formular pretensiones claras, medibles y proporcionales.
-6. Listar pruebas y anexos; marcar faltantes como pendientes.
-7. Revisar no revictimización en relato y peticiones.
-8. Control de competencia, direccionamiento y tono profesional.
-9. Entregar borrador numerado listo para revisión de firma (sin radicar).
-10. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Verificar existencia de petición previa, destinatario y objeto solicitado.
+2. Constatar plazo de respuesta y silencio administrativo si aplica.
+3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
+4. Documentar requisitos faltantes para interponer nueva petición o tutela.
+5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_constitucion_search``, ``rag_corte_constitucional_search``, ``rag_plantillas_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar peticiones ni fechas de radicación.
+- **g3:** Silencio administrativo solo si consta plazo y vencimiento.
+- **g4:** Redactor solo actúa con evaluación favorable a petición/impulso.
+- **g8:** Aviso de revisión profesional.
+- **g9:** No recomendar acción de tutela (fuera del producto).
 
-**Checklist de aprobacion — Skill redactar_tutela_penal_preliminar**
+**Checklist de aprobacion — Skill evaluar_derecho_peticion**
 
 | Decision | Marcar |
 |---|---|
@@ -3313,9 +3045,9 @@ borrador, derechos, hechos, accionado, pruebas, pretensiones, pendientes.
 
 ### Categoria: Skills de representacion de victimas
 
-#### 9.53 `alinear_estrategia_prueba_proceso`
+#### 9.45 `alinear_estrategia_prueba_proceso`
 
-**Para que sirve:** alinear teoria de victima con ruta procesal y plan probatorio.
+**Para que sirve:** Detectar desalineación entre teoría del caso, ruta Ley 906 y plan probatorio; proponer ajustes coordinados.
 
 **Archivo:** `agente/skills/alinear_estrategia_prueba_proceso/SKILL.md`
 
@@ -3325,28 +3057,34 @@ borrador, derechos, hechos, accionado, pruebas, pretensiones, pendientes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Teoría del caso de la víctima (`construir_teoria_caso_victima`).
+- Ruta procesal recomendada y etapa Ley 906.
+- Matriz hecho-prueba y plan de recaudo (`crear_plan_recaudo_probatorio`, si existe).
+- Objetivos priorizados de la víctima.
 
 **Que produce (salidas):**
 
-alineacion, contradicciones, ajustes, tareas.
+- `desalineaciones`: lista con `area` (teoria | ruta | prueba), `descripcion`, `impacto` (alto | medio | bajo).
+- `ajustes_recomendados` priorizados por urgencia procesal.
+- `coherencia_global`: alineado | parcial | desalineado.
+- Etiqueta: `ESTRATEGIA PRELIMINAR — APROBACIÓN ABOGADO`.
 
 **Pasos del skill:**
 
 1. Contrastar teoría del caso con etapa procesal y prueba disponible.
 2. Detectar desalineaciones entre ruta 906 y plan probatorio.
 3. Proponer ajustes coordinados para representación de la víctima.
-4. Profundizar análisis de «Alinear teoria de victima con ruta procesal y plan probatorio» con referencia al expediente y norma aplicable.
+4. Priorizar ajustes por plazos procesales y objetivos de la víctima.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_reader``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g3:** Ajustes basados en hechos y etapa, no en deseos sin soporte probatorio.
+- **g4:** HITL obligatorio antes de cambiar teoría o ruta aprobada.
+- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill alinear_estrategia_prueba_proceso**
 
@@ -3361,23 +3099,28 @@ alineacion, contradicciones, ajustes, tareas.
 
 > (espacio para la abogada)
 
-#### 9.54 `analizar_derechos_victima`
+#### 9.46 `analizar_derechos_victima`
 
-**Para que sirve:** mapear derechos de victima aplicables al caso.
+**Para que sirve:** Mapear derechos de la víctima en el proceso penal (participación, información, reparación, protección) y su vínculo con los hechos.
 
 **Archivo:** `agente/skills/analizar_derechos_victima/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `evaluador_derechos_fundamentales_tutela`
+**Agentes que lo usan:** `analista_representacion_victimas`
 
 **Instruccion tipo:** Mapear derechos de victima aplicables al caso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hechos verificados y etapa procesal Ley 906.
+- Conductas u omisiones de Fiscalía, juez o autoridad que afecten a la víctima.
+- Normativa de víctimas (Ley 906, Ley 1712, etc.) vía RAG.
 
 **Que produce (salidas):**
 
-derecho, hecho relacionado, oportunidad procesal, fuente.
+- `derechos_mapeados`: participación | información | reparación | protección | otros.
+- Por derecho: `hecho_vinculado`, `autoridad_responsable`, `estado` (vulnerado | en_riesgo | respetado | pendiente).
+- `prioridad_atencion` (alta | media | baja).
+- Etiqueta: `MAPEO DERECHOS VÍCTIMA — VÍA PENAL`.
 
 **Pasos del skill:**
 
@@ -3386,14 +3129,15 @@ derecho, hecho relacionado, oportunidad procesal, fuente.
 3. Priorizar derechos más vulnerados o urgentes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_normas_victimas_search``, ``rag_constitucional_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar vulneraciones ni normas.
+- **g3:** Derecho procesal de víctima se atiende en vía Ley 906 / petición / impulso.
+- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill analizar_derechos_victima**
 
@@ -3408,23 +3152,27 @@ derecho, hecho relacionado, oportunidad procesal, fuente.
 
 > (espacio para la abogada)
 
-#### 9.55 `analizar_enfoque_diferencial`
+#### 9.47 `analizar_enfoque_diferencial`
 
-**Para que sirve:** identificar sujetos de especial proteccion y necesidades diferenciadas.
+**Para que sirve:** Identificar factores diferenciales relevantes (género, edad, discapacidad, etnia, etc.) que exijan enfoque especial en la representación.
 
 **Archivo:** `agente/skills/analizar_enfoque_diferencial/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `evaluador_derechos_fundamentales_tutela`
+**Agentes que lo usan:** `analista_representacion_victimas`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Identificar sujetos de especial proteccion y necesidades diferenciadas.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Datos de la víctima disponibles (solo los documentados; no inferir).
+- Tipo de delito y contexto del caso.
+- Materiales a revisar (teoría, preguntas, memorial).
 
 **Que produce (salidas):**
 
-condicion relevante, implicacion juridica, medida sugerida, fuente.
+- `factores_diferenciales` documentados con fuente o `[PENDIENTE DE VERIFICAR]`.
+- `ajustes_recomendados` en lenguaje, ritmo procesal o medidas de protección.
+- `alertas` si el material ignora enfoque diferencial obligatorio.
 
 **Pasos del skill:**
 
@@ -3433,14 +3181,15 @@ condicion relevante, implicacion juridica, medida sugerida, fuente.
 3. Evitar estereotipos y proteger datos sensibles.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_constitucional_search``, ``rag_normas_victimas_search``, ``pii_detector``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inferir identidad o condición no documentada.
+- **g5:** No estigmatizar a la víctima al nombrar factores diferenciales.
+- **g6:** Minimizar datos sensibles innecesarios.
+- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill analizar_enfoque_diferencial**
 
@@ -3455,23 +3204,28 @@ condicion relevante, implicacion juridica, medida sugerida, fuente.
 
 > (espacio para la abogada)
 
-#### 9.56 `construir_teoria_caso_victima`
+#### 9.48 `construir_teoria_caso_victima`
 
-**Para que sirve:** formular teoria preliminar desde la victima.
+**Para que sirve:** Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio.
 
 **Archivo:** `agente/skills/construir_teoria_caso_victima/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_representacion_victimas`, `analista_audiencias`
 
 **Instruccion tipo:** Formular teoria preliminar desde la victima.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Cronología y hechos soportados.
+- Intereses de la víctima (`identificar_intereses_victima`).
+- Hipótesis tipicidad y matriz tipo-prueba (si existen).
+- Enfoque diferencial y riesgo revictimización.
 
 **Que produce (salidas):**
 
-teoria del caso, hechos clave, pruebas clave, riesgos, narrativa juridica.
+- Teoría del caso: narrativa factual, objetivos, fortalezas/debilidades, riesgos.
+- Vínculo con actuaciones Ley 906 disponibles.
+- Etiqueta: `TEORÍA PRELIMINAR — APROBACIÓN ABOGADO Y VÍCTIMA`.
 
 **Pasos del skill:**
 
@@ -3483,14 +3237,15 @@ teoria del caso, hechos clave, pruebas clave, riesgos, narrativa juridica.
 6. Alinear con enfoque diferencial y no revictimización.
 7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``rag_normativo_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar hechos ni normas.
+- **g3:** Narrativa factual separada de estrategia y de calificación penal definitiva.
+- **g4:** HITL obligatorio; no comunicar teoría al cliente sin abogado.
+- **g5:** Teoría no culpa ni expone innecesariamente a la víctima.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill construir_teoria_caso_victima**
 
@@ -3505,41 +3260,43 @@ teoria del caso, hechos clave, pruebas clave, riesgos, narrativa juridica.
 
 > (espacio para la abogada)
 
-#### 9.57 `detectar_riesgo_revictimizacion`
+#### 9.49 `crear_resumen_ejecutivo_litigante`
 
-**Para que sirve:** identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
+**Para que sirve:** Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no para cliente).
 
-**Archivo:** `agente/skills/detectar_riesgo_revictimizacion/SKILL.md`
+**Archivo:** `agente/skills/crear_resumen_ejecutivo_litigante/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_audiencias`, `analista_representacion_victimas`
 
-**Instruccion tipo:** Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
+**Instruccion tipo:** Crear resumen de una pagina para el abogado que interviene.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Teoría del caso, etapa procesal, prueba clave.
+- Objetivos de representación y próximas audiencias.
 
 **Que produce (salidas):**
 
-riesgo, ubicacion, recomendacion, severidad.
+- Resumen: situación | fortalezas | debilidades | próximos pasos | decisiones pendientes.
+- Etiqueta: `RESUMEN ABOGADO — CONFIDENCIAL`.
 
 **Pasos del skill:**
 
-1. Analizar preguntas, estrategias y lenguaje propuestos.
-2. Identificar conductas o formulaciones que revictimicen.
-3. Proponer alternativas respetuosas y centradas en derechos.
+1. Sintetizar objetivo, etapa procesal y postura de la víctima en una página.
+2. Incluir hechos clave, riesgos y decisiones tácticas pendientes.
+3. Formato listo para lectura previa del abogado en estrados.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``revictimization_risk_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** HITL obligatorio; uso interno del abogado — no envío a cliente ni terceros.
+- **g6:** Confidencial; no formato cliente.
+- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **g8:** Aviso de revisión profesional.
 
-**Checklist de aprobacion — Skill detectar_riesgo_revictimizacion**
+**Checklist de aprobacion — Skill crear_resumen_ejecutivo_litigante**
 
 | Decision | Marcar |
 |---|---|
@@ -3552,23 +3309,27 @@ riesgo, ubicacion, recomendacion, severidad.
 
 > (espacio para la abogada)
 
-#### 9.58 `evaluar_dano_y_afectacion`
+#### 9.50 `evaluar_dano_y_afectacion`
 
-**Para que sirve:** organizar danos y afectaciones alegadas.
+**Para que sirve:** Describir preliminarmente el daño o afectación a la víctima con base documentada (físico, psicológico, patrimonial, social).
 
 **Archivo:** `agente/skills/evaluar_dano_y_afectacion/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `gestor_evidencia_y_soporte_probatorio`
+**Agentes que lo usan:** `analista_representacion_victimas`
 
 **Instruccion tipo:** Organizar danos y afectaciones alegadas.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Relatos, informes médicos/psicológicos, declaraciones (si constan).
+- Hechos verificados del caso.
+- Pretensiones de reparación ya planteadas.
 
 **Que produce (salidas):**
 
-tipo de dano, hecho origen, prueba, necesidad pericial, pendiente.
+- `tipos_daño`: físico | psicológico | patrimonial | social | otros.
+- Por tipo: `descripción`, `fuente`, `gravedad_preliminar` (alta | media | baja | pendiente).
+- Etiqueta: `AFECTACIÓN PRELIMINAR — NO ES PERITAJE`.
 
 **Pasos del skill:**
 
@@ -3577,14 +3338,14 @@ tipo de dano, hecho origen, prueba, necesidad pericial, pendiente.
 3. Evitar minimizar o dramatizar sin soporte.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``rag_medicina_legal_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar diagnósticos ni secuelas.
+- **g5:** No minimizar ni dramatizar el daño sin base.
+- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill evaluar_dano_y_afectacion**
 
@@ -3599,9 +3360,9 @@ tipo de dano, hecho origen, prueba, necesidad pericial, pendiente.
 
 > (espacio para la abogada)
 
-#### 9.59 `identificar_intereses_victima`
+#### 9.51 `identificar_intereses_victima`
 
-**Para que sirve:** aclarar el objetivo real de la victima.
+**Para que sirve:** Identificar intereses y expectativas de la víctima en el proceso (reparación, verdad, seguridad, celeridad, etc.).
 
 **Archivo:** `agente/skills/identificar_intereses_victima/SKILL.md`
 
@@ -3611,11 +3372,15 @@ tipo de dano, hecho origen, prueba, necesidad pericial, pendiente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Relato o declaración de la víctima (si consta).
+- Notas del abogado sobre objetivos del cliente.
+- Etapa procesal y opciones disponibles.
 
 **Que produce (salidas):**
 
-objetivos principales, secundarios, tensiones, decisiones humanas necesarias.
+- `intereses`: lista priorizada con fuente (declarada | inferida_documentada | pendiente).
+- `tensiones` entre intereses si las hay.
+- Etiqueta: `INTERVIEW HITL — NO SUSTITUYE DECISIÓN ABOGADO`.
 
 **Pasos del skill:**
 
@@ -3624,14 +3389,14 @@ objetivos principales, secundarios, tensiones, decisiones humanas necesarias.
 3. Priorizar intereses para decisiones estratégicas.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``victim_objective_mapper``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g2:** Sin input de la víctima, marcar pendiente; no inventar intereses.
+- **g5:** No presionar objetivos que revictimicen.
+- **g4:** HITL obligatorio.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill identificar_intereses_victima**
 
@@ -3646,23 +3411,28 @@ objetivos principales, secundarios, tensiones, decisiones humanas necesarias.
 
 > (espacio para la abogada)
 
-#### 9.60 `priorizar_objetivos_representacion`
+#### 9.52 `priorizar_objetivos_representacion`
 
-**Para que sirve:** ordenar objetivos de la representacion.
+**Para que sirve:** Listar y ordenar objetivos posibles de la representación de la víctima según urgencia, viabilidad y alineación con sus intereses, documentando trade-offs para decisión del abogado.
 
 **Archivo:** `agente/skills/priorizar_objetivos_representacion/SKILL.md`
 
-**Agentes que lo usan:** `analista_representacion_victimas`, `coordinador_expediente_penal`
+**Agentes que lo usan:** `analista_representacion_victimas`
 
 **Instruccion tipo:** Ordenar objetivos de la representacion.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Intereses declarados por la víctima o el abogado (justicia, reparación, celeridad, protección, no confrontación).
+- Etapa procesal aparente y actuaciones disponibles.
+- Riesgos conocidos (revictimización, términos, debilidad probatoria).
+- Objetivos procesales técnicos ya identificados (si existen).
 
 **Que produce (salidas):**
 
-objetivo, prioridad, razon, dependencia, riesgo.
+- Lista ordenada: `objetivo`, `prioridad` (1–n), `razón`, `dependencia`, `riesgo` (procesal | probatorio | revictimización).
+- Trade-offs explícitos para decisión del abogado (ej. celeridad vs. recaudo probatorio).
+- Etiqueta: `PRELIMINAR — VALIDAR CON VÍCTIMA Y ABOGADO TITULAR`.
 
 **Pasos del skill:**
 
@@ -3671,14 +3441,16 @@ objetivo, prioridad, razon, dependencia, riesgo.
 3. Documentar trade-offs para decisión del abogado.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``sin_herramientas_obligatorias``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar intereses de la víctima no expresados.
+- **g2:** Sin input sobre intereses de la víctima, listar solo objetivos procesales genéricos marcados `[PENDIENTE DE VERIFICAR]`.
+- **g3:** Objetivos son hipótesis estratégicas, no hechos.
+- **g4:** HITL obligatorio: estrategia de representación requiere aprobación del abogado y, cuando aplique, consulta con la víctima.
+- **g5:** No presionar rutas que revictimicen (ej. confrontación pública innecesaria).
+- **g8:** Aviso de borrador estratégico.
 
 **Checklist de aprobacion — Skill priorizar_objetivos_representacion**
 
@@ -3695,40 +3467,48 @@ objetivo, prioridad, razon, dependencia, riesgo.
 
 ### Categoria: Skills de ruta procesal Ley 906
 
-#### 9.61 `analizar_intervencion_victima`
+#### 9.53 `analizar_intervencion_victima`
 
-**Para que sirve:** definir intervencion posible de la victima en una actuacion o audiencia.
+**Para que sirve:** Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906.
 
 **Archivo:** `agente/skills/analizar_intervencion_victima/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `preparador_estrategico_audiencias_penales`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_audiencias`
 
 **Instruccion tipo:** Definir intervencion posible de la victima en una actuacion o audiencia.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de audiencia o actuación (fecha si consta).
+- Etapa procesal.
+- Objetivos de la víctima.
+- Norma Ley 906 y derechos de víctimas.
 
 **Que produce (salidas):**
 
-objetivo, limite de intervencion, solicitudes posibles, riesgos.
+- `formas_intervencion_procedentes` (oral, escrita, solicitudes, etc.).
+- `contenido_sugerido` y `momento_procesal`.
+- `limites` de intervención.
+- `riesgos` (revictimización, revelación de estrategia).
+- Etiqueta: `MARCO PROCESAL — PREPARACIÓN TÁCTICA EN OTRO AGENTE`.
 
 **Pasos del skill:**
 
 1. Identificar actuación o audiencia específica y marco Ley 906.
 2. Determinar formas de intervención de la víctima procedentes.
 3. Proponer contenido y momento de la intervención.
-4. Profundizar análisis de «Definir intervencion posible de la victima en una actuacion o audiencia» con referencia al expediente y norma aplicable.
+4. Documentar riesgos procesales si la intervención no es oportuna.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``rag_normas_victimas_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar facultades de intervención no previstas en norma verificada.
+- **g4:** HITL antes de que la víctima intervenga en audiencia.
+- **g5:** Minimizar exposición innecesaria de la víctima.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill analizar_intervencion_victima**
 
@@ -3743,23 +3523,27 @@ objetivo, limite de intervencion, solicitudes posibles, riesgos.
 
 > (espacio para la abogada)
 
-#### 9.62 `controlar_terminos_procesales_preliminares`
+#### 9.54 `controlar_terminos_procesales_preliminares`
 
-**Para que sirve:** identificar y alertar terminos relevantes. No reemplaza calculo humano.
+**Para que sirve:** Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana.
 
 **Archivo:** `agente/skills/controlar_terminos_procesales_preliminares/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Identificar y alertar terminos relevantes. No reemplaza calculo humano.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Etapa procesal y tipo de actuación (recurso, solicitud, audiencia).
+- Fecha de notificación o actuación fundante (si consta).
+- Calendario procesal y reglas Ley 906 (RAG).
 
 **Que produce (salidas):**
 
-termino, fecha base, fecha limite estimada, nivel de confianza, pendientes.
+- Por término: `nombre`, `fecha_base`, `fecha_limite_estimada`, `nivel_confianza` (alto | medio | bajo), `accion_recomendada`.
+- Etiqueta obligatoria: `ESTIMACIÓN IA — VERIFICAR CON ABOGADO`.
+- Pendientes si falta fecha base.
 
 **Pasos del skill:**
 
@@ -3768,14 +3552,15 @@ termino, fecha base, fecha limite estimada, nivel de confianza, pendientes.
 3. Generar alertas con acción recomendada.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``calendar_terms_calculator``, ``calendar_event_create``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar fechas de notificación.
+- **g2:** Sin fecha base, no cerrar fecha límite; marcar pendiente.
+- **g4:** Nunca radicar recurso solo por alerta IA.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de verificación humana obligatoria en cada salida.
 
 **Checklist de aprobacion — Skill controlar_terminos_procesales_preliminares**
 
@@ -3790,40 +3575,50 @@ termino, fecha base, fecha limite estimada, nivel de confianza, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.63 `crear_ruta_procesal_recomendada`
+#### 9.55 `crear_ruta_procesal_recomendada`
 
-**Para que sirve:** crear plan de proximos pasos procesales para revision del abogado.
+**Para que sirve:** Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado.
 
 **Archivo:** `agente/skills/crear_ruta_procesal_recomendada/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
+**Agentes que lo usan:** `analista_ruta_procesal`
 
 **Instruccion tipo:** Crear plan de proximos pasos procesales para revision del abogado.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Etapa procesal actual (confirmada o `[PENDIENTE DE VERIFICAR]`).
+- Actuaciones pendientes y últimas actuaciones del radicado.
+- Objetivos preliminares de la víctima (si constan).
+- Términos o audiencias próximas conocidas.
+- Riesgos procesales (`detectar_riesgos_procesales`).
 
 **Que produce (salidas):**
 
-ruta, pasos, prioridad, dependencias, agentes involucrados.
+- Ruta numerada: paso, actuación, responsable, plazo estimado, dependencia.
+- Riesgos procesales de la ruta (oportunidad, improcedencia, extemporaneidad).
+- Agentes IA o abogados sugeridos por paso.
+- Etiqueta: `BORRADOR PARA REVISIÓN — NO EJECUTAR SIN APROBACIÓN`.
 
 **Pasos del skill:**
 
 1. Sintetizar etapa actual y actuaciones pendientes.
 2. Proponer secuencia de próximos pasos con responsables y plazos.
 3. Incluir riesgos procesales de la ruta propuesta.
-4. Profundizar análisis de «Crear plan de proximos pasos procesales para revision del abogado» con referencia al expediente y norma aplicable.
+4. Entregar ruta numerada con responsable y plazo por paso.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``task_manager_create``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No citar artículos Ley 906 sin verificar en RAG.
+- **g2:** Sin etapa ni radicado, no proponer ruta cerrada.
+- **g3:** Distinguir hechos del expediente de supuestos para planificar.
+- **g4:** HITL obligatorio: estrategia procesal no se ejecuta sin firma.
+- **g5:** Ruta centrada en derechos de la víctima.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de borrador y revisión profesional.
 
 **Checklist de aprobacion — Skill crear_ruta_procesal_recomendada**
 
@@ -3838,40 +3633,44 @@ ruta, pasos, prioridad, dependencias, agentes involucrados.
 
 > (espacio para la abogada)
 
-#### 9.64 `detectar_riesgos_procesales`
+#### 9.56 `detectar_riesgos_procesales`
 
-**Para que sirve:** detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
+**Para que sirve:** Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad.
 
 **Archivo:** `agente/skills/detectar_riesgos_procesales/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Etapa procesal y actuaciones del expediente.
+- Legitimación de la víctima/apoderado (poder, calidad).
+- Actuaciones propuestas o pendientes.
+- Términos próximos.
 
 **Que produce (salidas):**
 
-riesgo, severidad, accion preventiva, responsable.
+- Registro: `riesgo`, `tipo` (oportunidad | legitimación | competencia | improcedencia | preclusión), `severidad`, `accion_preventiva`, `responsable`, `plazo`.
+- Riesgos críticos destacados para decisión inmediata.
 
 **Pasos del skill:**
 
 1. Revisar oportunidad, legitimación, competencia e improcedencia.
 2. Documentar riesgos de pérdida de derechos o extemporaneidad.
 3. Priorizar riesgos críticos para decisión inmediata.
-4. Profundizar análisis de «Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos» con referencia al expediente y norma aplicable.
+4. Recomendar actuación inmediata para riesgos críticos extemporáneos.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``case_state_reader``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar vicios procesales sin actuación de soporte.
+- **g4:** Riesgos críticos requieren escalamiento al abogado titular.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_riesgos_procesales**
 
@@ -3886,23 +3685,29 @@ riesgo, severidad, accion preventiva, responsable.
 
 > (espacio para la abogada)
 
-#### 9.65 `evaluar_oportunidad_procesal`
+#### 9.57 `evaluar_oportunidad_procesal`
 
-**Para que sirve:** determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
+**Para que sirve:** Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual.
 
 **Archivo:** `agente/skills/evaluar_oportunidad_procesal/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Actuación o solicitud propuesta (tipo, destinatario, objeto).
+- Etapa procesal y actuaciones previas del radicado.
+- Fechas límite estimadas (`controlar_terminos_procesales_preliminares`).
+- Estado probatorio relevante (si aplica).
 
 **Que produce (salidas):**
 
-decision preliminar, razon, datos faltantes, riesgo.
+- `dictamen_preliminar`: oportuna | prematura | extemporánea | `[PENDIENTE DE VERIFICAR]`.
+- `razon`, `consecuencias_de_actuar_o_no`, `fecha_alternativa_sugerida`.
+- `datos_faltantes` para cerrar dictamen.
+- Advertencia: cálculo de términos requiere verificación humana.
 
 **Pasos del skill:**
 
@@ -3914,14 +3719,16 @@ decision preliminar, razon, datos faltantes, riesgo.
 6. Sugerir fecha o actuación alternativa si no es oportuna.
 7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``calendar_terms_calculator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar plazos ni actuaciones previas.
+- **g2:** Sin fecha de notificación de acto a impugnar, dictamen extemporaneidad = pendiente.
+- **g3:** Oportunidad es dictamen preliminar, no certeza judicial.
+- **g4:** HITL obligatorio antes de interponer recurso o solicitud.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso: términos deben verificarse por abogado.
 
 **Checklist de aprobacion — Skill evaluar_oportunidad_procesal**
 
@@ -3936,23 +3743,30 @@ decision preliminar, razon, datos faltantes, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.66 `evaluar_solicitud_fiscalia_juez`
+#### 9.58 `evaluar_solicitud_fiscalia_juez`
 
-**Para que sirve:** evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
+**Para que sirve:** Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento.
 
 **Archivo:** `agente/skills/evaluar_solicitud_fiscalia_juez/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `redactor_documentos_juridicos_penales`
+**Agentes que lo usan:** `analista_ruta_procesal`, `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de solicitud propuesta (oficio, memorial, incidente, etc.).
+- Autoridad destino (Fiscalía, Juez PGA/JUEZ).
+- Etapa procesal y hechos soportados.
+- Objetivo de la víctima.
 
 **Que produce (salidas):**
 
-solicitud, autoridad, fundamento, oportunidad, riesgos, documento sugerido.
+- `procedencia_preliminar`: procedente | improcedente | `[PENDIENTE DE VERIFICAR]`.
+- `conveniencia_estrategica` para la víctima.
+- `requisitos_y_anexos` necesarios.
+- `documento_sugerido` y agente (`redactor_documentos_juridicos` si procede).
+- `riesgos` (improcedencia, rechazo, efecto adverso).
 
 **Pasos del skill:**
 
@@ -3961,14 +3775,16 @@ solicitud, autoridad, fundamento, oportunidad, riesgos, documento sugerido.
 3. Listar requisitos y anexos necesarios.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``rag_expediente_search``, ``citation_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Fundamentos normativos verificados en RAG.
+- **g3:** Conveniencia estratégica ≠ predicción de resultado favorable.
+- **g4:** HITL antes de radicación.
+- **g5:** Solicitudes que expongan innecesariamente a la víctima señalar riesgo.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill evaluar_solicitud_fiscalia_juez**
 
@@ -3983,41 +3799,49 @@ solicitud, autoridad, fundamento, oportunidad, riesgos, documento sugerido.
 
 > (espacio para la abogada)
 
-#### 9.67 `identificar_etapa_procesal_ley906`
+#### 9.59 `identificar_etapa_procesal_ley906`
 
-**Para que sirve:** determinar etapa del caso.
+**Para que sirve:** Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres.
 
 **Archivo:** `agente/skills/identificar_etapa_procesal_ley906/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
+**Agentes que lo usan:** `analista_ruta_procesal`
 
 **Instruccion tipo:** Determinar etapa del caso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Radicado y últimas actuaciones procesales (auto, informe, audiencia, imputación).
+- Consulta a estado del proceso (`process_lookup_query`) si está disponible.
+- Fechas y tipos de actuación en expediente.
+- Declaración de etapa por el abogado (si existe) para contrastar.
 
 **Que produce (salidas):**
 
-etapa, evidencia de la etapa, incertidumbres, siguiente dato a verificar.
+- `etapa_ley906`: indagación | investigación | etapa_intermedia | juicio | ejecución_penal | archivo | `[PENDIENTE DE VERIFICAR]`.
+- `evidencia_etapa`: actuación + fecha + fuente.
+- `incertidumbres` y `siguiente_dato_a_verificar`.
+- Nota: conclusión preliminar, no dictamen procesal vinculante.
 
 **Pasos del skill:**
 
 1. Revisar actuaciones y estado del radicado.
 2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
 3. Señalar incertidumbres si el expediente es incompleto.
-4. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-5. Profundizar análisis de «Determinar etapa del caso» con referencia al expediente y norma aplicable.
-6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+4. Señalar actuaciones habilitadas en la etapa identificada.
+5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``process_lookup_query``, ``rag_ley906_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar actuaciones ni fechas para ubicar etapa.
+- **g2:** Expediente incompleto → etapa `[PENDIENTE DE VERIFICAR]` y pedir actuación fundante.
+- **g3:** Distinguir etapa inferida de etapa acreditada en auto o estado del radicado.
+- **g4:** Etapa incorrecta invalida oportunidad de solicitudes; HITL obligatorio.
+- **g7:** Solo aplica a proceso penal Ley 906 en Colombia.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill identificar_etapa_procesal_ley906**
 
@@ -4032,23 +3856,28 @@ etapa, evidencia de la etapa, incertidumbres, siguiente dato a verificar.
 
 > (espacio para la abogada)
 
-#### 9.68 `mapear_actuaciones_posibles_victima`
+#### 9.60 `mapear_actuaciones_posibles_victima`
 
-**Para que sirve:** indicar que puede hacer la representacion de victimas segun etapa.
+**Para que sirve:** Listar actuaciones que la representación de víctimas puede promover en la etapa actual, con requisitos y efectos esperados.
 
 **Archivo:** `agente/skills/mapear_actuaciones_posibles_victima/SKILL.md`
 
-**Agentes que lo usan:** `analista_ruta_procesal_ley906`, `analista_representacion_victimas`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_representacion_victimas`
 
 **Instruccion tipo:** Indicar que puede hacer la representacion de victimas segun etapa.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Etapa Ley 906 confirmada o `[PENDIENTE DE VERIFICAR]`.
+- Objetivos preliminares de la víctima.
+- Actuaciones ya realizadas en el expediente.
+- Norma Ley 906 y derechos de víctimas (RAG).
 
 **Que produce (salidas):**
 
-actuacion posible, oportunidad, autoridad, soporte normativo, riesgo.
+- Lista: `actuacion`, `autoridad_destino`, `requisitos`, `oportunidad_preliminar`, `efecto_esperado`, `riesgo`, `norma_soporte`.
+- Priorización según intereses de la víctima.
+- Actuaciones no procedentes en etapa marcadas con motivo.
 
 **Pasos del skill:**
 
@@ -4057,14 +3886,16 @@ actuacion posible, oportunidad, autoridad, soporte normativo, riesgo.
 3. Priorizar según intereses de la víctima.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_ley906_search``, ``rag_normas_victimas_search``, ``citation_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Normas solo desde RAG verificado.
+- **g2:** Sin etapa, listar solo categorías genéricas marcadas pendientes.
+- **g4:** HITL antes de radicar cualquier actuación.
+- **g5:** Actuaciones que expongan a la víctima señalar riesgo revictimización.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill mapear_actuaciones_posibles_victima**
 
@@ -4081,37 +3912,49 @@ actuacion posible, oportunidad, autoridad, soporte normativo, riesgo.
 
 ### Categoria: Skills de seguimiento procesal
 
-#### 9.69 `actualizar_tareas_responsable`
+#### 9.61 `actualizar_tareas_responsable`
 
-**Para que sirve:** mantener lista de tareas por agente o abogado.
+**Para que sirve:** Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento.
 
 **Archivo:** `agente/skills/actualizar_tareas_responsable/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `coordinador_caso`, `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Mantener lista de tareas por agente o abogado.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Lista de tareas abiertas del caso (id, descripción, estado actual).
+- Cambios reportados en el turno (nueva tarea, cierre, replazo de responsable, nuevo plazo).
+- Radicado o identificador interno del caso.
+- Responsable asignado: abogado de planta, agente IA o pendiente de asignación.
 
 **Que produce (salidas):**
 
-tarea, responsable, fecha limite, dependencia, estado.
+Alineados al ledger real (`src/agents/completeness.py`):
+- Tabla de tareas: `id`, `titulo`/`descripción`, `responsable`, `tipo` (`faltante` | `verificacion_especialista` | …), `estado` (`pendiente` | `cerrada`).
+- Campos opcionales: `prioridad`, `motivo`, `pendiente_tipo`, `impacto_juridico`, `origen`, `creada_en`/`cerrada_en`.
+- Tareas nuevas o modificadas marcadas para revisión humana.
+- Alertas de tareas vencidas o sin responsable (cuando el turno las reporte).
+
+Nota: estados ricos (`abierta`/`en_curso`/`bloqueada`) no viven en el ledger del POC; el código usa solo `pendiente`|`cerrada` para menos churn.
 
 **Pasos del skill:**
 
-1. Actualizar estado, plazo y responsable de cada tarea abierta del caso.
+1. Actualizar estado, plazo y responsable de cada tarea pendiente del caso.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``task_manager_create``, ``task_manager_update``
+**Herramientas:** `sin function_tools (side-effect gerencia_ledger / tareas_gerencia)`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar tareas, plazos ni actuaciones no reportadas en el expediente o el turno.
+- **g2:** Si falta responsable en tarea crítica, dejar `pendiente` y solicitar dato al abogado (no inventar cierre).
+- **g3:** Distinguir tarea confirmada de tarea sugerida por la IA (etiquetar sugeridas como preliminares).
+- **g4:** Cambios de plazo en actuaciones procesales requieren validación del abogado responsable.
+- **g6:** No incluir datos sensibles de la víctima en descripciones de tarea si no son necesarios.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Cerrar con aviso de que la asignación y plazos requieren revisión profesional.
 
 **Checklist de aprobacion — Skill actualizar_tareas_responsable**
 
@@ -4126,70 +3969,25 @@ tarea, responsable, fecha limite, dependencia, estado.
 
 > (espacio para la abogada)
 
-#### 9.70 `controlar_audiencias`
+#### 9.62 `crear_reporte_estado_caso`
 
-**Para que sirve:** administrar fechas, horas, enlaces y preparacion de audiencias.
-
-**Archivo:** `agente/skills/controlar_audiencias/SKILL.md`
-
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`, `preparador_estrategico_audiencias_penales`
-
-**Instruccion tipo:** Administrar fechas, horas, enlaces y preparacion de audiencias.
-
-**Que necesita para funcionar (entradas):**
-
-Depende del flujo. Solicitar datos faltantes antes de continuar.
-
-**Que produce (salidas):**
-
-audiencia, fecha, tipo, documentos requeridos, responsable.
-
-**Pasos del skill:**
-
-1. Registrar fechas, horas, enlaces y tipo de audiencia.
-2. Vincular audiencia con checklist de preparación.
-3. Alertar conflictos de agenda o datos incompletos.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-
-**Herramientas:** ``calendar_event_create``, ``calendar_event_reader``, ``task_manager_create``
-
-**Cuidados y riesgos:**
-
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
-
-**Checklist de aprobacion — Skill controlar_audiencias**
-
-| Decision | Marcar |
-|---|---|
-| APROBAR | [ ] |
-| AJUSTAR | [ ] |
-| ELIMINAR | [ ] |
-| PENDIENTE | [ ] |
-
-**Observaciones / cambios sugeridos:**
-
-> (espacio para la abogada)
-
-#### 9.71 `crear_reporte_estado_caso`
-
-**Para que sirve:** crear reporte interno periodico.
+**Para que sirve:** Generar reporte interno del estado del caso para el despacho (no para cliente).
 
 **Archivo:** `agente/skills/crear_reporte_estado_caso/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Crear reporte interno periodico.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Radicado, actuaciones recientes, tareas pendientes.
+- Alertas de términos y seguimiento documental.
 
 **Que produce (salidas):**
 
-estado, ultimas actuaciones, proximos hitos, tareas, riesgos.
+- Reporte: etapa, últimas actuaciones, pendientes, riesgos procesales, próximos pasos.
+- Etiqueta: `REPORTE INTERNO DESPACHO`.
 
 **Pasos del skill:**
 
@@ -4198,14 +3996,14 @@ estado, ultimas actuaciones, proximos hitos, tareas, riesgos.
 3. Excluir estrategia sensible no apta para todo el equipo.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_reader``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g6:** Reporte interno; no incluir datos innecesarios.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de compartir reporte con cliente o terceros; uso interno despacho con revisión.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill crear_reporte_estado_caso**
 
@@ -4220,23 +4018,29 @@ estado, ultimas actuaciones, proximos hitos, tareas, riesgos.
 
 > (espacio para la abogada)
 
-#### 9.72 `detectar_inactividad_procesal`
+#### 9.63 `detectar_inactividad_procesal`
 
-**Para que sirve:** alertar falta de movimientos por periodo relevante.
+**Para que sirve:** Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde.
 
 **Archivo:** `agente/skills/detectar_inactividad_procesal/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Alertar falta de movimientos por periodo relevante.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Última actuación registrada (fecha, tipo, fuente).
+- Etapa procesal y plazos razonables de la etapa.
+- Consulta estado radicado (`process_lookup_query`).
 
 **Que produce (salidas):**
 
-periodo, ultima actuacion, riesgo, accion sugerida.
+- `periodo_inactividad` (días/meses).
+- `ultima_actuacion` con fuente.
+- `riesgo` (pérdida prueba, archivo, olvido víctima).
+- `accion_sugerida` (solicitud impulso, derecho petición, seguimiento).
+- Derivar a `evaluar_solicitud_fiscalia_juez` si procede impulso.
 
 **Pasos del skill:**
 
@@ -4245,14 +4049,15 @@ periodo, ultima actuacion, riesgo, accion sugerida.
 3. Sugerir actuación de impulso si corresponde.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``process_lookup_query``, ``case_state_reader``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Última actuación con fuente y timestamp de consulta.
+- **g3:** Inactividad inferida sin consulta radicado = pendiente.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_inactividad_procesal**
 
@@ -4267,23 +4072,26 @@ periodo, ultima actuacion, riesgo, accion sugerida.
 
 > (espacio para la abogada)
 
-#### 9.73 `generar_alertas_terminos_vencimientos`
+#### 9.64 `generar_alertas_terminos_vencimientos`
 
-**Para que sirve:** crear alertas de posibles vencimientos.
+**Para que sirve:** Generar alertas de vencimientos próximos clasificadas por criticidad.
 
 **Archivo:** `agente/skills/generar_alertas_terminos_vencimientos/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+**Agentes que lo usan:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Crear alertas de posibles vencimientos.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Términos identificados (`controlar_terminos_procesales_preliminares`).
+- Calendario de audiencias y actuaciones.
+- Responsable asignado por alerta.
 
 **Que produce (salidas):**
 
-alerta, fecha base, fecha objetivo, responsable, nivel de confianza.
+- Alertas: `id`, `descripcion`, `fecha_objetivo`, `criticidad` (crítica | alta | media), `responsable`, `nivel_confianza`.
+- Notificación sugerida (sí/no).
 
 **Pasos del skill:**
 
@@ -4291,14 +4099,14 @@ alerta, fecha base, fecha objetivo, responsable, nivel de confianza.
 2. Clasificar alertas por criticidad.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``calendar_terms_calculator``, ``notification_create``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Fechas estimadas etiquetadas como tales.
+- **g4:** Alerta crítica dispara revisión humana, no actuación automática.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Verificación humana de términos.
 
 **Checklist de aprobacion — Skill generar_alertas_terminos_vencimientos**
 
@@ -4313,37 +4121,39 @@ alerta, fecha base, fecha objetivo, responsable, nivel de confianza.
 
 > (espacio para la abogada)
 
-#### 9.74 `monitorear_radicado`
+#### 9.65 `monitorear_radicado`
 
-**Para que sirve:** consultar o registrar estado de radicado.
+**Para que sirve:** Consultar o registrar estado del radicado con fuente y timestamp.
 
 **Archivo:** `agente/skills/monitorear_radicado/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Consultar o registrar estado de radicado.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Número de radicado (si consta).
+- Última consulta registrada (si existe).
 
 **Que produce (salidas):**
 
-estado, ultima actuacion, fuente, fecha consulta, incertidumbres.
+- Estado del radicado, fuente, `timestamp_consulta`.
+- Cambios respecto a consulta anterior (si aplica).
 
 **Pasos del skill:**
 
 1. Consultar o registrar estado del radicado con fuente y timestamp de la consulta.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``process_lookup_query``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar actuaciones ni estados.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill monitorear_radicado**
 
@@ -4358,23 +4168,27 @@ estado, ultima actuacion, fuente, fecha consulta, incertidumbres.
 
 > (espacio para la abogada)
 
-#### 9.75 `preparar_resumen_operativo_cliente`
+#### 9.66 `preparar_resumen_operativo_cliente`
 
-**Para que sirve:** crear version simple del estado del proceso para cliente, sin estrategia sensible.
+**Para que sirve:** Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible.
 
 **Archivo:** `agente/skills/preparar_resumen_operativo_cliente/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_seguimiento_procesal`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Crear version simple del estado del proceso para cliente, sin estrategia sensible.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Estado del radicado y últimas actuaciones.
+- Próximos pasos procesales públicos (no estrategia interna).
+- Aprobación previa del abogado (si aplica).
 
 **Que produce (salidas):**
 
-resumen claro, proximos pasos, pendientes, advertencias.
+- Resumen en lenguaje accesible: qué pasó, qué sigue, qué necesita el cliente.
+- `excluido_estrategia_sensible`: confirmación explícita.
+- Etiqueta: `SOLO_TRAS_APROBACION_ABOGADO — NO ENVIAR DIRECTO`.
 
 **Pasos del skill:**
 
@@ -4383,14 +4197,14 @@ resumen claro, proximos pasos, pendientes, advertencias.
 3. Marcar para revisión humana antes de envío al cliente.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_reader``, ``approval_gate_submit``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g4:** HITL obligatorio; nunca envío automático al cliente.
+- **g6:** No incluir datos de terceros ni detalles gráficos innecesarios.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill preparar_resumen_operativo_cliente**
 
@@ -4405,37 +4219,39 @@ resumen claro, proximos pasos, pendientes, advertencias.
 
 > (espacio para la abogada)
 
-#### 9.76 `registrar_actuacion_procesal`
+#### 9.67 `registrar_actuacion_procesal`
 
-**Para que sirve:** registrar una actuacion nueva en la bitacora del caso.
+**Para que sirve:** Registrar en el sistema una actuación procesal nueva con fuente y fecha.
 
 **Archivo:** `agente/skills/registrar_actuacion_procesal/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Registrar una actuacion nueva en la bitacora del caso.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Descripción de la actuación, fecha, documento fuente.
+- Radicado del caso.
 
 **Que produce (salidas):**
 
-actuacion, fecha, fuente, impacto operativo, tareas.
+- Registro: `actuacion`, `fecha`, `fuente`, `timestamp_registro`.
+- Confirmación de actualización de estado del caso.
 
 **Pasos del skill:**
 
 1. Registrar en bitácora: fecha, tipo, resumen y fuente de la actuación nueva.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_writer``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar actuaciones.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill registrar_actuacion_procesal**
 
@@ -4450,23 +4266,25 @@ actuacion, fecha, fuente, impacto operativo, tareas.
 
 > (espacio para la abogada)
 
-#### 9.77 `seguimiento_documentos_radicados`
+#### 9.68 `seguimiento_documentos_radicados`
 
-**Para que sirve:** controlar documentos enviados y respuestas pendientes.
+**Para que sirve:** Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.
 
 **Archivo:** `agente/skills/seguimiento_documentos_radicados/SKILL.md`
 
-**Agentes que lo usan:** `gestor_seguimiento_procesal_penal`
+**Agentes que lo usan:** `analista_seguimiento_procesal`
 
 **Instruccion tipo:** Controlar documentos enviados y respuestas pendientes.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Lista de documentos radicados (fecha, destinatario, radicado interno).
+- Plazos de respuesta esperados.
 
 **Que produce (salidas):**
 
-documento, fecha radicacion, autoridad, respuesta esperada, alerta.
+- Por documento: `estado` (pendiente | respondido | vencido | desconocido), `días_transcurridos`, `acción_sugerida`.
+- Alertas de vencimiento.
 
 **Pasos del skill:**
 
@@ -4475,14 +4293,14 @@ documento, fecha radicacion, autoridad, respuesta esperada, alerta.
 3. Alertar plazos de respuesta institucional.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``document_version_control``, ``case_state_writer``, ``task_manager_update``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar respuestas de autoridad.
+- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill seguimiento_documentos_radicados**
 
@@ -4499,23 +4317,26 @@ documento, fecha radicacion, autoridad, respuesta esperada, alerta.
 
 ### Categoria: Skills de tipicidad y responsabilidad penal
 
-#### 9.78 `analizar_autoria_y_participacion`
+#### 9.69 `analizar_autoria_y_participacion`
 
-**Para que sirve:** evaluar posibles roles de los intervinientes de manera preliminar.
+**Para que sirve:** Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal.
 
 **Archivo:** `agente/skills/analizar_autoria_y_participacion/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`
 
 **Instruccion tipo:** Evaluar posibles roles de los intervinientes de manera preliminar.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Mapa de actores (`identificar_actores_y_roles`).
+- Hechos soportados sobre conducta de cada interviniente.
+- Tipo penal hipotético y elementos descompuestos.
 
 **Que produce (salidas):**
 
-actor, posible rol, hechos soporte, riesgos, pendientes.
+- Por actor: `rol_preliminar` (autor | coautor | partícipe | testigo | sin_datos), `hechos_soporte`, `vacios_probatorios`, `riesgo`.
+- Etiqueta: `PRELIMINAR — NO IMPUTACIÓN FORMAL`.
 
 **Pasos del skill:**
 
@@ -4524,14 +4345,15 @@ actor, posible rol, hechos soporte, riesgos, pendientes.
 3. Señalar vacíos probatorios en autoria/participación.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_codigo_penal_search``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No atribuir conducta sin hecho soportado.
+- **g3:** Distinción entre “mencionado” y “partícipe acreditado”.
+- **g4:** No comunicar roles a Fiscalía o víctima sin revisión del abogado.
+- **g5:** No sugerir participación de la víctima sin base factual.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill analizar_autoria_y_participacion**
 
@@ -4546,23 +4368,28 @@ actor, posible rol, hechos soporte, riesgos, pendientes.
 
 > (espacio para la abogada)
 
-#### 9.79 `analizar_dolo_culpa_elemento_subjetivo`
+#### 9.70 `analizar_dolo_culpa_elemento_subjetivo`
 
-**Para que sirve:** identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
+**Para que sirve:** Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza.
 
 **Archivo:** `agente/skills/analizar_dolo_culpa_elemento_subjetivo/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`
 
 **Instruccion tipo:** Identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Elementos subjetivos del tipo penal descompuesto.
+- Hechos sobre intención, conocimiento, advertencia, inobservancia de deber.
+- Declaraciones y conductas posteriores al hecho (si constan).
 
 **Que produce (salidas):**
 
-indicios, hechos soporte, pruebas, debilidades.
+- `modalidad_preliminar`: dolo_directo | dolo_eventual | culpa_consciente | culpa_inconsciente | indeterminado.
+- `hechos_soporte` e `indicios` (separados).
+- `debilidades` y prueba pendiente.
+- Etiqueta: `NO AFIRMAR ELEMENTO SUBJETIVO SIN SOPORTE`.
 
 **Pasos del skill:**
 
@@ -4571,14 +4398,15 @@ indicios, hechos soporte, pruebas, debilidades.
 3. No afirmar elemento subjetivo sin soporte suficiente.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``rag_jurisprudencia_penal_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inferir dolo solo del resultado; exigir hechos de conocimiento/voluntad.
+- **g3:** Indicio ≠ prueba de dolo; etiquetar separadamente.
+- **g4:** Conclusión subjetiva nunca va a memorial sin abogado.
+- **g5:** En violencia sexual, no inferir consentimiento o dolo de la víctima.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill analizar_dolo_culpa_elemento_subjetivo**
 
@@ -4593,41 +4421,45 @@ indicios, hechos soporte, pruebas, debilidades.
 
 > (espacio para la abogada)
 
-#### 9.80 `descomponer_elementos_tipo_penal`
+#### 9.71 `descomponer_elementos_tipo_penal`
 
-**Para que sirve:** dividir un posible delito en elementos juridicos verificables.
+**Para que sirve:** Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente.
 
 **Archivo:** `agente/skills/descomponer_elementos_tipo_penal/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`
 
 **Instruccion tipo:** Dividir un posible delito en elementos juridicos verificables.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hipótesis de tipos penales preliminares.
+- Hechos soportados y cronología verificada.
+- Artículos del CP verificados en RAG (`citation_checker`).
 
 **Que produce (salidas):**
 
-elementos objetivos, subjetivos, sujetos, conducta, resultado, nexo, agravantes posibles.
+- Por cada tipo hipotético: `elemento` (conducta | resultado | nexo | tipicidad_especial | dolo | culpa | sujeto), `hecho_soporte`, `estado` (cubierto | parcial | vacío), `duda_tipicidad`.
+- Lista de elementos sin soporte factual.
+- Etiqueta: `ANÁLISIS DOGMÁTICO PRELIMINAR`.
 
 **Pasos del skill:**
 
 1. Seleccionar tipos penales hipotéticos aplicables.
 2. Descomponer conducta, resultado, nexo y elementos normativos.
 3. Documentar dudas de tipicidad.
-4. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-5. Profundizar análisis de «Dividir un posible delito en elementos juridicos verificables» con referencia al expediente y norma aplicable.
-6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+4. Registrar dudas de tipicidad por elemento sin concluir culpabilidad.
+5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_codigo_penal_search``, ``citation_checker``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Artículos y elementos normativos solo desde RAG verificado.
+- **g3:** Elemento cubierto requiere hecho soportado, no inferencia sola.
+- **g4:** No usar en escrito de acusación o memorial sin revisión del abogado.
+- **g5:** En delitos sexuales/violencia, no presuponer consentimiento en elementos subjetivos.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill descomponer_elementos_tipo_penal**
 
@@ -4642,23 +4474,26 @@ elementos objetivos, subjetivos, sujetos, conducta, resultado, nexo, agravantes 
 
 > (espacio para la abogada)
 
-#### 9.81 `detectar_agravantes_atenuantes`
+#### 9.72 `detectar_agravantes_atenuantes`
 
-**Para que sirve:** identificar circunstancias relevantes que puedan afectar gravedad juridica.
+**Para que sirve:** Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar.
 
 **Archivo:** `agente/skills/detectar_agravantes_atenuantes/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`
 
 **Instruccion tipo:** Identificar circunstancias relevantes que puedan afectar gravedad juridica.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo penal hipotético y hechos soportados.
+- Circunstancias del hecho (vínculo con víctima, premeditación, grupo, etc.).
+- Norma penal verificada en RAG.
 
 **Que produce (salidas):**
 
-circunstancia, fuente normativa, hecho soporte, prueba, riesgo.
+- Registro: `circunstancia`, `tipo` (agravante | atenuante | cualificadora), `norma_cp`, `hecho_soporte`, `prueba`, `estado` (acreditado | pendiente).
+- Circunstancias no acreditadas marcadas `[PENDIENTE DE VERIFICAR]`.
 
 **Pasos del skill:**
 
@@ -4667,14 +4502,15 @@ circunstancia, fuente normativa, hecho soporte, prueba, riesgo.
 3. Marcar elementos no acreditados como pendientes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_codigo_penal_search``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar circunstancias ni artículos.
+- **g3:** Circunstancia alegada sin hecho = pendiente, no acreditada.
+- **g4:** No prometer pena o resultado al cliente.
+- **g5:** No usar circunstancias que culpen a la víctima (ej. “provocación” sin soporte).
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_agravantes_atenuantes**
 
@@ -4689,23 +4525,28 @@ circunstancia, fuente normativa, hecho soporte, prueba, riesgo.
 
 > (espacio para la abogada)
 
-#### 9.82 `detectar_riesgos_atipicidad`
+#### 9.73 `detectar_riesgos_atipicidad`
 
-**Para que sirve:** detectar cuando un caso puede ser atipico o tener naturaleza no penal.
+**Para que sirve:** Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito.
 
 **Archivo:** `agente/skills/detectar_riesgos_atipicidad/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Detectar cuando un caso puede ser atipico o tener naturaleza no penal.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Hipótesis de tipos penales.
+- Descomposición de elementos (si existe).
+- Hechos soportados y vacíos documentados.
 
 **Que produce (salidas):**
 
-riesgo, razon, hecho faltante, prueba faltante, recomendacion interna.
+- `riesgo_atipicidad`: alto | medio | bajo.
+- `elementos_faltantes` (objetivos y subjetivos).
+- `conducta_alternativa` (civil, disciplinaria, administrativa — solo si hay indicios, marcados preliminares).
+- `recomendacion_interna`: continuar análisis penal | explorar vía no penal | pedir hechos adicionales.
 
 **Pasos del skill:**
 
@@ -4714,14 +4555,15 @@ riesgo, razon, hecho faltante, prueba faltante, recomendacion interna.
 3. Alertar riesgo de atipicidad antes de actuación.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_jurisprudencia_penal_search``, ``rag_expediente_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No citar jurisprudencia no verificada en RAG.
+- **g3:** Atipicidad es hipótesis; no afirmar que “no es delito”.
+- **g4:** Alerta de atipicidad alta debe llegar al abogado antes de radicar denuncia o memorial.
+- **g7:** Si el caso es claramente no penal, declararlo y no forzar tipicidad.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill detectar_riesgos_atipicidad**
 
@@ -4736,23 +4578,27 @@ riesgo, razon, hecho faltante, prueba faltante, recomendacion interna.
 
 > (espacio para la abogada)
 
-#### 9.83 `generar_preguntas_tipicidad`
+#### 9.74 `generar_preguntas_tipicidad`
 
-**Para que sirve:** crear preguntas para completar elementos del tipo penal.
+**Para que sirve:** Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad.
 
 **Archivo:** `agente/skills/generar_preguntas_tipicidad/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`, `analista_cronologia_hechos_penales`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`, `analista_cronologia_hechos`
 
 **Instruccion tipo:** Crear preguntas para completar elementos del tipo penal.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Vacíos factuales ya documentados (`detectar_vacios_factuales`).
+- Hipótesis de conducta preliminar (si existe, marcada como tal).
+- Elementos del tipo penal incompletos por falta de hecho, no por análisis jurídico.
 
 **Que produce (salidas):**
 
-pregunta, elemento que busca aclarar, riesgo de induccion.
+- Preguntas: `pregunta`, `elemento_factual_que_aclara`, `riesgo_induccion` (alto | medio | bajo).
+- Nota de derivación a `analista_responsabilidad_tipicidad` si el vacío es jurídico-dogmático.
+- Etiqueta: `NO SUSTITUYE ANÁLISIS DE TIPICIDAD`.
 
 **Pasos del skill:**
 
@@ -4761,14 +4607,15 @@ pregunta, elemento que busca aclarar, riesgo de induccion.
 3. Evitar preguntas que presupongan culpabilidad.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``sin_herramientas_obligatorias``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No asumir que el tipo penal está configurado.
+- **g3:** Preguntas aclaran hechos, no califican conducta.
+- **g5:** No preguntas del tipo “¿por qué no denunció antes?” o que presupongan consentimiento.
+- **g4:** Revisión del abogado antes de enviar a víctima.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill generar_preguntas_tipicidad**
 
@@ -4783,23 +4630,28 @@ pregunta, elemento que busca aclarar, riesgo de induccion.
 
 > (espacio para la abogada)
 
-#### 9.84 `identificar_conductas_punibles_preliminares`
+#### 9.75 `identificar_conductas_punibles_preliminares`
 
-**Para que sirve:** proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
+**Para que sirve:** Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación.
 
 **Archivo:** `agente/skills/identificar_conductas_punibles_preliminares/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`
 
 **Instruccion tipo:** Proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
 
 **Que necesita para funcionar (entradas):**
 
-cronologia, hechos soportados, objetivo de victima.
+- Cronología y hechos soportados (`verificar_hechos_soportados` del analista de cronología).
+- Mapa de actores.
+- Objetivos de la víctima (si constan).
+- Tipos penales a explorar (si el abogado los indicó).
 
 **Que produce (salidas):**
 
-posibles delitos, razon preliminar, fuentes normativas, nivel de confianza.
+- Hipótesis: `tipo_penal_hipotetico`, `articulo_cp` (solo si verificado en RAG), `conducta_mapeada`, `nivel_confianza` (alta | media | baja), `motivo`.
+- Atipicidad evidente descartada (con razón).
+- Etiqueta obligatoria: `HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN`.
 
 **Pasos del skill:**
 
@@ -4808,14 +4660,16 @@ posibles delitos, razon preliminar, fuentes normativas, nivel de confianza.
 3. Presentar como hipótesis, no conclusión.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_codigo_penal_search``, ``rag_normativo_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar artículos del Código Penal ni conductas no descritas en hechos.
+- **g2:** Sin hechos soportados mínimos, no proponer tipos; derivar a cronología.
+- **g3:** Hipótesis ≠ hecho probado; separar conducta narrada de calificación.
+- **g4:** HITL obligatorio antes de comunicar calificación a víctima o contraparte.
+- **g5:** No sugerir tipos que revictimicen (ej. calificar defensa de víctima como delito).
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill identificar_conductas_punibles_preliminares**
 
@@ -4830,40 +4684,44 @@ posibles delitos, razon preliminar, fuentes normativas, nivel de confianza.
 
 > (espacio para la abogada)
 
-#### 9.85 `mapear_tipo_penal_hecho_prueba`
+#### 9.76 `mapear_tipo_penal_hecho_prueba`
 
-**Para que sirve:** relacionar elementos del tipo con hechos y pruebas.
+**Para que sirve:** Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario.
 
 **Archivo:** `agente/skills/mapear_tipo_penal_hecho_prueba/SKILL.md`
 
-**Agentes que lo usan:** `analista_tipicidad_y_responsabilidad_penal`, `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+**Agentes que lo usan:** `analista_responsabilidad_tipicidad`, `analista_evidencia`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Relacionar elementos del tipo con hechos y pruebas.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Elementos del tipo descompuestos.
+- Matriz hecho-fuente y hecho-prueba (si existen).
+- Inventario probatorio del expediente.
 
 **Que produce (salidas):**
 
-matriz tipo/elemento/hecho/prueba/vacio/riesgo.
+- Matriz: `elemento_tipo`, `hecho`, `prueba_existente`, `prueba_faltante`, `fortaleza` (alta | media | baja), `riesgo`.
+- Prioridad de recaudo por elemento débil.
+- Etiqueta: `INSUMO ESTRATÉGICO — REVISIÓN ABOGADO`.
 
 **Pasos del skill:**
 
 1. Relacionar cada elemento del tipo con hechos y pruebas.
 2. Visualizar fortalezas y debilidades por elemento.
 3. Proponer recaudo orientado a elementos débiles.
-4. Profundizar análisis de «Relacionar elementos del tipo con hechos y pruebas» con referencia al expediente y norma aplicable.
+4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``rag_codigo_penal_search``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar pruebas ni elementos cubiertos artificialmente.
+- **g3:** Elemento “cubierto” requiere prueba identificada o hecho confirmado.
+- **g4:** HITL obligatorio antes de audiencia o memorial.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill mapear_tipo_penal_hecho_prueba**
 
@@ -4880,23 +4738,34 @@ matriz tipo/elemento/hecho/prueba/vacio/riesgo.
 
 ### Categoria: Skills transversales
 
-#### 9.86 `clasificar_tarea_y_etapa`
+#### 9.77 `clasificar_tarea_y_etapa`
 
-**Para que sirve:** clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
+**Para que sirve:** Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes.
 
 **Archivo:** `agente/skills/clasificar_tarea_y_etapa/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`, `analista_ruta_procesal_ley906`
+**Agentes que lo usan:** `coordinador_caso`, `analista_ruta_procesal`
 
 **Instruccion tipo:** Clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
 
 **Que necesita para funcionar (entradas):**
 
-solicitud, resumen de caso, documentos disponibles, estado procesal conocido.
+- Solicitud textual del abogado o usuario interno.
+- Resumen de caso y radicado (si existe).
+- Documentos disponibles en el turno o expediente.
+- Estado procesal conocido (última actuación, audiencia programada, etapa declarada).
 
 **Que produce (salidas):**
 
-clasificacion, etapa aparente, workflow recomendado, agentes requeridos.
+Alineados a `TriageResult` (`src/agents/schemas.py`):
+- `tipo_tarea`: `redaccion` | `analisis_factual` | `tipicidad` | `ruta_906` | `representacion_victima` | `evidencia` | `audiencia` | `seguimiento` | `fuera_de_alcance`.
+- `etapa_aparente`: `indagacion` | `investigacion` | `imputacion` | `juicio` | `ejecucion` | `desconocida` | `pendiente_verificar`.
+- `agente_destino` recomendado (agent id).
+- `datos_faltantes_bloqueantes` (lista corta de labels) o confirmación de derivación.
+- `puede_continuar`: bool.
+- `urgencia_preliminar`: bool (true si `nivel_urgencia` ∈ {critica, alta}).
+- `nivel_urgencia`: `critica` | `alta` | `media` | `baja`.
+- `motivos_urgencia`, `escalar_humano`, `accion_inmediata_urgencia`.
 
 **Pasos del skill:**
 
@@ -4905,14 +4774,16 @@ clasificacion, etapa aparente, workflow recomendado, agentes requeridos.
 3. Derivar al agente especialista correcto o pedir datos faltantes.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``case_state_reader``, ``audit_log_write``
+**Herramientas:** `buscar_en_expediente`
 
 **Cuidados y riesgos:**
 
-- no concluir etapa si no hay datos suficientes; marcar como desconocida o pendiente.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar etapa, radicado ni actuaciones para justificar derivación.
+- **g2:** Sin radicado ni actuaciones mínimas, no concluir etapa; marcar `desconocida` y pedir datos.
+- **g3:** Etapa aparente es hipótesis de enrutamiento, no conclusión procesal definitiva.
+- **g4:** Derivación con implicación estratégica (memorial, audiencia, impulso) requiere revisión del abogado.
+- **g7:** Consultas no penales o ajenas a representación de víctimas en Colombia → declarar fuera de alcance y no derivar a redactor.
+- **g8:** Cerrar con aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill clasificar_tarea_y_etapa**
 
@@ -4927,40 +4798,51 @@ clasificacion, etapa aparente, workflow recomendado, agentes requeridos.
 
 > (espacio para la abogada)
 
-#### 9.87 `detectar_urgencia_penal`
+#### 9.78 `detectar_urgencia_penal`
 
-**Para que sirve:** identificar si el caso requiere atencion humana inmediata.
+**Para que sirve:** Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria.
 
 **Archivo:** `agente/skills/detectar_urgencia_penal/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+**Agentes que lo usan:** `coordinador_caso`, `analista_seguimiento_procesal`, `analista_calidad_juridica`
 
 **Instruccion tipo:** Identificar si el caso requiere atencion humana inmediata.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Solicitud del turno y hechos reportados.
+- Fechas de audiencias, términos o vencimientos mencionados o en expediente.
+- Indicios de riesgo a integridad de la víctima, libertad, destrucción de evidencia o silencio procesal prolongado.
+- Estado del radicado y última actuación (si existe).
 
 **Que produce (salidas):**
 
-urgencias, nivel de severidad, accion inmediata, agente/humano responsable.
+Alineados a `UrgencyResult` / campos de `TriageResult`:
+- `nivel_urgencia`: `critica` | `alta` | `media` | `baja`.
+- `motivos` (lista verificable o `[PENDIENTE DE VERIFICAR]`).
+- `accion_inmediata_sugerida` (ej. contactar abogado titular, preservar evidencia, verificar término).
+- `escalar_humano`: bool (true si critica|alta).
+- `urgencia_preliminar`: bool derivado (`critica`|`alta` → true).
+- `evaluada_en`: unix timestamp.
 
 **Pasos del skill:**
 
 1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
 2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
 3. Escalar con notificación si aplica.
-4. Profundizar análisis de «Identificar si el caso requiere atencion humana inmediata» con referencia al expediente y norma aplicable.
+4. Documentar motivo de escalamiento y agente destino.
 5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``calendar_terms_calculator``, ``case_state_reader``, ``notification_create``
+**Herramientas:** `buscar_en_expediente`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No inventar vencimientos ni amenazas no reportadas.
+- **g2:** Si falta fecha de audiencia o término crítico, marcar urgencia `[PENDIENTE DE VERIFICAR]` y pedir dato.
+- **g3:** Distinguir riesgo reportado de inferencia de la IA.
+- **g4:** Nivel critica/alta siempre requiere confirmación humana antes de actuar.
+- **g5:** En riesgo a integridad, no exponer datos sensibles de la víctima en la notificación de escalamiento.
+- **g8:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
 
 **Checklist de aprobacion — Skill detectar_urgencia_penal**
 
@@ -4975,23 +4857,31 @@ urgencias, nivel de severidad, accion inmediata, agente/humano responsable.
 
 > (espacio para la abogada)
 
-#### 9.88 `gestionar_faltantes_expediente`
+#### 9.79 `gestionar_faltantes_expediente`
 
-**Para que sirve:** identificar datos y documentos faltantes antes de analizar o redactar.
+**Para que sirve:** Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras.
 
 **Archivo:** `agente/skills/gestionar_faltantes_expediente/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`
+**Agentes que lo usan:** `coordinador_caso`
 
 **Instruccion tipo:** Identificar datos y documentos faltantes antes de analizar o redactar.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Tipo de tarea / destino clasificado.
+- Inventario de documentos en expediente o adjuntos del turno.
+- Radicado, poder, actuaciones procesales conocidas.
+- Checklist mínimo por destino (código).
 
 **Que produce (salidas):**
 
-lista de faltantes, prioridad, responsable sugerido, dependencia con otros analisis.
+- `faltantes_detalle`: lista de `{elemento, prioridad (bloqueante|deseable), motivo, responsable_sugerido}`.
+- `faltantes`: `list[str]` (compat; labels de `elemento`).
+- `puede_continuar`: bool (false si hay bloqueantes).
+- Checklist canónico (labels): hechos mínimos del caso; número de radicado; poder o calidad en que actúa el despacho; última actuación procesal; partes relevantes; etapa o última actuación procesal.
+- Tareas de recolección en `tareas_gerencia` (estado `pendiente` hasta cerrar).
+- Mensaje al abogado con solicitud concreta (`format_missing_request`).
 
 **Pasos del skill:**
 
@@ -5000,14 +4890,16 @@ lista de faltantes, prioridad, responsable sugerido, dependencia con otros anali
 3. Solicitar al abogado completar antes de concluir.
 4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``case_state_reader``, ``rag_expediente_search``, ``task_manager_create``
+**Herramientas:** `buscar_en_expediente`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** No afirmar que un documento existe si no está en expediente o adjuntos.
+- **g2:** Obligatorio pedir faltantes bloqueantes antes de derivar a redactor.
+- **g3:** Distinguir documento no aportado de documento mencionado pero no verificado.
+- **g4:** No autorizar redacción de memorial, petición o recurso con faltantes bloqueantes sin excepción aprobada por abogado.
+- **g6:** No listar datos sensibles innecesarios en la solicitud de completitud.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill gestionar_faltantes_expediente**
 
@@ -5022,37 +4914,42 @@ lista de faltantes, prioridad, responsable sugerido, dependencia con otros anali
 
 > (espacio para la abogada)
 
-#### 9.89 `marcar_pendientes_verificacion`
+#### 9.80 `marcar_pendientes_verificacion`
 
-**Para que sirve:** marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
+**Para que sirve:** Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
 
 **Archivo:** `agente/skills/marcar_pendientes_verificacion/SKILL.md`
 
-**Agentes que lo usan:** `coordinador_expediente_penal`
+**Agentes que lo usan:** `coordinador_caso`
 
 **Instruccion tipo:** Marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto o estructura de salida a revisar (del turno actual o borrador consolidado).
+- Fuentes disponibles en expediente o RAG para contrastar.
+- Lista opcional de elementos ya marcados por otros skills.
 
 **Que produce (salidas):**
 
-texto marcado, lista de pendientes, impacto juridico.
+- Texto con marcadores `[PENDIENTE DE VERIFICAR]` insertados.
+- Registro de pendientes: `elemento`, `tipo` (`hecho` | `cita` | `radicado` | `fecha` | `otro`), `impacto_juridico` (`alto` | `medio` | `bajo`).
+- En ledger: tareas `verificacion_especialista` con `pendiente_tipo` e `impacto_juridico`.
+- Conteo de pendientes y recomendación de no uso externo si hay impacto alto.
 
 **Pasos del skill:**
 
 1. Recorrer salida e insertar `[PENDIENTE DE VERIFICAR]` en cada dato, cita o hecho sin fuente.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``audit_log_write``
+**Herramientas:** `sin function_tools (side-effect audit_trace / tareas_gerencia)`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Implementación directa de g1 — todo sin fuente queda marcado, nunca inventado.
+- **g3:** No eliminar la distinción hecho/inferencia al marcar; solo etiquetar.
+- **g4:** Si impacto alto (etapa, memorial, término), bloquear uso externo hasta revisión humana.
+- **g8:** Incluir aviso estándar de revisión profesional al final.
 
 **Checklist de aprobacion — Skill marcar_pendientes_verificacion**
 
@@ -5067,23 +4964,28 @@ texto marcado, lista de pendientes, impacto juridico.
 
 > (espacio para la abogada)
 
-#### 9.90 `verificar_hechos_soportados`
+#### 9.81 `verificar_hechos_soportados`
 
-**Para que sirve:** revisar si cada afirmacion factual tiene fuente.
+**Para que sirve:** Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte.
 
 **Archivo:** `agente/skills/verificar_hechos_soportados/SKILL.md`
 
-**Agentes que lo usan:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`, `analista_cronologia_hechos_penales`
+**Agentes que lo usan:** `analista_cronologia_hechos`, `analista_calidad_juridica`, `redactor_documentos_juridicos`
 
 **Instruccion tipo:** Revisar si cada afirmacion factual tiene fuente.
 
 **Que necesita para funcionar (entradas):**
 
-Depende del flujo. Solicitar datos faltantes antes de continuar.
+- Texto o estructura a verificar (cronología, matriz, lista de hechos).
+- Expediente y fuentes disponibles en RAG.
+- Matriz hecho-fuente (si existe).
 
 **Que produce (salidas):**
 
-hechos soportados, hechos no soportados, tipo de fuente, nivel de confianza.
+- `hechos_soportados`: afirmación + fuente + nivel de confianza.
+- `hechos_no_soportados`: afirmación + motivo + `[PENDIENTE DE VERIFICAR]`.
+- `tipo_fuente` por afirmación.
+- Recomendación: apto para uso interno | requiere completar fuentes | no apto para memorial.
 
 **Pasos del skill:**
 
@@ -5091,14 +4993,14 @@ hechos soportados, hechos no soportados, tipo de fuente, nivel de confianza.
 2. Cruzar cada afirmación con fuente documental o expediente.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 
-**Herramientas:** ``rag_expediente_search``, ``source_reference_validator``
+**Herramientas:** `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_area_derecho`, `leer_playbook_proceso`, `leer_normas_clave`, `listar_areas_derecho`
 
 **Cuidados y riesgos:**
 
-- No inventar hechos ni fuentes. Requiere revision humana.
-- Do not invent norms, rulings, case numbers, or facts.
-- Keep facts, inferences, and pending verification clearly separated.
-- Any external output requires explicit human legal review.
+- **g1:** Implementación operativa de g1 — sin fuente, no soportado.
+- **g3:** Distinguir “no encontrado en expediente” de “falso”.
+- **g4:** Bloquear uso en memorial si hay hechos no soportados de impacto alto.
+- **g8:** Aviso de revisión profesional.
 
 **Checklist de aprobacion — Skill verificar_hechos_soportados**
 
@@ -5273,112 +5175,102 @@ flowchart LR
 
 | # | Agente | APROBAR | AJUSTAR | ELIMINAR | PENDIENTE | Observaciones |
 |---|---|---|---|---|---|---|
-| 1 | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] | |
-| 2 | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] | |
-| 3 | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] | |
-| 4 | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] | |
+| 1 | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] | |
+| 2 | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] | |
+| 3 | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] | |
+| 4 | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] | |
 | 5 | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] | |
-| 6 | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] | |
-| 7 | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] | |
-| 8 | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] | |
-| 9 | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] | |
-| 10 | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] | |
-| 11 | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] | |
+| 6 | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] | |
+| 7 | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] | |
+| 8 | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] | |
+| 9 | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] | |
+| 10 | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] | |
 
 ### 11.2 Skills (90)
 
 | # | Skill | Agente principal | APROBAR | AJUSTAR | ELIMINAR | PENDIENTE |
 |---|---|---|---|---|---|---|
-| 1 | `actualizar_tareas_responsable` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
+| 1 | `actualizar_tareas_responsable` | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] |
 | 2 | `alinear_estrategia_prueba_proceso` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 3 | `analizar_autoria_y_participacion` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
+| 3 | `analizar_autoria_y_participacion` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
 | 4 | `analizar_derechos_victima` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 5 | `analizar_dolo_culpa_elemento_subjetivo` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
+| 5 | `analizar_dolo_culpa_elemento_subjetivo` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
 | 6 | `analizar_enfoque_diferencial` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 7 | `analizar_intervencion_victima` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 8 | `analizar_perjuicio_irremediable` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 9 | `clasificar_aprobacion_juridica` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 10 | `clasificar_fuente_factual` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
-| 11 | `clasificar_tarea_y_etapa` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
-| 12 | `clasificar_tipo_prueba` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 13 | `construir_cronologia_penal` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 14 | `construir_matriz_hecho_prueba` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 15 | `construir_teoria_caso_victima` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 16 | `controlar_audiencias` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 17 | `controlar_cadena_custodia_preliminar` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 18 | `controlar_confidencialidad_datos_sensibles` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 19 | `controlar_no_revictimizacion` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 20 | `controlar_separacion_hecho_inferencia` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 21 | `controlar_terminos_procesales_preliminares` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 22 | `controlar_tono_juridico_documento` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 23 | `controlar_tono_riesgo_reputacional` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 24 | `crear_checklist_previo_audiencia` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 25 | `crear_matriz_hecho_derecho_fundamental` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 26 | `crear_matriz_hecho_fuente` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 27 | `crear_plan_recaudo_probatorio` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 28 | `crear_reporte_estado_caso` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 29 | `crear_resumen_ejecutivo_litigante` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 30 | `crear_ruta_procesal_recomendada` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 31 | `descomponer_elementos_tipo_penal` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 32 | `detectar_agravantes_atenuantes` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 33 | `detectar_alucinaciones_legales` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 34 | `detectar_brechas_probatorias` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 35 | `detectar_contradicciones_factuales` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 36 | `detectar_inactividad_procesal` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 37 | `detectar_riesgo_improcedencia_tutela` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 38 | `detectar_riesgo_revictimizacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 39 | `detectar_riesgos_atipicidad` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 40 | `detectar_riesgos_audiencia` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 41 | `detectar_riesgos_procesales` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 42 | `detectar_urgencia_penal` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
-| 43 | `detectar_vacios_factuales` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 44 | `estructurar_hechos_fundamentos_solicitudes` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 45 | `evaluar_dano_y_afectacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 46 | `evaluar_derecho_peticion` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 47 | `evaluar_oportunidad_procesal` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 48 | `evaluar_procedencia_tutela` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 49 | `evaluar_solicitud_fiscalia_juez` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 50 | `evaluar_suficiencia_probatoria` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 51 | `extraer_hechos_relevantes` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 52 | `generar_alertas_terminos_vencimientos` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 53 | `generar_preguntas_aclaracion` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 54 | `generar_preguntas_testigos_peritos` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 55 | `generar_preguntas_tipicidad` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 56 | `gestionar_faltantes_expediente` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
-| 57 | `identificar_actores_y_roles` | `analista_cronologia_hechos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 58 | `identificar_conductas_punibles_preliminares` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 59 | `identificar_derecho_fundamental_afectado` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 60 | `identificar_etapa_procesal_ley906` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 61 | `identificar_intereses_victima` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 62 | `identificar_objetivo_audiencia` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 63 | `inventariar_evidencia` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 64 | `mapear_actuaciones_posibles_victima` | `analista_ruta_procesal_ley906` | [ ] | [ ] | [ ] | [ ] |
-| 65 | `mapear_tipo_penal_hecho_prueba` | `analista_tipicidad_y_responsabilidad_penal` | [ ] | [ ] | [ ] | [ ] |
-| 66 | `marcar_pendientes_verificacion` | `coordinador_expediente_penal` | [ ] | [ ] | [ ] | [ ] |
-| 67 | `monitorear_radicado` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 68 | `preparar_borrador_tutela_preliminar` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 69 | `preparar_contraargumentos` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 70 | `preparar_guion_intervencion_oral` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 71 | `preparar_preguntas_audiencia` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 72 | `preparar_resumen_operativo_cliente` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 73 | `preparar_solicitudes_orales` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 74 | `preservar_evidencia_digital` | `gestor_evidencia_y_soporte_probatorio` | [ ] | [ ] | [ ] | [ ] |
-| 75 | `priorizar_objetivos_representacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
-| 76 | `recomendar_via_constitucional_o_alternativa` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 77 | `redactar_ampliacion_denuncia` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 78 | `redactar_derecho_peticion_penal` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 79 | `redactar_memorial_penal` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 80 | `redactar_recurso_o_intervencion_preliminar` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 81 | `redactar_solicitud_impulso_procesal` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 82 | `redactar_tutela_penal_preliminar` | `redactor_documentos_juridicos_penales` | [ ] | [ ] | [ ] | [ ] |
-| 83 | `registrar_actuacion_procesal` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 84 | `revisar_coherencia_estrategica` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 85 | `revisar_mecanismos_ordinarios` | `evaluador_derechos_fundamentales_tutela` | [ ] | [ ] | [ ] | [ ] |
-| 86 | `seguimiento_documentos_radicados` | `gestor_seguimiento_procesal_penal` | [ ] | [ ] | [ ] | [ ] |
-| 87 | `simular_escenarios_audiencia` | `preparador_estrategico_audiencias_penales` | [ ] | [ ] | [ ] | [ ] |
-| 88 | `verificar_citas_normativas` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 89 | `verificar_hechos_soportados` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
-| 90 | `verificar_jurisprudencia` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 7 | `analizar_intervencion_victima` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 8 | `clasificar_aprobacion_juridica` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 9 | `clasificar_fuente_factual` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 10 | `clasificar_tarea_y_etapa` | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] |
+| 11 | `clasificar_tipo_prueba` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 12 | `construir_cronologia_penal` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 13 | `construir_matriz_hecho_prueba` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 14 | `construir_teoria_caso_victima` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
+| 15 | `controlar_audiencias` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 16 | `controlar_cadena_custodia_preliminar` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 17 | `controlar_confidencialidad_datos_sensibles` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 18 | `controlar_no_revictimizacion` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 19 | `controlar_separacion_hecho_inferencia` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 20 | `controlar_terminos_procesales_preliminares` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 21 | `controlar_tono_juridico_documento` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 22 | `controlar_tono_riesgo_reputacional` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 23 | `crear_checklist_previo_audiencia` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 24 | `crear_matriz_hecho_fuente` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 25 | `crear_plan_recaudo_probatorio` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 26 | `crear_reporte_estado_caso` | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 27 | `crear_resumen_ejecutivo_litigante` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 28 | `crear_ruta_procesal_recomendada` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 29 | `descomponer_elementos_tipo_penal` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 30 | `detectar_agravantes_atenuantes` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 31 | `detectar_alucinaciones_legales` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 32 | `detectar_brechas_probatorias` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 33 | `detectar_contradicciones_factuales` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 34 | `detectar_inactividad_procesal` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 35 | `detectar_riesgo_revictimizacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
+| 36 | `detectar_riesgos_atipicidad` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 37 | `detectar_riesgos_audiencia` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 38 | `detectar_riesgos_procesales` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 39 | `detectar_urgencia_penal` | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] |
+| 40 | `detectar_vacios_factuales` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 41 | `estructurar_hechos_fundamentos_solicitudes` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 42 | `evaluar_dano_y_afectacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
+| 43 | `evaluar_derecho_peticion` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 44 | `evaluar_oportunidad_procesal` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 45 | `evaluar_solicitud_fiscalia_juez` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 46 | `evaluar_suficiencia_probatoria` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 47 | `extraer_hechos_relevantes` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 48 | `generar_alertas_terminos_vencimientos` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 49 | `generar_preguntas_aclaracion` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 50 | `generar_preguntas_testigos_peritos` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 51 | `generar_preguntas_tipicidad` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 52 | `gestionar_faltantes_expediente` | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] |
+| 53 | `identificar_actores_y_roles` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 54 | `identificar_conductas_punibles_preliminares` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 55 | `identificar_etapa_procesal_ley906` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 56 | `identificar_intereses_victima` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
+| 57 | `identificar_objetivo_audiencia` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 58 | `inventariar_evidencia` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 59 | `mapear_actuaciones_posibles_victima` | `analista_ruta_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 60 | `mapear_tipo_penal_hecho_prueba` | `analista_responsabilidad_tipicidad` | [ ] | [ ] | [ ] | [ ] |
+| 61 | `marcar_pendientes_verificacion` | `coordinador_caso` | [ ] | [ ] | [ ] | [ ] |
+| 62 | `monitorear_radicado` | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 63 | `preparar_contraargumentos` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 64 | `preparar_guion_intervencion_oral` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 65 | `preparar_preguntas_audiencia` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 66 | `preparar_resumen_operativo_cliente` | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 67 | `preparar_solicitudes_orales` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 68 | `preservar_evidencia_digital` | `analista_evidencia` | [ ] | [ ] | [ ] | [ ] |
+| 69 | `priorizar_objetivos_representacion` | `analista_representacion_victimas` | [ ] | [ ] | [ ] | [ ] |
+| 70 | `redactar_ampliacion_denuncia` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 71 | `redactar_derecho_peticion_penal` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 72 | `redactar_memorial_penal` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 73 | `redactar_recurso_o_intervencion_preliminar` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 74 | `redactar_solicitud_impulso_procesal` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 75 | `registrar_actuacion_procesal` | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 76 | `revisar_coherencia_estrategica` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
+| 77 | `seguimiento_documentos_radicados` | `analista_seguimiento_procesal` | [ ] | [ ] | [ ] | [ ] |
+| 78 | `simular_escenarios_audiencia` | `analista_audiencias` | [ ] | [ ] | [ ] | [ ] |
+| 79 | `verificar_citas_normativas` | `redactor_documentos_juridicos` | [ ] | [ ] | [ ] | [ ] |
+| 80 | `verificar_hechos_soportados` | `analista_cronologia_hechos` | [ ] | [ ] | [ ] | [ ] |
+| 81 | `verificar_jurisprudencia` | `analista_calidad_juridica` | [ ] | [ ] | [ ] | [ ] |
 
 ### 11.3 Reglas del sistema
 
@@ -5457,4 +5349,4 @@ flowchart LR
 - `docs/canon/guia-aprobacion-abogada-flujos-penal-victimas.md`
 - `docs/canon/lista-aprobacion-agentes-skills-pasos.md`
 
-*Generado automaticamente desde codigo y skills — 2026-07-05 22:09*
+*Generado automaticamente desde codigo y skills — 2026-08-03 20:44*

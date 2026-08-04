@@ -4,14 +4,14 @@
 
 ## 1) Lista por agente
 
-### `coordinador_expediente_penal` (5 skills — ownership de gerencia)
+### `coordinador_caso` (5 skills — ownership de gerencia)
 - `clasificar_tarea_y_etapa`
 - `gestionar_faltantes_expediente`
 - `detectar_urgencia_penal`
 - `marcar_pendientes_verificacion`
 - `actualizar_tareas_responsable`
 
-### `analista_cronologia_hechos_penales` (10 skills)
+### `analista_cronologia_hechos` (10 skills)
 - `clasificar_fuente_factual`
 - `construir_cronologia_penal`
 - `crear_matriz_hecho_fuente`
@@ -23,7 +23,7 @@
 - `identificar_actores_y_roles`
 - `verificar_hechos_soportados`
 
-### `analista_tipicidad_y_responsabilidad_penal` (9 skills)
+### `analista_responsabilidad_tipicidad` (9 skills)
 - `analizar_autoria_y_participacion`
 - `analizar_dolo_culpa_elemento_subjetivo`
 - `construir_matriz_hecho_prueba`
@@ -34,7 +34,7 @@
 - `identificar_conductas_punibles_preliminares`
 - `mapear_tipo_penal_hecho_prueba`
 
-### `analista_ruta_procesal_ley906` (13 skills)
+### `analista_ruta_procesal` (13 skills)
 - `analizar_intervencion_victima`
 - `clasificar_tarea_y_etapa`
 - `controlar_terminos_procesales_preliminares`
@@ -64,7 +64,7 @@
 - `mapear_actuaciones_posibles_victima`
 - `priorizar_objetivos_representacion`
 
-### `gestor_evidencia_y_soporte_probatorio` (13 skills)
+### `analista_evidencia` (13 skills)
 - `clasificar_tipo_prueba`
 - `construir_matriz_hecho_prueba`
 - `controlar_cadena_custodia_preliminar`
@@ -79,7 +79,7 @@
 - `mapear_tipo_penal_hecho_prueba`
 - `preservar_evidencia_digital`
 
-### `preparador_estrategico_audiencias_penales` (16 skills)
+### `analista_audiencias` (16 skills)
 - `analizar_intervencion_victima`
 - `construir_cronologia_penal`
 - `construir_matriz_hecho_prueba`
@@ -97,7 +97,7 @@
 - `preparar_solicitudes_orales`
 - `simular_escenarios_audiencia`
 
-### `redactor_documentos_juridicos_penales` (16 skills)
+### `redactor_documentos_juridicos` (16 skills)
 - `controlar_separacion_hecho_inferencia`
 - `controlar_tono_juridico_documento`
 - `controlar_tono_riesgo_reputacional`
@@ -115,7 +115,7 @@
 - `verificar_citas_normativas`
 - `verificar_hechos_soportados`
 
-### `gestor_seguimiento_procesal_penal` (12 skills)
+### `analista_seguimiento_procesal` (12 skills)
 - `actualizar_tareas_responsable`
 - `controlar_audiencias`
 - `controlar_terminos_procesales_preliminares`
@@ -217,7 +217,7 @@
     4. Documentar requisitos faltantes para interponer nueva petición o tutela.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
 - `evaluar_procedencia_tutela`
   - Instrucción tipo: Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
   - Pasos:
@@ -250,7 +250,7 @@
     4. Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
 - `recomendar_via_constitucional_o_alternativa`
   - Instrucción tipo: Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
   - Pasos:
@@ -280,7 +280,7 @@
     3. Cerrar checklist con responsables y plazos de preparación.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`, `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_audiencias`, `analista_seguimiento_procesal`
 - `crear_resumen_ejecutivo_litigante`
   - Instrucción tipo: Crear resumen de una pagina para el abogado que interviene.
   - Pasos:
@@ -289,7 +289,7 @@
     3. Formato listo para lectura previa del abogado en estrados.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 - `detectar_riesgos_audiencia`
   - Instrucción tipo: Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
   - Pasos:
@@ -298,7 +298,7 @@
     3. Proponer mitigaciones y líneas rojas para la intervención.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_audiencias`, `analista_calidad_juridica`
 - `identificar_objetivo_audiencia`
   - Instrucción tipo: Definir objetivo juridico y tactico de la audiencia para la victima.
   - Pasos:
@@ -308,7 +308,7 @@
     4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 - `preparar_contraargumentos`
   - Instrucción tipo: Anticipar argumentos de defensa, Fiscalia u otros intervinientes.
   - Pasos:
@@ -317,7 +317,7 @@
     3. Priorizar contraargumentos según objetivo de audiencia.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 - `preparar_guion_intervencion_oral`
   - Instrucción tipo: Estructurar intervencion oral clara y breve.
   - Pasos:
@@ -330,7 +330,7 @@
     7. Cerrar con peticiones concretas alineadas al objetivo de audiencia.
     8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 - `preparar_preguntas_audiencia`
   - Instrucción tipo: Sugerir preguntas para victima, testigos o peritos.
   - Pasos:
@@ -342,7 +342,7 @@
     6. Alinear preguntas con solicitudes orales previstas en la audiencia.
     7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 - `preparar_solicitudes_orales`
   - Instrucción tipo: Formular solicitudes orales posibles segun etapa.
   - Pasos:
@@ -351,7 +351,7 @@
     3. Ordenar por prioridad y dependencias probatorias.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`, `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `analista_audiencias`, `analista_ruta_procesal`
 - `simular_escenarios_audiencia`
   - Instrucción tipo: Plantear escenarios probables y preparacion del abogado.
   - Pasos:
@@ -361,7 +361,7 @@
     4. Cruzar escenario adverso con plan de contingencia procesal.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_audiencias`
 
 ### Skills de calidad juridica
 - `clasificar_aprobacion_juridica`
@@ -399,7 +399,7 @@
     3. Exigir corrección o marcación antes de uso externo.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - `controlar_tono_riesgo_reputacional`
   - Instrucción tipo: Revisar tono profesional y evitar lenguaje riesgoso.
   - Pasos:
@@ -408,7 +408,7 @@
     3. Sugerir ajustes de redacción profesional.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - `detectar_alucinaciones_legales`
   - Instrucción tipo: Detectar fuentes, hechos, conclusiones o citas inventadas.
   - Pasos:
@@ -433,7 +433,7 @@
     2. Verificar vigencia y pertinencia al caso penal-víctimas.
     3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - `verificar_jurisprudencia`
   - Instrucción tipo: Revisar sentencias, radicados, fechas y organos judiciales.
   - Pasos:
@@ -453,7 +453,7 @@
     3. Señalar elementos sin clasificación definitiva como pendientes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_evidencia`
 - `construir_matriz_hecho_prueba`
   - Instrucción tipo: Relacionar hechos con pruebas existentes y faltantes.
   - Pasos:
@@ -462,7 +462,7 @@
     3. Priorizar brechas que afecten tipicidad o audiencia.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_tipicidad_y_responsabilidad_penal`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_evidencia`, `analista_responsabilidad_tipicidad`, `analista_audiencias`
 - `controlar_cadena_custodia_preliminar`
   - Instrucción tipo: Alertar si la evidencia puede requerir cadena de custodia.
   - Pasos:
@@ -474,7 +474,7 @@
     6. Proponer medidas correctivas sin alterar el elemento probatorio.
     7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_evidencia`, `analista_calidad_juridica`
 - `crear_plan_recaudo_probatorio`
   - Instrucción tipo: Proponer plan para obtener pruebas faltantes.
   - Pasos:
@@ -484,7 +484,7 @@
     4. Señalar dependencias (custodia antes de peritaje, etc.).
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+  - Agentes que lo usan: `analista_evidencia`, `analista_representacion_victimas`
 - `detectar_brechas_probatorias`
   - Instrucción tipo: Identificar hechos relevantes sin soporte suficiente.
   - Pasos:
@@ -493,7 +493,7 @@
     3. Proponer acciones de cierre de brecha.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_evidencia`, `analista_calidad_juridica`
 - `evaluar_suficiencia_probatoria`
   - Instrucción tipo: Evaluar preliminarmente fuerza de soporte probatorio.
   - Pasos:
@@ -503,7 +503,7 @@
     4. Relacionar debilidades probatorias con plan de recaudo sugerido.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+  - Agentes que lo usan: `analista_evidencia`, `analista_representacion_victimas`
 - `generar_preguntas_testigos_peritos`
   - Instrucción tipo: Preparar preguntas neutrales para testigos o peritos.
   - Pasos:
@@ -512,7 +512,7 @@
     3. Evitar preguntas inductivas o revictimizantes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_evidencia`, `analista_audiencias`
 - `inventariar_evidencia`
   - Instrucción tipo: Crear inventario de todos los elementos disponibles.
   - Pasos:
@@ -521,7 +521,7 @@
     3. Emitir inventario numerado para el expediente.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_evidencia`
 - `preservar_evidencia_digital`
   - Instrucción tipo: Definir medidas para proteger evidencia digital sin alterarla.
   - Pasos:
@@ -532,7 +532,7 @@
     5. Escalar a perito o autoridad si la evidencia es crítica para el caso.
     6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_evidencia`
 
 ### Skills de hechos y cronologia
 - `clasificar_fuente_factual`
@@ -545,7 +545,7 @@
     5. Señalar afirmaciones sin fuente para verificación humana.
     6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`
+  - Agentes que lo usan: `analista_cronologia_hechos`
 - `construir_cronologia_penal`
   - Instrucción tipo: Ordenar hechos en linea de tiempo.
   - Pasos:
@@ -555,7 +555,7 @@
     4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `analista_audiencias`
 - `crear_matriz_hecho_fuente`
   - Instrucción tipo: Relacionar cada hecho con su fuente exacta.
   - Pasos:
@@ -564,7 +564,7 @@
     3. Señalar hechos sin fuente como pendientes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `analista_calidad_juridica`
 - `detectar_contradicciones_factuales`
   - Instrucción tipo: Encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
   - Pasos:
@@ -573,7 +573,7 @@
     3. Sugerir preguntas de aclaración no inductivas.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `analista_calidad_juridica`
 - `detectar_vacios_factuales`
   - Instrucción tipo: Identificar lo que falta para comprender o probar el caso.
   - Pasos:
@@ -582,7 +582,7 @@
     3. Formular solicitud de datos al abogado o cliente.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`
+  - Agentes que lo usan: `analista_cronologia_hechos`
 - `extraer_hechos_relevantes`
   - Instrucción tipo: Extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
   - Pasos:
@@ -591,7 +591,7 @@
     3. Filtrar opiniones e inferencias no soportadas.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `redactor_documentos_juridicos_penales`, `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `redactor_documentos_juridicos`, `analista_evidencia`
 - `generar_preguntas_aclaracion`
   - Instrucción tipo: Crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
   - Pasos:
@@ -600,7 +600,7 @@
     3. Ordenar preguntas por prioridad probatoria.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `analista_evidencia`
 - `identificar_actores_y_roles`
   - Instrucción tipo: Identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
   - Pasos:
@@ -608,7 +608,7 @@
     2. Asignar rol procesal preliminar (víctima, imputado, testigo, autoridad, tercero).
     3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_cronologia_hechos_penales`, `analista_representacion_victimas`
+  - Agentes que lo usan: `analista_cronologia_hechos`, `analista_representacion_victimas`
 
 ### Skills de redaccion juridica penal
 - `controlar_tono_juridico_documento`
@@ -619,7 +619,7 @@
     3. Proponer correcciones manteniendo contenido jurídico.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `analista_calidad_juridica`
+  - Agentes que lo usan: `redactor_documentos_juridicos`, `analista_calidad_juridica`
 - `estructurar_hechos_fundamentos_solicitudes`
   - Instrucción tipo: Ordenar cualquier documento juridico.
   - Pasos:
@@ -628,7 +628,7 @@
     3. Verificar coherencia interna y remisiones a anexos.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `redactor_documentos_juridicos`
 - `redactar_ampliacion_denuncia`
   - Instrucción tipo: Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
   - Pasos:
@@ -637,7 +637,7 @@
     3. Marcar hechos no verificados como pendientes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `redactor_documentos_juridicos`
 - `redactar_derecho_peticion_penal`
   - Instrucción tipo: Redactar derecho de peticion relacionado con autoridad o informacion del caso.
   - Pasos:
@@ -646,7 +646,7 @@
     3. Incluir anexos y plazo de respuesta esperado.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+  - Agentes que lo usan: `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 - `redactar_memorial_penal`
   - Instrucción tipo: Crear borrador de memorial penal.
   - Pasos:
@@ -657,7 +657,7 @@
     5. Marcar pendientes de verificación antes de firma humana.
     6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `redactor_documentos_juridicos`
 - `redactar_recurso_o_intervencion_preliminar`
   - Instrucción tipo: Crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
   - Pasos:
@@ -666,7 +666,7 @@
     3. Alertar términos y requisitos de forma pendientes de verificación.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `redactor_documentos_juridicos`, `analista_ruta_procesal`
 - `redactar_solicitud_impulso_procesal`
   - Instrucción tipo: Crear borrador para solicitar impulso procesal o actuaciones.
   - Pasos:
@@ -675,7 +675,7 @@
     3. Proponer peticiones concretas y plazos.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `redactor_documentos_juridicos`
 - `redactar_tutela_penal_preliminar`
   - Instrucción tipo: Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
   - Pasos:
@@ -690,7 +690,7 @@
     9. Entregar borrador numerado listo para revisión de firma (sin radicar).
     10. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+  - Agentes que lo usan: `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 
 ### Skills de representacion de victimas
 - `alinear_estrategia_prueba_proceso`
@@ -732,7 +732,7 @@
     6. Alinear con enfoque diferencial y no revictimización.
     7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_representacion_victimas`, `analista_audiencias`
 - `detectar_riesgo_revictimizacion`
   - Instrucción tipo: Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
   - Pasos:
@@ -741,7 +741,7 @@
     3. Proponer alternativas respetuosas y centradas en derechos.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_representacion_victimas`, `analista_audiencias`, `analista_calidad_juridica`
 - `evaluar_dano_y_afectacion`
   - Instrucción tipo: Organizar danos y afectaciones alegadas.
   - Pasos:
@@ -750,7 +750,7 @@
     3. Evitar minimizar o dramatizar sin soporte.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_representacion_victimas`, `gestor_evidencia_y_soporte_probatorio`
+  - Agentes que lo usan: `analista_representacion_victimas`, `analista_evidencia`
 - `identificar_intereses_victima`
   - Instrucción tipo: Aclarar el objetivo real de la victima.
   - Pasos:
@@ -780,7 +780,7 @@
     4. Documentar riesgos procesales si la intervención no es oportuna.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_ruta_procesal`, `analista_audiencias`
 - `controlar_terminos_procesales_preliminares`
   - Instrucción tipo: Identificar y alertar terminos relevantes. No reemplaza calculo humano.
   - Pasos:
@@ -789,7 +789,7 @@
     3. Generar alertas con acción recomendada.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_ruta_procesal`, `analista_seguimiento_procesal`
 - `crear_ruta_procesal_recomendada`
   - Instrucción tipo: Crear plan de proximos pasos procesales para revision del abogado.
   - Pasos:
@@ -799,7 +799,7 @@
     4. Entregar ruta numerada con responsable y plazo por paso.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `analista_ruta_procesal`
 - `detectar_riesgos_procesales`
   - Instrucción tipo: Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
   - Pasos:
@@ -809,7 +809,7 @@
     4. Recomendar actuación inmediata para riesgos críticos extemporáneos.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_ruta_procesal`, `analista_calidad_juridica`
 - `evaluar_oportunidad_procesal`
   - Instrucción tipo: Determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
   - Pasos:
@@ -821,7 +821,7 @@
     6. Sugerir fecha o actuación alternativa si no es oportuna.
     7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_ruta_procesal`, `analista_calidad_juridica`
 - `evaluar_solicitud_fiscalia_juez`
   - Instrucción tipo: Evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
   - Pasos:
@@ -830,7 +830,7 @@
     3. Listar requisitos y anexos necesarios.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `redactor_documentos_juridicos_penales`
+  - Agentes que lo usan: `analista_ruta_procesal`, `redactor_documentos_juridicos`
 - `identificar_etapa_procesal_ley906`
   - Instrucción tipo: Determinar etapa del caso.
   - Pasos:
@@ -840,7 +840,7 @@
     4. Señalar actuaciones habilitadas en la etapa identificada.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `analista_ruta_procesal`
 - `mapear_actuaciones_posibles_victima`
   - Instrucción tipo: Indicar que puede hacer la representacion de victimas segun etapa.
   - Pasos:
@@ -849,7 +849,7 @@
     3. Priorizar según intereses de la víctima.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_ruta_procesal_ley906`, `analista_representacion_victimas`
+  - Agentes que lo usan: `analista_ruta_procesal`, `analista_representacion_victimas`
 
 ### Skills de seguimiento procesal
 - `actualizar_tareas_responsable`
@@ -859,7 +859,7 @@
     1. Actualizar estado, plazo y responsable de cada tarea pendiente del caso.
     2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `sin function_tools (side-effect gerencia_ledger / tareas_gerencia)`
-  - Agentes que lo usan: `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `coordinador_caso`, `analista_seguimiento_procesal`
 - `controlar_audiencias`
   - Instrucción tipo: Administrar fechas, horas, enlaces y preparacion de audiencias.
   - Pasos:
@@ -868,7 +868,7 @@
     3. Alertar conflictos de agenda o datos incompletos.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`, `preparador_estrategico_audiencias_penales`
+  - Agentes que lo usan: `analista_seguimiento_procesal`, `analista_audiencias`
 - `crear_reporte_estado_caso`
   - Instrucción tipo: Crear reporte interno periodico.
   - Pasos:
@@ -877,7 +877,7 @@
     3. Excluir estrategia sensible no apta para todo el equipo.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_seguimiento_procesal`
 - `detectar_inactividad_procesal`
   - Instrucción tipo: Alertar falta de movimientos por periodo relevante.
   - Pasos:
@@ -886,7 +886,7 @@
     3. Sugerir actuación de impulso si corresponde.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `analista_seguimiento_procesal`, `analista_ruta_procesal`
 - `generar_alertas_terminos_vencimientos`
   - Instrucción tipo: Crear alertas de posibles vencimientos.
   - Pasos:
@@ -894,14 +894,14 @@
     2. Clasificar alertas por criticidad.
     3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`, `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `analista_seguimiento_procesal`, `analista_ruta_procesal`
 - `monitorear_radicado`
   - Instrucción tipo: Consultar o registrar estado de radicado.
   - Pasos:
     1. Consultar o registrar estado del radicado con fuente y timestamp de la consulta.
     2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_seguimiento_procesal`
 - `preparar_resumen_operativo_cliente`
   - Instrucción tipo: Crear version simple del estado del proceso para cliente, sin estrategia sensible.
   - Pasos:
@@ -910,14 +910,14 @@
     3. Marcar para revisión humana antes de envío al cliente.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_seguimiento_procesal`, `analista_calidad_juridica`
 - `registrar_actuacion_procesal`
   - Instrucción tipo: Registrar una actuacion nueva en la bitacora del caso.
   - Pasos:
     1. Registrar en bitácora: fecha, tipo, resumen y fuente de la actuación nueva.
     2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_seguimiento_procesal`
 - `seguimiento_documentos_radicados`
   - Instrucción tipo: Controlar documentos enviados y respuestas pendientes.
   - Pasos:
@@ -926,7 +926,7 @@
     3. Alertar plazos de respuesta institucional.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `gestor_seguimiento_procesal_penal`
+  - Agentes que lo usan: `analista_seguimiento_procesal`
 
 ### Skills de tipicidad y responsabilidad penal
 - `analizar_autoria_y_participacion`
@@ -937,7 +937,7 @@
     3. Señalar vacíos probatorios en autoria/participación.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`
 - `analizar_dolo_culpa_elemento_subjetivo`
   - Instrucción tipo: Identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
   - Pasos:
@@ -946,7 +946,7 @@
     3. No afirmar elemento subjetivo sin soporte suficiente.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`
 - `descomponer_elementos_tipo_penal`
   - Instrucción tipo: Dividir un posible delito en elementos juridicos verificables.
   - Pasos:
@@ -956,7 +956,7 @@
     4. Registrar dudas de tipicidad por elemento sin concluir culpabilidad.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`
 - `detectar_agravantes_atenuantes`
   - Instrucción tipo: Identificar circunstancias relevantes que puedan afectar gravedad juridica.
   - Pasos:
@@ -965,7 +965,7 @@
     3. Marcar elementos no acreditados como pendientes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`
 - `detectar_riesgos_atipicidad`
   - Instrucción tipo: Detectar cuando un caso puede ser atipico o tener naturaleza no penal.
   - Pasos:
@@ -974,7 +974,7 @@
     3. Alertar riesgo de atipicidad antes de actuación.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`, `analista_calidad_juridica`
 - `generar_preguntas_tipicidad`
   - Instrucción tipo: Crear preguntas para completar elementos del tipo penal.
   - Pasos:
@@ -983,7 +983,7 @@
     3. Evitar preguntas que presupongan culpabilidad.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`, `analista_cronologia_hechos_penales`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`, `analista_cronologia_hechos`
 - `identificar_conductas_punibles_preliminares`
   - Instrucción tipo: Proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
   - Pasos:
@@ -992,7 +992,7 @@
     3. Presentar como hipótesis, no conclusión.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`
 - `mapear_tipo_penal_hecho_prueba`
   - Instrucción tipo: Relacionar elementos del tipo con hechos y pruebas.
   - Pasos:
@@ -1002,7 +1002,7 @@
     4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_tipicidad_y_responsabilidad_penal`, `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+  - Agentes que lo usan: `analista_responsabilidad_tipicidad`, `analista_evidencia`, `analista_calidad_juridica`
 
 ### Skills transversales
 - `clasificar_tarea_y_etapa`
@@ -1014,7 +1014,7 @@
     3. Derivar al agente especialista correcto o pedir datos faltantes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente (+ side-effects gerencia_ledger/audit_trace)`
-  - Agentes que lo usan: `coordinador_expediente_penal`, `analista_ruta_procesal_ley906`
+  - Agentes que lo usan: `coordinador_caso`, `analista_ruta_procesal`
 - `detectar_urgencia_penal`
   - Instrucción tipo: Identificar si el caso requiere atencion humana inmediata.
   - Outputs (código `UrgencyResult` / `assess_urgency`): `nivel_urgencia` ∈ {critica, alta, media, baja}; `motivos`; `accion_inmediata_sugerida`; `escalar_humano` (true si critica|alta); `urgencia_preliminar` derivado.
@@ -1025,7 +1025,7 @@
     4. Documentar motivo de escalamiento y agente destino.
     5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente (+ assess_urgency / gerencia_ledger)`
-  - Agentes que lo usan: `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+  - Agentes que lo usan: `coordinador_caso`, `analista_seguimiento_procesal`, `analista_calidad_juridica`
 - `gestionar_faltantes_expediente`
   - Instrucción tipo: Identificar datos y documentos faltantes antes de analizar o redactar.
   - Outputs (código `CompletenessResult`): `faltantes_detalle` `{elemento, prioridad, motivo, responsable_sugerido}` + compat `faltantes: list[str]`; `puede_continuar`.
@@ -1035,7 +1035,7 @@
     3. Solicitar al abogado completar antes de concluir.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente (+ assess_completeness / gerencia_ledger)`
-  - Agentes que lo usan: `coordinador_expediente_penal`
+  - Agentes que lo usan: `coordinador_caso`
 - `marcar_pendientes_verificacion`
   - Instrucción tipo: Marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
   - Outputs: marcadores en texto; pendientes `{elemento, tipo∈{hecho,cita,radicado,fecha,otro}, impacto_juridico∈{alto,medio,bajo}}` vía `record_specialist_result`.
@@ -1043,7 +1043,7 @@
     1. Recorrer salida e insertar `[PENDIENTE DE VERIFICAR]` en cada dato, cita o hecho sin fuente.
     2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `sin function_tools (side-effect audit_trace / tareas_gerencia)`
-  - Agentes que lo usan: `coordinador_expediente_penal`
+  - Agentes que lo usan: `coordinador_caso`
 - `verificar_hechos_soportados`
   - Instrucción tipo: Revisar si cada afirmacion factual tiene fuente.
   - Pasos:
@@ -1051,4 +1051,4 @@
     2. Cruzar cada afirmación con fuente documental o expediente.
     3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`, `analista_cronologia_hechos_penales`
+  - Agentes que lo usan: `analista_calidad_juridica`, `redactor_documentos_juridicos`, `analista_cronologia_hechos`

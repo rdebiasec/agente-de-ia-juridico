@@ -69,7 +69,7 @@ def test_quality_gate_ignores_other_agents():
     step = PlanStep(
         step_id="s02",
         order=2,
-        agent_id="redactor_documentos_juridicos_penales",
+        agent_id="redactor_documentos_juridicos",
         skill_id="redactar_memorial_penal",
         title="Redacción",
         user_summary="Redactar",

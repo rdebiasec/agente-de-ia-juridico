@@ -26,7 +26,7 @@ def test_triage_result_schema():
     t = TriageResult(
         tipo_tarea="redaccion",
         etapa_aparente="indagacion",
-        agente_destino="redactor_documentos_juridicos_penales",
+        agente_destino="redactor_documentos_juridicos",
         urgencia_preliminar=False,
         resumen_triage="Memorial de impulso",
     )
@@ -49,17 +49,16 @@ def test_orchestrator_has_sdk_guardrails_and_redactor_output_type():
     assert "Políticas obligatorias" in (poc.instructions or "")
     # Tools críticas con needs_approval en path conversacional
     by_name = {getattr(t, "name", None): t for t in (poc.tools or [])}
-    assert by_name["redactor_documentos_juridicos_penales"].needs_approval is True
-    assert by_name["evaluador_derechos_fundamentales_tutela"].needs_approval is True
-    assert by_name["analista_cronologia_hechos_penales"].needs_approval is False
+    assert by_name["redactor_documentos_juridicos"].needs_approval is True
+    assert by_name["analista_cronologia_hechos"].needs_approval is False
     # C3 — tool guardrails en specialists as_tool
-    red_tool = by_name["redactor_documentos_juridicos_penales"]
+    red_tool = by_name["redactor_documentos_juridicos"]
     assert red_tool.tool_input_guardrails
     assert red_tool.tool_output_guardrails
 
     poc_plan = build_orchestrator(require_tool_approval=False, use_cache=False)
     by_name_plan = {getattr(t, "name", None): t for t in (poc_plan.tools or [])}
-    assert by_name_plan["redactor_documentos_juridicos_penales"].needs_approval is False
+    assert by_name_plan["redactor_documentos_juridicos"].needs_approval is False
 
     poc_chat = build_orchestrator(
         require_tool_approval=True,
@@ -67,20 +66,17 @@ def test_orchestrator_has_sdk_guardrails_and_redactor_output_type():
         use_cache=False,
     )
     chat_names = {getattr(t, "name", None) for t in (poc_chat.tools or [])}
-    assert "redactor_documentos_juridicos_penales" not in chat_names
-    assert "evaluador_derechos_fundamentales_tutela" not in chat_names
+    assert "redactor_documentos_juridicos" not in chat_names
 
-    redactor = get_agent_by_id("redactor_documentos_juridicos_penales")
+    redactor = get_agent_by_id("redactor_documentos_juridicos")
     assert redactor is not None
     assert redactor.output_type is not None
     # C2 — output guardrails en alto riesgo
     assert redactor.output_guardrails
-    tutela = get_agent_by_id("evaluador_derechos_fundamentales_tutela")
-    assert tutela is not None and tutela.output_guardrails
     # C5 — modelo high-risk distinto del default
     settings = get_settings()
     assert redactor.model == (settings.openai_model_high_risk or settings.openai_model)
-    cronologia = get_agent_by_id("analista_cronologia_hechos_penales")
+    cronologia = get_agent_by_id("analista_cronologia_hechos")
     assert cronologia is not None
     assert cronologia.model == settings.openai_model
 
@@ -93,12 +89,12 @@ def test_plan_step_resolves_declared_agent():
     specialist_step = PlanStep(
         step_id="s02",
         order=2,
-        agent_id="analista_cronologia_hechos_penales",
+        agent_id="analista_cronologia_hechos",
         title="Cronologia",
         user_summary="Ordenar hechos",
     )
     agent = _resolve_step_agent(specialist_step)
-    assert agent.name == "analista_cronologia_hechos_penales"
+    assert agent.name == "analista_cronologia_hechos"
 
     poc_step = PlanStep(
         step_id="s01",
@@ -120,7 +116,7 @@ async def test_tool_input_guardrail_blocks_tutela_to_redactor():
 
     ctx = ToolContext(
         context=None,
-        tool_name="redactor_documentos_juridicos_penales",
+        tool_name="redactor_documentos_juridicos",
         tool_call_id="call-1",
         tool_arguments='{"input":"Prepara tutela por derecho fundamental"}',
     )
@@ -128,7 +124,7 @@ async def test_tool_input_guardrail_blocks_tutela_to_redactor():
     result = poc_tool_input_guardrail.guardrail_function(data)
     assert isinstance(result, ToolGuardrailFunctionOutput)
     assert result.behavior["type"] == "reject_content"
-    assert result.output_info.get("reason") == "blocked_routing"
+    assert result.output_info.get("reason") == "blocked_routing_tutela_out_of_scope"
 
 
 @pytest.mark.asyncio
@@ -203,7 +199,7 @@ def test_plan_step_session_is_isolated():
 def test_skill_contract_brief_is_registry_not_tool():
     from src.agents.skill_catalog import primary_skill_for_agent, skill_contract_brief
 
-    sid = primary_skill_for_agent("analista_cronologia_hechos_penales")
+    sid = primary_skill_for_agent("analista_cronologia_hechos")
     brief = skill_contract_brief(sid)
     assert "Contrato de capacidad" in brief
     assert "no invocable" in brief.lower()
@@ -213,7 +209,7 @@ def test_skill_contract_brief_is_registry_not_tool():
 def test_specialist_instructions_include_capability_anchor():
     from src.agents.orchestrator import get_agent_by_id
 
-    agent = get_agent_by_id("analista_cronologia_hechos_penales")
+    agent = get_agent_by_id("analista_cronologia_hechos")
     assert agent is not None
     assert agent.output_guardrails
     assert "Contrato de capacidad" in (agent.instructions or "")
@@ -226,7 +222,7 @@ def test_step_prompt_embeds_skill_contract():
     step = PlanStep(
         step_id="s02",
         order=2,
-        agent_id="analista_cronologia_hechos_penales",
+        agent_id="analista_cronologia_hechos",
         skill_id="construir_cronologia_penal",
         title="Cronologia",
         user_summary="Ordenar hechos",
@@ -244,7 +240,7 @@ def test_step_prompt_embeds_skill_contract():
 def test_quality_gate_message_hides_technical_agent_ids():
     from src.agents.pipeline import run_post_validations
 
-    trace: dict = {"sent_to_agent": "redactor_documentos_juridicos_penales", "turn_index": 1}
+    trace: dict = {"sent_to_agent": "redactor_documentos_juridicos", "turn_index": 1}
     text = run_post_validations(
         "Redacte memorial citando art. 250 y radicado 110016000",
         "Se recomienda memorial con art. 250 Ley 906.",
@@ -276,8 +272,7 @@ def test_create_plan_embeds_triage_snapshot():
         "representacion_victima",
         "evidencia",
         "audiencia",
-        "tutela_constitucional",
-        "fuera_de_alcance",
+                "fuera_de_alcance",
     }
     assert "resumen_triage" in plan.triage_snapshot
     assert plan.status == "awaiting_input"

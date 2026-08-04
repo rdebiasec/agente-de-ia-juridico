@@ -32,7 +32,7 @@ Reescribir `src/agents/orchestrator.py` como una firma. Roles + litigantes por �
 ```mermaid
 flowchart LR
   User[Abogado usuario]
-  POC[coordinador_expediente_penal POC]
+  POC[coordinador_caso POC]
   SpecA[especialista_backoffice]
   SpecB[especialista_backoffice]
   HITL[HITL borrador]
@@ -49,7 +49,7 @@ flowchart LR
   SpecB -.-> Trace
 ```
 
-> **Modelo vigente (POC / backoffice):** el coordinador es el único interlocutor en web/Slack. Los 10 especialistas se invocan con `Agent.as_tool` (no handoffs terminales). El chat muestra voz de despacho; la traza conserva `sent_to_agent` / tools del especialista.
+> **Modelo vigente (POC / backoffice):** el coordinador es el único interlocutor en web/Slack. Los 9 especialistas se invocan con `Agent.as_tool` (no handoffs terminales). El chat muestra voz de despacho; la traza conserva `sent_to_agent` / tools del especialista.
 
 ## A.3 Skills por rol/área (todas stateless, leen la KB)
 

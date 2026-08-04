@@ -83,7 +83,7 @@ seguimiento a procesos y comunique con clientes — siempre bajo supervisión hu
 
 Situación actual
 
-+ Redactar contratos, tutelas, memoriales y correos consume horas que se repiten semana a
++ Redactar contratos, memoriales y correos consume horas que se repiten semana a
 semana.
 
 + El seguimiento de procesos y el informe mensual al cliente se hace de forma manual.
@@ -128,12 +128,12 @@ KAN-6 Fase 1 MVP (consulta, redacción y comunicació  [REQ-012](https://dbx-sol
 KAN-7 Fase 2 Gestión, seguimiento y estrategia [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16)...0 Seguimiento de casos, informes al cliente y
 23, apoyo para pensar la estrate
 [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14)...0
-50 (10)
+45 (10)
 
 KAN-8 Fase 3 Especialidades (conceptos, memoriales,  [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17)...0 Tareas avanzadas: conceptos, memoriales
-42 (14) procesales y tutelas con plazos.
+37 (9) procesales (conceptos y memoriales) con plazos.
 
-Tareas de implementación (12 tickets, 50 requisitos)
+Tareas de implementación (12 tickets, 45 requisitos activos; REQ-038…042 retirados)
 
 Cada tarea agrupa requisitos relacionados. Al completarla, el asistente gana una capacidad
 concreta que el abogado puede probar.
@@ -194,7 +194,7 @@ Preparación entrevistas y cuestionamiento pre-escrito
 Requisitos: [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16), [REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16)
 Preparar entrevistas con Fiscalía/juez y detectar debilidades antes de escribir.
 
-Fase 3 — Especialidades (conceptos, memoriales, tutelas)
+Fase 3 — Especialidades (conceptos y memoriales)
 
 Emisión de conceptos jurídicos por área
 Requisitos: [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17)...032
@@ -203,14 +203,6 @@ Conceptos con problema, normas aplicables y recomendación clara al cliente.
 Redacción de memoriales procesales
 Requisitos: [REQ-033](https://dbx-solutions.atlassian.net/browse/KAN-18)...037
 Memoriales a juzgados y entidades con datos completos del proceso.
-
-Acciones de tutela — redacción y presentación
-Requisitos: [REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19)...041
-Demandas de tutela completas y seguimiento de radicación en línea.
-
-Tutelas — seguimiento de plazos de respuesta
-Requisitos: [REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20)
-Controlar los 10 días hábiles de respuesta del juez en tutela.
 
 DBX Solutions - contact@dbx-solutions.com - www.dbx-solutions.com
 Página 4
@@ -238,14 +230,14 @@ Fase 2 (10 requisitos)
 
 + Por qué: El abogado pidió un asistente de gestión y estrategia, no solo de búsqueda.
 
-Fase 3 (14 requisitos)
+Fase 3 (9 requisitos)
 
-+ Qué: Conceptos, memoriales avanzados y tutelas con control de plazos.
++ Qué: Conceptos jurídicos y memoriales procesales avanzados.
 
 + Por qué: Son tareas especializadas que se activan cuando las bases ya funcionan bien.
 
 Requisitos por fase del proyecto
-Fase 3 14
+Fase 3 9
 Fase 2 10
 
 Fase 1 15
@@ -286,8 +278,7 @@ audio_002_2 2026-06-18 1:29 1 Emisión de conceptos jurídicos por área del der
 
 026-06-18
 
-audio_003_2 2026-06-18 1:09 2 Redacción y seguimiento de acciones de tutela; Plazos de respuesta en
-026-06-18 acciones de tutela
+audio_003_2 2026-06-18 1:09 2 (Histórico) audio sobre tutelas — fuera de alcance del producto actual
 
 DBX Solutions - contact@dbx-solutions.com - www.dbx-solutions.com
 Página 6
@@ -318,7 +309,6 @@ Gestionar procesos Dar seguimiento a procesos y contarle al 5 Radicaciones, esta
 cliente qué pasa con su caso. mensuales.
 Emitir conceptos jurídicos Redactar conceptos jurídicos por área del 4 Conceptos en civil, familia, penal...
 derecho.
-Acciones de tutela Preparar tutelas y vigilar plazos. 5 Demanda, radicación, respuesta del juez.
 Rol estratégico del Ayudar a pensar el caso completo, no solo 3 Organizar ideas, revisar estrategia.
 asistente buscar sentencias.
 Requisitos por tipo de tarea
@@ -660,22 +650,6 @@ proceso, las partes y el radicado
 
 jueces de control de garantías o
 
-[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) Redactar acciones de tutela por vulneración de Específico Fase 3 Acciones de tutela
-derechos fundamentales consagrados en
-
-[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) — Incluir en la tutela datos completos del accionante y Específico | Fase 3 Acciones de tutela
-accionado (nombre, razón social
-
-[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) — Indicar el presunto derecho vulnerado y los Específico Fase 3 Acciones de tutela
-fundamentos de derecho en la acción de tu
-
-[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) Hacer seguimiento a la radicación de tutelas en Específico | Fase3 Acciones de tutela
-Tutelas en línea de la Rama Judicial
-
-[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) — Contabilizar el término de respuesta del fallo de tutela — Específico Fase 3 Acciones de tutela
-
-(10 días hábiles desde la ad
-
 [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14) | Revisar correos del despacho Específico Fase 2 Gestionar procesos
 [REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14) Hacer seguimiento a las radicaciones de documentos Específico  Fase2 Gestionar procesos
 [REQ-045](https://dbx-solutions.atlassian.net/browse/KAN-14) Revisar procesos y estados en la Rama Judicial y Específico | Fase2 Gestionar procesos
@@ -814,14 +788,13 @@ Página 13
 
 ### Página 14
 
-12. Fase 3 — Especialidades (conceptos, memoriales,
-tutelas)
+12. Fase 3 — Especialidades (conceptos y memoriales)
 
-Objetivo: Capacidades avanzadas: conceptos jurídicos, memoriales procesales y acciones de
-tutela con seguimiento de plazos.
+Objetivo: Capacidades avanzadas: conceptos jurídicos y memoriales procesales
+(impulso, solicitud de expediente, audiencias).
 
 Antes de empezar: Completar Fase 2 (gestión y estrategia).
-En pocas palabras: Conceptos, memoriales avanzados y tutelas con control de plazos.
+En pocas palabras: Conceptos y memoriales procesales avanzados.
 
 CO
 
@@ -852,65 +825,11 @@ radicado
 
 de garantías o audiencias de c
 
-[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) Redactar acciones de tutela por vulneración de derechos fundamentales — Específico Acciones de tutela
-consagrados en la Constitución
-
-[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) Incluir en la tutela datos completos del accionante y accionado (nombre, | Específico Acciones de tutela
-razón social, cédula/NIT, c
-
-[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) Indicar el presunto derecho vulnerado y los fundamentos de derecho en — Específico Acciones de tutela
-la acción de tutela
-
-[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Específico Acciones de tutela
-Rama Judicial
-
-[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles Específico Acciones de tutela
-
-desde la admisión)
-
-DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
-Página 1
-
-### Página 15
-
-13. Cómo los documentos se convierten en el
-asistente
-
-Los documentos de este proyecto (audios, requisitos y fases) no son el asistente en sí. Son el
-plan de construcción: dicen qué debe hacer y cómo sabremos que lo hace bien.
-
-II TT
-Notas y transcripciones Lo que el abogado dijo en sus propias palabras
-
-Listado de requisitos 50 necesidades concretas, numeradas ([REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9) a [REQ-050](https://dbx-solutions.atlassian.net/browse/KAN-15))
-
-Instrucciones del asistente Cómo debe hablar, qué puede y qué no puede hacer
-
-Reglas por tipo de tarea Cómo redactar tutelas, contratos, correos, etc.
-
-Conexiones útiles Correo, calendario, consulta de normas — cuando haga falta
-
-Pruebas de cumplimiento Para cada requisito: cómo comprobamos que funciona
-
-Revisión del abogado El abogado prueba, corrige y aprueba antes de usar en casos reales
-
-Recuerde: la IA apoya; el abogado decide y responde ante el cliente.
-
-14. Qué podrá hacer el asistente en cada fase
-
-o Fase | El asistente podrá... Requisitos clave
-
-Fase 0 Enseñar al asistente quién es el abogado, qué áreas practica y [REQ-001](https://dbx-solutions.atlassian.net/browse/KAN-9),  [REQ-002](https://dbx-solutions.atlassian.net/browse/KAN-9),  [REQ-003](https://dbx-solutions.atlassian.net/browse/KAN-9),
-cómo debe hablar. [REQ-004](https://dbx-solutions.atlassian.net/browse/KAN-10)... (+7)
-
-Fase 1 Primera versión útil: atender consultas, ver riesgos, redactar [REQ-012](https://dbx-solutions.atlassian.net/browse/KAN-11),  [REQ-013](https://dbx-solutions.atlassian.net/browse/KAN-11),  [REQ-014](https://dbx-solutions.atlassian.net/browse/KAN-11),
-borradores y escribir a clientes. [REQ-015](https://dbx-solutions.atlassian.net/browse/KAN-11)... (+11)
-
-Fase 2 Seguimiento de procesos, informes al cliente, revisión de [REQ-022](https://dbx-solutions.atlassian.net/browse/KAN-16),  [REQ-023](https://dbx-solutions.atlassian.net/browse/KAN-16),  [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14),
+[REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14),
 correos y apoyo estratégico. [REQ-044](https://dbx-solutions.atlassian.net/browse/KAN-14)... (+6)
 
-Fase 3 Conceptos, memoriales avanzados y tutelas con control de [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17), [REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17),  [REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17),
-plazos. [REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17)... (+10)
+Fase 3 Conceptos y memoriales procesales avanzados. [REQ-029](https://dbx-solutions.atlassian.net/browse/KAN-17), [REQ-030](https://dbx-solutions.atlassian.net/browse/KAN-17),  [REQ-031](https://dbx-solutions.atlassian.net/browse/KAN-17),
+[REQ-032](https://dbx-solutions.atlassian.net/browse/KAN-17)...037
 
 DBX Solutions - contact@dbx-sglutions.com - www.dbx-solutions.com
 Página 15
@@ -1121,31 +1040,6 @@ Cita: «memoriales de impulso procesal» - Fuente: audio_002
 garantías o audiencias de conciliación
 
 Cita: «memoriales de solicitud de audiencias ante jueves de control de garantías» - Fuente: audio_002
-
-[REQ-038](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Redactar acciones de tutela por vulneración de derechos fundamentales
-consagrados en la Constitución Política
-
-Cita: «redacción de acciones de tutela por vulneración a derechos fundamentales» - Fuente: audio_003
-
-[REQ-039](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Incluir en la tutela datos completos del accionante y accionado (nombre, razón
-social, cédula/NIT, correo, domicilio)
-
-Cita: «datos del accionante y del accionado, datos completos» - Fuente: audio_003
-
-[REQ-040](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Indicar el presunto derecho vulnerado y los fundamentos de derecho en la
-acción de tutela
-
-Cita: «presunto derecho que está vulnerado» - Fuente: audio_003
-
-[REQ-041](https://dbx-solutions.atlassian.net/browse/KAN-19) [Específico] — Hacer seguimiento a la radicación de tutelas en Tutelas en línea de la Rama
-Judicial
-
-Cita: «seguimiento a la radicación en la página de la Rama Judicial de Tutelas en línea» - Fuente: audio_003
-
-[REQ-042](https://dbx-solutions.atlassian.net/browse/KAN-20) [Específico] — Contabilizar el término de respuesta del fallo de tutela (10 días hábiles desde la
-admisión)
-
-Cita: «contabilizar el término de respuesta del fallo de tutela que son de 10 días hábiles» - Fuente: audio_003
 
 [REQ-043](https://dbx-solutions.atlassian.net/browse/KAN-14) [Específico] — Revisar correos del despacho
 

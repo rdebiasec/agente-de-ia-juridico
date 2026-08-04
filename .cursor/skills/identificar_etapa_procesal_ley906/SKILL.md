@@ -1,4 +1,4 @@
-<!-- config-version: 1; checksum: b09c0f9dcb35cd33 -->
+<!-- config-version: 2; checksum: 7501fbcae3060eb9 -->
 ---
 name: identificar-etapa-procesal-ley906
 description: Skill estrategico penal-victimas: determinar etapa del caso segun Ley 906. Use when the workflow requires `identificar_etapa_procesal_ley906`.
@@ -13,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906` (skill primario del agente)
+- `analista_ruta_procesal` (skill primario del agente)
 
 ## Purpose
 Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres.

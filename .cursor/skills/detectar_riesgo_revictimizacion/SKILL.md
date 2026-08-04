@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 32759252f6d53791 -->
 ---
 name: detectar-riesgo-revictimizacion
 description: Skill atomico penal-victimas: identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar. Use when the workflow requires `detectar_riesgo_revictimizacion`.

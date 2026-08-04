@@ -1,9 +1,9 @@
-# Auditoría viva — Gerente del Caso + agentes
+# Auditoría viva — Coordinador del Caso + agentes
 
 **Producto:** firma virtual penal-víctimas  
 **Documento único** (no crear un MD por agente)  
 **Commit base:** `6a94371` (2026-07-31)  
-**Alcance:** POC (`coordinador_expediente_penal`) a fondo + 10 laborers  
+**Alcance:** POC (`coordinador_caso`) a fondo + 10 laborers  
 **Código:** solo con `aprobado, ejecuta Gxx` (o lista)
 
 Leyenda estado: `hallazgo` · `aprendido` · `propuesto` · `aprobado` · `hecho` · `diferir`
@@ -29,7 +29,7 @@ flowchart TD
 | Pieza | Archivo | Rol |
 |---|---|---|
 | Identidad técnica | `src/agents/orchestrator.py` | `POC_AGENT_ID` |
-| Persona / voz | `agente/prompts/agents/coordinador_expediente_penal.md` | Prompt Gerente (`config-version: 14`) |
+| Persona / voz | `agente/prompts/agents/coordinador_caso.md` | Prompt Gerente (`config-version: 14`) |
 | Turno | `src/agents/runner.py` | `run_agent` state machine |
 | Router | `src/agents/triage.py` | Destino regex + `TriageResult` |
 | Gate completitud | `src/agents/completeness.py` + `pipeline.py` | Bloqueo antes de delegar |
@@ -40,10 +40,10 @@ flowchart TD
 
 ## 2. Lista de aprendizajes (invariantes)
 
-1. El **Gerente del Caso Penal** es el único interlocutor (POC); los 10 especialistas son **backoffice** vía `Agent.as_tool`, no caras en el chat.
+1. El **Coordinador del Caso** es el único interlocutor (POC); los 9 especialistas son **backoffice** vía `Agent.as_tool`, no caras en el chat.
 2. **No hay handoffs peer** entre especialistas; el patrón canónico es as_tool + síntesis del Gerente.
 3. La **completitud** y la **urgencia** son gates de **código**, no solo instrucciones de prompt (`completeness.py`, `urgency.py`).
-4. Redacción y tutela son **high-risk**: en chat no existen como tools (`include_high_risk_tools=False`); van por **plan HITL** (`requires_execution_plan`).
+4. Redacción es **high-risk**: en chat no existe como tool (`include_high_risk_tools=False`); va por **plan HITL** (`requires_execution_plan`). Tutela está **fuera del producto**.
 5. El Gerente posee solo 5 skills (`POC_OWNED_SKILLS`); el resto es MOVE a especialistas.
 6. Chat usa **instrucciones slim** + superficie dinámica (focus + vecinos + calidad); no lecturas MD completas ni `listar_areas`.
 7. Modelos (Opción A): laborers/POC `gpt-4.1-mini` @ temp 0.2; high-risk `gpt-4.1` @ 0.1.
@@ -91,8 +91,8 @@ flowchart TD
 
 | Campo | Valor |
 |---|---|
-| ID | `coordinador_expediente_penal` |
-| Label desk | Gerente del Caso Penal |
+| ID | `coordinador_caso` |
+| Label desk | Coordinador del Caso |
 | Skills propias | `clasificar_tarea_y_etapa`, `gestionar_faltantes_expediente`, `detectar_urgencia_penal`, `marcar_pendientes_verificacion`, `actualizar_tareas_responsable` |
 | Modelo | `gpt-4.1-mini` @ 0.2 |
 | output_type chat | No (prosa); triage es código |
@@ -114,7 +114,7 @@ flowchart TD
 
 ### 4.3 Triage y plan_required (G03)
 
-Precedencia actual (`infer_destination_agent`): fuera de alcance → **calidad** → tutela → **redacción** → audiencia → evidencia → tipicidad → cronología → ruta906 → víctimas → seguimiento → perfil → knowledge → POC.
+Precedencia actual (`infer_destination_agent`): fuera de alcance / investigado → pedido de tutela (queda en POC, fuera de producto) → **redacción** → audiencia → evidencia → tipicidad → cronología → ruta906 → víctimas → seguimiento → **calidad** → perfil → knowledge → POC.
 
 Riesgos UX:
 
@@ -161,13 +161,13 @@ Archivo baseline con `config-version: 14`. Runtime: `load_prompt_text` / config 
 
 Plantilla: skill primario · schema · high-risk/HITL · vecinos · modelo · gaps.
 
-### 5.1 `coordinador_expediente_penal` (POC)
+### 5.1 `coordinador_caso` (POC)
 
 Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.2 `analista_cronologia_hechos_penales`
+### 5.2 `analista_cronologia_hechos`
 
 | Campo | Valor |
 |---|---|
@@ -180,7 +180,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.3 `analista_tipicidad_y_responsabilidad_penal`
+### 5.3 `analista_responsabilidad_tipicidad`
 
 | Campo | Valor |
 |---|---|
@@ -193,7 +193,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.4 `analista_ruta_procesal_ley906`
+### 5.4 `analista_ruta_procesal`
 
 | Campo | Valor |
 |---|---|
@@ -212,13 +212,13 @@ Ver §4. Gaps: G01–G09.
 |---|---|
 | Skill primario | `construir_teoria_caso_victima` |
 | Schema | `RepresentacionVictimas` |
-| Vecinos | cronología, calidad, **tutela** (en vecinos pero tutela no está en chat tools) |
+| Vecinos | cronología, calidad |
 | Modelo | `gpt-4.1-mini` @ 0.2 |
-| Gaps | Vecino tutela inútil en chat (high-risk off); OK en plan |
+| Gaps | — |
 
 ---
 
-### 5.6 `gestor_evidencia_y_soporte_probatorio`
+### 5.6 `analista_evidencia`
 
 | Campo | Valor |
 |---|---|
@@ -231,7 +231,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.7 `preparador_estrategico_audiencias_penales`
+### 5.7 `analista_audiencias`
 
 | Campo | Valor |
 |---|---|
@@ -246,7 +246,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.8 `gestor_seguimiento_procesal_penal`
+### 5.8 `analista_seguimiento_procesal`
 
 | Campo | Valor |
 |---|---|
@@ -260,7 +260,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.9 `redactor_documentos_juridicos_penales`
+### 5.9 `redactor_documentos_juridicos`
 
 | Campo | Valor |
 |---|---|
@@ -274,21 +274,7 @@ Ver §4. Gaps: G01–G09.
 
 ---
 
-### 5.10 `evaluador_derechos_fundamentales_tutela`
-
-| Campo | Valor |
-|---|---|
-| Skill primario | `evaluar_procedencia_tutela` |
-| Schema | `Tutela` |
-| High-risk | **Sí** — solo plan HITL |
-| Modelo | `gpt-4.1` @ 0.1 |
-| Nested max | 4 |
-| Vecinos | calidad, ruta906, víctimas |
-| Gaps | G01; plazo 10 días al radicar (producto P2 ESTADO, no este batch) |
-
----
-
-### 5.11 `analista_calidad_juridica`
+### 5.10 `analista_calidad_juridica` *(antes 5.11; evaluador tutela retirado 2026-08-03)*
 
 | Campo | Valor |
 |---|---|
@@ -311,11 +297,13 @@ Ver §4. Gaps: G01–G09.
 | 2026-07-31 | G03 | Regex redactor/calidad endurecidos (sin `borrador`/`verificar` sueltos) | idem | hecho |
 | 2026-07-31 | G07 | `SLACK_NOTIFY_WEB_DRAFTS` + gate en `_maybe_create_draft` | `.env.example` | hecho |
 | 2026-07-31 | G08 | `prompt_parity.py` + log en boot `main.py` | idem | hecho |
-| 2026-07-31 | G04 | Vecinos: cronología/tipicidad ↔ `analista_ruta_procesal_ley906` | idem | hecho |
+| 2026-07-31 | G04 | Vecinos: cronología/tipicidad ↔ `analista_ruta_procesal` | idem | hecho |
 | 2026-07-31 | G05 | LRU cache orch/agent (max 6 / 24) | idem | hecho |
 | 2026-07-31 | G06 | Docstring `_ensure_poc_voice` (red residual plan/handoff) | — | hecho |
 | 2026-07-31 | G09 | Udemy B12 → hecho (Slack socket prod) | `UDEMY_LISTA_CAMBIOS.md` | hecho |
 | 2026-07-31 | G08+ | Prod: prompt DB v2→v3 (contenido = checksum archivo `e5b134fe…`); parity usa checksum como autoridad (versión DB ≠ header MD) | `publicar_config_gerente.py --prod --apply` + fix `prompt_parity.py` | hecho |
+| 2026-07-31 | BIT | Bitácora notas: prompts Gerente+10, `NotaTrabajo`, `Expediente.bitacora`, post-hook runner/plan, UI sidebar | `tests/test_bitacora_notas.py` | hecho |
+| 2026-07-31 | DRV | Drive Lexiatek: sync `.md` bitácora Gerente vía SA (local/dev); doc ops + smoke | `docs/operaciones/GOOGLE_DRIVE_LEXIATEK.md` | hecho |
 
 ---
 
@@ -327,6 +315,7 @@ Ver §4. Gaps: G01–G09.
 - Reescritura masiva de los 10 prompts sin demanda  
 - B13 tunear compactación sin mediana de tokens  
 - Subir temperatura “naturalidad”
+- Google Drive sync de bitácora (sin DPA / service account)
 
 ---
 

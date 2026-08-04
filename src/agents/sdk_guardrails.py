@@ -51,10 +51,6 @@ _INJECTION_RE = re.compile(
     r")",
     re.IGNORECASE,
 )
-_TUTELA_RE = re.compile(
-    r"\b(tutela|derecho fundamental|subsidiariedad|inmediatez)\b",
-    re.IGNORECASE,
-)
 _CITATION_HINT_RE = re.compile(
     r"\b(art\.?\s*\d+|ley\s+\d+|sentencia|radicado\s+\d+|jurisprudencia)\b",
     re.IGNORECASE,
@@ -278,28 +274,6 @@ async def redactor_output_guardrail(
     )
 
 
-@output_guardrail(name="tutela_output_guardrail")
-async def tutela_output_guardrail(
-    ctx: RunContextWrapper[Any],
-    agent: Any,
-    output: Any,
-) -> GuardrailFunctionOutput:
-    """Tutela: salida estructurada mínima (derecho/fundamentos o texto)."""
-    text = _structured_text(output)
-    empty = not text
-    has_tutela_anchor = bool(_TUTELA_RE.search(text)) if text else False
-    return GuardrailFunctionOutput(
-        output_info={
-            "reason": "salida_vacia" if empty else ("ok" if has_tutela_anchor else "sin_ancla_tutela"),
-            "chars": len(text),
-            "pii_flags": pii_flags(text) if text else [],
-            "has_tutela_anchor": has_tutela_anchor,
-            "agent": getattr(agent, "name", None),
-        },
-        # Vacío = trip; falta de ancla se reporta pero no corta (puede ser improcedencia).
-        tripwire_triggered=empty,
-    )
-
 
 @output_guardrail(name="calidad_output_guardrail")
 async def calidad_output_guardrail(
@@ -355,13 +329,16 @@ def poc_tool_input_guardrail(data: ToolInputGuardrailData) -> ToolGuardrailFunct
             ),
             output_info={"reason": "pii_in_args", "tool_name": tool_name, "pii_flags": flags},
         )
-    if tool_name == "redactor_documentos_juridicos_penales" and _TUTELA_RE.search(blob):
+    if tool_name == "redactor_documentos_juridicos" and re.search(
+        r"\b(tutela|acci[oó]n\s+de\s+tutela)\b", blob, re.I
+    ):
         return ToolGuardrailFunctionOutput.reject_content(
             message=(
-                "Routing bloqueado: para tutela/derechos fundamentales debe consultar "
-                "primero `evaluador_derechos_fundamentales_tutela`, no al redactor."
+                "Routing bloqueado: la acción de tutela está fuera del producto. "
+                "Reformule el pedido como memorial de impulso, derecho de petición "
+                "o seguimiento procesal penal."
             ),
-            output_info={"reason": "blocked_routing", "tool_name": tool_name},
+            output_info={"reason": "blocked_routing_tutela_out_of_scope", "tool_name": tool_name},
         )
     return ToolGuardrailFunctionOutput.allow(
         output_info={"reason": "ok", "tool_name": tool_name}
@@ -403,9 +380,6 @@ def specialist_output_guardrails() -> list:
 def redactor_output_guardrails() -> list:
     return [redactor_output_guardrail]
 
-
-def tutela_output_guardrails() -> list:
-    return [tutela_output_guardrail]
 
 
 def calidad_output_guardrails() -> list:

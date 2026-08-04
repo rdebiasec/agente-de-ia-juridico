@@ -13,12 +13,12 @@ disable-model-invocation: true
 - Tier: `critico`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (skill primario del agente)
+- `redactor_documentos_juridicos` (skill primario del agente)
 
 ## Purpose
 Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Skill primario del agente; ejecutar antes de pasar a calidad jurídica.
 
 ## Inputs

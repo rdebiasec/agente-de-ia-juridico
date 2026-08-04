@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: c200ebbc7ee52aef -->
 ---
 name: controlar-cadena-custodia-preliminar
 description: Skill critico penal-victimas: alertar si la evidencia puede requerir cadena de custodia. Use when the workflow requires `controlar_cadena_custodia_preliminar`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `critico`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Ejecutar tras `inventariar_evidencia` o `preservar_evidencia_digital` en elementos físicos o digitales críticos.
 
 ## Rol en analista_calidad_juridica

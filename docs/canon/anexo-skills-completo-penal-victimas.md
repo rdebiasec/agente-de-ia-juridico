@@ -20,7 +20,7 @@ Lista canónica con pasos operativos por skill:
 
 ## 2) Mapeo completo agente -> skills (con archivo por skill)
 
-### `coordinador_expediente_penal` (11)
+### `coordinador_caso` (11)
 
 - `actualizar_tareas_responsable` -> `agente/skills/actualizar_tareas_responsable/SKILL.md`
 - `clasificar_fuente_factual` -> `agente/skills/clasificar_fuente_factual/SKILL.md`
@@ -34,7 +34,7 @@ Lista canónica con pasos operativos por skill:
 - `priorizar_objetivos_representacion` -> `agente/skills/priorizar_objetivos_representacion/SKILL.md`
 - `recomendar_via_constitucional_o_alternativa` -> `agente/skills/recomendar_via_constitucional_o_alternativa/SKILL.md`
 
-### `analista_cronologia_hechos_penales` (9)
+### `analista_cronologia_hechos` (9)
 
 - `construir_cronologia_penal` -> `agente/skills/construir_cronologia_penal/SKILL.md`
 - `crear_matriz_hecho_fuente` -> `agente/skills/crear_matriz_hecho_fuente/SKILL.md`
@@ -46,7 +46,7 @@ Lista canónica con pasos operativos por skill:
 - `identificar_actores_y_roles` -> `agente/skills/identificar_actores_y_roles/SKILL.md`
 - `verificar_hechos_soportados` -> `agente/skills/verificar_hechos_soportados/SKILL.md`
 
-### `analista_tipicidad_y_responsabilidad_penal` (9)
+### `analista_responsabilidad_tipicidad` (9)
 
 - `analizar_autoria_y_participacion` -> `agente/skills/analizar_autoria_y_participacion/SKILL.md`
 - `analizar_dolo_culpa_elemento_subjetivo` -> `agente/skills/analizar_dolo_culpa_elemento_subjetivo/SKILL.md`
@@ -58,7 +58,7 @@ Lista canónica con pasos operativos por skill:
 - `identificar_conductas_punibles_preliminares` -> `agente/skills/identificar_conductas_punibles_preliminares/SKILL.md`
 - `mapear_tipo_penal_hecho_prueba` -> `agente/skills/mapear_tipo_penal_hecho_prueba/SKILL.md`
 
-### `analista_ruta_procesal_ley906` (13)
+### `analista_ruta_procesal` (13)
 
 - `analizar_intervencion_victima` -> `agente/skills/analizar_intervencion_victima/SKILL.md`
 - `clasificar_tarea_y_etapa` -> `agente/skills/clasificar_tarea_y_etapa/SKILL.md`
@@ -90,7 +90,7 @@ Lista canónica con pasos operativos por skill:
 - `mapear_actuaciones_posibles_victima` -> `agente/skills/mapear_actuaciones_posibles_victima/SKILL.md`
 - `priorizar_objetivos_representacion` -> `agente/skills/priorizar_objetivos_representacion/SKILL.md`
 
-### `gestor_evidencia_y_soporte_probatorio` (13)
+### `analista_evidencia` (13)
 
 - `clasificar_tipo_prueba` -> `agente/skills/clasificar_tipo_prueba/SKILL.md`
 - `construir_matriz_hecho_prueba` -> `agente/skills/construir_matriz_hecho_prueba/SKILL.md`
@@ -106,7 +106,7 @@ Lista canónica con pasos operativos por skill:
 - `mapear_tipo_penal_hecho_prueba` -> `agente/skills/mapear_tipo_penal_hecho_prueba/SKILL.md`
 - `preservar_evidencia_digital` -> `agente/skills/preservar_evidencia_digital/SKILL.md`
 
-### `preparador_estrategico_audiencias_penales` (16)
+### `analista_audiencias` (16)
 
 - `analizar_intervencion_victima` -> `agente/skills/analizar_intervencion_victima/SKILL.md`
 - `construir_cronologia_penal` -> `agente/skills/construir_cronologia_penal/SKILL.md`
@@ -125,7 +125,7 @@ Lista canónica con pasos operativos por skill:
 - `preparar_solicitudes_orales` -> `agente/skills/preparar_solicitudes_orales/SKILL.md`
 - `simular_escenarios_audiencia` -> `agente/skills/simular_escenarios_audiencia/SKILL.md`
 
-### `redactor_documentos_juridicos_penales` (16)
+### `redactor_documentos_juridicos` (16)
 
 - `controlar_separacion_hecho_inferencia` -> `agente/skills/controlar_separacion_hecho_inferencia/SKILL.md`
 - `controlar_tono_juridico_documento` -> `agente/skills/controlar_tono_juridico_documento/SKILL.md`
@@ -144,7 +144,7 @@ Lista canónica con pasos operativos por skill:
 - `verificar_citas_normativas` -> `agente/skills/verificar_citas_normativas/SKILL.md`
 - `verificar_hechos_soportados` -> `agente/skills/verificar_hechos_soportados/SKILL.md`
 
-### `gestor_seguimiento_procesal_penal` (12)
+### `analista_seguimiento_procesal` (12)
 
 - `actualizar_tareas_responsable` -> `agente/skills/actualizar_tareas_responsable/SKILL.md`
 - `controlar_audiencias` -> `agente/skills/controlar_audiencias/SKILL.md`

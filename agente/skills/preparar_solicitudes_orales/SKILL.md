@@ -13,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales` (uso principal)
-- `analista_ruta_procesal_ley906` (catálogo procedimental preliminar)
+- `analista_audiencias` (uso principal)
+- `analista_ruta_procesal` (catálogo procedimental preliminar)
 
 ## Purpose
 Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia.

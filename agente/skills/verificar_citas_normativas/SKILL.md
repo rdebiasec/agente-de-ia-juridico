@@ -13,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Control en borrador antes de calidad.
 
 ## Rol en analista_calidad_juridica

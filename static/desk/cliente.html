@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Canal de la víctima con el Coordinador del Caso — Lexiatek. Respuestas solo tras revisión del abogado."
+    />
+    <link rel="icon" href="/static/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/cliente.css" />
+    <title>Consulta · Lexiatek</title>
+  </head>
+  <body class="cliente-body">
+    <a class="skip-link" href="#cliente-messages">Ir al chat</a>
+    <div class="cliente-shell">
+      <header class="cliente-header">
+        <a class="cliente-logo" href="https://www.dbx-solutions.com" target="_blank" rel="noopener">
+          <img src="/static/dbx-logo.png" alt="Lexiatek" width="140" height="28" />
+        </a>
+        <p class="cliente-tagline">Coordinador del Caso · representación de víctimas</p>
+        <p class="cliente-case" id="cliente-case-label" hidden></p>
+      </header>
+
+      <p class="cliente-status" id="cliente-status" aria-live="polite">
+        Escriba su mensaje. El despacho revisará la respuesta antes de enviársela.
+      </p>
+
+      <main class="cliente-main" id="cliente-messages" aria-live="polite"></main>
+
+      <form class="cliente-composer" id="cliente-form">
+        <label class="cliente-consent">
+          <input type="checkbox" id="cliente-consent" required />
+          Autorizo el tratamiento de mis datos de caso conforme a la Ley 1581
+          (<a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">aviso</a>).
+        </label>
+        <div class="cliente-composer-row">
+          <textarea
+            id="cliente-input"
+            rows="2"
+            maxlength="4000"
+            placeholder="Cuéntenos su consulta…"
+            required
+          ></textarea>
+          <button type="submit" id="cliente-send">Enviar</button>
+        </div>
+        <p class="cliente-hint">
+          Habla con el Coordinador del Caso. No verá planes técnicos ni especialistas.
+          Toda respuesta pasa por el abogado del despacho.
+        </p>
+      </form>
+    </div>
+    <script src="/static/cliente.js" defer></script>
+  </body>
+</html>

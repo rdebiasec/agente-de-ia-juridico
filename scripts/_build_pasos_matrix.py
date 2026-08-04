@@ -23,7 +23,6 @@ for s in (
 
 TIER_TARGETS.update(
     {
-        "evaluar_procedencia_tutela": ("critico", 9),
         "redactar_tutela_penal_preliminar": ("critico", 10),
         "preparar_guion_intervencion_oral": ("critico", 8),
         "detectar_riesgo_improcedencia_tutela": ("critico", 8),
@@ -72,16 +71,6 @@ for s in (
     TIER_TARGETS[s] = ("operativo", 3)
 
 CUSTOM_OPS: dict[str, list[str]] = {
-    "evaluar_procedencia_tutela": [
-        "Verificar legitimación por activa (titular del derecho y vínculo con el caso).",
-        "Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).",
-        "Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.",
-        "Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.",
-        "Evaluar inmediatez del perjuicio y necesidad de medida urgente.",
-        "Evaluar conexidad constitucional y relevancia del derecho invocado.",
-        "Documentar requisitos faltantes y riesgo de improcedencia.",
-        "Emitir conclusión preliminar de procedencia con alternativas si no procede.",
-    ],
     "redactar_tutela_penal_preliminar": [
         "Confirmar dictamen previo de procedencia tutela (no redactar si improcedente).",
         "Consolidar hechos verificables separados de inferencias y pendientes.",

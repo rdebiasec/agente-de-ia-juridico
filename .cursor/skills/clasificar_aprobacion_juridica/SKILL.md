@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 4e16cd7e83c1b264 -->
 ---
 name: clasificar-aprobacion-juridica
 description: Skill atomico penal-victimas: clasificar la salida como aprobable, aprobable con cambios, rechazada o escalar. Use when the workflow requires `clasificar_aprobacion_juridica`.

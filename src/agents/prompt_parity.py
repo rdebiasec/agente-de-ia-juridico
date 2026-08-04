@@ -17,7 +17,7 @@ def parse_file_prompt_header(text: str) -> tuple[int | None, str | None]:
     return int(match.group(1)), match.group(2).lower()
 
 
-def check_prompt_parity(agent_id: str = "coordinador_expediente_penal") -> dict:
+def check_prompt_parity(agent_id: str = "coordinador_caso") -> dict:
     """Compara header del MD en disco con la versión activa en Postgres (si hay).
 
     No falla el boot: devuelve un dict con ok/mismatch/unavailable.

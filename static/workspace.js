@@ -134,9 +134,32 @@
     list.innerHTML = hitos.map((h) => `<li>${esc(h)}</li>`).join("");
   }
 
+  function renderBitacora(exp) {
+    const wrap = document.getElementById("expediente-bitacora");
+    const list = document.getElementById("expediente-bitacora-list");
+    if (!wrap || !list) return;
+    const entries = Array.isArray(exp?.bitacora) ? exp.bitacora : [];
+    if (!entries.length) {
+      wrap.hidden = true;
+      list.innerHTML = "";
+      return;
+    }
+    wrap.hidden = false;
+    const tail = entries.slice(-8).reverse();
+    list.innerHTML = tail
+      .map((e) => {
+        const autor = esc(e.autor || "gerente_caso");
+        const tipo = esc(e.tipo || "nota");
+        const resumen = esc((e.resumen || "").slice(0, 180));
+        return `<li><strong>${autor}</strong> · <em>${tipo}</em><br>${resumen}</li>`;
+      })
+      .join("");
+  }
+
   function setExpediente(exp) {
     expedienteState = exp || null;
     renderExpedienteFields(expedienteState);
+    renderBitacora(expedienteState);
     renderContextChips(expedienteState);
     autofillSessionIds();
     if (expedienteState?.radicado) addHito("Radicado identificado");
@@ -168,7 +191,7 @@
       panel.classList.toggle("is-active", active);
       panel.hidden = !active;
     });
-    if (id === "actividad" || id === "borrador" || id === "plazos" || id === "rag") {
+    if (id === "actividad" || id === "borrador" || id === "plazos" || id === "rag" || id === "equipo") {
       try {
         history.replaceState(null, "", `#${id}`);
       } catch {
@@ -178,11 +201,20 @@
     if (id === "actividad") {
       window.ChatActivity?.refresh?.({ force: true });
     }
+    if (id === "equipo") {
+      window.EquipoInterno?.refresh?.();
+    }
+    try {
+      document.dispatchEvent(new CustomEvent("workspace:tab", { detail: { tab: id } }));
+    } catch {
+      /* ignore */
+    }
   }
 
   function smartTab(reason) {
     if (reason === "borrador" || reason === "draft") switchTab("borrador");
     else if (reason === "plazos" || reason === "deadline") switchTab("plazos");
+    else if (reason === "equipo" || reason === "interno" || reason === "transcript") switchTab("equipo");
     else if (reason === "trazas" || reason === "trace" || reason === "actividad" || reason === "detalle") {
       switchTab("actividad");
     }
@@ -223,7 +255,6 @@
     const dias = next.dias_habiles != null ? `${next.dias_habiles} días háb.` : "";
     chip.textContent = `${next.descripcion}${dias ? ` · ${dias}` : ""}`;
     chip.className = "workspace-deadline-chip";
-    if (next.tipo === "tutela") chip.classList.add("workspace-deadline-chip--tutela");
     const limit = next.fecha_limite ? new Date(next.fecha_limite) : null;
     if (limit) {
       const daysLeft = Math.ceil((limit - new Date()) / (86400000));

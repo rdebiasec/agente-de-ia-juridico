@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: b4e632dd47253627 -->
 ---
 name: monitorear-radicado
 description: Skill atomico penal-victimas: consultar o registrar estado de radicado. Use when the workflow requires `monitorear_radicado`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `atomico`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal` (skill primario del agente)
+- `analista_seguimiento_procesal` (skill primario del agente)
 
 ## Purpose
 Consultar o registrar estado del radicado con fuente y timestamp.

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 0b578bd89e2be08f -->
 ---
 name: verificar-citas-normativas
 description: Skill atomico penal-victimas: verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes. Use when the workflow requires `verificar_citas_normativas`.
@@ -12,13 +13,13 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Control en borrador antes de calidad.
 
 ## Rol en analista_calidad_juridica

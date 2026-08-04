@@ -59,17 +59,6 @@ def crear_termino(
     )
 
 
-# Atajos para términos frecuentes.
-def termino_fallo_tutela(session_id: str, fecha_base: date | None = None) -> Deadline:
-    """Fallo de tutela: 10 días hábiles (art. 29 Decreto 2591/1991)."""
-    return crear_termino(
-        session_id=session_id,
-        descripcion="Fallo de acción de tutela (10 días hábiles)",
-        dias_habiles=10,
-        tipo="tutela_fallo",
-        fecha_base=fecha_base,
-    )
-
 
 def termino_impugnacion_tutela(session_id: str, fecha_base: date | None = None) -> Deadline:
     """Impugnación de tutela: 3 días hábiles desde la notificación."""

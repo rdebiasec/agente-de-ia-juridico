@@ -41,7 +41,7 @@
 #### `clasificar_tarea_y_etapa`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `coordinador_expediente_penal`, `analista_ruta_procesal_ley906`
+- **Agentes:** `coordinador_caso`, `analista_ruta_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
@@ -66,7 +66,7 @@
 #### `detectar_urgencia_penal`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+- **Agentes:** `coordinador_caso`, `analista_seguimiento_procesal`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Identificar si el caso requiere atencion humana inmediata.
@@ -93,7 +93,7 @@
 #### `gestionar_faltantes_expediente`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `coordinador_expediente_penal`
+- **Agentes:** `coordinador_caso`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar datos y documentos faltantes antes de analizar o redactar.
@@ -118,7 +118,7 @@
 #### `marcar_pendientes_verificacion`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `coordinador_expediente_penal`
+- **Agentes:** `coordinador_caso`
 - **Prioridad:** P0
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`.
@@ -139,7 +139,7 @@
 #### `verificar_hechos_soportados`
 
 - **Categoría:** Skills transversales
-- **Agentes:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `analista_cronologia_hechos`, `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Revisar si cada afirmacion factual tiene fuente.
@@ -164,7 +164,7 @@
 #### `clasificar_fuente_factual`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `coordinador_expediente_penal`
+- **Agentes:** `coordinador_caso`
 - **Prioridad:** P0
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente.
@@ -193,7 +193,7 @@
 #### `construir_cronologia_penal`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_cronologia_hechos`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Ordenar hechos en linea de tiempo.
@@ -220,7 +220,7 @@
 #### `crear_matriz_hecho_fuente`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+- **Agentes:** `analista_cronologia_hechos`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Relacionar cada hecho con su fuente exacta.
@@ -245,7 +245,7 @@
 #### `detectar_contradicciones_factuales`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `analista_calidad_juridica`
+- **Agentes:** `analista_cronologia_hechos`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Encontrar inconsistencias entre versiones, documentos, fechas, valores o actores.
@@ -270,7 +270,7 @@
 #### `detectar_vacios_factuales`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `coordinador_expediente_penal`
+- **Agentes:** `analista_cronologia_hechos`, `coordinador_caso`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar lo que falta para comprender o probar el caso.
@@ -295,7 +295,7 @@
 #### `extraer_hechos_relevantes`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `redactor_documentos_juridicos_penales`, `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_cronologia_hechos`, `redactor_documentos_juridicos`, `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Extraer hechos relevantes de documentos, relatos, audios o comunicaciones.
@@ -320,7 +320,7 @@
 #### `generar_preguntas_aclaracion`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_cronologia_hechos`, `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear preguntas para victima, testigos o abogado humano sin inducir respuestas.
@@ -345,7 +345,7 @@
 #### `identificar_actores_y_roles`
 
 - **Categoría:** Skills de hechos y cronologia
-- **Agentes:** `analista_cronologia_hechos_penales`, `analista_representacion_victimas`
+- **Agentes:** `analista_cronologia_hechos`, `analista_representacion_victimas`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar victima, presunto responsable, testigos, autoridades, terceros y entidades.
@@ -370,7 +370,7 @@
 #### `analizar_autoria_y_participacion`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`
+- **Agentes:** `analista_responsabilidad_tipicidad`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Evaluar posibles roles de los intervinientes de manera preliminar.
@@ -395,7 +395,7 @@
 #### `analizar_dolo_culpa_elemento_subjetivo`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`
+- **Agentes:** `analista_responsabilidad_tipicidad`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo.
@@ -420,7 +420,7 @@
 #### `descomponer_elementos_tipo_penal`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`
+- **Agentes:** `analista_responsabilidad_tipicidad`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Dividir un posible delito en elementos juridicos verificables.
@@ -447,7 +447,7 @@
 #### `detectar_agravantes_atenuantes`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`
+- **Agentes:** `analista_responsabilidad_tipicidad`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar circunstancias relevantes que puedan afectar gravedad juridica.
@@ -472,7 +472,7 @@
 #### `detectar_riesgos_atipicidad`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`, `analista_calidad_juridica`
+- **Agentes:** `analista_responsabilidad_tipicidad`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar cuando un caso puede ser atipico o tener naturaleza no penal.
@@ -497,7 +497,7 @@
 #### `generar_preguntas_tipicidad`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`, `analista_cronologia_hechos_penales`
+- **Agentes:** `analista_responsabilidad_tipicidad`, `analista_cronologia_hechos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear preguntas para completar elementos del tipo penal.
@@ -522,7 +522,7 @@
 #### `identificar_conductas_punibles_preliminares`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`
+- **Agentes:** `analista_responsabilidad_tipicidad`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Proponer posibles conductas punibles con base en hechos, sin conclusion definitiva.
@@ -547,7 +547,7 @@
 #### `mapear_tipo_penal_hecho_prueba`
 
 - **Categoría:** Skills de tipicidad y responsabilidad penal
-- **Agentes:** `analista_tipicidad_y_responsabilidad_penal`, `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+- **Agentes:** `analista_responsabilidad_tipicidad`, `analista_evidencia`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Relacionar elementos del tipo con hechos y pruebas.
@@ -576,7 +576,7 @@
 #### `analizar_intervencion_victima`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_ruta_procesal`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Definir intervencion posible de la victima en una actuacion o audiencia.
@@ -603,7 +603,7 @@
 #### `controlar_terminos_procesales_preliminares`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar y alertar terminos relevantes. No reemplaza calculo humano.
@@ -628,7 +628,7 @@
 #### `crear_ruta_procesal_recomendada`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
+- **Agentes:** `analista_ruta_procesal`, `coordinador_caso`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Crear plan de proximos pasos procesales para revision del abogado.
@@ -655,7 +655,7 @@
 #### `detectar_riesgos_procesales`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+- **Agentes:** `analista_ruta_procesal`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos.
@@ -682,7 +682,7 @@
 #### `evaluar_oportunidad_procesal`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `analista_calidad_juridica`
+- **Agentes:** `analista_ruta_procesal`, `analista_calidad_juridica`
 - **Prioridad:** P1
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Determinar si una solicitud o intervencion es oportuna, prematura o extemporanea.
@@ -713,7 +713,7 @@
 #### `evaluar_solicitud_fiscalia_juez`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `analista_ruta_procesal`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Evaluar si una solicitud a Fiscalia o juez es procedente y conveniente.
@@ -738,7 +738,7 @@
 #### `identificar_etapa_procesal_ley906`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `coordinador_expediente_penal`
+- **Agentes:** `analista_ruta_procesal`, `coordinador_caso`
 - **Prioridad:** P1
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Determinar etapa del caso.
@@ -765,7 +765,7 @@
 #### `mapear_actuaciones_posibles_victima`
 
 - **Categoría:** Skills de ruta procesal Ley 906
-- **Agentes:** `analista_ruta_procesal_ley906`, `analista_representacion_victimas`
+- **Agentes:** `analista_ruta_procesal`, `analista_representacion_victimas`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Indicar que puede hacer la representacion de victimas segun etapa.
@@ -869,7 +869,7 @@
 #### `construir_teoria_caso_victima`
 
 - **Categoría:** Skills de representacion de victimas
-- **Agentes:** `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_representacion_victimas`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Formular teoria preliminar desde la victima.
@@ -900,7 +900,7 @@
 #### `detectar_riesgo_revictimizacion`
 
 - **Categoría:** Skills de representacion de victimas
-- **Agentes:** `analista_representacion_victimas`, `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+- **Agentes:** `analista_representacion_victimas`, `analista_audiencias`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar.
@@ -925,7 +925,7 @@
 #### `evaluar_dano_y_afectacion`
 
 - **Categoría:** Skills de representacion de victimas
-- **Agentes:** `analista_representacion_victimas`, `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_representacion_victimas`, `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Organizar danos y afectaciones alegadas.
@@ -975,7 +975,7 @@
 #### `priorizar_objetivos_representacion`
 
 - **Categoría:** Skills de representacion de victimas
-- **Agentes:** `analista_representacion_victimas`, `coordinador_expediente_penal`
+- **Agentes:** `analista_representacion_victimas`, `coordinador_caso`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Ordenar objetivos de la representacion.
@@ -1002,7 +1002,7 @@
 #### `clasificar_tipo_prueba`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Clasificar evidencia como documental, testimonial, digital, fisica, pericial, institucional o pendiente.
@@ -1027,7 +1027,7 @@
 #### `construir_matriz_hecho_prueba`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `analista_tipicidad_y_responsabilidad_penal`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_evidencia`, `analista_responsabilidad_tipicidad`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Relacionar hechos con pruebas existentes y faltantes.
@@ -1052,7 +1052,7 @@
 #### `controlar_cadena_custodia_preliminar`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+- **Agentes:** `analista_evidencia`, `analista_calidad_juridica`
 - **Prioridad:** P0
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Alertar si la evidencia puede requerir cadena de custodia.
@@ -1083,7 +1083,7 @@
 #### `crear_plan_recaudo_probatorio`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+- **Agentes:** `analista_evidencia`, `analista_representacion_victimas`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Proponer plan para obtener pruebas faltantes.
@@ -1110,7 +1110,7 @@
 #### `detectar_brechas_probatorias`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `analista_calidad_juridica`
+- **Agentes:** `analista_evidencia`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Identificar hechos relevantes sin soporte suficiente.
@@ -1135,7 +1135,7 @@
 #### `evaluar_suficiencia_probatoria`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `analista_representacion_victimas`
+- **Agentes:** `analista_evidencia`, `analista_representacion_victimas`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Evaluar preliminarmente fuerza de soporte probatorio.
@@ -1162,7 +1162,7 @@
 #### `generar_preguntas_testigos_peritos`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_evidencia`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Preparar preguntas neutrales para testigos o peritos.
@@ -1187,7 +1187,7 @@
 #### `inventariar_evidencia`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear inventario de todos los elementos disponibles.
@@ -1212,7 +1212,7 @@
 #### `preservar_evidencia_digital`
 
 - **Categoría:** Skills de evidencia y soporte probatorio
-- **Agentes:** `gestor_evidencia_y_soporte_probatorio`
+- **Agentes:** `analista_evidencia`
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Definir medidas para proteger evidencia digital sin alterarla.
@@ -1243,7 +1243,7 @@
 #### `crear_checklist_previo_audiencia`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`, `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_audiencias`, `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Listar requisitos antes de audiencia.
@@ -1268,7 +1268,7 @@
 #### `crear_resumen_ejecutivo_litigante`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear resumen de una pagina para el abogado que interviene.
@@ -1293,7 +1293,7 @@
 #### `detectar_riesgos_audiencia`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`, `analista_calidad_juridica`
+- **Agentes:** `analista_audiencias`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion.
@@ -1318,7 +1318,7 @@
 #### `identificar_objetivo_audiencia`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Definir objetivo juridico y tactico de la audiencia para la victima.
@@ -1345,7 +1345,7 @@
 #### `preparar_contraargumentos`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Anticipar argumentos de defensa, Fiscalia u otros intervinientes.
@@ -1370,7 +1370,7 @@
 #### `preparar_guion_intervencion_oral`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P1
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Estructurar intervencion oral clara y breve.
@@ -1403,7 +1403,7 @@
 #### `preparar_preguntas_audiencia`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Sugerir preguntas para victima, testigos o peritos.
@@ -1434,7 +1434,7 @@
 #### `preparar_solicitudes_orales`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`, `analista_ruta_procesal_ley906`
+- **Agentes:** `analista_audiencias`, `analista_ruta_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Formular solicitudes orales posibles segun etapa.
@@ -1459,7 +1459,7 @@
 #### `simular_escenarios_audiencia`
 
 - **Categoría:** Skills de audiencias
-- **Agentes:** `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Plantear escenarios probables y preparacion del abogado.
@@ -1488,7 +1488,7 @@
 #### `controlar_tono_juridico_documento`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`, `analista_calidad_juridica`
+- **Agentes:** `redactor_documentos_juridicos`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Asegurar tono formal, preciso, no agresivo y no especulativo.
@@ -1513,7 +1513,7 @@
 #### `estructurar_hechos_fundamentos_solicitudes`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`
+- **Agentes:** `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Ordenar cualquier documento juridico.
@@ -1538,7 +1538,7 @@
 #### `redactar_ampliacion_denuncia`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`
+- **Agentes:** `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Estructurar hechos nuevos, pruebas y anexos para ampliar denuncia.
@@ -1563,7 +1563,7 @@
 #### `redactar_derecho_peticion_penal`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+- **Agentes:** `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Redactar derecho de peticion relacionado con autoridad o informacion del caso.
@@ -1588,7 +1588,7 @@
 #### `redactar_memorial_penal`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`
+- **Agentes:** `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Crear borrador de memorial penal.
@@ -1617,7 +1617,7 @@
 #### `redactar_recurso_o_intervencion_preliminar`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`, `analista_ruta_procesal_ley906`
+- **Agentes:** `redactor_documentos_juridicos`, `analista_ruta_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear borrador preliminar de recurso o intervencion, sujeto a revision procesal.
@@ -1642,7 +1642,7 @@
 #### `redactar_solicitud_impulso_procesal`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`
+- **Agentes:** `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear borrador para solicitar impulso procesal o actuaciones.
@@ -1667,7 +1667,7 @@
 #### `redactar_tutela_penal_preliminar`
 
 - **Categoría:** Skills de redaccion juridica penal
-- **Agentes:** `redactor_documentos_juridicos_penales`, `evaluador_derechos_fundamentales_tutela`
+- **Agentes:** `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 - **Prioridad:** P2
 - **Tier gerencial:** `critico`
 - **Instrucción tipo:** Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
@@ -1706,7 +1706,7 @@
 #### `actualizar_tareas_responsable`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `coordinador_expediente_penal`, `gestor_seguimiento_procesal_penal`
+- **Agentes:** `coordinador_caso`, `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Mantener lista de tareas por agente o abogado.
@@ -1727,7 +1727,7 @@
 #### `controlar_audiencias`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`, `preparador_estrategico_audiencias_penales`
+- **Agentes:** `analista_seguimiento_procesal`, `analista_audiencias`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Administrar fechas, horas, enlaces y preparacion de audiencias.
@@ -1752,7 +1752,7 @@
 #### `crear_reporte_estado_caso`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear reporte interno periodico.
@@ -1777,7 +1777,7 @@
 #### `detectar_inactividad_procesal`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Alertar falta de movimientos por periodo relevante.
@@ -1802,7 +1802,7 @@
 #### `generar_alertas_terminos_vencimientos`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `analista_ruta_procesal_ley906`, `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_ruta_procesal`, `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear alertas de posibles vencimientos.
@@ -1825,7 +1825,7 @@
 #### `monitorear_radicado`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Consultar o registrar estado de radicado.
@@ -1846,7 +1846,7 @@
 #### `preparar_resumen_operativo_cliente`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`, `analista_calidad_juridica`
+- **Agentes:** `analista_seguimiento_procesal`, `analista_calidad_juridica`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Crear version simple del estado del proceso para cliente, sin estrategia sensible.
@@ -1871,7 +1871,7 @@
 #### `registrar_actuacion_procesal`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `atomico`
 - **Instrucción tipo:** Registrar una actuacion nueva en la bitacora del caso.
@@ -1892,7 +1892,7 @@
 #### `seguimiento_documentos_radicados`
 
 - **Categoría:** Skills de seguimiento procesal
-- **Agentes:** `gestor_seguimiento_procesal_penal`
+- **Agentes:** `analista_seguimiento_procesal`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Controlar documentos enviados y respuestas pendientes.
@@ -2006,7 +2006,7 @@
 #### `evaluar_derecho_peticion`
 
 - **Categoría:** Skills constitucionales y tutela
-- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Revisar si existe derecho de peticion incumplido.
@@ -2093,7 +2093,7 @@
 #### `preparar_borrador_tutela_preliminar`
 
 - **Categoría:** Skills constitucionales y tutela
-- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `estrategico`
 - **Instrucción tipo:** Preparar insumos para borrador de tutela.
@@ -2120,7 +2120,7 @@
 #### `recomendar_via_constitucional_o_alternativa`
 
 - **Categoría:** Skills constitucionales y tutela
-- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `coordinador_expediente_penal`
+- **Agentes:** `evaluador_derechos_fundamentales_tutela`, `coordinador_caso`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
@@ -2249,7 +2249,7 @@
 #### `controlar_separacion_hecho_inferencia`
 
 - **Categoría:** Skills de calidad juridica
-- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Verificar que no se confundan hechos probados, narrados, inferidos y pendientes.
@@ -2274,7 +2274,7 @@
 #### `controlar_tono_riesgo_reputacional`
 
 - **Categoría:** Skills de calidad juridica
-- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Revisar tono profesional y evitar lenguaje riesgoso.
@@ -2347,7 +2347,7 @@
 #### `verificar_citas_normativas`
 
 - **Categoría:** Skills de calidad juridica
-- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos_penales`
+- **Agentes:** `analista_calidad_juridica`, `redactor_documentos_juridicos`
 - **Prioridad:** P2
 - **Tier gerencial:** `operativo`
 - **Instrucción tipo:** Verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes.
@@ -2632,31 +2632,31 @@
 
 ## Resumen por agente
 
-### `coordinador_expediente_penal` — Gerente del Caso Penal
+### `coordinador_caso` — Coordinador del Caso
 - **Skills:** 11 · **Flujo:** Verifica completitud, prioriza, delega y mantiene faltantes, tareas y responsables hasta su cierre.
 
-### `analista_cronologia_hechos_penales` — Analista de cronologia y hechos
+### `analista_cronologia_hechos` — Analista de cronologia y hechos
 - **Skills:** 9 · **Flujo:** Convierte relatos y documentos en una historia factual ordenada y verificable.
 
-### `analista_tipicidad_y_responsabilidad_penal` — Analista de tipicidad y responsabilidad
+### `analista_responsabilidad_tipicidad` — Analista de tipicidad y responsabilidad
 - **Skills:** 9 · **Flujo:** Traduce hechos y pruebas en hipotesis juridicas de tipicidad y responsabilidad preliminar.
 
-### `analista_ruta_procesal_ley906` — Analista de ruta procesal Ley 906
+### `analista_ruta_procesal` — Analista de ruta procesal Ley 906
 - **Skills:** 13 · **Flujo:** Ubica la etapa exacta y la mejor ruta procesal para representar a la victima.
 
 ### `analista_representacion_victimas` — Analista de representacion de victimas
 - **Skills:** 13 · **Flujo:** Garantiza que la estrategia este centrada en derechos, intereses y no revictimizacion.
 
-### `gestor_evidencia_y_soporte_probatorio` — Gestor de evidencia y prueba
+### `analista_evidencia` — Gestor de evidencia y prueba
 - **Skills:** 13 · **Flujo:** Transforma evidencia dispersa en inventario util y plan probatorio accionable.
 
-### `preparador_estrategico_audiencias_penales` — Preparador de audiencias
+### `analista_audiencias` — Preparador de audiencias
 - **Skills:** 16 · **Flujo:** Prepara audiencias con objetivo, guion, preguntas y solicitudes.
 
-### `redactor_documentos_juridicos_penales` — Redactor de documentos penales
+### `redactor_documentos_juridicos` — Redactor de documentos penales
 - **Skills:** 16 · **Flujo:** Convierte analisis juridico en escritos utilizables por el despacho.
 
-### `gestor_seguimiento_procesal_penal` — Gestor de seguimiento procesal
+### `analista_seguimiento_procesal` — Gestor de seguimiento procesal
 - **Skills:** 12 · **Flujo:** Monitorea estado de radicado, actuaciones, audiencias y terminos.
 
 ### `evaluador_derechos_fundamentales_tutela` — Evaluador de tutela y derechos fundamentales

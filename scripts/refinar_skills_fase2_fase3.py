@@ -132,13 +132,13 @@ _w("controlar_audiencias", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Checklist de control previo a audiencia.
 
 ## Rol en analista_calidad_juridica
@@ -185,13 +185,13 @@ _w("controlar_separacion_hecho_inferencia", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Autocontrol antes de entregar borrador.
 
 ## Rol en analista_calidad_juridica
@@ -236,13 +236,13 @@ _w("controlar_tono_juridico_documento", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Revisión de tono antes de pasar a calidad.
 
 ## Rol en analista_calidad_juridica
@@ -287,13 +287,13 @@ _w("controlar_tono_riesgo_reputacional", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Filtro antes de radicar o comunicar.
 
 ## Rol en analista_calidad_juridica
@@ -339,13 +339,13 @@ _w("crear_checklist_previo_audiencia", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Generar lista verificable de tareas y documentos antes de una audiencia penal.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Checklist operativo tras definir objetivo de audiencia.
 
 ## Rol en analista_calidad_juridica
@@ -392,13 +392,13 @@ _w("detectar_brechas_probatorias", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 - `analista_representacion_victimas`
 
 ## Purpose
 Identificar hechos relevantes sin prueba suficiente en el expediente.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Antecede plan de recaudo.
 
 ## Rol en analista_representacion_victimas
@@ -494,13 +494,13 @@ _w("detectar_riesgos_audiencia", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_calidad_juridica`
 
 ## Purpose
 Identificar riesgos tácticos y procesales específicos de una audiencia programada.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Antecede simulación y guion oral.
 
 ## Rol en analista_calidad_juridica
@@ -600,16 +600,16 @@ _w("generar_preguntas_testigos_peritos", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
-- `analista_cronologia_hechos_penales`
+- `analista_audiencias`
+- `analista_cronologia_hechos`
 
 ## Purpose
 Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar.
 
-## Rol en preparador_estrategico_audiencias_penales
+## Rol en analista_audiencias
 Uso principal en preparación de audiencia.
 
-## Rol en analista_cronologia_hechos_penales
+## Rol en analista_cronologia_hechos
 Solo para aclarar huecos factuales vía terceros; no preguntas a víctima.
 
 ## Inputs
@@ -651,13 +651,13 @@ _w("preparar_resumen_operativo_cliente", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose
 Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible.
 
-## Rol en gestor_seguimiento_procesal_penal
+## Rol en analista_seguimiento_procesal
 Comunicación periódica de avance procesal.
 
 ## Rol en analista_calidad_juridica
@@ -705,12 +705,12 @@ _w("redactar_derecho_peticion_penal", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (único ejecutor de redacción)
+- `redactor_documentos_juridicos` (único ejecutor de redacción)
 
 ## Purpose
 Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Ejecutar redacción solo con evaluación favorable preliminar de petición.
 
 ## Inputs
@@ -753,13 +753,13 @@ _w("verificar_citas_normativas", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 - `analista_calidad_juridica`
 
 ## Purpose
 Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Control en borrador antes de calidad.
 
 ## Rol en analista_calidad_juridica
@@ -805,7 +805,7 @@ _w("clasificar_tipo_prueba", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio`
+- `analista_evidencia`
 
 ## Purpose
 Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.).
@@ -885,7 +885,7 @@ _w("crear_reporte_estado_caso", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Generar reporte interno del estado del caso para el despacho (no para cliente).
@@ -925,7 +925,7 @@ _w("crear_resumen_ejecutivo_litigante", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 - `analista_representacion_victimas`
 
 ## Purpose
@@ -969,7 +969,7 @@ _w("estructurar_hechos_fundamentos_solicitudes", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito.
@@ -1107,7 +1107,7 @@ _w("preparar_contraargumentos", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales`
+- `analista_audiencias`
 
 ## Purpose
 Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial.
@@ -1152,7 +1152,7 @@ _w("redactar_ampliacion_denuncia", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.
@@ -1194,16 +1194,16 @@ _w("redactar_solicitud_impulso_procesal", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales`
-- `gestor_seguimiento_procesal_penal`
+- `redactor_documentos_juridicos`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Redacta borrador formal.
 
-## Rol en gestor_seguimiento_procesal_penal
+## Rol en analista_seguimiento_procesal
 Aporta hechos de inactividad (`detectar_inactividad_procesal`); no redacta texto final.
 
 ## Inputs
@@ -1247,7 +1247,7 @@ _w("registrar_actuacion_procesal", """
 - Tier: `atomico`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Registrar en el sistema una actuación procesal nueva con fuente y fecha.
@@ -1285,7 +1285,7 @@ _w("seguimiento_documentos_radicados", """
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_seguimiento_procesal_penal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.
@@ -1326,12 +1326,12 @@ _w("verificar_jurisprudencia", """
 
 ## Used By Agents
 - `analista_calidad_juridica`
-- `redactor_documentos_juridicos_penales`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Control en borrador antes de calidad.
 
 ## Rol en analista_calidad_juridica

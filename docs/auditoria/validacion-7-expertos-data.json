@@ -1,10 +1,10 @@
 {
   "metrics": {
-    "with_steps": 90,
-    "with_guardrails": 90,
-    "with_rol": 89,
-    "with_boundary": 84,
-    "total": 90,
+    "with_steps": 81,
+    "with_guardrails": 81,
+    "with_rol": 80,
+    "with_boundary": 75,
+    "total": 81,
     "generic_io": 0,
     "generic_risk": 0,
     "profundizar": 0,
@@ -17,10 +17,14 @@
     "actualizar_tareas_responsable": {
       "veredicto": "APROBADO",
       "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
+      "cond_experts": [
+        "E7"
+      ],
+      "pass_score": 55,
       "action": "ninguna",
-      "hallazgos": []
+      "hallazgos": [
+        "Lista/matriz divergen (2 vs 2)"
+      ]
     },
     "alinear_estrategia_prueba_proceso": {
       "veredicto": "APROBADO",
@@ -73,14 +77,6 @@
       "hallazgos": [
         "Sin separación hecho/inferencia (g3)"
       ]
-    },
-    "analizar_perjuicio_irremediable": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
     },
     "clasificar_aprobacion_juridica": {
       "veredicto": "APROBADO",
@@ -214,14 +210,6 @@
       "action": "ninguna",
       "hallazgos": []
     },
-    "crear_matriz_hecho_derecho_fundamental": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
-    },
     "crear_matriz_hecho_fuente": {
       "veredicto": "APROBADO",
       "fail_experts": [],
@@ -314,14 +302,6 @@
       "action": "ninguna",
       "hallazgos": []
     },
-    "detectar_riesgo_improcedencia_tutela": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
-    },
     "detectar_riesgo_revictimizacion": {
       "veredicto": "APROBADO",
       "fail_experts": [],
@@ -399,14 +379,6 @@
       "hallazgos": []
     },
     "evaluar_oportunidad_procesal": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
-    },
-    "evaluar_procedencia_tutela": {
       "veredicto": "APROBADO",
       "fail_experts": [],
       "cond_experts": [],
@@ -498,14 +470,6 @@
       "action": "ninguna",
       "hallazgos": []
     },
-    "identificar_derecho_fundamental_afectado": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
-    },
     "identificar_etapa_procesal_ley906": {
       "veredicto": "APROBADO",
       "fail_experts": [],
@@ -574,18 +538,6 @@
       "action": "ninguna",
       "hallazgos": []
     },
-    "preparar_borrador_tutela_preliminar": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [
-        "E3"
-      ],
-      "pass_score": 55,
-      "action": "ninguna",
-      "hallazgos": [
-        "Sin separación hecho/inferencia (g3)"
-      ]
-    },
     "preparar_contraargumentos": {
       "veredicto": "APROBADO",
       "fail_experts": [],
@@ -646,21 +598,17 @@
       "action": "ninguna",
       "hallazgos": []
     },
-    "recomendar_via_constitucional_o_alternativa": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
-    },
     "redactar_ampliacion_denuncia": {
       "veredicto": "APROBADO",
       "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
       "action": "ninguna",
-      "hallazgos": []
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
     },
     "redactar_derecho_peticion_penal": {
       "veredicto": "APROBADO",
@@ -685,26 +633,26 @@
     "redactar_recurso_o_intervencion_preliminar": {
       "veredicto": "APROBADO",
       "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
       "action": "ninguna",
-      "hallazgos": []
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
     },
     "redactar_solicitud_impulso_procesal": {
       "veredicto": "APROBADO",
       "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
+      "cond_experts": [
+        "E3"
+      ],
+      "pass_score": 55,
       "action": "ninguna",
-      "hallazgos": []
-    },
-    "redactar_tutela_penal_preliminar": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
+      "hallazgos": [
+        "Sin separación hecho/inferencia (g3)"
+      ]
     },
     "registrar_actuacion_procesal": {
       "veredicto": "APROBADO",
@@ -725,14 +673,6 @@
       "hallazgos": [
         "Sin separación hecho/inferencia (g3)"
       ]
-    },
-    "revisar_mecanismos_ordinarios": {
-      "veredicto": "APROBADO",
-      "fail_experts": [],
-      "cond_experts": [],
-      "pass_score": 56,
-      "action": "ninguna",
-      "hallazgos": []
     },
     "seguimiento_documentos_radicados": {
       "veredicto": "APROBADO",
@@ -777,13 +717,11 @@
   },
   "chains": [
     {
-      "chain": "tutela",
+      "chain": "peticion_impulso",
       "skills": [
-        "recomendar_via_constitucional_o_alternativa",
-        "revisar_mecanismos_ordinarios",
-        "evaluar_procedencia_tutela",
-        "preparar_borrador_tutela_preliminar",
-        "redactar_tutela_penal_preliminar",
+        "evaluar_derecho_peticion",
+        "redactar_derecho_peticion_penal",
+        "redactar_solicitud_impulso_procesal",
         "clasificar_aprobacion_juridica"
       ],
       "status": "OK",

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 3ce13461f89c0cbe -->
 ---
 name: controlar-terminos-procesales-preliminares
 description: Skill operativo penal-victimas: identificar y alertar terminos relevantes. No reemplaza calculo humano. Use when the workflow requires `controlar_terminos_procesales_preliminares`.
@@ -12,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
-- `gestor_seguimiento_procesal_penal`
+- `analista_ruta_procesal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana.

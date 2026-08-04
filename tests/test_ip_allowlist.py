@@ -21,6 +21,8 @@ def test_path_bypass():
     assert path_is_bypassed("/health") is True
     assert path_is_bypassed("/slack/interactivity") is True
     assert path_is_bypassed("/twilio/sms-status") is True
+    assert path_is_bypassed("/cliente") is True
+    assert path_is_bypassed("/cliente/chat") is True
     assert path_is_bypassed("/abogado") is False
     assert path_is_bypassed("/auditoria/") is False
     assert path_is_bypassed("/chat") is False

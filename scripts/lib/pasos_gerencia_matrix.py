@@ -104,19 +104,6 @@ _RAW: dict = {
     "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "analizar_perjuicio_irremediable": {
-    "tier": "estrategico",
-    "pasos": [
-      "Identificar el perjuicio alegado y su carácter actual o inminente.",
-      "Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.",
-      "Contrastar con mecanismos ordinarios y plazos procesales vigentes.",
-      "Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill estratégico («Identificar urgencia constitucional.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "clasificar_aprobacion_juridica": {
     "tier": "operativo",
     "pasos": [
@@ -318,19 +305,6 @@ _RAW: dict = {
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "crear_matriz_hecho_derecho_fundamental": {
-    "tier": "estrategico",
-    "pasos": [
-      "Listar hechos verificables y narrados relevantes para la vulneración alegada.",
-      "Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.",
-      "Señalar vacíos probatorios y norma constitucional de soporte preliminar.",
-      "Ordenar filas por relevancia para pretensiones de tutela.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill estratégico («Relacionar hechos con derechos afectados.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "crear_matriz_hecho_fuente": {
     "tier": "operativo",
     "pasos": [
@@ -465,22 +439,6 @@ _RAW: dict = {
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "detectar_riesgo_improcedencia_tutela": {
-    "tier": "critico",
-    "pasos": [
-      "Inventariar vías ordinarias disponibles en la etapa penal actual.",
-      "Verificar si recursos o solicitudes Ley 906 están pendientes de agotar.",
-      "Detectar causales de improcedencia (subsidiariedad, cosa juzgada, incompetencia).",
-      "Evaluar si el daño es actual o remediabile por vía ordinaria.",
-      "Documentar probabilidad de rechazo y costo de tutela prematura.",
-      "Recomendar vía alternativa preferente si la tutela es improcedente.",
-      "Señalar plazo y actuación ordinaria recomendada antes de tutela.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill crítico («Detectar si tutela puede ser prematura, subsidiaria o improcedente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "8 pasos (7 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "detectar_riesgo_revictimizacion": {
     "tier": "operativo",
     "pasos": [
@@ -607,23 +565,6 @@ _RAW: dict = {
     "por_que_n": "7 pasos (6 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "evaluar_procedencia_tutela": {
-    "tier": "critico",
-    "pasos": [
-      "Verificar legitimación por activa (titular del derecho y vínculo con el caso).",
-      "Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).",
-      "Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.",
-      "Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.",
-      "Evaluar inmediatez del perjuicio y necesidad de medida urgente.",
-      "Evaluar conexidad constitucional y relevancia del derecho invocado.",
-      "Documentar requisitos faltantes y riesgo de improcedencia.",
-      "Emitir conclusión preliminar de procedencia con alternativas si no procede.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill crítico («Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "9 pasos (8 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "evaluar_solicitud_fiscalia_juez": {
     "tier": "operativo",
     "pasos": [
@@ -743,18 +684,6 @@ _RAW: dict = {
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "identificar_derecho_fundamental_afectado": {
-    "tier": "operativo",
-    "pasos": [
-      "Mapear hechos del caso contra catálogo de derechos fundamentales aplicables.",
-      "Precisar titular del derecho y autoridad o sujeto vulnerador.",
-      "Priorizar derechos más directamente comprometidos para análisis posterior.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill operativo («Identificar posibles derechos fundamentales comprometidos.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "identificar_etapa_procesal_ley906": {
     "tier": "estrategico",
     "pasos": [
@@ -850,19 +779,6 @@ _RAW: dict = {
     "por_que_n": "2 pasos (1 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "preparar_borrador_tutela_preliminar": {
-    "tier": "estrategico",
-    "pasos": [
-      "Consolidar hechos, derechos afectados y pretensiones con fuentes.",
-      "Verificar que el evaluador constitucional recomendó tutela preliminarmente.",
-      "Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.",
-      "Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill estratégico («Preparar insumos para borrador de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "preparar_contraargumentos": {
     "tier": "operativo",
     "pasos": [
@@ -956,18 +872,6 @@ _RAW: dict = {
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "recomendar_via_constitucional_o_alternativa": {
-    "tier": "operativo",
-    "pasos": [
-      "Inventariar vías disponibles: tutela, petición, solicitud Ley 906, queja, etc.",
-      "Comparar oportunidad, celeridad y probabilidad de éxito de cada vía.",
-      "Recomendar ruta preferente con justificación y riesgos.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill operativo («Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "redactar_ampliacion_denuncia": {
     "tier": "operativo",
     "pasos": [
@@ -1030,24 +934,6 @@ _RAW: dict = {
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
-  "redactar_tutela_penal_preliminar": {
-    "tier": "critico",
-    "pasos": [
-      "Confirmar dictamen previo de procedencia tutela (no redactar si improcedente).",
-      "Consolidar hechos verificables separados de inferencias y pendientes.",
-      "Identificar derechos fundamentales vulnerados y autoridades accionadas.",
-      "Redactar fundamentos constitucionales con citas verificadas en RAG.",
-      "Formular pretensiones claras, medibles y proporcionales.",
-      "Listar pruebas y anexos; marcar faltantes como pendientes.",
-      "Revisar no revictimización en relato y peticiones.",
-      "Control de competencia, direccionamiento y tono profesional.",
-      "Entregar borrador numerado listo para revisión de firma (sin radicar).",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill crítico («Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "10 pasos (9 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
   "registrar_actuacion_procesal": {
     "tier": "atomico",
     "pasos": [
@@ -1068,19 +954,6 @@ _RAW: dict = {
     ],
     "reasoning": "Gerencia penal-víctimas: skill operativo («Asegurar que documento o recomendacion sea coherente con la estrategia aprobada.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
     "por_que_n": "4 pasos (3 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
-    "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
-  },
-  "revisar_mecanismos_ordinarios": {
-    "tier": "estrategico",
-    "pasos": [
-      "Identificar recursos y actuaciones ordinarias en el proceso penal vigente.",
-      "Verificar si están pendientes de interponer o ya agotados.",
-      "Determinar si la tutela es subsidiaria respecto de dichos mecanismos.",
-      "Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.",
-      "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
-    ],
-    "reasoning": "Gerencia penal-víctimas: skill estratégico («Verificar si hay vias ordinarias antes de tutela.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",
-    "por_que_n": "5 pasos (4 operativos + HITL): menos pasos omitirían controles jurídicos; más pasos sin justificación duplicarían otro skill.",
     "riesgos_si_faltan": "Omitir etapas eleva riesgo de improcedencia, revictimización, pérdida probatoria o uso de afirmaciones sin fuente."
   },
   "seguimiento_documentos_radicados": {

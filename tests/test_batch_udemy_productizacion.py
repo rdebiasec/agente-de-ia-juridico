@@ -10,10 +10,10 @@ from src.agents.orchestrator import (
     SPECIALIST_AGENT_IDS,
     _model_for_agent,
     _model_settings_for_agent,
-    build_analista_tipicidad_y_responsabilidad_penal_agent,
-    build_coordinador_agent,
+    build_analista_responsabilidad_tipicidad_agent,
+    build_coordinador_caso_agent,
     build_orchestrator,
-    build_redactor_documentos_juridicos_penales_agent,
+    build_redactor_documentos_juridicos_agent,
 )
 from src.agents.pricing import enrich_completion_with_cost, estimate_call_cost_usd
 from src.agents.session_context import (
@@ -50,9 +50,9 @@ def test_option_a_model_defaults(option_a_settings):
 
 def test_model_settings_temperature_all_agents(option_a_settings):
     del option_a_settings
-    poc = build_coordinador_agent()
-    tipicidad = build_analista_tipicidad_y_responsabilidad_penal_agent()
-    redactor = build_redactor_documentos_juridicos_penales_agent()
+    poc = build_coordinador_caso_agent()
+    tipicidad = build_analista_responsabilidad_tipicidad_agent()
+    redactor = build_redactor_documentos_juridicos_agent()
 
     assert poc.model == "gpt-4.1-mini"
     assert tipicidad.model == "gpt-4.1-mini"
@@ -113,15 +113,15 @@ def test_smoke_productizacion_surface(option_a_settings):
     orch = build_orchestrator(
         require_tool_approval=False,
         include_high_risk_tools=False,
-        focus_agent_id="analista_tipicidad_y_responsabilidad_penal",
+        focus_agent_id="analista_responsabilidad_tipicidad",
         use_cache=False,
     )
     tool_names = {getattr(t, "name", "") for t in (orch.tools or [])}
-    assert "analista_tipicidad_y_responsabilidad_penal" in tool_names
-    assert "redactor_documentos_juridicos_penales" not in tool_names
+    assert "analista_responsabilidad_tipicidad" in tool_names
+    assert "redactor_documentos_juridicos" not in tool_names
     assert "evaluador_derechos_fundamentales_tutela" not in tool_names
     assert orch.model_settings.temperature == 0.2
-    assert "analista_tipicidad_y_responsabilidad_penal" in SPECIALIST_AGENT_IDS
+    assert "analista_responsabilidad_tipicidad" in SPECIALIST_AGENT_IDS
 
 
 def test_sentry_scrub_masks_email():

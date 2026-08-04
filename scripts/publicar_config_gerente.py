@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publica en el config store activo el prompt y los guardrails del Gerente del Caso.
+"""Publica en el config store activo el prompt y los guardrails del Coordinador del Caso.
 
 Postgres es autoritativo en runtime, así que un archivo en disco no cambia el
 comportamiento del agente hasta que se publica. Este script usa la misma vía
@@ -31,23 +31,23 @@ HEADER_RE = re.compile(r"^<!--\s*config-version:.*?-->\s*", re.DOTALL)
 ITEMS: list[tuple[str, str, Path]] = [
     (
         "prompt",
-        "coordinador_expediente_penal",
-        ROOT / "agente/prompts/agents/coordinador_expediente_penal.md",
+        "coordinador_caso",
+        ROOT / "agente/prompts/agents/coordinador_caso.md",
     ),
     (
         "agent_guardrail",
-        "coordinador_expediente_penal__input",
-        ROOT / "config/guardrails/agents/coordinador_expediente_penal/input.md",
+        "coordinador_caso__input",
+        ROOT / "config/guardrails/agents/coordinador_caso/input.md",
     ),
     (
         "agent_guardrail",
-        "coordinador_expediente_penal__output",
-        ROOT / "config/guardrails/agents/coordinador_expediente_penal/output.md",
+        "coordinador_caso__output",
+        ROOT / "config/guardrails/agents/coordinador_caso/output.md",
     ),
     (
         "agent_guardrail",
-        "coordinador_expediente_penal__tools",
-        ROOT / "config/guardrails/agents/coordinador_expediente_penal/tools.md",
+        "coordinador_caso__tools",
+        ROOT / "config/guardrails/agents/coordinador_caso/tools.md",
     ),
 ]
 
@@ -122,7 +122,7 @@ def publish(base: str, *, email: str, password: str, pin: str, apply: bool) -> d
                     "key": key,
                     "content": content,
                     "expected_version": active.get("version"),
-                    "note": "publicación Gerente del Caso Penal desde archivos revisados",
+                    "note": "publicación Coordinador del Caso desde archivos revisados",
                 },
             )
             if saved.status_code != 200:

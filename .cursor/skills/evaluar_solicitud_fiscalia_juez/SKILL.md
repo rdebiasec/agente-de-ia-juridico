@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: cd0b2cb6a658300a -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Skill operativo penal-victimas: evaluar si una solicitud a Fiscalia o juez es procedente y conveniente. Use when the workflow requires `evaluar_solicitud_fiscalia_juez`.
@@ -12,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
-- `redactor_documentos_juridicos_penales`
+- `analista_ruta_procesal`
+- `redactor_documentos_juridicos`
 
 ## Purpose
 Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento.
@@ -34,7 +35,7 @@ Validar que la solicitud a redactar tuvo evaluación procesal previa.
 - `procedencia_preliminar`: procedente | improcedente | `[PENDIENTE DE VERIFICAR]`.
 - `conveniencia_estrategica` para la víctima.
 - `requisitos_y_anexos` necesarios.
-- `documento_sugerido` y agente (`redactor_documentos_juridicos_penales` si procede).
+- `documento_sugerido` y agente (`redactor_documentos_juridicos` si procede).
 - `riesgos` (improcedencia, rechazo, efecto adverso).
 
 ## Steps

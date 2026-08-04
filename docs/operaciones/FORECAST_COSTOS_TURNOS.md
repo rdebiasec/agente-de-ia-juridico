@@ -2,7 +2,7 @@
 
 **Producto:** firma virtual penal-víctimas  
 **Modelos (Opción A):** `OPENAI_MODEL=gpt-4.1-mini` · `OPENAI_MODEL_HIGH_RISK=gpt-4.1`  
-**Temp:** `0.2` general · `0.1` high-risk (redactor / tutela)  
+**Temp:** `0.2` general · `0.1` high-risk (redactor)  
 **Fuente de medición:** `trace.completion` (hooks) + `estimated_cost_usd` en summary/calls  
 **Tabla de precios:** `src/agents/pricing.py` (actualizar si cambia OpenAI)
 
@@ -20,7 +20,7 @@ No adivinar: leer mediana desde desk soporte / Workflow Trace.
 | Modelo | Input | Output | Uso |
 |---|---:|---:|---|
 | gpt-4.1-mini | 0.40 | 1.60 | POC + laborers |
-| gpt-4.1 | 2.00 | 8.00 | Redactor / tutela |
+| gpt-4.1 | 2.00 | 8.00 | Redactor |
 | gpt-4o-mini (legacy) | 0.15 | 0.60 | — |
 | gpt-4o (legacy) | 2.50 | 10.00 | — |
 

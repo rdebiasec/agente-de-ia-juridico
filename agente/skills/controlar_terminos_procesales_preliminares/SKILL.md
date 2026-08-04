@@ -13,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
-- `gestor_seguimiento_procesal_penal`
+- `analista_ruta_procesal`
+- `analista_seguimiento_procesal`
 
 ## Purpose
 Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana.

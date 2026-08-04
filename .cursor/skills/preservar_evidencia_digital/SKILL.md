@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: 8aeeb5b91b6a041b -->
 ---
 name: preservar-evidencia-digital
 description: Skill critico penal-victimas: definir medidas para proteger evidencia digital sin alterarla. Use when the workflow requires `preservar_evidencia_digital`.
@@ -12,12 +13,12 @@ disable-model-invocation: true
 - Tier: `critico`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio` (skill crítico del flujo digital)
+- `analista_evidencia` (skill crítico del flujo digital)
 
 ## Purpose
 Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar.
 
-## Rol en gestor_evidencia_y_soporte_probatorio
+## Rol en analista_evidencia
 Ejecutar de inmediato cuando ingresa evidencia digital nueva o vulnerable a borrado.
 
 ## Inputs

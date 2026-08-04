@@ -13,14 +13,14 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
-- `preparador_estrategico_audiencias_penales`
+- `analista_ruta_procesal`
+- `analista_audiencias`
 
 ## Purpose
 Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906.
 
 ## Rol en analista_ruta_procesal
-Marco procesal de intervención (qué puede pedir la víctima y cuándo). La preparación táctica oral la hace `preparador_estrategico_audiencias_penales`.
+Marco procesal de intervención (qué puede pedir la víctima y cuándo). La preparación táctica oral la hace `analista_audiencias`.
 
 ## Rol en preparador_audiencias
 Usar este marco como base para guion, preguntas y solicitudes orales.

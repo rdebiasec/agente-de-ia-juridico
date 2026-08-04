@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: e6388f266e03a960 -->
 ---
 name: redactar-recurso-o-intervencion-preliminar
 description: Skill operativo penal-victimas: evaluar y preparar insumos para recurso o intervencion; redaccion final en redactor. Use when the workflow requires `redactar_recurso_o_intervencion_preliminar`.
@@ -12,14 +13,14 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (redacción del borrador)
-- `analista_ruta_procesal_ley906` (solo evaluación e insumos — **no redacta texto final**)
+- `redactor_documentos_juridicos` (redacción del borrador)
+- `analista_ruta_procesal` (solo evaluación e insumos — **no redacta texto final**)
 
 ## Purpose
 Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor.
 
 ## Rol en analista_ruta_procesal
-**Solo pasos 1 y 3:** confirmar oportunidad/tipo de recurso y alertar términos. **No ejecutar paso 2 (redactar)** — derivar a `redactor_documentos_juridicos_penales`.
+**Solo pasos 1 y 3:** confirmar oportunidad/tipo de recurso y alertar términos. **No ejecutar paso 2 (redactar)** — derivar a `redactor_documentos_juridicos`.
 
 ## Rol en redactor
 Ejecutar los 4 pasos completos incluyendo borrador.
@@ -31,7 +32,7 @@ Ejecutar los 4 pasos completos incluyendo borrador.
 
 ## Outputs (ruta 906)
 - `tipo_recurso_intervencion`, `oportunidad`, `agravios_preliminares`, `terminos_pendientes_verificar`.
-- `derivar_a`: `redactor_documentos_juridicos_penales`.
+- `derivar_a`: `redactor_documentos_juridicos`.
 - Etiqueta: `NO ES BORRADOR — SOLO INSUMOS PROCESALES`.
 
 ## Outputs (redactor)

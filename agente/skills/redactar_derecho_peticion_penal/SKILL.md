@@ -13,12 +13,12 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `redactor_documentos_juridicos_penales` (único ejecutor de redacción)
+- `redactor_documentos_juridicos` (único ejecutor de redacción)
 
 ## Purpose
 Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia.
 
-## Rol en redactor_documentos_juridicos_penales
+## Rol en redactor_documentos_juridicos
 Ejecutar redacción solo con evaluación favorable preliminar de petición.
 
 ## Inputs

@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: c951250748dbf3b2 -->
 ---
 name: inventariar-evidencia
 description: Skill operativo penal-victimas: crear inventario numerado de evidencia del caso. Use when the workflow requires `inventariar_evidencia`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `gestor_evidencia_y_soporte_probatorio` (skill primario del agente)
+- `analista_evidencia` (skill primario del agente)
 
 ## Purpose
 Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar.

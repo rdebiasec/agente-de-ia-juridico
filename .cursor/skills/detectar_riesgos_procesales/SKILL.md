@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: d5fc1c16640cead4 -->
 ---
 name: detectar-riesgos-procesales
 description: Skill estrategico penal-victimas: detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos. Use when the workflow requires `detectar_riesgos_procesales`.
@@ -12,7 +13,7 @@ disable-model-invocation: true
 - Tier: `estrategico`
 
 ## Used By Agents
-- `analista_ruta_procesal_ley906`
+- `analista_ruta_procesal`
 - `analista_calidad_juridica`
 
 ## Purpose
@@ -62,7 +63,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 ## No duplicar
 - No evaluar una sola actuación (`evaluar_oportunidad_procesal`).
 - No atipicidad penal (`detectar_riesgos_atipicidad`).
-- No tutela (`detectar_riesgo_improcedencia_tutela`).
+- No acción de tutela (fuera del producto).
 
 ## Riesgo si se omite
 Pérdida silenciosa de recursos o derechos de la víctima en el proceso.

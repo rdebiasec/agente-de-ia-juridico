@@ -1,3 +1,4 @@
+<!-- config-version: 2; checksum: f654758d955a60e8 -->
 ---
 name: preparar-solicitudes-orales
 description: Skill operativo penal-victimas: formular solicitudes orales posibles segun etapa. Use when the workflow requires `preparar_solicitudes_orales`.
@@ -12,8 +13,8 @@ disable-model-invocation: true
 - Tier: `operativo`
 
 ## Used By Agents
-- `preparador_estrategico_audiencias_penales` (uso principal)
-- `analista_ruta_procesal_ley906` (catálogo procedimental preliminar)
+- `analista_audiencias` (uso principal)
+- `analista_ruta_procesal` (catálogo procedimental preliminar)
 
 ## Purpose
 Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia.

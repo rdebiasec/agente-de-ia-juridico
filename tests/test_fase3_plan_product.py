@@ -44,8 +44,11 @@ def test_classify_plan_template_cronologia():
     assert classify_plan_template("Necesito una cronología de hechos del caso") == "cronologia"
 
 
-def test_classify_plan_template_tutela():
-    assert classify_plan_template("Evaluar acción de tutela por derecho fundamental") == "tutela"
+def test_classify_plan_template_tutela_out_of_product():
+    # Tutela ya no abre plantilla constitucional; queda genérico (o impulso si hay petición).
+    kind = classify_plan_template("Evaluar acción de tutela por derecho fundamental")
+    assert kind != "tutela"
+    assert kind in {"generico", "indagacion_impulso", "cronologia", "audiencia", "vif_proteccion", "querella_abreviado"}
 
 
 def test_classify_plan_template_indagacion_impulso():
@@ -70,7 +73,7 @@ def test_templated_steps_cronologia_has_analyst():
     steps = build_templated_steps("cronologia", "cronología de hechos")
     assert steps is not None
     agents = [s.agent_id for s in steps]
-    assert "analista_cronologia_hechos_penales" in agents
+    assert "analista_cronologia_hechos" in agents
 
 
 def test_templated_steps_indagacion_impulso_chain_order():
@@ -81,13 +84,13 @@ def test_templated_steps_indagacion_impulso_chain_order():
     assert steps is not None
     agents = [s.agent_id for s in steps]
     expected = [
-        "coordinador_expediente_penal",
-        "analista_cronologia_hechos_penales",
-        "analista_tipicidad_y_responsabilidad_penal",
-        "analista_ruta_procesal_ley906",
-        "gestor_evidencia_y_soporte_probatorio",
-        "redactor_documentos_juridicos_penales",
-        "gestor_seguimiento_procesal_penal",
+        "coordinador_caso",
+        "analista_cronologia_hechos",
+        "analista_responsabilidad_tipicidad",
+        "analista_ruta_procesal",
+        "analista_evidencia",
+        "redactor_documentos_juridicos",
+        "analista_seguimiento_procesal",
         "analista_calidad_juridica",
     ]
     assert agents == expected
@@ -111,7 +114,7 @@ def test_create_plan_indagacion_impulso_smoke():
     assert plan.template_kind == "indagacion_impulso"
     assert "[Impulso / anti-archivo en indagación]" in plan.objective
     assert len(plan.steps) >= 7
-    assert any(s.agent_id == "redactor_documentos_juridicos_penales" for s in plan.steps)
+    assert any(s.agent_id == "redactor_documentos_juridicos" for s in plan.steps)
 
 
 def test_remember_pattern_reused_on_second_plan():
