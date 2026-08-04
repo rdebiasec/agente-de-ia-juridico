@@ -44,6 +44,7 @@ from src.agents.triage import (
     format_triage_sistema,
     has_penal_context,
     infer_destination_agent,
+    is_animal_scope_request,
     is_investigado_posture,
     is_non_penal_scope_request,
     is_trivial_consultation,
@@ -666,6 +667,30 @@ def _finalize_trace(trace: dict, text: str) -> dict:
     return trace
 
 
+def _out_of_scope_materia_reply(message: str) -> str:
+    """Respuesta fija, breve y respetuosa para consultas fuera de especialidad.
+
+    Variante animal vs otras materias: no menciona animales si el caso no lo es.
+    No ofrece orientación operativa sobre la materia ajena.
+    """
+    if is_animal_scope_request(message):
+        return (
+            "Lamento lo sucedido. Esta consulta está fuera de alcance penal-víctimas: "
+            "este despacho atiende únicamente representación penal de víctimas humanas "
+            "en Colombia. Para asuntos relacionados con animales, lo más prudente es "
+            "buscar apoyo con un profesional experto en esa área. Si su caso también "
+            "incluye una víctima humana en contexto penal, compárteme ese componente "
+            "y lo encauzamos por la vía penal-víctimas."
+        )
+    return (
+        "Gracias por compartirlo. Esta consulta está fuera de alcance penal-víctimas: "
+        "este despacho atiende únicamente representación penal de víctimas humanas "
+        "en Colombia. Para esta materia, lo más prudente es buscar apoyo con un "
+        "profesional experto en esa área. Si existe un componente penal con víctima "
+        "humana, compárteme hechos y etapa Ley 906 para continuar."
+    )
+
+
 def _fallback_response(message: str) -> str:
     """Respuesta offline determinista cuando no hay OPENAI_API_KEY."""
     dest = infer_destination_agent(message)
@@ -725,13 +750,7 @@ def _fallback_response(message: str) -> str:
             "en defensa penal."
         )
     elif is_non_penal_scope_request(message):
-        body = (
-            "Esta consulta está fuera de alcance penal-víctimas. Este despacho atiende "
-            "únicamente representación penal de víctimas humanas en Colombia. Para "
-            "asuntos de animales u otras materias distintas, lo más prudente es buscar "
-            "apoyo con un profesional experto en esa área. Si existe un componente penal "
-            "con víctima humana, compárteme hechos y etapa Ley 906 para continuar."
-        )
+        body = _out_of_scope_materia_reply(message)
     elif any(
         w in (message or "").lower()
         for w in ("perfil", "experiencia", "quien eres", "quién eres")
@@ -958,14 +977,7 @@ async def run_agent(
         }
 
     if is_non_penal_scope_request(message):
-        text = apply_output_guardrails(
-            "Esta consulta está fuera de alcance penal-víctimas. Este despacho atiende "
-            "únicamente representación penal de víctimas humanas en Colombia. Para "
-            "asuntos de animales u otras materias distintas, lo más prudente es buscar "
-            "apoyo con un profesional experto en esa área. Si su caso también incluye "
-            "una víctima humana en contexto penal, compárteme ese componente y lo "
-            "encauzamos por la vía penal-víctimas."
-        )
+        text = apply_output_guardrails(_out_of_scope_materia_reply(message))
         trace["route"] = "fuera_alcance_materia"
         trace["blocked"] = True
         trace["selected_agent"] = POC_AGENT_ID

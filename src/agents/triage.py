@@ -77,17 +77,22 @@ _OUT_OF_SCOPE_RE = re.compile(
     re.I,
 )
 _ANIMAL_SCOPE_RE = re.compile(
-    r"\b(animal(?:es)?|mascota(?:s)?|gato(?:s)?|perro(?:s)?|veterinari[oa]s?|zootecni[ae])\b",
-    re.I,
-)
-_ANIMAL_OWNER_RE = re.compile(
-    r"\b(?:mi|mis|nuestro|nuestra|nuestros|nuestras)\s+"
-    r"(?:gato(?:s)?|perro(?:s)?|mascota(?:s)?|animal(?:es)?)\b",
+    r"\b("
+    r"animal(?:es)?|mascota(?:s)?|gato(?:s)?|perro(?:s)?|"
+    r"loro(?:s)?|caballo(?:s)?|yegua(?:s)?|burro(?:s)?|"
+    r"vaca(?:s)?|ternero(?:s)?|conejo(?:s)?|h[aá]mster(?:s)?|"
+    r"p[aá]jaro(?:s)?|ave(?:s)?|veterinari[oa]s?|zootecni[ae]|"
+    r"maltrato\s+animal|protecci[oó]n\s+animal"
+    r")\b",
     re.I,
 )
 _HUMAN_VICTIM_HINT_RE = re.compile(
-    r"\b(v[ií]ctima(?:s)?\s+humana(?:s)?|persona(?:s)?|cliente|"
-    r"mujer(?:es)?|hombre(?:s)?|niñ[oa]s?|menor(?:es)?)\b",
+    r"\b("
+    r"v[ií]ctima(?:s)?(?:\s+humana(?:s)?)?|persona(?:s)?|cliente|"
+    r"mujer(?:es)?|hombre(?:s)?|niñ[oa]s?|menor(?:es)?|"
+    r"hija(?:s)?|hijo(?:s)?|esposa|esposo|compa[nñ]era|compa[nñ]ero|"
+    r"madre|padre|hermana(?:s)?|hermano(?:s)?|familiar(?:es)?"
+    r")\b",
     re.I,
 )
 # Postura aparente de conductor/investigado (no víctima) — despacho es penal-víctimas.
@@ -147,13 +152,18 @@ def has_penal_context(message: str) -> bool:
 
 
 def is_animal_scope_request(message: str) -> bool:
-    """True cuando la consulta trata de mascota/animal fuera del foco penal-víctimas humanas."""
+    """True cuando la consulta es de mascota/animal y no ancla víctima humana.
+
+    Si el mismo mensaje menciona víctima humana (p. ej. hija + mascota),
+    no se clasifica como fuera de alcance por animal: el componente humano
+    debe poder seguir en vía penal-víctimas.
+    """
     text = message or ""
     if not _ANIMAL_SCOPE_RE.search(text):
         return False
-    if _ANIMAL_OWNER_RE.search(text):
-        return True
-    return not bool(_HUMAN_VICTIM_HINT_RE.search(text))
+    if _HUMAN_VICTIM_HINT_RE.search(text):
+        return False
+    return True
 
 
 def is_non_penal_scope_request(message: str) -> bool:

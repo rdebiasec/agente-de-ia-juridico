@@ -39,6 +39,41 @@ def test_animal_case_is_out_of_scope():
     assert triage.rol_aparente == "fuera_penal_victimas"
 
 
+def test_human_plus_animal_is_not_animal_oos():
+    """P1: víctima humana + mascota no debe bloquearse como solo-animal."""
+    from src.agents.triage import is_animal_scope_request
+
+    msg = "mi gato y mi hija fueron atacados"
+    assert is_animal_scope_request(msg) is False
+    assert is_non_penal_scope_request(msg) is False
+    triage = build_triage(msg)
+    assert triage.tipo_tarea != "fuera_de_alcance"
+    assert triage.rol_aparente != "fuera_penal_victimas"
+
+
+@pytest.mark.parametrize(
+    "msg",
+    [
+        "tengo un loro herido",
+        "me mataron el caballo",
+        "maltrato animal en la finca",
+    ],
+)
+def test_expanded_animal_lexicon_is_oos(msg):
+    from src.agents.triage import is_animal_scope_request
+
+    assert is_animal_scope_request(msg) is True
+    assert is_non_penal_scope_request(msg) is True
+
+
+def test_divorcio_and_arrendamiento_are_oos():
+    assert is_non_penal_scope_request("divorcio y custodia")
+    assert is_non_penal_scope_request("Necesito asesoría sobre arrendamiento")
+    assert not is_non_penal_scope_request(
+        "caso penal por lesiones y arrendamiento"
+    )
+
+
 @pytest.mark.asyncio
 async def test_investigado_chat_no_offer_plan(monkeypatch):
     from src.agents import runner as runner_mod
@@ -167,10 +202,80 @@ async def test_non_penal_scope_chat_refers_to_expert_without_plan(monkeypatch):
     )
     assert result["trace"]["route"] == "fuera_alcance_materia"
     assert result.get("offer_plan") is False
-    assert "profesional experto" in result["text"].lower()
-    assert "puedo orient" not in result["text"].lower()
+    text = result["text"].lower()
+    assert "profesional experto" in text
+    assert "lamento" in text  # tono empático en variante animal
+    assert "animales" in text  # microcopy animal solo cuando aplica
+    assert "puedo orient" not in text
     assert "TriageResult" not in result["text"]
 
+
+@pytest.mark.asyncio
+async def test_non_animal_oos_reply_omits_animal_wording(monkeypatch):
+    from src.agents import runner as runner_mod
+
+    class FakeRepo:
+        def get_chat_session(self, _sid):
+            return None
+
+        def list_session_traces(self, _sid, limit=40):
+            return []
+
+        def append_chat_message(self, *a, **k):
+            return None
+
+        def save_session_trace(self, *a, **k):
+            return None
+
+        def mutate_expediente(self, *a, **k):
+            return None
+
+    monkeypatch.setattr(runner_mod, "get_repository", lambda: FakeRepo())
+    monkeypatch.setattr(
+        "src.services.expediente_sync.sync_expediente_from_chat",
+        lambda *a, **k: None,
+    )
+    monkeypatch.setattr(
+        "src.agents.completeness.persist_verification",
+        lambda *a, **k: None,
+    )
+
+    class Exp:
+        session_id = "web:fase0-oos-civil"
+        hechos_minimos_confirmados = False
+        poder_acreditado = False
+        ultima_actuacion_confirmada = False
+        radicado = ""
+        partes: list = []
+        rol_despacho = ""
+        etapa_actual = ""
+        terminos: list = []
+        evidencias: list = []
+        faltantes: list = []
+        involucra_menor = False
+        datos_sensibles = False
+
+        def resumen(self):
+            return ""
+
+    monkeypatch.setattr(
+        runner_mod.expediente_store,
+        "get_or_create",
+        lambda _sid: Exp(),
+    )
+
+    result = await runner_mod.run_agent(
+        "Necesito asesoría sobre un arrendamiento habitacional.",
+        channel="web",
+        session_id="web:fase0-oos-civil",
+        user_id="abogada",
+    )
+    assert result["trace"]["route"] == "fuera_alcance_materia"
+    text = result["text"].lower()
+    assert "profesional experto" in text
+    assert "animales" not in text
+    assert "puedo orient" not in text
+    assert "TriageResult" not in result["text"]
 
 @pytest.mark.asyncio
 async def test_plan_required_sets_offer_plan(monkeypatch):
