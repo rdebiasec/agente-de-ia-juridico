@@ -5,8 +5,41 @@ const LEGACY_STORAGE_KEY = "agente-juridico-validation-v2";
 const ONBOARDING_KEY = "agente-juridico-onboarding-seen";
 const ENABLE_SERVER_RUBRIC = true;
 
-const WELCOME_MESSAGE =
-  "Bienvenida. Soy la firma virtual penal-víctimas del despacho. Puedo apoyarla en cronología de hechos, tipicidad, ruta Ley 906, evidencia, audiencias, redacción penal y seguimiento procesal.\n\n¿En qué punto del caso penal necesita apoyo hoy?";
+/** Display name del bubble de bienvenida (escritorio abogado). */
+const WELCOME_DISPLAY_NAME = "Coordinador del Caso";
+/**
+ * TZ del despacho para saludo por hora local.
+ * Default Bogotá. America/New_York = Eastern (Orlando observa Eastern).
+ * El servidor expone la TZ efectiva en GET /api/desk/welcome (DESPACHO_TZ / AGENT_TZ).
+ * Bogotá vs Orlando se refinará con más detalle más adelante.
+ */
+const DEFAULT_DESPACHO_TZ = "America/Bogota";
+
+function greetingForHour(hour) {
+  if (hour >= 5 && hour <= 11) return "Buenos días";
+  if (hour >= 12 && hour <= 18) return "Buenas tardes";
+  return "Buenas noches";
+}
+
+function localHourInTz(tz) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz || DEFAULT_DESPACHO_TZ,
+      hour: "numeric",
+      hourCycle: "h23",
+    }).formatToParts(new Date());
+    const hourPart = parts.find((p) => p.type === "hour");
+    const hour = Number(hourPart?.value);
+    return Number.isFinite(hour) ? hour : new Date().getHours();
+  } catch {
+    return new Date().getHours();
+  }
+}
+
+function buildLawyerWelcomeMessage(tz = DEFAULT_DESPACHO_TZ) {
+  const greeting = greetingForHour(localHourInTz(tz));
+  return `${greeting}. Soy el Coordinador del Caso, asistente de IA penal del despacho.`;
+}
 
 const messagesEl = document.getElementById("messages");
 const formEl = document.getElementById("chat-form");
@@ -379,7 +412,7 @@ function buildMessageMeta(role, options = {}) {
   const { blockId, via, latencyMs, agent } = options;
   const parts = [];
   if (role === "user") parts.push("Usted");
-  else if (role === "assistant") parts.push("Asistente jurídico");
+  else if (role === "assistant") parts.push(WELCOME_DISPLAY_NAME);
 
   if (blockId) {
     const title = getBlockTitle(blockId);
@@ -1053,8 +1086,29 @@ function addMessageToUI(role, text, meta = "", options = {}) {
   return el;
 }
 
-function showWelcomeMessage() {
-  addMessageToUI("assistant", WELCOME_MESSAGE, "Asistente jurídico");
+async function fetchLawyerWelcomePayload() {
+  try {
+    const res = await fetch("/api/desk/welcome", { credentials: "include" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || typeof data.message !== "string" || !data.message.trim()) return null;
+    return {
+      message: data.message.trim(),
+      displayName:
+        typeof data.display_name === "string" && data.display_name.trim()
+          ? data.display_name.trim()
+          : WELCOME_DISPLAY_NAME,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function showWelcomeMessage() {
+  const fromServer = await fetchLawyerWelcomePayload();
+  const text = fromServer?.message || buildLawyerWelcomeMessage();
+  const label = fromServer?.displayName || WELCOME_DISPLAY_NAME;
+  addMessageToUI("assistant", text, label);
 }
 
 function clearChatUI() {
@@ -1064,10 +1118,10 @@ function clearChatUI() {
   hideTyping();
 }
 
-function restoreChatFromLog() {
+async function restoreChatFromLog() {
   clearChatUI();
   if (!chatLog.length) {
-    showWelcomeMessage();
+    await showWelcomeMessage();
     void renderTracePanelForEntry(null);
     return;
   }
@@ -2176,14 +2230,14 @@ async function generateNewProbes(options = {}) {
   }
 }
 
-function resetChatConversation() {
+async function resetChatConversation() {
   chatEpoch += 1;
   pendingChatMeta = null;
   sendViaOverride = null;
   chatLog = [];
   selectedTraceMsgId = null;
   clearChatUI();
-  showWelcomeMessage();
+  await showWelcomeMessage();
   activitySelectedTraceId = null;
   activityFingerprint = "";
   activityServerTraces = [];
@@ -2220,7 +2274,7 @@ async function arcoEraseOwnData() {
       }
       throw new Error(detail);
     }
-    resetChatConversation();
+    await resetChatConversation();
     recordEvent({ type: "arco_erase" });
     saveSessionState();
     window.Workspace?.setExpediente?.(null);
@@ -2273,7 +2327,7 @@ async function resetChatSession() {
       }
       throw new Error(detail);
     }
-    resetChatConversation();
+    await resetChatConversation();
     recordEvent({ type: "reset_chat" });
     saveSessionState();
     window.Workspace?.setExpediente?.(null);
@@ -2305,7 +2359,7 @@ function resetScoreOnly() {
   markNotes = {};
   checklistChecked = {};
   lastReport = null;
-  resetChatConversation();
+  void resetChatConversation();
   recordEvent({ type: "reset_score" });
   VALIDATION_TESTS.forEach((test) => updateBlockVisualState(test.id));
   VALIDATION_CHECKLIST.forEach((_, index) => updateChecklistItemVisual(index));
@@ -2616,7 +2670,7 @@ async function bootAgentApp() {
   if (appBooted) return;
   appBooted = true;
   const hadServerHistory = await loadServerHistory();
-  restoreChatFromLog();
+  await restoreChatFromLog();
   if (hadServerHistory && typeof Toast !== "undefined" && Toast.show) {
     Toast.show("Sesión restaurada desde el servidor.", "info");
   }

@@ -641,6 +641,14 @@ async def health():
     return payload
 
 
+@app.get("/api/desk/welcome")
+async def desk_welcome(settings: Settings = Depends(get_settings)):
+    """Saludo breve del Coordinador del Caso (TZ del despacho). Solo desk abogado."""
+    from src.services.welcome import lawyer_welcome_payload
+
+    return lawyer_welcome_payload(settings=settings)
+
+
 @app.post("/chat", response_model=ChatResponse, dependencies=[Depends(require_web_session)])
 async def chat(
     req: ChatRequest,

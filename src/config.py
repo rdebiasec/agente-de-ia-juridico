@@ -111,6 +111,12 @@ class Settings(BaseSettings):
     # Path al JSON de la SA. Si vacío, usa GOOGLE_APPLICATION_CREDENTIALS.
     google_drive_service_account_file: str = ""
 
+    # TZ del despacho para el saludo de bienvenida del escritorio abogado.
+    # Default Bogotá. America/New_York = Eastern (Orlando observa Eastern).
+    # Bogotá vs Orlando se refinará con más detalle más adelante.
+    # Alias de entorno: DESPACHO_TZ (campo) o AGENT_TZ (override en welcome.py).
+    despacho_tz: str = "America/Bogota"
+
     def audit_email_allowlist(self) -> set[str]:
         raw = (self.audit_allowed_emails or "").strip()
         if not raw:

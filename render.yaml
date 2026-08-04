@@ -85,6 +85,9 @@ services:
         sync: false
       - key: TWILIO_STATUS_CALLBACK
         sync: false
+      # Saludo /abogado por hora local del despacho. Orlando: America/New_York.
+      - key: DESPACHO_TZ
+        value: America/Bogota
 
 # Base autoritativa única (plan básico, sin expiración).
 # Adopta la instancia existente agente-ia-juridico-db; no declarar la gratis.
