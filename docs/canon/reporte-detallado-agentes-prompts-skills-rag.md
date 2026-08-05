@@ -1,5 +1,11 @@
 # REPORTE EN CHAT - DETALLE GRANULAR (PROMPT BASE SOLO PENAL)
 
+> **OBSOLETO (parcial) — 2026-08-05.** Este reporte conserva contexto histórico pero **no es fuente de verdad**.
+> - Tutela / `evaluador_derechos_fundamentales_tutela` y skills constitucionales están **fuera del producto**.
+> - Ownership de skills y roster actual: `src/agents/skill_catalog.py`, `src/agents/agent_ids.py`.
+> - Revisión vigente: [`PROMPT_REVISION_PROMPTS_Y_SKILLS.md`](PROMPT_REVISION_PROMPTS_Y_SKILLS.md) e [`INFORME_AUDITORIA_PROMPTS_SKILLS.md`](INFORME_AUDITORIA_PROMPTS_SKILLS.md).
+> - Prompts canónicos: `agente/prompts/`; skills canónicos: `agente/skills/`.
+
 ## 1) Encadenamiento de prompts
 - Prompt efectivo: `prompt_base + prompt_rol_agente + contexto_expediente + contexto_rag + consulta_usuario`.
 - Secuencia: validacion entrada -> prevalidaciones -> inyeccion contexto -> handoff coordinador -> respuesta especialista -> postvalidaciones -> guardrails -> HITL.
