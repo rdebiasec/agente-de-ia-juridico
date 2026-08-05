@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: cd98e7348a29dcdf -->
+<!-- config-version: 2; checksum: f3ef3d392108d79a -->
 ---
 name: identificar-objetivo-audiencia
-description: Skill estrategico penal-victimas: definir objetivo juridico y tactico de la audiencia para la victima. Use when the workflow requires `identificar_objetivo_audiencia`.
+description: Contrato penal-víctimas: Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal). Activar cuando el plan/HITL o el especialista requiera `identificar_objetivo_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.
 disable-model-invocation: true
 ---
 
@@ -36,11 +36,9 @@ Antecede guion, preguntas, solicitudes orales y simulación de escenarios.
 - Etiqueta: `OBJETIVO AUDIENCIA — VALIDAR CON ABOGADO`.
 
 ## Steps
-1. Precisar tipo de audiencia y marco normativo Ley 906 aplicable.
-2. Definir objetivo jurídico y táctico para la representación de la víctima.
-3. Alinear objetivo con teoría del caso y prueba disponible.
-4. Documentar peticiones orientativas y riesgos si no se logra el objetivo.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Identificar tipo de audiencia y pretensión de la víctima.
+2. Listar 1–5 objetivos medibles para la intervención.
+3. No redactar guion ni checklist completo aquí.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `identificar_objetivo_audiencia`.
@@ -57,14 +55,19 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `calendar_event_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar tipo de audiencia ni competencias.
-- **g3:** Objetivo táctico separado de hechos probados.
-- **g4:** HITL antes de audiencia.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar tipo de audiencia ni competencias.
+- **Separar hecho de inferencia:** Objetivo táctico separado de hechos probados.
+- **Revision humana obligatoria:** HITL antes de audiencia.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Siguiente: `preparar_preguntas_audiencia`, `preparar_guion_intervencion_oral`, `preparar_solicitudes_orales`.
+
+## No duplicar
+- No redactar guion oral completo (`preparar_guion_intervencion_oral`).
+- No listar preguntas detalladas (`preparar_preguntas_audiencia`).
+- No simular escenarios (`simular_escenarios_audiencia`).
 
 ## Riesgo si se omite
 Audiencia sin norte: intervenciones dispersas que no protegen los intereses de la víctima.

@@ -8,7 +8,7 @@ El roadmap original (Fases 0→3 por gating) fue **reemplazado operativamente** 
 
 **Cadenas = planes/tools; sin handoffs peer:** flujos frecuentes SPOA (indagación/impulso, VIF, querella/abreviado) se orquestan por plantillas en `plan_templates.py` (ver `docs/canon/flujos-frecuentes-penal-victimas-co.md`).
 
-**Alcance producto (2026-08-03):** denuncias / representación penal-víctimas; derecho de petición, memoriales e impulso como herramientas **penales**. La acción de tutela (especialista constitucional y REQ-038…042) quedó **fuera del producto**.
+**Alcance producto:** denuncias / representación **penal-víctimas**; derecho de petición, memoriales e impulso en vía **penal**. Otras líneas Lexiatek (p. ej. equipos distintos) no se desarrollan en este asistente.
 
 **Cumplimiento Ley 1581 (2026-07-21):** consentimiento hard en `/auth/login`; ARCO web `POST /api/compliance/arco-erase`; retención mensual; términos `/legal/terminos`; cifrado en reposo (Fernet via `DATA_AT_REST_KEY`/`SESSION_SECRET`); flags `involucra_menor`/`datos_sensibles` en expediente; plantillas DPA/RNBD en `docs/operaciones/`.
 

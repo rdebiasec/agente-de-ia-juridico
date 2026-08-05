@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: f1fefe95cef39495 -->
+<!-- config-version: 2; checksum: 614e8faeb355ae01 -->
 ---
 name: crear-checklist-previo-audiencia
-description: Skill atomico penal-victimas: listar requisitos antes de audiencia. Use when the workflow requires `crear_checklist_previo_audiencia`.
+description: Contrato penal-víctimas: Generar lista verificable de tareas y documentos antes de una audiencia penal. Activar cuando el plan/HITL o el especialista requiera `crear_checklist_previo_audiencia`. No sustituye a `identificar_objetivo_audiencia`.
 disable-model-invocation: true
 ---
 
@@ -56,9 +56,9 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_che
 - `hearing_template_loader` — no implementada
 - `calendar_event_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g4:** HITL antes de audiencia.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL antes de audiencia.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No definir objetivo (`identificar_objetivo_audiencia`).

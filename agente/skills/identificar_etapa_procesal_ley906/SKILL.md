@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 7501fbcae3060eb9 -->
+<!-- config-version: 2; checksum: a6246750767df617 -->
 ---
 name: identificar-etapa-procesal-ley906
-description: Skill estrategico penal-victimas: determinar etapa del caso segun Ley 906. Use when the workflow requires `identificar_etapa_procesal_ley906`.
+description: Contrato penal-víctimas: Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres. Activar cuando el plan/HITL o el especialista requiera `identificar_etapa_procesal_ley906`. No sustituye a `evaluar_oportun...
 disable-model-invocation: true
 ---
 
@@ -21,9 +21,8 @@ Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en act
 ## Rol en analista_ruta_procesal
 Primer paso del agente tras recibir caso del coordinador. Toda actuación posterior depende de etapa confirmada o `[PENDIENTE DE VERIFICAR]`.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
-
 
 ## Inputs
 - Radicado y últimas actuaciones procesales (auto, informe, audiencia, imputación).
@@ -38,11 +37,10 @@ Primer paso del agente tras recibir caso del coordinador. Toda actuación poster
 - Nota: conclusión preliminar, no dictamen procesal vinculante.
 
 ## Steps
-1. Revisar actuaciones y estado del radicado.
-2. Determinar etapa procesal según Ley 906 (indagación, investigación, juicio, etc.).
-3. Señalar incertidumbres si el expediente es incompleto.
-4. Señalar actuaciones habilitadas en la etapa identificada.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Identificar etapa aparente con base en actuaciones/radicado aportados.
+2. Justificar con hechos procesales; marcar incertidumbre si faltan datos.
+3. No inventar actuaciones ni fechas de audiencia.
+4. Derivar ruta completa a `crear_ruta_procesal_recomendada` si se pide plan.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `identificar_etapa_procesal_ley906`.
@@ -60,14 +58,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 - `process_lookup_query` — no implementada
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar actuaciones ni fechas para ubicar etapa.
-- **g2:** Expediente incompleto → etapa `[PENDIENTE DE VERIFICAR]` y pedir actuación fundante.
-- **g3:** Distinguir etapa inferida de etapa acreditada en auto o estado del radicado.
-- **g4:** Etapa incorrecta invalida oportunidad de solicitudes; HITL obligatorio.
-- **g7:** Solo aplica a proceso penal Ley 906 en Colombia.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar actuaciones ni fechas para ubicar etapa.
+- **Pedir datos faltantes:** Expediente incompleto → etapa `[PENDIENTE DE VERIFICAR]` y pedir actuación fundante.
+- **Separar hecho de inferencia:** Distinguir etapa inferida de etapa acreditada en auto o estado del radicado.
+- **Revision humana obligatoria:** Etapa incorrecta invalida oportunidad de solicitudes; HITL obligatorio.
+- **Fuera de alcance:** Solo aplica a proceso penal Ley 906 en Colombia.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Salida alimenta: `mapear_actuaciones_posibles_victima`, `evaluar_oportunidad_procesal`, `controlar_terminos_procesales_preliminares`.

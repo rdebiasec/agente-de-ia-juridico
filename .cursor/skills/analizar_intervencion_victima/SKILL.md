@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 4a6f7b75dbd7622b -->
+<!-- config-version: 2; checksum: 9def3638a96efeba -->
 ---
 name: analizar-intervencion-victima
-description: Skill estrategico penal-victimas: definir intervencion posible de la victima en una actuacion o audiencia. Use when the workflow requires `analizar_intervencion_victima`.
+description: Contrato penal-víctimas: Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906. Activar cuando el plan/HITL o el especialista requiera `analizar_intervencion_victima`. No sustituye a `preparar_guion_intervencion_oral`.
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Definir formas de intervención procedentes de la víctima en una actuación o a
 ## Rol en analista_ruta_procesal
 Marco procesal de intervención (qué puede pedir la víctima y cuándo). La preparación táctica oral la hace `analista_audiencias`.
 
-## Rol en preparador_audiencias
+## Rol en analista_audiencias
 Usar este marco como base para guion, preguntas y solicitudes orales.
 
 ## Inputs
@@ -60,12 +60,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_normas_victimas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar facultades de intervención no previstas en norma verificada.
-- **g4:** HITL antes de que la víctima intervenga en audiencia.
-- **g5:** Minimizar exposición innecesaria de la víctima.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar facultades de intervención no previstas en norma verificada.
+- **Revision humana obligatoria:** HITL antes de que la víctima intervenga en audiencia.
+- **No revictimizar:** Minimizar exposición innecesaria de la víctima.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No guion oral (`preparar_guion_intervencion_oral`).

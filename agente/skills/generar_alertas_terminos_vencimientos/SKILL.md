@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 60245ff0126486a6 -->
+<!-- config-version: 2; checksum: d30420f51c9c5c65 -->
 ---
 name: generar-alertas-terminos-vencimientos
-description: Skill operativo penal-victimas: crear alertas de posibles vencimientos. Use when the workflow requires `generar_alertas_terminos_vencimientos`.
+description: Contrato penal-víctimas: Generar alertas de vencimientos próximos clasificadas por criticidad. Activar cuando el plan/HITL o el especialista requiera `generar_alertas_terminos_vencimientos`. No sustituye a `controlar_terminos_procesales_preliminares`.
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Generar alertas de vencimientos próximos clasificadas por criticidad.
 ## Rol en analista_ruta_procesal
 Alertas ligadas a actuación estratégica inminente (recurso, audiencia). Complementa `controlar_terminos_procesales_preliminares`.
 
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Calendario operativo del caso.
 
 ## Inputs
@@ -35,9 +35,9 @@ Calendario operativo del caso.
 - Notificación sugerida (sí/no).
 
 ## Steps
-1. Identificar vencimientos próximos en calendario procesal.
-2. Clasificar alertas por criticidad.
-3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Identificar términos/plazos con fuente y fecha de cómputo si consta.
+2. Clasificar alerta: informativa | próxima | vencida | incierta.
+3. No inventar dies a quo; marcar incertidumbre.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `generar_alertas_terminos_vencimientos`.
@@ -54,11 +54,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_a
 - `calendar_terms_calculator` — no implementada
 - `notification_create` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** Fechas estimadas etiquetadas como tales.
-- **g4:** Alerta crítica dispara revisión humana, no actuación automática.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Verificación humana de términos.
+## Guardrails
+- **No inventar:** Fechas estimadas etiquetadas como tales.
+- **Revision humana obligatoria:** Alerta crítica dispara revisión humana, no actuación automática.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Verificación humana de términos.
 
 ## No duplicar
 - No identificar términos desde cero (`controlar_terminos_procesales_preliminares`).

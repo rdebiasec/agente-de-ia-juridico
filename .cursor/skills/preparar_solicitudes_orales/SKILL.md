@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: f654758d955a60e8 -->
+<!-- config-version: 2; checksum: 3c5ced4bcf34026b -->
 ---
 name: preparar-solicitudes-orales
-description: Skill operativo penal-victimas: formular solicitudes orales posibles segun etapa. Use when the workflow requires `preparar_solicitudes_orales`.
+description: Contrato penal-víctimas: Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_solicitudes_orales`. No sustituye a `preparar_guion_intervencion_oral`.
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Identificar y formular solicitudes orales procedentes según etapa y tipo de aud
 ## Rol en analista_ruta_procesal
 **Solo catálogo preliminar:** qué solicitudes orales son procedentes en la etapa (sin guion ni táctica de audiencia). Derivar detalle a preparador de audiencias.
 
-## Rol en preparador_audiencias
+## Rol en analista_audiencias
 Formulación completa con fundamento, prioridad y dependencias probatorias para estrados.
 
 ## Inputs
@@ -55,11 +55,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `citation_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** Fundamentos desde RAG.
-- **g4:** HITL antes de audiencia.
-- **g5:** Solicitudes que expongan víctima: señalar riesgo.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** Fundamentos desde RAG.
+- **Revision humana obligatoria:** HITL antes de audiencia.
+- **No revictimizar:** Solicitudes que expongan víctima: señalar riesgo.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No guion completo (`preparar_guion_intervencion_oral`).

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: c633dc9426b9a1d7 -->
+<!-- config-version: 2; checksum: 1dac009587bfa87a -->
 ---
 name: construir-teoria-caso-victima
-description: Skill critico penal-victimas: formular teoria preliminar del caso desde la victima. Use when the workflow requires `construir_teoria_caso_victima`.
+description: Contrato penal-víctimas: Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio. Activar cuando el plan/HITL o el especialista requiera `construir_teoria_caso_victima`. No sustituye a `priorizar_objetivos_represent...
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Formular teoría preliminar del caso centrada en la víctima: hechos, intereses,
 ## Rol en analista_representacion_victimas
 Producto nuclear del agente. Requiere cronología verificada y tipicidad preliminar.
 
-## Rol en preparador_audiencias
+## Rol en analista_audiencias
 Marco narrativo para audiencia; no reemplaza guion táctico.
 
 ## Inputs
@@ -37,13 +37,10 @@ Marco narrativo para audiencia; no reemplaza guion táctico.
 - Etiqueta: `TEORÍA PRELIMINAR — APROBACIÓN ABOGADO Y VÍCTIMA`.
 
 ## Steps
-1. Precisar intereses y objetivos de la víctima en el caso concreto.
-2. Sintetizar narrativa factual centrada en la víctima con fuentes.
-3. Vincular teoría con tipicidad preliminar y elementos del tipo.
-4. Integrar plan probatorio y actuaciones Ley 906 disponibles.
-5. Identificar fortalezas, debilidades y riesgos de la postura.
-6. Alinear con enfoque diferencial y no revictimización.
-7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Integrar hechos, derechos e intereses de la víctima en teoría tentativa.
+2. Separar confirmado / narrado / inferido.
+3. No prometer resultados judiciales ni culpabilizar a la víctima.
+4. Alinear luego con prueba/ruta vía skills vecinos, no invadirlos aquí.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `construir_teoria_caso_victima`.
@@ -60,12 +57,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `construir
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_normativo_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar hechos ni normas.
-- **g3:** Narrativa factual separada de estrategia y de calificación penal definitiva.
-- **g4:** HITL obligatorio; no comunicar teoría al cliente sin abogado.
-- **g5:** Teoría no culpa ni expone innecesariamente a la víctima.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar hechos ni normas.
+- **Separar hecho de inferencia:** Narrativa factual separada de estrategia y de calificación penal definitiva.
+- **Revision humana obligatoria:** HITL obligatorio; no comunicar teoría al cliente sin abogado.
+- **No revictimizar:** Teoría no culpa ni expone innecesariamente a la víctima.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No priorizar objetivos (`priorizar_objetivos_representacion` — preliminar en coordinador).

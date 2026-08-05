@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: ca29f370b3f7ec34 -->
+<!-- config-version: 2; checksum: 4f9597371c9c3c27 -->
 ---
 name: identificar-conductas-punibles-preliminares
-description: Skill operativo penal-victimas: proponer posibles conductas punibles con base en hechos, sin conclusion definitiva. Use when the workflow requires `identificar_conductas_punibles_preliminares`.
+description: Contrato penal-víctimas: Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación. Activar cuando el plan/HITL o el especialista requiera `identificar_conductas_punibles_preliminares`. No sustituye a `descompone...
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Punto de entrada del agente tras cronología verificada. Alimenta `descomponer_elementos_tipo_penal` y `detectar_riesgos_atipicidad`.
 
 ## Inputs
@@ -33,10 +33,10 @@ Punto de entrada del agente tras cronología verificada. Alimenta `descomponer_e
 - Etiqueta obligatoria: `HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN`.
 
 ## Steps
-1. Mapear conductas descritas contra tipos penales del catálogo.
-2. Priorizar hipótesis más sólidas y descartar atipicidad evidente.
-3. Presentar como hipótesis, no conclusión.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Listar conductas narradas con soporte fáctico mínimo.
+2. Asociar hipótesis tipicas tentativas (no definitivas) sin forzar tipo.
+3. Marcar conductas atípicas o insuficientes como riesgo/pendiente.
+4. Derivar descomposición elemental a `descomponer_elementos_tipo_penal`.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `identificar_conductas_punibles_preliminares`.
@@ -53,13 +53,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 - `rag_codigo_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_normativo_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar artículos del Código Penal ni conductas no descritas en hechos.
-- **g2:** Sin hechos soportados mínimos, no proponer tipos; derivar a cronología.
-- **g3:** Hipótesis ≠ hecho probado; separar conducta narrada de calificación.
-- **g4:** HITL obligatorio antes de comunicar calificación a víctima o contraparte.
-- **g5:** No sugerir tipos que revictimicen (ej. calificar defensa de víctima como delito).
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar artículos del Código Penal ni conductas no descritas en hechos.
+- **Pedir datos faltantes:** Sin hechos soportados mínimos, no proponer tipos; derivar a cronología.
+- **Separar hecho de inferencia:** Hipótesis ≠ hecho probado; separar conducta narrada de calificación.
+- **Revision humana obligatoria:** HITL obligatorio antes de comunicar calificación a víctima o contraparte.
+- **No revictimizar:** No sugerir tipos que revictimicen (ej. calificar defensa de víctima como delito).
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Requiere entrada de `analista_cronologia_hechos`: cronología + `verificar_hechos_soportados` con recomendación apta.

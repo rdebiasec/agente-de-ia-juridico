@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: bcb061bbe39bc7d5 -->
+<!-- config-version: 2; checksum: 22b07fae999888bb -->
 ---
 name: analizar-autoria-y-participacion
-description: Skill operativo penal-victimas: evaluar posibles roles de los intervinientes de manera preliminar. Use when the workflow requires `analizar_autoria_y_participacion`.
+description: Contrato penal-víctimas: Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal. Activar cuando el plan/HITL o el especialista requiera `analizar_autoria_y_participacion`. No sustituye a `identificar_actores_y_roles`.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición de elementos y mapa de actores. En representación de víctimas: identificar posibles responsables, no absolver ni condenar.
 
 ## Inputs
@@ -51,12 +51,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 - `rag_codigo_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No atribuir conducta sin hecho soportado.
-- **g3:** Distinción entre “mencionado” y “partícipe acreditado”.
-- **g4:** No comunicar roles a Fiscalía o víctima sin revisión del abogado.
-- **g5:** No sugerir participación de la víctima sin base factual.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No atribuir conducta sin hecho soportado.
+- **Separar hecho de inferencia:** Distinción entre “mencionado” y “partícipe acreditado”.
+- **Revision humana obligatoria:** No comunicar roles a Fiscalía o víctima sin revisión del abogado.
+- **No revictimizar:** No sugerir participación de la víctima sin base factual.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No identificar actores (`identificar_actores_y_roles` — solo roles procesales básicos).

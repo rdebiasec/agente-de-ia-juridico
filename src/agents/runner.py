@@ -47,6 +47,7 @@ from src.agents.triage import (
     is_animal_scope_request,
     is_investigado_posture,
     is_non_penal_scope_request,
+    is_other_team_scope_request,
     is_trivial_consultation,
     requires_execution_plan,
 )
@@ -732,9 +733,9 @@ def _fallback_response(message: str) -> str:
             "y riesgos de confidencialidad o revictimización antes de salida externa."
         ),
         POC_AGENT_ID: (
-            "La acción de tutela / vía constitucional está fuera del alcance de este producto. "
-            "Puedo apoyar impulso procesal, derecho de petición, seguimiento o memoriales penales. "
-            "¿Qué actuación en vía penal necesita?"
+            "Como Coordinador del Caso puedo apoyar estrategia de víctimas de extremo a "
+            "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
+            "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
         ),
     }
     if is_investigado_posture(message):
@@ -749,7 +750,7 @@ def _fallback_response(message: str) -> str:
             "Si necesita defensa del conductor, conviene reconducir a un profesional "
             "en defensa penal."
         )
-    elif is_non_penal_scope_request(message):
+    elif is_non_penal_scope_request(message) or is_other_team_scope_request(message):
         body = _out_of_scope_materia_reply(message)
     elif any(
         w in (message or "").lower()
@@ -761,16 +762,10 @@ def _fallback_response(message: str) -> str:
             "evidencia, audiencias, redacción, seguimiento y calidad) y te entrego una sola "
             "voz de despacho para tu revisión."
         )
-    elif re.search(r"\b(tutela|acci[oó]n\s+de\s+tutela)\b", message or "", re.I):
-        body = bodies[POC_AGENT_ID]
     else:
         body = bodies.get(
             dest,
-            (
-                "Como Coordinador del Caso puedo apoyar estrategia de víctimas de extremo a "
-                "extremo: hechos, tipicidad, ruta 906, evidencia, audiencias, redacción, seguimiento y "
-                "control de calidad. ¿Qué parte del caso necesitas trabajar primero?"
-            ),
+            bodies[POC_AGENT_ID],
         )
     return apply_output_guardrails(body)
 
@@ -976,7 +971,7 @@ async def run_agent(
             "trace": trace,
         }
 
-    if is_non_penal_scope_request(message):
+    if is_non_penal_scope_request(message) or is_other_team_scope_request(message):
         text = apply_output_guardrails(_out_of_scope_materia_reply(message))
         trace["route"] = "fuera_alcance_materia"
         trace["blocked"] = True

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: bc078350d64e0c85 -->
+<!-- config-version: 2; checksum: 055f6d52e5539112 -->
 ---
 name: preparar-preguntas-audiencia
-description: Skill operativo penal-victimas: sugerir preguntas para victima, testigos o peritos en audiencia. Use when the workflow requires `preparar_preguntas_audiencia`.
+description: Contrato penal-víctimas: Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_preguntas_audiencia`. No sustituye a `preparar_guio...
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia.
 
-
-## Rol en preparador_audiencias
+## Rol en analista_audiencias
 Guion probatorio oral alineado con hechos y teoría del caso.
 ## Inputs
 - Objetivo de audiencia (`identificar_objetivo_audiencia`).
@@ -32,13 +31,10 @@ Guion probatorio oral alineado con hechos y teoría del caso.
 - Etiqueta: `REVISAR CON ABOGADO — ESPECIALMENTE PREGUNTAS A VÍCTIMA`.
 
 ## Steps
-1. Definir objetivo probatorio de cada bloque de preguntas.
-2. Seleccionar destinatario (víctima, testigo, perito) según matriz hecho-prueba.
-3. Redactar preguntas neutrales, no inductivas y en orden lógico.
-4. Revisar cada pregunta con criterio de no revictimización.
-5. Señalar preguntas de alto riesgo y alternativas más seguras.
-6. Alinear preguntas con solicitudes orales previstas en la audiencia.
-7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Definir objetivo de la audiencia y hechos a acreditar.
+2. Redactar preguntas abiertas/cerradas sin revictimizar.
+3. Separar preguntas a testigos/peritos vs solicitudes orales.
+4. No sustituir guion completo ni simulación.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_preguntas_audiencia`.
@@ -54,10 +50,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g4:** HITL obligatorio antes de audiencia.
-- **g5:** No revictimizar; evitar preguntas sobre vida íntima no pertinente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL obligatorio antes de audiencia.
+- **No revictimizar:** No revictimizar; evitar preguntas sobre vida íntima no pertinente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No guion completo (`preparar_guion_intervencion_oral`).

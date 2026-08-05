@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 949654d380d2e3f6 -->
+<!-- config-version: 2; checksum: 182d9c17c8812a24 -->
 ---
 name: crear-matriz-hecho-fuente
-description: Skill operativo penal-victimas: relacionar cada hecho con su fuente exacta. Use when the workflow requires `crear_matriz_hecho_fuente`.
+description: Contrato penal-víctimas: Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte. Activar cuando el plan/HITL o el especialista requiera `crear_matriz_hecho_fuente`. No sustituye a `clasificar_fuente_factual`.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Puente entre extracción y cronología. Profundiza la matriz preliminar del coordinador (`clasificar_fuente_factual`) con referencias verificables.
 
 ## Inputs
@@ -53,14 +53,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_mat
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `source_reference_validator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar folios, timestamps ni documentos.
-- **g2:** Sin acceso al documento citado, marcar fuente `[PENDIENTE DE VERIFICAR]`.
-- **g3:** Un hecho por fila; no mezclar inferencias con hechos documentados.
-- **g4:** Matriz usada en escrito requiere revisión humana.
-- **g6:** No exponer PII innecesaria en la columna hecho.
-- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar folios, timestamps ni documentos.
+- **Pedir datos faltantes:** Sin acceso al documento citado, marcar fuente `[PENDIENTE DE VERIFICAR]`.
+- **Separar hecho de inferencia:** Un hecho por fila; no mezclar inferencias con hechos documentados.
+- **Revision humana obligatoria:** Matriz usada en escrito requiere revisión humana.
+- **Confidencialidad:** No exponer PII innecesaria en la columna hecho.
+- **No revictimizar:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - **vs `clasificar_fuente_factual`:** esta matriz exige referencia exacta (folio/timestamp); la del coordinador es preliminar.

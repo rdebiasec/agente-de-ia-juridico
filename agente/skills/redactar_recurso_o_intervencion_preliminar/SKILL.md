@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: e6388f266e03a960 -->
+<!-- config-version: 2; checksum: 4378b1bb5bded21a -->
 ---
 name: redactar-recurso-o-intervencion-preliminar
-description: Skill operativo penal-victimas: evaluar y preparar insumos para recurso o intervencion; redaccion final en redactor. Use when the workflow requires `redactar_recurso_o_intervencion_preliminar`.
+description: Contrato penal-víctimas: Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor. Activar cuando el plan/HITL o el especialista requiera `redactar_recurso_o_intervencion_preliminar`. No sustituye a `evaluar_oportunidad_pr...
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Confirmar oportunidad y preparar insumos para recurso o intervención; el borrad
 ## Rol en analista_ruta_procesal
 **Solo pasos 1 y 3:** confirmar oportunidad/tipo de recurso y alertar términos. **No ejecutar paso 2 (redactar)** — derivar a `redactor_documentos_juridicos`.
 
-## Rol en redactor
+## Rol en redactor_documentos_juridicos
 Ejecutar los 4 pasos completos incluyendo borrador.
 
 ## Inputs
@@ -60,10 +60,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - `rag_jurisprudencia_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `calendar_terms_calculator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar actos procesales ni plazos.
-- **g4:** HITL y firma humana antes de radicar.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar actos procesales ni plazos.
+- **Revision humana obligatoria:** HITL y firma humana antes de radicar.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No oportunidad sin recurso concreto (`evaluar_oportunidad_procesal`).

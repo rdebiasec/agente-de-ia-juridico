@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: cd0b2cb6a658300a -->
+<!-- config-version: 2; checksum: d368168e652e6ef0 -->
 ---
 name: evaluar-solicitud-fiscalia-juez
-description: Skill operativo penal-victimas: evaluar si una solicitud a Fiscalia o juez es procedente y conveniente. Use when the workflow requires `evaluar_solicitud_fiscalia_juez`.
+description: Contrato penal-víctimas: Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento. Activar cuando el plan/HITL o el especialista requiera `evaluar_solicitud_fiscalia_juez`. No sustituye a `redactar_memorial...
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscal
 ## Rol en analista_ruta_procesal
 Dictamen preliminar antes de derivar a redactor. Incluye oportunidad, requisitos y anexos.
 
-## Rol en redactor
+## Rol en redactor_documentos_juridicos
 Validar que la solicitud a redactar tuvo evaluación procesal previa.
 
 ## Inputs
@@ -60,13 +60,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_s
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `citation_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** Fundamentos normativos verificados en RAG.
-- **g3:** Conveniencia estratégica ≠ predicción de resultado favorable.
-- **g4:** HITL antes de radicación.
-- **g5:** Solicitudes que expongan innecesariamente a la víctima señalar riesgo.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** Fundamentos normativos verificados en RAG.
+- **Separar hecho de inferencia:** Conveniencia estratégica ≠ predicción de resultado favorable.
+- **Revision humana obligatoria:** HITL antes de radicación.
+- **No revictimizar:** Solicitudes que expongan innecesariamente a la víctima señalar riesgo.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No redactar memorial (`redactar_memorial_penal`).

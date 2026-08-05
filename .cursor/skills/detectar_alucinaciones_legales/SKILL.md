@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 1d1b772ebaccba72 -->
+<!-- config-version: 2; checksum: 29b736928af116f7 -->
 ---
 name: detectar-alucinaciones-legales
-description: Skill operativo penal-victimas: detectar fuentes, hechos, conclusiones o citas inventadas. Use when the workflow requires `detectar_alucinaciones_legales`.
+description: Contrato penal-víctimas: Detectar citas normativas, sentencias, radicados o hechos inventados o no localizables en fuentes verificables. Activar cuando el plan/HITL o el especialista requiera `detectar_alucinaciones_legales`. No sustituye a `clasificar_aprobacion_juridica`.
 disable-model-invocation: true
 ---
 
@@ -33,9 +33,9 @@ Primer filtro de detección; **no** clasifica aprobación final — derivar a `c
 - Etiqueta: `DETECCIÓN ALUCINACIONES — NO ES DICTAMEN DE APROBACIÓN`.
 
 ## Steps
-1. Cruzar citas normativas, sentencias y radicados con fuentes verificables.
-2. Marcar referencias inventadas o no localizadas en RAG.
-3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Extraer citas de normas, sentencias, radicados y hechos afirmados.
+2. Cruzar con expediente/KB; clasificar verificada | no_localizada | inventada | pendiente.
+3. Entregar conteo y recomendación de escalamiento; no dictaminar aprobación final.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_alucinaciones_legales`.
@@ -53,11 +53,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `citation_checker` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar verificaciones; si RAG no resuelve, marcar `no_localizada`.
-- **g3:** Distinguir cita incorrecta de hecho no soportado.
-- **g4:** HITL antes de marcar referencia como inventada en salida externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar verificaciones; si RAG no resuelve, marcar `no_localizada`.
+- **Separar hecho de inferencia:** Distinguir cita incorrecta de hecho no soportado.
+- **Revision humana obligatoria:** HITL antes de marcar referencia como inventada en salida externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No clasificar aprobación (`clasificar_aprobacion_juridica`).

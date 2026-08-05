@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 1a756b8f7c5a0552 -->
+<!-- config-version: 2; checksum: a58113eba6d1c1a6 -->
 ---
 name: preparar-resumen-operativo-cliente
-description: Skill atomico penal-victimas: crear version simple del estado del proceso para cliente, sin estrategia sensible. Use when the workflow requires `preparar_resumen_operativo_cliente`.
+description: Contrato penal-víctimas: Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible. Activar cuando el plan/HITL o el especialista requiera `preparar_resumen_operativo_cliente`. No sustituye a `crear_resumen_ejecutivo_litigante`.
 disable-model-invocation: true
 ---
 
@@ -56,11 +56,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_
 - `case_state_reader` — no implementada
 - `approval_gate_submit` — no implementada
 
-## Guardrails (g1–g10)
-- **g4:** HITL obligatorio; nunca envío automático al cliente.
-- **g6:** No incluir datos de terceros ni detalles gráficos innecesarios.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL obligatorio; nunca envío automático al cliente.
+- **Confidencialidad:** No incluir datos de terceros ni detalles gráficos innecesarios.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No resumen ejecutivo litigante (`crear_resumen_ejecutivo_litigante` — abogado).

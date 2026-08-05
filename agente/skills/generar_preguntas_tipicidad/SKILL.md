@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 4ef35bfb3be27a69 -->
+<!-- config-version: 2; checksum: 23e96a1db43a28bf -->
 ---
 name: generar-preguntas-tipicidad
-description: Skill operativo penal-victimas: crear preguntas para completar elementos del tipo penal. Use when the workflow requires `generar_preguntas_tipicidad`.
+description: Contrato penal-víctimas: Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_tipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
 disable-model-invocation: true
 ---
 
@@ -19,10 +19,10 @@ disable-model-invocation: true
 ## Purpose
 Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 **Uso principal:** tras `descomponer_elementos_tipo_penal` y `mapear_tipo_penal_hecho_prueba`, para cerrar vacíos en elementos objetivos o subjetivos. Preguntas alineadas a elemento del tipo, no genéricas.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 **Uso limitado:** solo cuando un vacío factual obvio impide plantear hipótesis de conducta. Derivar al analista de tipicidad si el vacío es dogmático.
 
 ## Inputs
@@ -52,12 +52,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_p
 - `leer_normas_clave` — normas penales clave (plan/especialistas)
 - `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
-## Guardrails (g1–g10)
-- **g1:** No asumir que el tipo penal está configurado.
-- **g3:** Preguntas aclaran hechos, no califican conducta.
-- **g5:** No preguntas del tipo “¿por qué no denunció antes?” o que presupongan consentimiento.
-- **g4:** Revisión del abogado antes de enviar a víctima.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No asumir que el tipo penal está configurado.
+- **Separar hecho de inferencia:** Preguntas aclaran hechos, no califican conducta.
+- **No revictimizar:** No preguntas del tipo “¿por qué no denunció antes?” o que presupongan consentimiento.
+- **Revision humana obligatoria:** Revisión del abogado antes de enviar a víctima.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No descomponer tipos penales (`descomponer_elementos_tipo_penal` → tipicidad).

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 7c6465e0cf96d5c7 -->
+<!-- config-version: 2; checksum: c2a25604d37c9567 -->
 ---
 name: registrar-actuacion-procesal
-description: Skill atomico penal-victimas: registrar una actuacion nueva en la bitacora del caso. Use when the workflow requires `registrar_actuacion_procesal`.
+description: Contrato penal-víctimas: Registrar en el sistema una actuación procesal nueva con fuente y fecha. Activar cuando el plan/HITL o el especialista requiera `registrar_actuacion_procesal`. No sustituye a `monitorear_radicado`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Registrar en el sistema una actuación procesal nueva con fuente y fecha.
 
-
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Bitácora operativa del expediente para cronología y reportes.
 ## Inputs
 - Descripción de la actuación, fecha, documento fuente.
@@ -48,11 +47,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `registrar
 - `case_state_writer` — no implementada
 - `audit_log_write` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar actuaciones.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar actuaciones.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
+
+## No duplicar
+- No monitoreo continuo del radicado (`monitorear_radicado`).
+- No gestión de backlog de tareas (`actualizar_tareas_responsable`).
 
 ## Riesgo si se omite
 Expediente interno desactualizado y errores en alertas de términos.

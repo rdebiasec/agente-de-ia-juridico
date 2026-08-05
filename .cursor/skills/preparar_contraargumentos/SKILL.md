@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 2e9b7edd4ac727a8 -->
+<!-- config-version: 2; checksum: 3da08213d54edf1c -->
 ---
 name: preparar-contraargumentos
-description: Skill atomico penal-victimas: anticipar argumentos de defensa, Fiscalia u otros intervinientes. Use when the workflow requires `preparar_contraargumentos`.
+description: Contrato penal-víctimas: Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial. Activar cuando el plan/HITL o el especialista requiera `preparar_contraargumentos`. No sustituye a `preparar_guion_intervencion_oral`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial.
 
-
-## Rol en preparador_audiencias
+## Rol en analista_audiencias
 Réplicas anticipadas para audiencia o memorial; insumo estratégico, no conclusión.
 ## Inputs
 - Teoría del caso contraria (hipótesis documentada).
@@ -51,10 +50,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g3:** Réplicas basadas en hechos soportados, no en especulación.
-- **g4:** HITL obligatorio antes de usar en audiencia o memorial.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Separar hecho de inferencia:** Réplicas basadas en hechos soportados, no en especulación.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar en audiencia o memorial.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No guion oral (`preparar_guion_intervencion_oral`).

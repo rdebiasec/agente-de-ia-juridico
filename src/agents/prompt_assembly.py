@@ -9,16 +9,15 @@ Reglas innegociables: no inventes normas, sentencias, radicados ni hechos;
 marca `[PENDIENTE DE VERIFICAR]` lo no soportado; salidas accionables requieren revisión humana.
 """
 
-# G-ids alineados a config/guardrails/g1..g10.md (fuente canónica de políticas).
-# No declarar enforcement que no exista: el runtime aplica un subconjunto vía
-# sdk_guardrails / completeness / plan HITL; el resto es obligación de instrucción.
+# Fuente de verdad: desk_policies + I/O/T por agente + SDK/HITL.
+# Ids legacy g1…g10 son solo alias de portal; no son frenos por sí solos.
 _SLIM_POLICY_HINT = (
-    "Políticas obligatorias del despacho (ids = config/guardrails/g1..g10.md; "
-    "subset enforced en código/SDK): "
-    "g1 no inventar; g2 pedir datos faltantes; g3 separar hecho/inferencia; "
-    "g4 revisión humana obligatoria; g5 no revictimizar; g6 confidencialidad; "
-    "g7 fuera de alcance; g8 aviso de borrador; g9 oportunidad/términos Ley 906; "
-    "g10 integridad probatoria. "
+    "Políticas obligatorias del despacho "
+    "(canónicas: config/guardrails/_shared/desk_policies.md; "
+    "enforcement: agents/{id}/{input|output|tools}.md + SDK/HITL): "
+    "no_inventar; pedir_faltantes; hecho_vs_inferencia; hitl; "
+    "no_revictimizar; confidencialidad; fuera_de_alcance; aviso_borrador; "
+    "terminos_906; integridad_probatoria. "
     "Código/SDK: alcance duro, PII, tripwires de salida vacía, "
     "gates de plan/completitud — no reexpongas textos largos."
 )
@@ -55,7 +54,7 @@ def load_full_system_prompt() -> str:
 
 
 def full_policy_block(agent_id: str | None = None) -> str:
-    """Políticas G1–G10 + agent_guardrail Input/Output/Tools (modo legacy/verbose)."""
+    """desk_policies (+ alias g*) + agent_guardrail Input/Output/Tools (modo verbose)."""
     parts: list[str] = []
     try:
         from src.config_store import load_guardrail_policies
@@ -64,9 +63,15 @@ def full_policy_block(agent_id: str | None = None) -> str:
     except Exception:
         policies = []
     if policies:
-        lines = ["Políticas obligatorias del despacho (guardrails de política):"]
+        lines = [
+            "Políticas obligatorias del despacho "
+            "(I/O/T + SDK; ids g* = alias deprecados de portal):"
+        ]
         for g in policies:
-            lines.append(f"- [{g['id']}] {g['name']}: {g['desc']}")
+            pid = g.get("policy_id") or g["id"]
+            status = g.get("status") or "active"
+            tag = f"{pid}" if status != "deprecated" else f"{pid} (alias {g['id']})"
+            lines.append(f"- [{tag}] {g['name']}: {g['desc']}")
         parts.append("\n".join(lines))
 
     if agent_id:
@@ -99,7 +104,7 @@ def assemble_instructions(
     backoffice_voice: str = "",
     capability_anchor: str = "",
 ) -> str:
-    """Compone instructions. slim=True omite dumps largos (G1–G10 bodies + agent guardrails)."""
+    """Compone instructions. slim=True omite dumps largos (desk_policies + agent I/O/T)."""
     if slim:
         parts = [slim_system_prompt(), load_role_prompt(agent_id)]
     else:

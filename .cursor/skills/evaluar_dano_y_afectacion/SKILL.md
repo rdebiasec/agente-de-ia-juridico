@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: db220061159d9492 -->
+<!-- config-version: 2; checksum: b93d991fd9d4cb61 -->
 ---
 name: evaluar-dano-y-afectacion
-description: Skill atomico penal-victimas: organizar danos y afectaciones alegadas. Use when the workflow requires `evaluar_dano_y_afectacion`.
+description: Contrato penal-víctimas: Describir preliminarmente el daño o afectación a la víctima con base documentada (físico, psicológico, patrimonial, social). Activar cuando el plan/HITL o el especialista requiera `evaluar_dano_y_afectacion`. No sustituye a `identificar_intereses_victi...
 disable-model-invocation: true
 ---
 
@@ -51,11 +51,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_d
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar diagnósticos ni secuelas.
-- **g5:** No minimizar ni dramatizar el daño sin base.
-- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar diagnósticos ni secuelas.
+- **No revictimizar:** No minimizar ni dramatizar el daño sin base.
+- **Revision humana obligatoria:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No pretensiones de reparación definitivas sin HITL.

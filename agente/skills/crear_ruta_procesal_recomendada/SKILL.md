@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: ebf44a0af3487133 -->
+<!-- config-version: 2; checksum: dfd1dfaf6a8e5476 -->
 ---
 name: crear-ruta-procesal-recomendada
-description: Skill estrategico penal-victimas: crear plan de proximos pasos procesales para revision del abogado. Use when the workflow requires `crear_ruta_procesal_recomendada`.
+description: Contrato penal-víctimas: Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado. Activar cuando el plan/HITL o el especialista requiera `crear_ruta_procesal_recomendada`. No sustituye a `evalua...
 disable-model-invocation: true
 ---
 
@@ -21,9 +21,8 @@ Proponer secuencia de próximos pasos procesales para la representación de la v
 ## Rol en analista_ruta_procesal
 Producto integrador del agente. Ejecutar tras etapa, actuaciones mapeadas, oportunidad y riesgos procesales.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
-
 
 ## Inputs
 - Etapa procesal actual (confirmada o `[PENDIENTE DE VERIFICAR]`).
@@ -39,11 +38,9 @@ Producto integrador del agente. Ejecutar tras etapa, actuaciones mapeadas, oport
 - Etiqueta: `BORRADOR PARA REVISIÓN — NO EJECUTAR SIN APROBACIÓN`.
 
 ## Steps
-1. Sintetizar etapa actual y actuaciones pendientes.
-2. Proponer secuencia de próximos pasos con responsables y plazos.
-3. Incluir riesgos procesales de la ruta propuesta.
-4. Entregar ruta numerada con responsable y plazo por paso.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Partir de etapa e intereses de la víctima.
+2. Proponer secuencia de actuaciones posibles con justificación breve.
+3. Separar recomendación de decisión del abogado; HITL para piezas accionables.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `crear_ruta_procesal_recomendada`.
@@ -60,14 +57,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_rut
 - `task_manager_create` — no implementada
 - `audit_log_write` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No citar artículos Ley 906 sin verificar en RAG.
-- **g2:** Sin etapa ni radicado, no proponer ruta cerrada.
-- **g3:** Distinguir hechos del expediente de supuestos para planificar.
-- **g4:** HITL obligatorio: estrategia procesal no se ejecuta sin firma.
-- **g5:** Ruta centrada en derechos de la víctima.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de borrador y revisión profesional.
+## Guardrails
+- **No inventar:** No citar artículos Ley 906 sin verificar en RAG.
+- **Pedir datos faltantes:** Sin etapa ni radicado, no proponer ruta cerrada.
+- **Separar hecho de inferencia:** Distinguir hechos del expediente de supuestos para planificar.
+- **Revision humana obligatoria:** HITL obligatorio: estrategia procesal no se ejecuta sin firma.
+- **No revictimizar:** Ruta centrada en derechos de la víctima.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de borrador y revisión profesional.
 
 ## No duplicar
 - No evaluar oportunidad de cada actuación (`evaluar_oportunidad_procesal`).

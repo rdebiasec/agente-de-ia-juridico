@@ -139,7 +139,7 @@ def patch_skill(path: Path, sid: str, category: str) -> bool:
     text = path.read_text(encoding="utf-8")
     original = text
 
-    text = re.sub(r"## Guardrails \(g1–g8\)", "## Guardrails (g1–g10)", text)
+    text = re.sub(r"## Guardrails", "## Guardrails", text)
     text = re.sub(r"## Guardrails \(g1-g8\)", "## Guardrails (g1-g10)", text)
 
     if category in CATEGORIES_G5:

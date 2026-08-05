@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 5c1b57f7dcc68555 -->
+<!-- config-version: 2; checksum: 8151ad6478ea5e5d -->
 ---
 name: detectar-riesgos-atipicidad
-description: Skill operativo penal-victimas: detectar cuando un caso puede ser atipico o tener naturaleza no penal. Use when the workflow requires `detectar_riesgos_atipicidad`.
+description: Contrato penal-víctimas: Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_atipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Gate temprano: ejecutar en paralelo con o justo después de `identificar_conductas_punibles_preliminares`. Si riesgo alto, alertar antes de ruta procesal penal.
 
 ## Inputs
@@ -34,10 +34,10 @@ Gate temprano: ejecutar en paralelo con o justo después de `identificar_conduct
 - `recomendacion_interna`: continuar análisis penal | explorar vía no penal | pedir hechos adicionales.
 
 ## Steps
-1. Evaluar si faltan elementos objetivos o subjetivos del tipo.
-2. Identificar conductas alternativas más ajustadas.
-3. Alertar riesgo de atipicidad antes de actuación.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Revisar elementos del tipo vs hechos/prueba disponibles.
+2. Señalar riesgos de atipicidad o insuficiencia probatoria por elemento.
+3. No afirmar inocencia ni tipicidad definitiva.
+4. Proponer preguntas de aclaración, no conclusiones cerradas.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_riesgos_atipicidad`.
@@ -54,16 +54,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `rag_jurisprudencia_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No citar jurisprudencia no verificada en RAG.
-- **g3:** Atipicidad es hipótesis; no afirmar que “no es delito”.
-- **g4:** Alerta de atipicidad alta debe llegar al abogado antes de radicar denuncia o memorial.
-- **g7:** Si el caso es claramente no penal, declararlo y no forzar tipicidad.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No citar jurisprudencia no verificada en RAG.
+- **Separar hecho de inferencia:** Atipicidad es hipótesis; no afirmar que “no es delito”.
+- **Revision humana obligatoria:** Alerta de atipicidad alta debe llegar al abogado antes de radicar denuncia o memorial.
+- **Fuera de alcance:** Si el caso es claramente no penal, declararlo y no forzar tipicidad.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No descomponer elementos (`descomponer_elementos_tipo_penal`).
-- No acción de tutela (fuera del producto).
 - No calidad final (`clasificar_aprobacion_juridica` en calidad).
 
 ## Riesgo si se omite

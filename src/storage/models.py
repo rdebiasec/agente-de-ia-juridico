@@ -100,7 +100,7 @@ class Draft:
 
     id: str = field(default_factory=_new_id)
     session_id: str = ""
-    tipo: str = "documento"  # memorial, tutela, concepto, correo, estrategia...
+    tipo: str = "documento"  # memorial, concepto, correo, estrategia...
     titulo: str = ""
     contenido: str = ""
     materia: str | None = None  # penal
@@ -172,7 +172,7 @@ class Deadline:
     id: str = field(default_factory=_new_id)
     session_id: str = ""
     descripcion: str = ""
-    tipo: str = "termino"  # tutela, traslado, recurso, seguimiento...
+    tipo: str = "termino"  # traslado, recurso, seguimiento, termino_procesal...
     fecha_base: date | None = None
     fecha_limite: date | None = None
     dias_habiles: int | None = None

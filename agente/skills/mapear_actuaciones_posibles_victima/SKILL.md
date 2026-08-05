@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 388fef5b6b3e4763 -->
+<!-- config-version: 2; checksum: 499ab2264c6ae78d -->
 ---
 name: mapear-actuaciones-posibles-victima
-description: Skill operativo penal-victimas: indicar que puede hacer la representacion de victimas segun etapa Ley 906. Use when the workflow requires `mapear_actuaciones_posibles_victima`.
+description: Contrato penal-víctimas: Listar actuaciones que la representación de víctimas puede promover en la etapa actual, con requisitos y efectos esperados. Activar cuando el plan/HITL o el especialista requiera `mapear_actuaciones_posibles_victima`. No sustituye a `evaluar_oportunida...
 disable-model-invocation: true
 ---
 
@@ -58,13 +58,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_ac
 - `rag_normas_victimas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `citation_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** Normas solo desde RAG verificado.
-- **g2:** Sin etapa, listar solo categorías genéricas marcadas pendientes.
-- **g4:** HITL antes de radicar cualquier actuación.
-- **g5:** Actuaciones que expongan a la víctima señalar riesgo revictimización.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** Normas solo desde RAG verificado.
+- **Pedir datos faltantes:** Sin etapa, listar solo categorías genéricas marcadas pendientes.
+- **Revision humana obligatoria:** HITL antes de radicar cualquier actuación.
+- **No revictimizar:** Actuaciones que expongan a la víctima señalar riesgo revictimización.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No evaluar oportunidad concreta (`evaluar_oportunidad_procesal`).

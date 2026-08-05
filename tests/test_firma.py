@@ -52,8 +52,8 @@ def test_orquestador_tiene_roster_completo():
 
 
 @pytest.mark.asyncio
-async def test_run_agent_tutela_queda_en_gerente_sin_especialista():
-    """Mensajes de tutela no abren especialista constitucional; quedan en el Gerente."""
+async def test_run_agent_other_team_scope_queda_en_gerente():
+    """Materias de otro equipo Lexiatek quedan en el Gerente, fuera de alcance."""
     from src.agents import runner as runner_mod
     from src.agents.triage import infer_destination_agent
 
@@ -71,7 +71,7 @@ async def test_run_agent_tutela_queda_en_gerente_sin_especialista():
     if dest:
         assert dest == "coordinador_caso"
     text = (result.get("text") or "").lower()
-    assert "tutela" in text or "fuera" in text or "impulso" in text or "petición" in text or "peticion" in text
+    assert "fuera" in text or "alcance" in text or "penal" in text
 
 
 def test_ensure_poc_voice_envuelve_especialista_residual():

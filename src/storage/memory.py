@@ -502,6 +502,18 @@ class InMemoryRepository:
             self._config_active[(row.kind, row.key)] = row
             return row
 
+    def delete_config_active(self, kind: str, key: str) -> bool:
+        with self._lock:
+            return self._config_active.pop((kind, key), None) is not None
+
+    def delete_config_versions(self, kind: str, key: str) -> int:
+        with self._lock:
+            before = len(self._config_versions)
+            self._config_versions = [
+                r for r in self._config_versions if not (r.kind == kind and r.key == key)
+            ]
+            return before - len(self._config_versions)
+
     def list_config_active(self, *, kind: str | None = None) -> list[ConfigActive]:
         with self._lock:
             rows = list(self._config_active.values())

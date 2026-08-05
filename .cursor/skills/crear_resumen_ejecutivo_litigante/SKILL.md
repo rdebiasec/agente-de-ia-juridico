@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 2e432b7a8b54a55e -->
+<!-- config-version: 2; checksum: 6618c656d396a545 -->
 ---
 name: crear-resumen-ejecutivo-litigante
-description: Skill atomico penal-victimas: crear resumen de una pagina para el abogado que interviene. Use when the workflow requires `crear_resumen_ejecutivo_litigante`.
+description: Contrato penal-víctimas: Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_resumen_ejecutivo_litigante`. No sustituye a `preparar_resumen_operativo_cliente`.
 disable-model-invocation: true
 ---
 
@@ -48,11 +48,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_res
 - `case_state_reader` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g4:** HITL obligatorio; uso interno del abogado — no envío a cliente ni terceros.
-- **g6:** Confidencial; no formato cliente.
-- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL obligatorio; uso interno del abogado — no envío a cliente ni terceros.
+- **Confidencialidad:** Confidencial; no formato cliente.
+- **No revictimizar:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No resumen cliente (`preparar_resumen_operativo_cliente`).

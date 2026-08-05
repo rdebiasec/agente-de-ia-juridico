@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 09a4fee7817169f0 -->
+<!-- config-version: 2; checksum: bbe9bd48d8538f1f -->
 ---
 name: controlar-tono-riesgo-reputacional
-description: Skill atomico penal-victimas: revisar tono profesional y evitar lenguaje riesgoso. Use when the workflow requires `controlar_tono_riesgo_reputacional`.
+description: Contrato penal-víctimas: Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario. Activar cuando el plan/HITL o el especialista requiera `controlar_tono_riesgo_reputacional`. No sustituye a `controlar_tono_juridico_documento`.
 disable-model-invocation: true
 ---
 
@@ -51,10 +51,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `leer_normas_clave` — normas penales clave (plan/especialistas)
 - `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
-## Guardrails (g1–g10)
-- **g6:** No amplificar datos sensibles en comunicaciones.
-- **g4:** HITL obligatorio antes de comunicación externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Confidencialidad:** No amplificar datos sensibles en comunicaciones.
+- **Revision humana obligatoria:** HITL obligatorio antes de comunicación externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No tono judicial (`controlar_tono_juridico_documento`).

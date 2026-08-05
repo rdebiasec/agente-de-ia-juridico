@@ -1,0 +1,58 @@
+name: Limpiar residuos descartados (prod)
+
+# Retira del config store de producción keys huérfanas (tutela/constitucional, etc.),
+# publica stubs g* deprecados + I/O/T desde disco, y limpia demo data con tipología tutela.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Solo reportar (no escribir)"
+        type: boolean
+        default: true
+      skip_demo_data:
+        description: "No borrar drafts/deadlines/sessions de demo"
+        type: boolean
+        default: false
+
+concurrency:
+  group: limpiar-residuos-prod
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Ejecutar limpieza
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python scripts/limpiar_residuos_descartados.py --dry-run
+          else
+            EXTRA=""
+            if [ "${{ inputs.skip_demo_data }}" = "true" ]; then
+              EXTRA="--skip-demo-data"
+            fi
+            python scripts/limpiar_residuos_descartados.py --apply \
+              --author "github-actions@users.noreply.github.com" \
+              $EXTRA
+          fi
+
+      - name: Subir backup/reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: limpieza-residuos-report
+          path: tmp/limpieza_residuos_*
+          if-no-files-found: warn

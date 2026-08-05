@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 0468e938b87e4ffd -->
+<!-- config-version: 2; checksum: 4b6241ebc4beba61 -->
 ---
 name: redactar-ampliacion-denuncia
-description: Skill atomico penal-victimas: estructurar hechos nuevos, pruebas y anexos para ampliar denuncia. Use when the workflow requires `redactar_ampliacion_denuncia`.
+description: Contrato penal-víctimas: Redactar borrador de ampliación de denuncia con nuevos hechos o elementos. Activar cuando el plan/HITL o el especialista requiera `redactar_ampliacion_denuncia`. No sustituye a `redactar_memorial_penal`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.
 
-
-## Rol en redactor
+## Rol en redactor_documentos_juridicos
 Borrador de ampliación; HITL y radicación son del despacho.
 ## Inputs
 - Denuncia o informe previo (si consta).
@@ -51,10 +50,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar radicados ni hechos.
-- **g4:** HITL y firma humana.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar radicados ni hechos.
+- **Revision humana obligatoria:** HITL y firma humana.
+- **Aviso de borrador:** Aviso de revisión profesional.
+
+## No duplicar
+- No memorial de impulso genérico (`redactar_memorial_penal` / `redactar_solicitud_impulso_procesal`).
+- No derecho de petición (`redactar_derecho_peticion_penal`).
 
 ## Riesgo si se omite
 Hechos nuevos no incorporados formalmente al expediente penal.

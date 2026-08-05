@@ -31,6 +31,7 @@ from src.agents.sdk_guardrails import (
     poc_tool_input_guardrails,
     poc_tool_output_guardrails,
     redactor_output_guardrails,
+    specialist_input_guardrails,
     specialist_output_guardrails,
 )
 from src.agents.skill_catalog import (
@@ -224,6 +225,7 @@ def _build_agent(
     with_tools: bool = True,
     slim: bool = True,
     output_type: type | None = None,
+    input_guardrails: list | None = None,
     output_guardrails: list | None = None,
 ) -> Agent:
     instructions = assemble_instructions(
@@ -238,6 +240,9 @@ def _build_agent(
         "instructions": instructions,
         "model": _model_for_agent(name),
         "model_settings": _model_settings_for_agent(name),
+        "input_guardrails": input_guardrails
+        if input_guardrails is not None
+        else specialist_input_guardrails(),
         "output_guardrails": output_guardrails or specialist_output_guardrails(),
     }
     if with_tools:

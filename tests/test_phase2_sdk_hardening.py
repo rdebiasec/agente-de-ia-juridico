@@ -108,7 +108,7 @@ def test_plan_step_resolves_declared_agent():
 
 
 @pytest.mark.asyncio
-async def test_tool_input_guardrail_blocks_tutela_to_redactor():
+async def test_tool_input_guardrail_allows_normal_redactor_pedido():
     from agents.tool_context import ToolContext
     from agents.tool_guardrails import ToolGuardrailFunctionOutput, ToolInputGuardrailData
 
@@ -118,13 +118,12 @@ async def test_tool_input_guardrail_blocks_tutela_to_redactor():
         context=None,
         tool_name="redactor_documentos_juridicos",
         tool_call_id="call-1",
-        tool_arguments='{"input":"Prepara tutela por derecho fundamental"}',
+        tool_arguments='{"input":"Prepara memorial de impulso procesal"}',
     )
     data = ToolInputGuardrailData(context=ctx, agent=None)  # type: ignore[arg-type]
     result = poc_tool_input_guardrail.guardrail_function(data)
     assert isinstance(result, ToolGuardrailFunctionOutput)
-    assert result.behavior["type"] == "reject_content"
-    assert result.output_info.get("reason") == "blocked_routing_tutela_out_of_scope"
+    assert result.behavior["type"] == "allow"
 
 
 @pytest.mark.asyncio
@@ -154,7 +153,7 @@ async def test_poc_input_guardrail_allows_penal_anchor():
     from src.agents.sdk_guardrails import poc_input_guardrail
 
     result = await poc_input_guardrail.guardrail_function(
-        None, None, "Victima solicita tutela por vulneracion en proceso penal"
+        None, None, "Victima solicita impulso procesal por vulneracion en proceso penal"
     )
     assert result.tripwire_triggered is False
 

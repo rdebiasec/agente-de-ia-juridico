@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: cd661d14e266b04e -->
+<!-- config-version: 2; checksum: 34ba0d85a1962a35 -->
 ---
 name: generar-preguntas-testigos-peritos
-description: Skill atomico penal-victimas: preparar preguntas neutrales para testigos o peritos. Use when the workflow requires `generar_preguntas_testigos_peritos`.
+description: Contrato penal-víctimas: Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_testigos_peritos`. No sustituye a `preparar_preguntas_audiencia`.
 disable-model-invocation: true
 ---
 
@@ -54,9 +54,9 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_p
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g4:** HITL antes de audiencia.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL antes de audiencia.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No preguntas a víctima (`preparar_preguntas_audiencia`).

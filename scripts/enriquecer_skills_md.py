@@ -28,20 +28,20 @@ PRIMARY: dict[str, str] = {
     "analista_calidad_juridica": "revisar_coherencia_estrategica",
 }
 
-GUARDRAILS_STD = """## Guardrails (g1–g10)
-- **g1:** No inventar hechos, normas, sentencias ni radicados.
-- **g2:** Pedir datos faltantes (incl. plazos y etapa Ley 906) antes de concluir.
-- **g3:** Separar hecho confirmado, narrado, inferido y pendiente.
-- **g4:** HITL obligatorio en escritos, estrategia, memoriales y reportes a cliente.
-- **g5:** No revictimizar; lenguaje centrado en derechos de la víctima.
-- **g6:** Minimizar datos sensibles innecesarios.
-- **g7:** Fuera de alcance si no es penal-víctimas Colombia.
-- **g8:** Aviso de revisión profesional en cada entrega.
-- **g9:** Sin plazo o etapa Ley 906 verificados, no certificar oportunidad.
-- **g10:** No sugerir descarte de evidencia sin revisar custodia y preservación."""
+GUARDRAILS_STD = """## Guardrails
+- **No inventar:** No inventar hechos, normas, sentencias ni radicados.
+- **Pedir datos faltantes:** Pedir datos faltantes (incl. plazos y etapa Ley 906) antes de concluir.
+- **Separar hecho de inferencia:** Separar hecho confirmado, narrado, inferido y pendiente.
+- **Revision humana obligatoria:** HITL obligatorio en escritos, estrategia, memoriales y reportes a cliente.
+- **No revictimizar:** No revictimizar; lenguaje centrado en derechos de la víctima.
+- **Confidencialidad:** Minimizar datos sensibles innecesarios.
+- **Fuera de alcance:** Fuera de alcance si no es penal-víctimas Colombia.
+- **Aviso de borrador:** Aviso de revisión profesional en cada entrega.
+- **Oportunidad y terminos Ley 906:** Sin plazo o etapa Ley 906 verificados, no certificar oportunidad.
+- **Integridad probatoria:** No sugerir descarte de evidencia sin revisar custodia y preservación."""
 
 EXTRA_HITL: dict[str, str] = {
-                "clasificar_aprobacion_juridica": "- **g4:** Último filtro antes de salida externa.",
+                "clasificar_aprobacion_juridica": "- **Revision humana obligatoria:** Último filtro antes de salida externa.",
 }
 
 

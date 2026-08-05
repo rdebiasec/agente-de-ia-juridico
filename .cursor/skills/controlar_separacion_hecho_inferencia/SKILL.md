@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 4b6bc89ee678382f -->
+<!-- config-version: 2; checksum: 028415a34dd58ed9 -->
 ---
 name: controlar-separacion-hecho-inferencia
-description: Skill atomico penal-victimas: verificar que no se confundan hechos probados, narrados, inferidos y pendientes. Use when the workflow requires `controlar_separacion_hecho_inferencia`.
+description: Contrato penal-víctimas: Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida. Activar cuando el plan/HITL o el especialista requiera `controlar_separacion_hecho_inferencia`. No sustituye a `verificar_hechos_soportados`.
 disable-model-invocation: true
 ---
 
@@ -54,10 +54,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g3:** No reclasificar hecho confirmado sin fuente.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Separar hecho de inferencia:** No reclasificar hecho confirmado sin fuente.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No verificar soporte global (`verificar_hechos_soportados`).

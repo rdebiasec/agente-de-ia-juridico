@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 5f134c76d4182cfa -->
+<!-- config-version: 2; checksum: 0d2a5d3173438c42 -->
 ---
 name: controlar-confidencialidad-datos-sensibles
-description: Skill atomico penal-victimas: detectar datos sensibles o innecesarios. Use when the workflow requires `controlar_confidencialidad_datos_sensibles`.
+description: Contrato penal-víctimas: Detectar y mitigar exposición innecesaria de datos personales sensibles en salidas del sistema. Activar cuando el plan/HITL o el especialista requiera `controlar_confidencialidad_datos_sensibles`. No sustituye a `controlar_no_revictimizacion`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Detectar y mitigar exposición innecesaria de datos personales sensibles en salidas del sistema.
 
-
-## Rol en calidad
+## Rol en analista_calidad_juridica
 Control de minimización y datos sensibles antes de salidas externas.
 ## Inputs
 - Texto o documento a revisar.
@@ -31,10 +30,9 @@ Control de minimización y datos sensibles antes de salidas externas.
 - Etiqueta: `CONTROL LEY 1581 / DATOS SENSIBLES`.
 
 ## Steps
-1. Identificar datos personales sensibles en la salida.
-2. Evaluar si son necesarios para el fin procesal.
-3. Proponer redacción o seudonimización cuando sea posible.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Detectar PII/datos sensibles/menor en la salida.
+2. Proponer redacción mínima necesaria o redacción.
+3. No sustituir control de no revictimización ni dictamen de aprobación.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `controlar_confidencialidad_datos_sensibles`.
@@ -50,10 +48,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `pii_detector` — no implementada
 
-## Guardrails (g1–g10)
-- **g6:** Minimización de datos por defecto.
-- **g4:** HITL antes de compartir externamente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Confidencialidad:** Minimización de datos por defecto.
+- **Revision humana obligatoria:** HITL antes de compartir externamente.
+- **Aviso de borrador:** Aviso de revisión profesional.
+
+## No duplicar
+- No control de tono revictimizante (`controlar_no_revictimizacion`).
+- No dictamen de aprobación (`clasificar_aprobacion_juridica`).
 
 ## Riesgo si se omite
 Filtración de datos de la víctima o terceros con violación de Ley 1581.

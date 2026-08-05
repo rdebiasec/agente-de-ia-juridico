@@ -17,10 +17,9 @@ from src.storage.models import Expediente
 
 POC_AGENT_ID = "coordinador_caso"
 
-# Tutela / constitucional queda fuera del producto: no hay destino especialista.
-_TUTELA_OUT_RE = re.compile(
-    r"\b(tutela|acci[oó]n\s+de\s+tutela|derecho\s+fundamental|"
-    r"subsidiariedad|inmediatez)\b",
+# Materias de otros equipos Lexiatek (no este asistente penal-víctimas).
+_OTHER_TEAM_SCOPE_RE = re.compile(
+    r"\b(tutela|acci[oó]n\s+de\s+tutela|acci[oó]n\s+constitucional)\b",
     re.I,
 )
 _SEGUIMIENTO_RE = re.compile(
@@ -166,6 +165,11 @@ def is_animal_scope_request(message: str) -> bool:
     return True
 
 
+def is_other_team_scope_request(message: str) -> bool:
+    """True si el pedido es de otro equipo Lexiatek (no este asistente)."""
+    return bool(_OTHER_TEAM_SCOPE_RE.search(message or ""))
+
+
 def is_non_penal_scope_request(message: str) -> bool:
     text = message or ""
     if is_animal_scope_request(text):
@@ -180,10 +184,11 @@ def is_investigado_posture(message: str) -> bool:
 
 def infer_destination_agent(message: str) -> str:
     """Unica funcion de destino: usada por chat, planner y gates."""
-    if is_non_penal_scope_request(message) or is_investigado_posture(message):
-        return POC_AGENT_ID
-    # Pedido de tutela/constitucional → Gerente (fuera de alcance del producto).
-    if _TUTELA_OUT_RE.search(message):
+    if (
+        is_non_penal_scope_request(message)
+        or is_investigado_posture(message)
+        or is_other_team_scope_request(message)
+    ):
         return POC_AGENT_ID
     # La intención explícita de producir un escrito prevalece sobre términos
     # contextuales como "última actuación" o "radicado".
@@ -283,7 +288,11 @@ def build_triage_bundle(
     """Triage + completeness + urgency en una sola pass (G02)."""
     dest = destination or infer_destination_agent(message)
     urgency = assess_urgency(message, expediente)
-    fuera = is_non_penal_scope_request(message) or is_investigado_posture(message)
+    fuera = (
+        is_non_penal_scope_request(message)
+        or is_investigado_posture(message)
+        or is_other_team_scope_request(message)
+    )
     tipo = "fuera_de_alcance" if fuera else _DEST_TO_TAREA.get(dest, "seguimiento")
     if is_investigado_posture(message):
         rol_aparente = "investigado_o_conductor"

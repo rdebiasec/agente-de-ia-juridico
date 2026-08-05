@@ -31,7 +31,7 @@ _OUT_OF_SCOPE_HARD_RE = re.compile(
 )
 _PENAL_ANCHOR_RE = re.compile(
     r"\b("
-    r"penal|v[ií]ctima|ley\s*906|fiscal[ií]a|tutela|"
+    r"penal|v[ií]ctima|ley\s*906|fiscal[ií]a|"
     r"radicado|audiencia|imputaci[oó]n|denuncia|"
     r"indagaci[oó]n|juicio\s+oral|proceso\s+penal|"
     r"representaci[oó]n\s+de\s+v[ií]ctimas"
@@ -225,26 +225,57 @@ def _structured_text(output: Any) -> str:
     return str(output).strip()
 
 
+@input_guardrail(name="specialist_input_guardrail", run_in_parallel=False)
+async def specialist_input_guardrail(
+    ctx: RunContextWrapper[Any],
+    agent: Any,
+    input: str | list[TResponseInputItem],
+) -> GuardrailFunctionOutput:
+    """Input de especialistas (plan / as_tool): vacío e injection."""
+    text = _input_text(input).strip()
+    agent_name = getattr(agent, "name", "") or ""
+    if not text:
+        return GuardrailFunctionOutput(
+            output_info={"reason": "entrada_vacia", "agent": agent_name},
+            tripwire_triggered=True,
+        )
+    if _INJECTION_RE.search(text):
+        return GuardrailFunctionOutput(
+            output_info={"reason": "injection_suspect", "agent": agent_name},
+            tripwire_triggered=True,
+        )
+    return GuardrailFunctionOutput(
+        output_info={"reason": "ok", "agent": agent_name, "chars": len(text)},
+        tripwire_triggered=False,
+    )
+
+
 @output_guardrail(name="specialist_output_guardrail")
 async def specialist_output_guardrail(
     ctx: RunContextWrapper[Any],
     agent: Any,
     output: Any,
 ) -> GuardrailFunctionOutput:
-    """Output guardrail genérico de especialistas (vacío + PII flags)."""
+    """Output guardrail genérico de especialistas (vacío + PII flags + invención soft)."""
     text = _structured_text(output)
     flags = pii_flags(text) if text else []
     empty = not text
+    invention_suspect = (not empty) and citation_hints_without_pending(text)
     trip = empty
+    if empty:
+        reason = "salida_vacia"
+    elif sensitive_pii_flags(text):
+        reason = "sensitive_pii_pending_policy"
+    elif invention_suspect:
+        reason = "invention_suspect"
+    else:
+        reason = "ok"
     return GuardrailFunctionOutput(
         output_info={
-            "reason": (
-                "salida_vacia"
-                if empty
-                else ("sensitive_pii_pending_policy" if sensitive_pii_flags(text) else "ok")
-            ),
+            "reason": reason,
             "chars": len(text),
             "pii_flags": flags,
+            "invention_suspect": invention_suspect,
             "agent": getattr(agent, "name", None),
         },
         tripwire_triggered=trip,
@@ -329,17 +360,6 @@ def poc_tool_input_guardrail(data: ToolInputGuardrailData) -> ToolGuardrailFunct
             ),
             output_info={"reason": "pii_in_args", "tool_name": tool_name, "pii_flags": flags},
         )
-    if tool_name == "redactor_documentos_juridicos" and re.search(
-        r"\b(tutela|acci[oó]n\s+de\s+tutela)\b", blob, re.I
-    ):
-        return ToolGuardrailFunctionOutput.reject_content(
-            message=(
-                "Routing bloqueado: la acción de tutela está fuera del producto. "
-                "Reformule el pedido como memorial de impulso, derecho de petición "
-                "o seguimiento procesal penal."
-            ),
-            output_info={"reason": "blocked_routing_tutela_out_of_scope", "tool_name": tool_name},
-        )
     return ToolGuardrailFunctionOutput.allow(
         output_info={"reason": "ok", "tool_name": tool_name}
     )
@@ -371,6 +391,10 @@ def poc_input_guardrails() -> list:
 
 def poc_output_guardrails() -> list:
     return [poc_output_guardrail]
+
+
+def specialist_input_guardrails() -> list:
+    return [specialist_input_guardrail]
 
 
 def specialist_output_guardrails() -> list:

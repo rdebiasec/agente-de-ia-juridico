@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 6d5310d61a026d2d -->
+<!-- config-version: 2; checksum: 4cceb1817108ff94 -->
 ---
 name: verificar-jurisprudencia
-description: Skill atomico penal-victimas: revisar sentencias, radicados, fechas y organos judiciales. Use when the workflow requires `verificar_jurisprudencia`.
+description: Contrato penal-víctimas: Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento. Activar cuando el plan/HITL o el especialista requiera `verificar_jurisprudencia`. No sustituye a `verificar_citas_normativas`.
 disable-model-invocation: true
 ---
 
@@ -54,10 +54,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `verificar
 - `rag_jurisprudencia_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `citation_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar sentencias ni extractos.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar sentencias ni extractos.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No citas normativas (`verificar_citas_normativas`).

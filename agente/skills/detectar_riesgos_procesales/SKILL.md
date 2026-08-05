@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: d5fc1c16640cead4 -->
+<!-- config-version: 2; checksum: 4597bfc899bb4525 -->
 ---
 name: detectar-riesgos-procesales
-description: Skill estrategico penal-victimas: detectar riesgos de oportunidad, legitimacion, competencia, improcedencia o perdida de derechos. Use when the workflow requires `detectar_riesgos_procesales`.
+description: Contrato penal-víctimas: Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_procesales`. No sustituye a `evaluar_oportunidad_procesal`.
 disable-model-invocation: true
 ---
 
@@ -54,16 +54,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `case_state_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar vicios procesales sin actuación de soporte.
-- **g4:** Riesgos críticos requieren escalamiento al abogado titular.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar vicios procesales sin actuación de soporte.
+- **Revision humana obligatoria:** Riesgos críticos requieren escalamiento al abogado titular.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No evaluar una sola actuación (`evaluar_oportunidad_procesal`).
 - No atipicidad penal (`detectar_riesgos_atipicidad`).
-- No acción de tutela (fuera del producto).
 
 ## Riesgo si se omite
 Pérdida silenciosa de recursos o derechos de la víctima en el proceso.

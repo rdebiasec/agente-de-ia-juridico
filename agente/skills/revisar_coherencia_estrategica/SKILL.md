@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: db03ad8e97a9e7a8 -->
+<!-- config-version: 2; checksum: ab40b6337fca7493 -->
 ---
 name: revisar-coherencia-estrategica
-description: Skill estrategico penal-victimas: asegurar coherencia con teoria del caso aprobada. Use when the workflow requires `revisar_coherencia_estrategica`.
+description: Contrato penal-víctimas: Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivos aprobados de la víctima. Activar cuando el plan/HITL o el especialista requiera `revisar_coherencia_estrategica`. No sustituye a `clasificar_aprobacion_juridica`.
 disable-model-invocation: true
 ---
 
@@ -31,10 +31,9 @@ Skill primario del agente; primer filtro de coherencia estratégica.
 - Contradicciones detectadas y recomendación de ajuste o escalamiento.
 
 ## Steps
-1. Contrastar salida con teoría del caso y objetivos aprobados de la víctima.
-2. Detectar contradicciones internas o con actuaciones previas.
-3. Recomendar alineación o escalamiento estratégico.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Cruzar teoría del caso, ruta y prueba propuesta.
+2. Señalar inconsistencias estratégicas y riesgos.
+3. No dictaminar aprobación final ni solo cazar citas falsas.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `revisar_coherencia_estrategica`.
@@ -51,12 +50,17 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `revisar_c
 - `strategy_consistency_checker` — no implementada
 - `case_state_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g4:** No aprobar salida desalineada para uso externo.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** No aprobar salida desalineada para uso externo.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Complementar con `clasificar_aprobacion_juridica` antes de entrega final.
+
+## No duplicar
+- No clasificar aprobación final (`clasificar_aprobacion_juridica`).
+- No detectar solo alucinaciones (`detectar_alucinaciones_legales`).
+- No reescribir el memorial completo (`redactar_memorial_penal`).
 
 ## Riesgo si se omite
 Memoriales o rutas que contradicen la estrategia aprobada del caso.

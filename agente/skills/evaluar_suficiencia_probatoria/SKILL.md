@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: eb7b485a65190d41 -->
+<!-- config-version: 2; checksum: 7775a4dfa585a120 -->
 ---
 name: evaluar-suficiencia-probatoria
-description: Skill estrategico penal-victimas: evaluar preliminarmente fuerza de soporte probatorio. Use when the workflow requires `evaluar_suficiencia_probatoria`.
+description: Contrato penal-víctimas: Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena. Activar cuando el plan/HITL o el especialista requiera `evaluar_suficiencia_probatoria`. No sustituye a `detectar_brechas_probatorias`.
 disable-model-invocation: true
 ---
 
@@ -58,13 +58,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_s
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar pruebas ni testimonios.
-- **g3:** Suficiencia preliminar ≠ más allá de duda razonable demostrado.
-- **g5:** No usar lenguaje que culpe a la víctima por “falta de prueba”.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar pruebas ni testimonios.
+- **Separar hecho de inferencia:** Suficiencia preliminar ≠ más allá de duda razonable demostrado.
+- **No revictimizar:** No usar lenguaje que culpe a la víctima por “falta de prueba”.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No detectar brechas (`detectar_brechas_probatorias`).

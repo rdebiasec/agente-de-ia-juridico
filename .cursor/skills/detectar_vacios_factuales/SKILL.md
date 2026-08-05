@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 2bdff98055ebae51 -->
+<!-- config-version: 2; checksum: af27481a08853900 -->
 ---
 name: detectar-vacios-factuales
-description: Skill operativo penal-victimas: identificar lo que falta para comprender o probar el caso. Use when the workflow requires `detectar_vacios_factuales`.
+description: Contrato penal-víctimas: Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero. Activar cuando el plan/HITL o el especialista requiera `detectar_vacios_factuales`. No sustituye a `gestionar_faltantes_exp...
 disable-model-invocation: true
 ---
 
@@ -18,12 +18,11 @@ disable-model-invocation: true
 ## Purpose
 Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `generar_preguntas_aclaracion`. Prioriza vacíos que afectan cronología y teoría factual.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
-
 
 ## Inputs
 - Relato disponible (víctima, abogado, documentos).
@@ -37,10 +36,10 @@ Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `
 - Agente sugerido para profundizar (cronología, tipicidad, evidencia).
 
 ## Steps
-1. Identificar información faltante para comprender el caso o sostener actuación.
-2. Priorizar vacíos por impacto en tipicidad, prueba o oportunidad procesal.
-3. Formular solicitud de datos al abogado o cliente.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Partir de hechos/cronología ya extraídos.
+2. Listar huecos críticos (fecha, lugar, actor, medio, daño) para la pretensión.
+3. Priorizar vacíos que bloquean tipicidad, prueba o actuación procesal.
+4. No rellenar con inferencias presentadas como hechos.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_vacios_factuales`.
@@ -57,13 +56,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `case_state_reader` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No suponer hechos para “cerrar” vacíos.
-- **g2:** Pedir aclaración antes de recomendar actuación que dependa del dato faltante.
-- **g3:** Vacíos son lagunas de información, no inferencias presentadas como hechos.
-- **g4:** Preguntas a víctima requieren revisión del abogado (riesgo revictimización).
-- **g5:** Formular preguntas abiertas; no insinuar culpa o incredibilidad.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No suponer hechos para “cerrar” vacíos.
+- **Pedir datos faltantes:** Pedir aclaración antes de recomendar actuación que dependa del dato faltante.
+- **Separar hecho de inferencia:** Vacíos son lagunas de información, no inferencias presentadas como hechos.
+- **Revision humana obligatoria:** Preguntas a víctima requieren revisión del abogado (riesgo revictimización).
+- **No revictimizar:** Formular preguntas abiertas; no insinuar culpa o incredibilidad.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - **vs `gestionar_faltantes_expediente`:** este skill cubre vacíos **narrativos o probatorios** (qué pasó, quién, cuándo); `gestionar_faltantes_expediente` cubre **documentos/datos mínimos** para iniciar análisis o redacción.

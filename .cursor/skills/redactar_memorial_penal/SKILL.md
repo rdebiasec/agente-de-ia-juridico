@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: b1bafa79284061e5 -->
+<!-- config-version: 2; checksum: 177588d90399a636 -->
 ---
 name: redactar-memorial-penal
-description: Skill critico penal-victimas: crear borrador de memorial penal para firma humana. Use when the workflow requires `redactar_memorial_penal`.
+description: Contrato penal-víctimas: Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones. Activar cuando el plan/HITL o el especialista requiera `redactar_memorial_penal`. No sustituye a `estructurar_hechos_fundamentos_solicitudes`.
 disable-model-invocation: true
 ---
 
@@ -33,12 +33,9 @@ Skill primario del agente; ejecutar antes de pasar a calidad jurídica.
 - Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 ## Steps
-1. Recopilar hechos soportados y pretensiones de la víctima.
-2. Verificar citas normativas aplicables al memorial.
-3. Revisar estructura hechos-fundamentos-peticiones según plantilla del despacho.
-4. Redactar memorial integrando hechos, fundamentos y peticiones.
-5. Marcar pendientes de verificación antes de firma humana.
-6. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Identificar destinatario, pretensión y hechos soportados del expediente.
+2. Estructurar hechos → fundamentos → peticiones sin inventar citas ni radicados.
+3. Insertar `[PENDIENTE DE VERIFICAR]` en cada dato no anclado.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_memorial_penal`.
@@ -57,15 +54,19 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `document_version_create` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar hechos, citas ni anexos.
-- **g3:** Hechos separados de argumentación y peticiones.
-- **g4:** HITL y firma humana obligatorias.
-- **g5:** Lenguaje respetuoso con la víctima.
-- **g8:** Aviso de borrador.
+## Guardrails
+- **No inventar:** No inventar hechos, citas ni anexos.
+- **Separar hecho de inferencia:** Hechos separados de argumentación y peticiones.
+- **Revision humana obligatoria:** HITL y firma humana obligatorias.
+- **No revictimizar:** Lenguaje respetuoso con la víctima.
+- **Aviso de borrador:** Aviso de borrador.
 
 ## Handoff
 - Pasar a `analista_calidad_juridica` (`clasificar_aprobacion_juridica`) antes de uso externo.
+
+## No duplicar
+- No solo estructurar secciones sin redactar (`estructurar_hechos_fundamentos_solicitudes`).
+- No derecho de petición (`redactar_derecho_peticion_penal`).
 
 ## Riesgo si se omite
 Memorial con hechos no soportados o improcedente en la etapa.

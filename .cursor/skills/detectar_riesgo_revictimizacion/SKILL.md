@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 32759252f6d53791 -->
+<!-- config-version: 2; checksum: a595263c93bfa277 -->
 ---
 name: detectar-riesgo-revictimizacion
-description: Skill atomico penal-victimas: identificar lenguaje, preguntas, acciones o estrategias que puedan revictimizar. Use when the workflow requires `detectar_riesgo_revictimizacion`.
+description: Contrato penal-víctimas: Alertar tempranamente sobre riesgo de revictimización en materiales o estrategia propuesta. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgo_revictimizacion`. No sustituye a `controlar_no_revictimizacion`.
 disable-model-invocation: true
 ---
 
@@ -35,10 +35,9 @@ Alerta antes de revisión profunda (`controlar_no_revictimizacion`).
 - `derivar_a`: `controlar_no_revictimizacion` si riesgo medio/alto.
 
 ## Steps
-1. Escanear lenguaje, preguntas y exposición de datos sensibles.
-2. Clasificar nivel de riesgo de revictimización.
-3. Recomendar revisión profunda o reformulación inmediata.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Identificar actos/lenguaje/prácticas que puedan revictimizar.
+2. Clasificar riesgo y proponer mitigaciones al Gerente.
+3. No culpabilizar a la víctima; proteger datos sensibles (/).
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_riesgo_revictimizacion`.
@@ -54,10 +53,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `revictimization_risk_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g5:** Priorizar dignidad y derechos de la víctima.
-- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No revictimizar:** Priorizar dignidad y derechos de la víctima.
+- **Revision humana obligatoria:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No revisión exhaustiva (`controlar_no_revictimizacion`).

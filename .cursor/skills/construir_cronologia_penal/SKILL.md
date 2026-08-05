@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 8f394133a2bae7a0 -->
+<!-- config-version: 2; checksum: 111430392bc5f502 -->
 ---
 name: construir-cronologia-penal
-description: Skill estrategico penal-victimas: ordenar hechos en linea de tiempo. Use when the workflow requires `construir_cronologia_penal`.
+description: Contrato penal-víctimas: Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos. Activar cuando el plan/HITL o el especialista requiera `construir_cronologia_penal`. No sustituye a `extraer_hechos_relevantes`.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Producto central del agente. Ejecutar tras `extraer_hechos_relevantes` y `crear_matriz_hecho_fuente`. Las contradicciones profundas van a `detectar_contradicciones_factuales`.
 
 ## Inputs
@@ -35,11 +35,10 @@ Producto central del agente. Ejecutar tras `extraer_hechos_relevantes` y `crear_
 - Tres bloques separados: hechos confirmados | narrados | inferidos.
 
 ## Steps
-1. Extraer hechos con fecha, hora y actores de fuentes verificadas.
-2. Ordenar línea de tiempo y señalar eventos sin fecha exacta.
-3. Marcar inconsistencias entre versiones.
-4. Validar coherencia temporal con matriz hecho-fuente y marcar huecos.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Ordenar hechos/eventos por fecha u orden relativo cuando falte fecha exacta.
+2. Etiquetar cada evento: confirmado | narrado | inferido | pendiente_verificar.
+3. Registrar actores y fuente por evento; no inventar fechas.
+4. Señalar huecos temporales evidentes sin rellenarlos; derivar vacíos a `detectar_vacios_factuales` si aplica.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `construir_cronologia_penal`.
@@ -57,14 +56,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `construir
 - `entity_extractor` — no implementada
 - `case_state_writer` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar fechas, horas ni eventos para completar la línea de tiempo.
-- **g2:** Sin fuentes con fecha, dejar evento en cola sin fecha; no inferir secuencia cerrada.
-- **g3:** Obligatorio: tres bloques (confirmado / narrado / inferido) en la salida final.
-- **g4:** Cronología para memorial o audiencia requiere revisión del abogado antes de uso externo.
-- **g5:** No ordenar relatos de víctima de forma que implique incredibilidad o culpa.
-- **g6:** Minimizar datos sensibles; referir a fuente documental cuando baste.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar fechas, horas ni eventos para completar la línea de tiempo.
+- **Pedir datos faltantes:** Sin fuentes con fecha, dejar evento en cola sin fecha; no inferir secuencia cerrada.
+- **Separar hecho de inferencia:** Obligatorio: tres bloques (confirmado / narrado / inferido) en la salida final.
+- **Revision humana obligatoria:** Cronología para memorial o audiencia requiere revisión del abogado antes de uso externo.
+- **No revictimizar:** No ordenar relatos de víctima de forma que implique incredibilidad o culpa.
+- **Confidencialidad:** Minimizar datos sensibles; referir a fuente documental cuando baste.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No extraer hechos crudos (`extraer_hechos_relevantes`).

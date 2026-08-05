@@ -22,54 +22,75 @@ def _resolve_skills_dir() -> Path:
 SKILLS_DIR = _resolve_skills_dir()
 LISTA = ROOT / "docs" / "canon" / "lista-aprobacion-agentes-skills-pasos.md"
 
+# Alias de portal (g*) → policy_id canónico. Enforcement: desk_policies + I/O/T + SDK.
 _FALLBACK_GUARDRAILS = [
     {
         "id": "g1",
+        "policy_id": "no_inventar",
+        "status": "deprecated",
         "name": "No inventar",
         "desc": "Si no hay fuente verificada, se marca como pendiente de verificar.",
     },
     {
         "id": "g2",
+        "policy_id": "pedir_faltantes",
+        "status": "deprecated",
         "name": "Pedir datos faltantes",
         "desc": "Si faltan hechos, etapa, radicado o plazos Ley 906, el sistema pregunta antes de concluir.",
     },
     {
         "id": "g3",
+        "policy_id": "hecho_vs_inferencia",
+        "status": "deprecated",
         "name": "Separar hecho de inferencia",
         "desc": "Distingue lo confirmado, lo narrado y lo inferido.",
     },
     {
         "id": "g4",
+        "policy_id": "hitl",
+        "status": "deprecated",
         "name": "Revision humana obligatoria",
         "desc": "Escritos, estrategia, memoriales y reportes a cliente requieren aprobacion.",
     },
     {
         "id": "g5",
+        "policy_id": "no_revictimizar",
+        "status": "deprecated",
         "name": "No revictimizar",
         "desc": "El lenguaje no culpa ni expone indebidamente a la victima.",
     },
     {
         "id": "g6",
+        "policy_id": "confidencialidad",
+        "status": "deprecated",
         "name": "Confidencialidad",
         "desc": "Detecta y controla datos sensibles innecesarios.",
     },
     {
         "id": "g7",
+        "policy_id": "fuera_de_alcance",
+        "status": "deprecated",
         "name": "Fuera de alcance",
         "desc": "Consultas no penales se declaran fuera de alcance penal-victimas.",
     },
     {
         "id": "g8",
+        "policy_id": "aviso_borrador",
+        "status": "deprecated",
         "name": "Aviso de borrador",
         "desc": "Toda respuesta termina con aviso de revision profesional.",
     },
     {
         "id": "g9",
+        "policy_id": "terminos_906",
+        "status": "deprecated",
         "name": "Oportunidad y terminos Ley 906",
         "desc": "No recomendar actuacion sin verificar plazos, notificaciones y etapa; extemporaneidad marcada pendiente hasta confirmacion del abogado.",
     },
     {
         "id": "g10",
+        "policy_id": "integridad_probatoria",
+        "status": "deprecated",
         "name": "Integridad probatoria",
         "desc": "No alterar ni suprimir evidencia; cadena de custodia y preservacion digital antes de descartar prueba en estrategia.",
     },
@@ -77,7 +98,7 @@ _FALLBACK_GUARDRAILS = [
 
 
 def _load_guardrails() -> list[dict]:
-    """Carga políticas desde config/guardrails/*.md (o DB vía config_store si disponible)."""
+    """Carga políticas (alias g* deprecados) desde config_store / stubs g*.md."""
     try:
         from src.config_store import load_guardrail_policies
 
@@ -94,17 +115,31 @@ def _load_guardrails() -> list[dict]:
         text = path.read_text(encoding="utf-8")
         name = path.stem
         gid = path.stem
+        policy_id = ""
+        status = "deprecated"
+        resumen = ""
         body_lines: list[str] = []
         for ln in text.splitlines():
+            low = ln.lower()
             if ln.startswith("# "):
                 name = ln[2:].strip() or name
-            elif ln.startswith("id:"):
+            elif low.startswith("id:"):
                 gid = ln.split(":", 1)[1].strip() or gid
-            elif ln.startswith("name:"):
+            elif low.startswith("name:"):
                 name = ln.split(":", 1)[1].strip() or name
+            elif low.startswith("policy_id:"):
+                policy_id = ln.split(":", 1)[1].strip()
+            elif low.startswith("status:"):
+                status = ln.split(":", 1)[1].strip() or status
+            elif low.startswith("resumen:"):
+                resumen = ln.split(":", 1)[1].strip()
             elif ln.strip():
                 body_lines.append(ln.strip())
-        items.append({"id": gid, "name": name, "desc": " ".join(body_lines).strip()})
+        desc = resumen or " ".join(body_lines).strip()
+        row = {"id": gid, "name": name, "desc": desc, "status": status}
+        if policy_id:
+            row["policy_id"] = policy_id
+        items.append(row)
     return items or list(_FALLBACK_GUARDRAILS)
 
 

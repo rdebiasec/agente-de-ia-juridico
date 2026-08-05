@@ -59,13 +59,3 @@ def crear_termino(
     )
 
 
-
-def termino_impugnacion_tutela(session_id: str, fecha_base: date | None = None) -> Deadline:
-    """Impugnación de tutela: 3 días hábiles desde la notificación."""
-    return crear_termino(
-        session_id=session_id,
-        descripcion="Impugnación de fallo de tutela (3 días hábiles)",
-        dias_habiles=3,
-        tipo="tutela_impugnacion",
-        fecha_base=fecha_base,
-    )

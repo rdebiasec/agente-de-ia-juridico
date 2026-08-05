@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 26ba0879bdd01268 -->
+<!-- config-version: 2; checksum: 0b2841aa091a644d -->
 ---
 name: alinear-estrategia-prueba-proceso
-description: Skill estrategico penal-victimas: alinear teoria de victima con ruta procesal y plan probatorio. Use when the workflow requires `alinear_estrategia_prueba_proceso`.
+description: Contrato penal-víctimas: Detectar desalineación entre teoría del caso, ruta Ley 906 y plan probatorio; proponer ajustes coordinados. Activar cuando el plan/HITL o el especialista requiera `alinear_estrategia_prueba_proceso`. No sustituye a `construir_teoria_caso_victima`.
 disable-model-invocation: true
 ---
 
@@ -59,11 +59,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `alinear_e
 - `case_state_reader` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g3:** Ajustes basados en hechos y etapa, no en deseos sin soporte probatorio.
-- **g4:** HITL obligatorio antes de cambiar teoría o ruta aprobada.
-- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Separar hecho de inferencia:** Ajustes basados en hechos y etapa, no en deseos sin soporte probatorio.
+- **Revision humana obligatoria:** HITL obligatorio antes de cambiar teoría o ruta aprobada.
+- **No revictimizar:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No construir teoría (`construir_teoria_caso_victima`).

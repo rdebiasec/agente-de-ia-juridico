@@ -1,7 +1,7 @@
-<!-- config-version: 5; checksum: 657e8e76e371ef3b -->
+<!-- config-version: 6; checksum: 1d785e286072cef0 -->
 ---
 name: clasificar-tarea-y-etapa
-description: Skill operativo penal-victimas: clasificar la solicitud del usuario interno y detectar la etapa aparente del caso. Use when the workflow requires `clasificar_tarea_y_etapa`.
+description: Contrato penal-víctimas: Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes. Activar cuando el plan/HITL o el especialista requiera `clasificar_tarea_y_etapa`....
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Triage del turno: tipo de tarea + etapa aparente + agente destino o faltantes.
 ## Purpose
 Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 Primer skill en cada consulta nueva. En runtime el contrato lo materializa `build_triage` (`src/agents/triage.py` → `TriageResult`); el LLM no re-clasifica si ya hay `[TRIAGE_SISTEMA]`.
 
 ## Inputs
@@ -43,10 +43,9 @@ Alineados a `TriageResult` (`src/agents/schemas.py`):
 - `motivos_urgencia`, `escalar_humano`, `accion_inmediata_urgencia`.
 
 ## Steps
-1. Analizar solicitud del usuario y objetivo del turno.
-2. Clasificar tipo de tarea y etapa procesal aparente del caso.
-3. Derivar al agente especialista correcto o pedir datos faltantes.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Clasificar tipo de tarea y etapa aparente con base en el mensaje.
+2. Alinear con triage de sistema; no contradecir `[TRIAGE_SISTEMA]`.
+3. No hacer análisis de fondo de tipicidad/cronología.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `clasificar_tarea_y_etapa`.
@@ -58,19 +57,18 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `clasifica
 - `gerencia_ledger` — triage/completitud en `src/agents/triage.py` + `src/agents/completeness.py`
 - `audit_trace` — spans del runner / pipeline
 
-## Guardrails (g1–g10)
-- **g1:** No inventar etapa, radicado ni actuaciones para justificar derivación.
-- **g2:** Sin radicado ni actuaciones mínimas, no concluir etapa; marcar `desconocida` y pedir datos.
-- **g3:** Etapa aparente es hipótesis de enrutamiento, no conclusión procesal definitiva.
-- **g4:** Derivación con implicación estratégica (memorial, audiencia, impulso) requiere revisión del abogado.
-- **g7:** Consultas no penales o ajenas a representación de víctimas en Colombia → declarar fuera de alcance y no derivar a redactor.
-- **g8:** Cerrar con aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar etapa, radicado ni actuaciones para justificar derivación.
+- **Pedir datos faltantes:** Sin radicado ni actuaciones mínimas, no concluir etapa; marcar `desconocida` y pedir datos.
+- **Separar hecho de inferencia:** Etapa aparente es hipótesis de enrutamiento, no conclusión procesal definitiva.
+- **Revision humana obligatoria:** Derivación con implicación estratégica (memorial, audiencia, impulso) requiere revisión del abogado.
+- **Fuera de alcance:** Consultas no penales o ajenas a representación de víctimas en Colombia → declarar fuera de alcance y no derivar a redactor.
+- **Aviso de borrador:** Cerrar con aviso de revisión profesional.
 
 ## Handoff
 - Análisis factual → `analista_cronologia_hechos` (`extraer_hechos_relevantes`).
 - Tipicidad / calificación → `analista_responsabilidad_tipicidad` (solo con hechos mínimos).
 - Ruta Ley 906 → `analista_ruta_procesal`.
-- Pedido de tutela / constitucional → `fuera_de_alcance` (producto sin vía tutela); ofrecer impulso/petición/seguimiento.
 - Urgencia detectada → contrato `detectar_urgencia_penal` / `assess_urgency` antes de derivar.
 
 ## No duplicar

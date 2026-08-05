@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 864aafd2468c51f1 -->
+<!-- config-version: 2; checksum: 1235b1bd44352ea9 -->
 ---
 name: extraer-hechos-relevantes
-description: Skill operativo penal-victimas: extraer hechos relevantes de documentos, relatos, audios o comunicaciones. Use when the workflow requires `extraer_hechos_relevantes`.
+description: Contrato penal-víctimas: Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias. Activar cuando el plan/HITL o el especialista requiera `extraer_hechos_relevantes`. No sustituye a `crear_matriz_hecho_fue...
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ disable-model-invocation: true
 ## Purpose
 Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Punto de entrada del agente tras triage del coordinador. Alimenta matriz hecho-fuente, actores y cronología.
 
 ## Inputs
@@ -34,10 +34,10 @@ Punto de entrada del agente tras triage del coordinador. Alimenta matriz hecho-f
 - Elementos no legibles o no procesables marcados `[PENDIENTE DE VERIFICAR]`.
 
 ## Steps
-1. Procesar documentos, relatos, audios o mensajes del expediente.
-2. Extraer hechos materiales con referencia de fuente.
-3. Filtrar opiniones e inferencias no soportadas.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Procesar documentos, relatos, audios o mensajes del expediente/turno.
+2. Extraer hechos materiales con referencia de fuente (no opiniones).
+3. Separar opiniones e inferencias en lista aparte.
+4. Marcar ilegible/no procesable como `[PENDIENTE DE VERIFICAR]`; no inventar lagunas.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `extraer_hechos_relevantes`.
@@ -56,14 +56,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `extraer_h
 - `transcribe_audio` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No completar lagunas del relato con hechos inventados.
-- **g2:** Audio/documento ilegible → pedir nueva copia o transcripción humana.
-- **g3:** Separar hecho material de opinión del declarante o de la IA.
-- **g5:** En relatos de víctima, extraer sin juicio de credibilidad.
-- **g6:** No reproducir datos sensibles innecesarios en la lista de hechos.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No completar lagunas del relato con hechos inventados.
+- **Pedir datos faltantes:** Audio/documento ilegible → pedir nueva copia o transcripción humana.
+- **Separar hecho de inferencia:** Separar hecho material de opinión del declarante o de la IA.
+- **No revictimizar:** En relatos de víctima, extraer sin juicio de credibilidad.
+- **Confidencialidad:** No reproducir datos sensibles innecesarios en la lista de hechos.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No clasificar nivel de soporte en profundidad (`crear_matriz_hecho_fuente`).

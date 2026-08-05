@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 832d683f212ba195 -->
+<!-- config-version: 2; checksum: 81029d074ff6580f -->
 ---
 name: seguimiento-documentos-radicados
-description: Skill atomico penal-victimas: controlar documentos enviados y respuestas pendientes. Use when the workflow requires `seguimiento_documentos_radicados`.
+description: Contrato penal-víctimas: Hacer seguimiento a documentos enviados o radicados y su estado de respuesta. Activar cuando el plan/HITL o el especialista requiera `seguimiento_documentos_radicados`. No sustituye a `monitorear_radicado`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.
 
-
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Seguimiento de peticiones y respuestas; alerta vencimientos y faltantes.
 ## Inputs
 - Lista de documentos radicados (fecha, destinatario, radicado interno).
@@ -50,11 +49,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `seguimien
 - `case_state_reader` — no implementada
 - `calendar_terms_calculator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar respuestas de autoridad.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar respuestas de autoridad.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
+
+## No duplicar
+- No solo estado del radicado (`monitorear_radicado`).
+- No inventario de evidencia física/digital (`inventariar_evidencia`).
 
 ## Riesgo si se omite
 Silencios administrativos no detectados y pérdida de términos útiles.

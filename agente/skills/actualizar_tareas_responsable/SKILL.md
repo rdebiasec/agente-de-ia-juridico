@@ -1,7 +1,7 @@
-<!-- config-version: 4; checksum: 61381da726794598 -->
+<!-- config-version: 5; checksum: 21da80ef276bc781 -->
 ---
 name: actualizar-tareas-responsable
-description: Skill atomico penal-victimas: mantener lista de tareas por agente o abogado. Use when the workflow requires `actualizar_tareas_responsable`.
+description: Contrato penal-víctimas: Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento. Activar cuando el plan/HITL o el especialista requiera `actualizar_tareas_responsable`. No sustituye ...
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Registra tareas del triage (faltantes, urgencias, derivaciones) con responsable 
 ## Purpose
 Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 Registrar o actualizar tareas surgidas del triage inicial (derivación, faltantes, urgencias). Runtime: `tareas_gerencia` en `completeness.py` (no CRUD LLM).
 
 ## Inputs
@@ -54,14 +54,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM de CRUD de
 - `gerencia_ledger` — `tareas_gerencia` en expediente (`completeness.py`: estados `pendiente`|`cerrada`)
 - `audit_trace` — spans de verificación/delegación
 
-## Guardrails (g1–g10)
-- **g1:** No inventar tareas, plazos ni actuaciones no reportadas en el expediente o el turno.
-- **g2:** Si falta responsable en tarea crítica, dejar `pendiente` y solicitar dato al abogado (no inventar cierre).
-- **g3:** Distinguir tarea confirmada de tarea sugerida por la IA (etiquetar sugeridas como preliminares).
-- **g4:** Cambios de plazo en actuaciones procesales requieren validación del abogado responsable.
-- **g6:** No incluir datos sensibles de la víctima en descripciones de tarea si no son necesarios.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Cerrar con aviso de que la asignación y plazos requieren revisión profesional.
+## Guardrails
+- **No inventar:** No inventar tareas, plazos ni actuaciones no reportadas en el expediente o el turno.
+- **Pedir datos faltantes:** Si falta responsable en tarea crítica, dejar `pendiente` y solicitar dato al abogado (no inventar cierre).
+- **Separar hecho de inferencia:** Distinguir tarea confirmada de tarea sugerida por la IA (etiquetar sugeridas como preliminares).
+- **Revision humana obligatoria:** Cambios de plazo en actuaciones procesales requieren validación del abogado responsable.
+- **Confidencialidad:** No incluir datos sensibles de la víctima en descripciones de tarea si no son necesarios.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Cerrar con aviso de que la asignación y plazos requieren revisión profesional.
 
 ## Handoff
 - Seguimiento continuo de radicado/términos → `analista_seguimiento_procesal`.

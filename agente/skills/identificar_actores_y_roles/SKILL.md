@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 12fe9374a1d5ea1a -->
+<!-- config-version: 2; checksum: b2aba86a8d0f2232 -->
 ---
 name: identificar-actores-y-roles
-description: Skill operativo penal-victimas: identificar victima, presunto responsable, testigos, autoridades, terceros y entidades. Use when the workflow requires `identificar_actores_y_roles`.
+description: Contrato penal-víctimas: Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar. Activar cuando el plan/HITL o el especialista requiera `identificar_actores_y_roles`. No sustituye a `analizar_autoria_y_participacion`.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Ejecutar en paralelo o justo después de `extraer_hechos_relevantes`. Alimenta cronología y detección de contradicciones.
 
 ## Inputs
@@ -53,13 +53,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 - `pii_detector` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar personas no mencionadas en fuentes.
-- **g3:** Rol preliminar ≠ calidad procesal acreditada (imputado solo si consta en actuación).
-- **g6:** Marcar y minimizar PII; no listar documentos de identidad completos.
-- **g5:** No etiquetar a la víctima con roles que impliquen culpa compartida.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar personas no mencionadas en fuentes.
+- **Separar hecho de inferencia:** Rol preliminar ≠ calidad procesal acreditada (imputado solo si consta en actuación).
+- **Confidencialidad:** Marcar y minimizar PII; no listar documentos de identidad completos.
+- **No revictimizar:** No etiquetar a la víctima con roles que impliquen culpa compartida.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No analizar autoría/participación penal (`analizar_autoria_y_participacion`).

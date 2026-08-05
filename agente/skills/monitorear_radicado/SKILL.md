@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: b4e632dd47253627 -->
+<!-- config-version: 2; checksum: 6478e8939e885d1a -->
 ---
 name: monitorear-radicado
-description: Skill atomico penal-victimas: consultar o registrar estado de radicado. Use when the workflow requires `monitorear_radicado`.
+description: Contrato penal-víctimas: Consultar o registrar estado del radicado con fuente y timestamp. Activar cuando el plan/HITL o el especialista requiera `monitorear_radicado`. No sustituye a `seguimiento_documentos_radicados`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Consultar o registrar estado del radicado con fuente y timestamp.
 
-
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Consulta puntual de estado; alimenta alertas y reportes de seguimiento.
 ## Inputs
 - Número de radicado (si consta).
@@ -30,8 +29,10 @@ Consulta puntual de estado; alimenta alertas y reportes de seguimiento.
 - Cambios respecto a consulta anterior (si aplica).
 
 ## Steps
-1. Consultar o registrar estado del radicado con fuente y timestamp de la consulta.
-2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Registrar o consultar estado del radicado con fuente y timestamp.
+2. Listar última actuación conocida sin inventar movimientos.
+3. Marcar inconsistencias de número/estado como pendientes.
+4. No sustituir seguimiento documental profundo ni alertas de términos.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `monitorear_radicado`.
@@ -48,14 +49,19 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `monitorea
 - `process_lookup_query` — no implementada
 - `audit_log_write` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar actuaciones ni estados.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar actuaciones ni estados.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Cambios relevantes → `registrar_actuacion_procesal`, `detectar_inactividad_procesal`.
+
+## No duplicar
+- No inventario documental profundo (`seguimiento_documentos_radicados`).
+- No análisis de inactividad estratégica (`detectar_inactividad_procesal`).
+- No alertas de términos (`generar_alertas_terminos_vencimientos`).
 
 ## Riesgo si se omite
 Desfase entre estado real del proceso y estrategia del despacho.

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: cad0b30b9447f121 -->
+<!-- config-version: 2; checksum: 8910b04454b85269 -->
 ---
 name: controlar-no-revictimizacion
-description: Skill critico penal-victimas: revisar que la salida no culpe ni exponga indebidamente a la victima. Use when the workflow requires `controlar_no_revictimizacion`.
+description: Contrato penal-víctimas: Detectar lenguaje, preguntas o estrategias que culpen, minimicen o expongan indebidamente a la víctima; proponer reformulaciones. Activar cuando el plan/HITL o el especialista requiera `controlar_no_revictimizacion`. No sustituye a `clasificar_aprobaci...
 disable-model-invocation: true
 ---
 
@@ -58,12 +58,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `revictimization_risk_checker` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar conductas de la víctima ni contexto no documentado.
-- **g5:** Prohibido sugerir que la víctima “provocó”, “consintió tácitamente” o “debió denunciar antes” sin prueba.
-- **g6:** No reproducir detalles gráficos innecesarios en reformulaciones.
-- **g4:** HITL obligatorio; no aprobar salida con hallazgos de severidad alta.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar conductas de la víctima ni contexto no documentado.
+- **No revictimizar:** Prohibido sugerir que la víctima “provocó”, “consintió tácitamente” o “debió denunciar antes” sin prueba.
+- **Confidencialidad:** No reproducir detalles gráficos innecesarios en reformulaciones.
+- **Revision humana obligatoria:** HITL obligatorio; no aprobar salida con hallazgos de severidad alta.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No clasificar aprobación final (`clasificar_aprobacion_juridica`).

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: a7210394ff5cd215 -->
+<!-- config-version: 2; checksum: 3742c1f32d922b22 -->
 ---
 name: detectar-agravantes-atenuantes
-description: Skill operativo penal-victimas: identificar circunstancias relevantes que puedan afectar gravedad juridica. Use when the workflow requires `detectar_agravantes_atenuantes`.
+description: Contrato penal-víctimas: Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar. Activar cuando el plan/HITL o el especialista requiera `detectar_agravantes_atenuantes`. No sustituye a `descomponer_elementos_tipo_penal`.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición del tipo y autoría. Relevante para gravedad de solicitudes de la víctima y expectativas de pena (sin prometer resultado).
 
 ## Inputs
@@ -51,12 +51,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `rag_codigo_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar circunstancias ni artículos.
-- **g3:** Circunstancia alegada sin hecho = pendiente, no acreditada.
-- **g4:** No prometer pena o resultado al cliente.
-- **g5:** No usar circunstancias que culpen a la víctima (ej. “provocación” sin soporte).
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar circunstancias ni artículos.
+- **Separar hecho de inferencia:** Circunstancia alegada sin hecho = pendiente, no acreditada.
+- **Revision humana obligatoria:** No prometer pena o resultado al cliente.
+- **No revictimizar:** No usar circunstancias que culpen a la víctima (ej. “provocación” sin soporte).
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No descomponer tipo base (`descomponer_elementos_tipo_penal`).

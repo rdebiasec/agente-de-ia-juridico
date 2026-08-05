@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 05afd581783a7e7b -->
+<!-- config-version: 2; checksum: 47cf61b8fbc6e234 -->
 ---
 name: controlar-audiencias
-description: Skill atomico penal-victimas: administrar fechas, horas, enlaces y preparacion de audiencias. Use when the workflow requires `controlar_audiencias`.
+description: Contrato penal-víctimas: Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención. Activar cuando el plan/HITL o el especialista requiera `controlar_audiencias`. No sustituye a `preparar_preguntas_audiencia`.
 disable-model-invocation: true
 ---
 
@@ -56,9 +56,9 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `calendar_event_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g4:** HITL obligatorio antes de audiencia.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL obligatorio antes de audiencia.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No redactar preguntas (`preparar_preguntas_audiencia`).

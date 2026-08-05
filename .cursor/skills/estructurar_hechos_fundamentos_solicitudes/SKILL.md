@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: a250d823c9f14b09 -->
+<!-- config-version: 2; checksum: 6dfbce8de435dae9 -->
 ---
 name: estructurar-hechos-fundamentos-solicitudes
-description: Skill atomico penal-victimas: ordenar cualquier documento juridico. Use when the workflow requires `estructurar_hechos_fundamentos_solicitudes`.
+description: Contrato penal-víctimas: Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito. Activar cuando el plan/HITL o el especialista requiera `estructurar_hechos_fundamentos_solicitudes`. No sustituye a `redactar_memorial_penal`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito.
 
-
-## Rol en redactor
+## Rol en redactor_documentos_juridicos
 Esquema previo a redacción de escritos; insumo del redactor, no pieza final.
 ## Inputs
 - Hechos soportados y pretensiones.
@@ -32,10 +31,9 @@ Esquema previo a redacción de escritos; insumo del redactor, no pieza final.
 - Etiqueta: `ESQUEMA — NO ES BORRADOR FINAL`.
 
 ## Steps
-1. Agrupar hechos verificados por tema o cronología.
-2. Vincular fundamentos normativos a cada bloque fáctico.
-3. Formular peticiones derivadas de cada fundamento.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Organizar esquema hechos → fundamentos → peticiones sin prosa final.
+2. Anclar cada bloque a fuente; marcar pendientes.
+3. No redactar el memorial completo (`redactar_memorial_penal`).
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `estructurar_hechos_fundamentos_solicitudes`.
@@ -52,10 +50,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `estructur
 - `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_normativo_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g3:** Esquema separa hecho de argumento.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Separar hecho de inferencia:** Esquema separa hecho de argumento.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No redactar memorial completo (`redactar_memorial_penal`).

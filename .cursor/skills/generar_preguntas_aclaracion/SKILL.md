@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 2a3c9fd70cffcad4 -->
+<!-- config-version: 2; checksum: 020d3e7a46b50d37 -->
 ---
 name: generar-preguntas-aclaracion
-description: Skill operativo penal-victimas: crear preguntas para victima, testigos o abogado humano sin inducir respuestas. Use when the workflow requires `generar_preguntas_aclaracion`.
+description: Contrato penal-víctimas: Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_aclaracion`. No sustituye a `generar_preguntas_tipicidad`.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Ejecutar tras `detectar_vacios_factuales` o `detectar_contradicciones_factuales`. Las preguntas requieren aprobación del abogado antes de enviarse a la víctima.
 
 ## Inputs
@@ -50,12 +50,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_p
 - `leer_normas_clave` — normas penales clave (plan/especialistas)
 - `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
-## Guardrails (g1–g10)
-- **g1:** No presuponer respuesta en la formulación de la pregunta.
-- **g4:** HITL obligatorio antes de contacto con víctima.
-- **g5:** Evitar preguntas sobre vestimenta, conducta previa o vida íntima salvo estricta pertinencia probatoria y aprobación del abogado.
-- **g6:** No incluir datos sensibles de terceros en las preguntas.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No presuponer respuesta en la formulación de la pregunta.
+- **Revision humana obligatoria:** HITL obligatorio antes de contacto con víctima.
+- **No revictimizar:** Evitar preguntas sobre vestimenta, conducta previa o vida íntima salvo estricta pertinencia probatoria y aprobación del abogado.
+- **Confidencialidad:** No incluir datos sensibles de terceros en las preguntas.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - **vs `generar_preguntas_tipicidad`:** aclaración = lagunas factuales; tipicidad = elementos del tipo penal.

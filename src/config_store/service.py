@@ -215,7 +215,10 @@ def save_version(
             f"Versión esperada {expected_version}, activa {current_version}."
         )
 
-    next_version = current_version + 1
+    # Si hay versiones huérfanas (activas atrás del max), no colisionar.
+    latest = repo.list_config_versions(kind, key, limit=1)
+    max_stored = latest[0].version if latest else 0
+    next_version = max(current_version, max_stored) + 1
     chk = checksum_content(body)
     row = ConfigVersion(
         kind=kind,
@@ -295,10 +298,40 @@ def load_prompt_text(key: str) -> str:
     return data["content"]
 
 
+# Alias de portal (g*) → política desk canónica. Enforcement real: I/O/T + SDK + HITL.
+_G_ALIAS_META: dict[str, dict[str, str]] = {
+    "g1": {"policy_id": "no_inventar", "iot_layer": "output", "status": "deprecated"},
+    "g2": {"policy_id": "pedir_faltantes", "iot_layer": "input", "status": "deprecated"},
+    "g3": {
+        "policy_id": "hecho_vs_inferencia",
+        "iot_layer": "output",
+        "status": "deprecated",
+    },
+    "g4": {"policy_id": "hitl", "iot_layer": "tools/HITL", "status": "deprecated"},
+    "g5": {"policy_id": "no_revictimizar", "iot_layer": "output", "status": "deprecated"},
+    "g6": {
+        "policy_id": "confidencialidad",
+        "iot_layer": "output+tools",
+        "status": "deprecated",
+    },
+    "g7": {"policy_id": "fuera_de_alcance", "iot_layer": "input", "status": "deprecated"},
+    "g8": {"policy_id": "aviso_borrador", "iot_layer": "output", "status": "deprecated"},
+    "g9": {"policy_id": "terminos_906", "iot_layer": "output", "status": "deprecated"},
+    "g10": {
+        "policy_id": "integridad_probatoria",
+        "iot_layer": "output+tools",
+        "status": "deprecated",
+    },
+}
+
+
 def load_guardrail_policies() -> list[dict[str, str]]:
-    """Lista de políticas de guardrail (id, name, desc) desde DB/archivos."""
+    """Lista de políticas (id alias g*, policy_id canónico, name, desc, status).
+
+    Fuente de enforcement: desk_policies + I/O/T por agente + SDK.
+    Los archivos/keys g* son stubs deprecados (alias de portal/progreso).
+    """
     items: list[dict[str, str]] = []
-    # Preferir keys activas en DB; si vacío, escanear archivos seed.
     actives = get_repository().list_config_active(kind=KIND_GUARDRAIL)
     keys = [a.key for a in actives] if actives else sorted(
         p.stem for p in guardrails_dir().glob("g*.md")
@@ -309,6 +342,27 @@ def load_guardrail_policies() -> list[dict[str, str]]:
         except ConfigNotFoundError:
             continue
         parsed = _parse_guardrail_markdown(data["content"], fallback_id=key)
+        # Preferir metadatos de stub en disco (status/policy_id) sobre DB legacy.
+        disk = guardrails_dir() / f"{key}.md"
+        if disk.is_file():
+            disk_parsed = _parse_guardrail_markdown(
+                _read_file_body(disk), fallback_id=key
+            )
+            for field in ("status", "policy_id", "iot_layer"):
+                if disk_parsed.get(field):
+                    parsed[field] = disk_parsed[field]
+            if disk_parsed.get("status") == "deprecated" and disk_parsed.get("desc"):
+                # Mantener desc corto del stub si DB aún tiene el texto largo legacy.
+                if len(disk_parsed["desc"]) < len(parsed.get("desc") or "") or "DEPRECATED" in (
+                    data["content"] or ""
+                ):
+                    if not disk_parsed["desc"].startswith("**DEPRECATED"):
+                        parsed["desc"] = disk_parsed["desc"]
+        alias = _G_ALIAS_META.get(parsed["id"]) or _G_ALIAS_META.get(key)
+        if alias:
+            parsed.setdefault("policy_id", alias["policy_id"])
+            parsed.setdefault("iot_layer", alias["iot_layer"])
+            parsed["status"] = alias["status"]
         items.append(parsed)
     items.sort(key=lambda g: int(re.sub(r"\D", "", g["id"]) or 0))
     return items
@@ -318,34 +372,86 @@ def _parse_guardrail_markdown(content: str, *, fallback_id: str) -> dict[str, st
     lines = [ln.rstrip() for ln in content.splitlines()]
     name = fallback_id
     gid = fallback_id
+    policy_id = ""
+    status = "active"
+    iot_layer = ""
     body_lines: list[str] = []
+    resumen = ""
     for ln in lines:
         if ln.startswith("# "):
             name = ln[2:].strip() or name
             continue
-        if ln.startswith("id:"):
+        low = ln.lower()
+        if low.startswith("id:"):
             gid = ln.split(":", 1)[1].strip() or gid
             continue
-        if ln.startswith("name:"):
+        if low.startswith("name:"):
             name = ln.split(":", 1)[1].strip() or name
+            continue
+        if low.startswith("status:"):
+            status = ln.split(":", 1)[1].strip() or status
+            continue
+        if low.startswith("policy_id:"):
+            policy_id = ln.split(":", 1)[1].strip()
+            continue
+        if low.startswith("iot_layer:"):
+            iot_layer = ln.split(":", 1)[1].strip()
+            continue
+        if low.startswith("resumen:"):
+            resumen = ln.split(":", 1)[1].strip()
             continue
         if ln.strip() == "":
             if body_lines:
                 body_lines.append("")
             continue
         body_lines.append(ln)
-    desc = "\n".join(body_lines).strip()
-    return {"id": gid, "name": name, "desc": desc}
+    desc = resumen or "\n".join(body_lines).strip()
+    # Preferir resumen corto; si el body es stub DEPRECATED, acotar.
+    if status == "deprecated" and resumen:
+        desc = resumen
+    elif status == "deprecated" and "DEPRECATED" in desc:
+        # Extraer última línea útil si no hay Resumen:
+        useful = [
+            ln for ln in body_lines
+            if ln.strip() and not ln.strip().startswith("**DEPRECATED")
+            and not ln.strip().startswith("- Política")
+            and not ln.strip().startswith("- Mapa:")
+            and not ln.strip().startswith("- Enforcement:")
+        ]
+        if useful:
+            desc = useful[-1].removeprefix("Resumen:").strip()
+    out: dict[str, str] = {"id": gid, "name": name, "desc": desc}
+    if policy_id:
+        out["policy_id"] = policy_id
+    if status:
+        out["status"] = status
+    if iot_layer:
+        out["iot_layer"] = iot_layer
+    return out
 
 
 def _agent_ids_from_prompts() -> list[str]:
     return sorted(p.stem for p in agent_prompts_dir().glob("*.md"))
 
 
+def _desk_policies_bundle() -> str:
+    """Texto canónico de políticas del despacho para seeds I/O/T."""
+    path = guardrails_dir() / "_shared" / "desk_policies.md"
+    if path.is_file():
+        return _read_file_body(path).strip()
+    return ""
+
+
 def _legacy_guardrail_bundle() -> str:
-    """Concatena G1–G10 como punto de partida para políticas input por agente."""
+    """Compat: preferir desk_policies; si falta, concatenar stubs g*."""
+    desk = _desk_policies_bundle()
+    if desk:
+        return desk
     parts: list[str] = []
-    for path in sorted(guardrails_dir().glob("g*.md"), key=lambda p: int(re.sub(r"\D", "", p.stem) or 0)):
+    for path in sorted(
+        guardrails_dir().glob("g*.md"),
+        key=lambda p: int(re.sub(r"\D", "", p.stem) or 0),
+    ):
         body = _read_file_body(path).strip()
         if body:
             parts.append(body)
@@ -355,14 +461,14 @@ def _legacy_guardrail_bundle() -> str:
 def default_agent_guardrail_content(agent_id: str, clase: str) -> str:
     """Plantilla seed para Input/Output/Tools por agente."""
     if clase == "input":
-        bundle = _legacy_guardrail_bundle()
+        bundle = _desk_policies_bundle() or _legacy_guardrail_bundle()
         header = (
             f"# Guardrails de entrada — {agent_id}\n\n"
             "Políticas aplicadas al input del agente. "
-            "Punto de partida: texto legacy G1–G10 (editable por agente).\n\n"
+            "Punto de partida: desk_policies + capas I/O/T (editable por agente).\n\n"
         )
         return f"{header}{bundle}" if bundle else (
-            f"{header}(Sin políticas G1–G10 en disco; complete esta sección.)\n"
+            f"{header}(Sin desk_policies en disco; complete esta sección.)\n"
         )
     if clase == "output":
         return (
@@ -515,28 +621,54 @@ def list_agent_guardrail_keys() -> list[str]:
     return sorted(keys)
 
 
+def retire_config_key(
+    kind: str,
+    key: str,
+    *,
+    purge_versions: bool = True,
+) -> dict[str, int | bool]:
+    """Retira una key del catálogo activo (y opcionalmente su historial).
+
+    Usar para agentes/skills/guardrails eliminados del filesystem (p. ej. tutela).
+    """
+    repo = get_repository()
+    removed_active = repo.delete_config_active(kind, key)
+    removed_versions = repo.delete_config_versions(kind, key) if purge_versions else 0
+    return {
+        "removed_active": bool(removed_active),
+        "removed_versions": int(removed_versions),
+    }
+
+
+def list_orphan_config_keys() -> list[tuple[str, str]]:
+    """Keys activas en DB sin archivo canónico en disco."""
+    orphans: list[tuple[str, str]] = []
+    for active in get_repository().list_config_active():
+        if not path_for(active.kind, active.key).is_file():
+            orphans.append((active.kind, active.key))
+    return sorted(set(orphans))
+
+
 def list_catalog_items() -> dict[str, list[dict[str, Any]]]:
-    """Inventario editable: prompts, guardrails, agent_guardrails y skills."""
+    """Inventario editable: prompts, guardrails, agent_guardrails y skills.
+
+    Solo keys con archivo canónico en disco (no resucita huérfanos de DB).
+    """
     repo = get_repository()
     actives = {(a.kind, a.key): a for a in repo.list_config_active()}
 
     prompt_keys = ["sistema"] + _agent_ids_from_prompts()
-    for kind_key, a in list(actives.items()):
-        if kind_key[0] == KIND_PROMPT and kind_key[1] not in prompt_keys:
-            prompt_keys.append(kind_key[1])
-
-    guard_keys = sorted(
-        {p.stem for p in guardrails_dir().glob("g*.md")}
-        | {k for (knd, k) in actives if knd == KIND_GUARDRAIL}
-    )
-    skill_keys = sorted(
-        {p.parent.name for p in skills_dir().glob("*/SKILL.md")}
-        | {k for (knd, k) in actives if knd == KIND_SKILL}
-    )
-    agent_guard_keys = sorted(
-        set(list_agent_guardrail_keys())
-        | {k for (knd, k) in actives if knd == KIND_AGENT_GUARDRAIL}
-    )
+    guard_keys = sorted(p.stem for p in guardrails_dir().glob("g*.md"))
+    skill_keys = sorted(p.parent.name for p in skills_dir().glob("*/SKILL.md"))
+    root = agent_guardrails_dir()
+    if root.is_dir():
+        agent_guard_keys = sorted(
+            agent_guardrail_key(path.parent.name, path.stem)
+            for path in root.glob("*/*.md")
+            if path.stem in AGENT_GUARDRAIL_CLASSES
+        )
+    else:
+        agent_guard_keys = sorted(list_agent_guardrail_keys())
 
     def _item(kind: str, key: str) -> dict[str, Any]:
         active = actives.get((kind, key))
@@ -572,11 +704,13 @@ __all__ = [
     "ensure_agent_guardrail_seeds",
     "get_active_content",
     "list_catalog_items",
+    "list_orphan_config_keys",
     "list_versions",
     "load_guardrail_policies",
     "load_prompt_text",
     "path_for",
     "restore_version",
+    "retire_config_key",
     "save_version",
     "seed_from_filesystem",
     "validate_config_store",

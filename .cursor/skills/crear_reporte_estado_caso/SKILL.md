@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: ef07b26b3a9f5e4e -->
+<!-- config-version: 2; checksum: 93311b2203e15680 -->
 ---
 name: crear-reporte-estado-caso
-description: Skill atomico penal-victimas: crear reporte interno periodico. Use when the workflow requires `crear_reporte_estado_caso`.
+description: Contrato penal-víctimas: Generar reporte interno del estado del caso para el despacho (no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_reporte_estado_caso`. No sustituye a `preparar_resumen_operativo_cliente`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Generar reporte interno del estado del caso para el despacho (no para cliente).
 
-
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Panorama operativo interno para el despacho; no sustituye memorial ni comunicación con cliente.
 ## Inputs
 - Radicado, actuaciones recientes, tareas pendientes.
@@ -50,11 +49,16 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_rep
 - `case_state_reader` — no implementada
 - `audit_log_write` — no implementada
 
-## Guardrails (g1–g10)
-- **g6:** Reporte interno; no incluir datos innecesarios.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de compartir reporte con cliente o terceros; uso interno despacho con revisión.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Confidencialidad:** Reporte interno; no incluir datos innecesarios.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de compartir reporte con cliente o terceros; uso interno despacho con revisión.
+- **Aviso de borrador:** Aviso de revisión profesional.
+
+## No duplicar
+- No resumen operativo al cliente (`preparar_resumen_operativo_cliente`).
+- No resumen ejecutivo litigante (`crear_resumen_ejecutivo_litigante`).
+- No bitácora de una sola actuación (`registrar_actuacion_procesal`).
 
 ## Riesgo si se omite
 Despacho opera sin panorama actualizado del caso y pierde plazos.

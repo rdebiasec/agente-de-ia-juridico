@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 4577d9bd56357daa -->
+<!-- config-version: 2; checksum: cf73cc140f37bf4a -->
 ---
 name: crear-plan-recaudo-probatorio
-description: Skill estrategico penal-victimas: proponer plan para obtener pruebas faltantes. Use when the workflow requires `crear_plan_recaudo_probatorio`.
+description: Contrato penal-víctimas: Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal. Activar cuando el plan/HITL o el especialista requiera `crear_plan_recaudo_probatorio`. No sustituye a `inventariar_evidencia`.
 disable-model-invocation: true
 ---
 
@@ -36,11 +36,10 @@ Alinear recaudo con objetivos de la víctima y teoría del caso.
 - Etiqueta: `PLAN RECAUDO — EJECUCIÓN CON APROBACIÓN ABOGADO`.
 
 ## Steps
-1. Listar pruebas faltantes críticas según matriz hecho-prueba.
-2. Asignar responsable, plazo y vía de obtención (oficio, solicitud, peritaje).
-3. Ordenar por impacto procesal y urgencia.
-4. Señalar dependencias (ej. custodia antes de peritaje).
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Priorizar brechas materiales.
+2. Proponer diligencias/recaudos con responsable sugerido y urgencia.
+3. No alterar evidencia; preservar integridad.
+4. HITL antes de contactar terceros o radicar solicitudes.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `crear_plan_recaudo_probatorio`.
@@ -57,12 +56,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_pla
 - `task_manager_create` — no implementada
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar pruebas ya existentes en expediente.
-- **g4:** HITL antes de oficios o contacto con víctima para recaudo.
-- **g5:** Minimizar exposición de la víctima en vías de obtención innecesarias.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar pruebas ya existentes en expediente.
+- **Revision humana obligatoria:** HITL antes de oficios o contacto con víctima para recaudo.
+- **No revictimizar:** Minimizar exposición de la víctima en vías de obtención innecesarias.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No inventariar evidencia existente (`inventariar_evidencia`).

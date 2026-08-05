@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 3ce13461f89c0cbe -->
+<!-- config-version: 2; checksum: 6fd862e6389a4488 -->
 ---
 name: controlar-terminos-procesales-preliminares
-description: Skill operativo penal-victimas: identificar y alertar terminos relevantes. No reemplaza calculo humano. Use when the workflow requires `controlar_terminos_procesales_preliminares`.
+description: Contrato penal-víctimas: Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana. Activar cuando el plan/HITL o el especialista requiera `controlar_terminos_procesales_preliminares`. No sustituye a `generar_alertas_t...
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ Identificar términos procesales relevantes y estimar fechas límite, con advert
 ## Rol en analista_ruta_procesal
 Soporte a `evaluar_oportunidad_procesal` y recursos. **No sustituye** el cálculo del abogado.
 
-## Rol en gestor_seguimiento
+## Rol en analista_seguimiento_procesal
 Monitoreo operativo continuo de vencimientos.
 
 ## Inputs
@@ -57,12 +57,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `calendar_event_create` — no implementada
 - `audit_log_write` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar fechas de notificación.
-- **g2:** Sin fecha base, no cerrar fecha límite; marcar pendiente.
-- **g4:** Nunca radicar recurso solo por alerta IA.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de verificación humana obligatoria en cada salida.
+## Guardrails
+- **No inventar:** No inventar fechas de notificación.
+- **Pedir datos faltantes:** Sin fecha base, no cerrar fecha límite; marcar pendiente.
+- **Revision humana obligatoria:** Nunca radicar recurso solo por alerta IA.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de verificación humana obligatoria en cada salida.
 
 ## No duplicar
 - No alertas de calendario operativo (`generar_alertas_terminos_vencimientos` → gestor).

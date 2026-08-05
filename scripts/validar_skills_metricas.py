@@ -234,9 +234,17 @@ def collect_metrics(skills: dict[str, SkillData]) -> dict:
             c["with_rol"] += 1
         if sd.has_no_dup or sd.has_handoff:
             c["with_boundary"] += 1
-        if needs_g9(sd) and "g9" not in sd.text:
+        if needs_g9(sd) and not (
+            "g9" in sd.text
+            or "Oportunidad y terminos Ley 906" in sd.text
+            or "terminos_906" in sd.text
+        ):
             c["missing_g9"] += 1
-        if needs_g10(sd) and "g10" not in sd.text:
+        if needs_g10(sd) and not (
+            "g10" in sd.text
+            or "Integridad probatoria" in sd.text
+            or "integridad_probatoria" in sd.text
+        ):
             c["missing_g10"] += 1
     c["total"] = len(skills)
     for key in (
@@ -393,7 +401,17 @@ def expert_e5(sd: SkillData) -> ExpertResult:
         ("inputs", len(sd.inputs) > 25, ""),
         ("outputs", len(sd.outputs) > 25, ""),
         ("steps", len(sd.steps) >= 2, ""),
-        ("guardrails", "g9" in sd.text if g9_req else True, "Sin g9 plazos/etapa Ley 906"),
+        (
+            "guardrails",
+            (
+                ("g9" in sd.text)
+                or ("Oportunidad y terminos Ley 906" in sd.text)
+                or ("terminos_906" in sd.text)
+            )
+            if g9_req
+            else True,
+            "Sin política de plazos/etapa Ley 906",
+        ),
         ("boundaries", (not recurso) or sd.has_no_dup or "Rol en" in sd.text, "Sin frontera ruta/redactor"),
         ("risk", GENERIC_RISK not in sd.text, ""),
         ("business", gate_ok, msg),
@@ -418,13 +436,34 @@ def expert_e6(sd: SkillData) -> ExpertResult:
         comp_ok = "SOLO_TRAS_APROBACION" in sd.outputs or "SOLO_ABOGADO" in sd.outputs
         msg = "Resumen cliente sin control de aprobación"
     if "revictimiz" in sd.sid:
-        comp_ok = comp_ok and "g5" in sd.text
+        comp_ok = comp_ok and ("g5" in sd.text or "No revictimizar" in sd.text or "no_revictimizar" in sd.text)
     checks = [
         ("purpose", bool(sd.purpose), ""),
         ("inputs", len(sd.inputs) > 20, ""),
         ("outputs", len(sd.outputs) > 20, ""),
         ("steps", len(sd.steps) >= 2, ""),
-        ("guardrails", ("g5" in sd.text if sensitive else True) and ("g10" in sd.text if g10_req else True), "Skill sensible sin g5 o sin g10 custodia"),
+        (
+            "guardrails",
+            (
+                (
+                    ("g5" in sd.text)
+                    or ("No revictimizar" in sd.text)
+                    or ("no_revictimizar" in sd.text)
+                )
+                if sensitive
+                else True
+            )
+            and (
+                (
+                    ("g10" in sd.text)
+                    or ("Integridad probatoria" in sd.text)
+                    or ("integridad_probatoria" in sd.text)
+                )
+                if g10_req
+                else True
+            ),
+            "Skill sensible sin no_revictimizar o sin integridad_probatoria",
+        ),
         ("boundaries", True, ""),
         ("risk", GENERIC_RISK not in sd.text, ""),
         ("business", comp_ok if sensitive else True, msg),
@@ -486,7 +525,7 @@ def synthesize(sd: SkillData, results: list[ExpertResult]) -> dict:
     if sd.tier == "critico" and fail_experts:
         integrated = "RECHAZADO"
     elif e4_fail or e6_fail:
-        if sd.tier == "critico" or sd.sid in TUTELA_SKILLS | CLIENT_SKILLS:
+        if sd.tier == "critico" or sd.sid in CLIENT_SKILLS:
             integrated = "RECHAZADO"
         else:
             integrated = "APROBADO_CON_OBSERVACIONES"
@@ -541,8 +580,13 @@ def validate_chain(chain_name: str, sids: list[str], skills: dict[str, SkillData
             issues.append("resumen cliente: sin etiqueta de aprobación previa")
     if chain_name == "evidencia_digital":
         for s in sids:
-            if s in skills and "g10" not in skills[s].text:
-                issues.append(f"{s}: falta g10 custodia probatoria")
+            t = skills[s].text if s in skills else ""
+            if s in skills and not (
+                "g10" in t
+                or "Integridad probatoria" in t
+                or "integridad_probatoria" in t
+            ):
+                issues.append(f"{s}: falta política de integridad probatoria")
             if s in skills and skills[s].tier == "critico" and len(skills[s].inputs) < 30:
                 issues.append(f"{s}: inputs podrían ser más concretos (observación)")
     status = "OK" if not issues else "OBSERVACIONES" if len(issues) <= 1 else "FAIL"
@@ -620,7 +664,7 @@ def write_report(
         "Skills con Steps, Guardrails y sin plantillas genéricas I/O/riesgo.",
         "Lista canónica y matriz alineadas (CHECK OK).",
         "Multi-agente con No duplicar o Handoff en todos los skills compartidos.",
-        "10 reglas globales g1–g10 (plazos Ley 906 y custodia probatoria).",
+        "Políticas desk I/O/T + alias g* deprecados (plazos Ley 906 y custodia).",
     ]
 
     risks = [
@@ -665,7 +709,7 @@ def write_report(
         obs = "; ".join(ch["issues"]) if ch["issues"] else "Sin contradicciones"
         lines.append(f"| {ch['chain']} | {ch['status']} | {obs} |")
 
-    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela fuera del producto | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |", f"| Guardrails globales g1–g10 | {'OK' if len(GUARDRAILS) == 10 else 'FAIL'} |"])
+    lines.extend(["", "## Reglas de negocio", "", "| Regla | Estado |", "|-------|--------|", "| Tutela fuera del producto | OK |", "| Ruta 906 no redacta recursos | OK |", "| Preguntas víctima HITL | OK |", "| IA propone; abogado aprueba | OK |", f"| Políticas desk (alias g* deprecados) | {'OK' if len(GUARDRAILS) == 10 else 'FAIL'} |"])
 
     remediation = [
         ("crear_resumen_ejecutivo_litigante", "Añadido g4 HITL uso interno abogado."),

@@ -67,7 +67,7 @@ Abra con Cmd+Shift+R si no ve cambios.
 | POST | `/api/audit/config/save` | Guardar (lock optimista `expected_version`) |
 | POST | `/api/audit/config/{kind}/{key}/restore` | Restaurar versión |
 
-Kinds: `prompt`, `guardrail` (G1–G10 legacy en store), `skill`, `agent_guardrail` (keys `{agent_id}__{input|output|tools}`).
+Kinds: `prompt`, `guardrail` (alias g* deprecados → desk_policies), `skill`, `agent_guardrail` (keys `{agent_id}__{input|output|tools}`).
 
 ## Seed / migración
 
@@ -84,4 +84,4 @@ En Render el seed corre al arranque (lifespan) sin sobrescribir versiones ya act
 ## Alcance de guardrails
 
 - **Por agente:** políticas editables Input / Output / Tools (`agent_guardrail`). El enforcement en runtime del SDK queda como tarea aparte.
-- **Legacy G1–G10:** siguen versionados en el store (`kind=guardrail`); el portal ya no ofrece una vista plana de inventario. El código tripwire (`src/agents/sdk_guardrails.py`) permanece bajo control del desarrollador.
+- **Alias g* deprecados:** siguen versionados en el store (`kind=guardrail`) solo como claves de portal; enforcement real = I/O/T + SDK. El código tripwire (`src/agents/sdk_guardrails.py`) permanece bajo control del desarrollador.

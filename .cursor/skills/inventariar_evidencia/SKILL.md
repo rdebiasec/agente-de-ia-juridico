@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: c951250748dbf3b2 -->
+<!-- config-version: 2; checksum: 977c5c0f0110021b -->
 ---
 name: inventariar-evidencia
-description: Skill operativo penal-victimas: crear inventario numerado de evidencia del caso. Use when the workflow requires `inventariar_evidencia`.
+description: Contrato penal-víctimas: Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `inventariar_evidencia`. No sustituye a `clasificar_tipo_prueba`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar.
 
-
-## Rol en gestor_evidencia
+## Rol en analista_evidencia
 Base del inventario probatorio; antecede clasificación, matrices y brechas.
 ## Inputs
 - Documentos, audios, mensajes, objetos aportados o en expediente.
@@ -30,10 +29,10 @@ Base del inventario probatorio; antecede clasificación, matrices y brechas.
 - Elementos sin clasificar marcados `[PENDIENTE DE VERIFICAR]`.
 
 ## Steps
-1. Recopilar todos los elementos disponibles (documentos, audios, mensajes, objetos).
-2. Registrar metadatos, hash y ubicación de custodia preliminar.
-3. Emitir inventario numerado para el expediente.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Listar cada medio de prueba mencionado o allegado con identificador provisional.
+2. Anotar metadatos mínimos: tipo, fuente, fecha_si_consta, custodia_preliminar, legibilidad.
+3. Separar evidencia existente de la solo narrada; marcar narrada como pendiente de recaudo.
+4. Entregar inventario numerado; no clasificar tipología profunda ni matriz hecho-prueba aquí.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `inventariar_evidencia`.
@@ -51,15 +50,20 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `inventari
 - `metadata_extractor` — no implementada
 - `file_hash_generator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar elementos ni hashes.
-- **g6:** Minimizar exposición de datos sensibles en descripciones.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar elementos ni hashes.
+- **Confidencialidad:** Minimizar exposición de datos sensibles en descripciones.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Alimenta `clasificar_tipo_prueba`, `construir_matriz_hecho_prueba`, `preservar_evidencia_digital`.
+
+## No duplicar
+- No clasificar tipología probatoria en profundidad (`clasificar_tipo_prueba`).
+- No construir matriz hecho-prueba (`construir_matriz_hecho_prueba`).
+- No diseñar plan de recaudo (`crear_plan_recaudo_probatorio`).
 
 ## Riesgo si se omite
 Pérdida de trazabilidad probatoria y debilidad en audiencia.

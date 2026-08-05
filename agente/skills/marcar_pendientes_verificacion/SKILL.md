@@ -1,7 +1,7 @@
-<!-- config-version: 5; checksum: 522250085d3865bf -->
+<!-- config-version: 6; checksum: d2ee1341f240e3a1 -->
 ---
 name: marcar-pendientes-verificacion
-description: Skill atomico penal-victimas: marcar cualquier dato, cita o hecho incompleto como `[PENDIENTE DE VERIFICAR]`. Use when the workflow requires `marcar_pendientes_verificacion`.
+description: Contrato penal-víctimas: Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable. Activar cuando el plan/HITL o el especialista requiera `marcar_pendientes_verificacion`. No sustituye a `verificar...
 disable-model-invocation: true
 ---
 
@@ -21,7 +21,7 @@ Etiqueta todo dato no verificado antes de entregar la voz del despacho.
 ## Purpose
 Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 Control de calidad transversal antes de entregar cualquier salida del coordinador o de ensamblar respuestas de subagentes. Persistencia estructurada vía `record_specialist_result`.
 
 ## Inputs
@@ -36,8 +36,9 @@ Control de calidad transversal antes de entregar cualquier salida del coordinado
 - Conteo de pendientes y recomendación de no uso externo si hay impacto alto.
 
 ## Steps
-1. Recorrer salida e insertar `[PENDIENTE DE VERIFICAR]` en cada dato, cita o hecho sin fuente.
-2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Recorrer salida/borrador y listar afirmaciones sin soporte.
+2. Etiquetar con `[PENDIENTE DE VERIFICAR]` y dueño sugerido.
+3. No corregir el fondo jurídico ni aprobar calidad.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `marcar_pendientes_*`.
@@ -49,11 +50,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `marcar_pe
 - `audit_trace` — marcadores en síntesis del Gerente y post-validación
 - `record_specialist_result` — parsea `[PENDIENTE DE VERIFICAR]` / `[FALTANTE]` y persiste `pendiente_tipo` + `impacto_juridico` en `tareas_gerencia`
 
-## Guardrails (g1–g10)
-- **g1:** Implementación directa de g1 — todo sin fuente queda marcado, nunca inventado.
-- **g3:** No eliminar la distinción hecho/inferencia al marcar; solo etiquetar.
-- **g4:** Si impacto alto (etapa, memorial, término), bloquear uso externo hasta revisión humana.
-- **g8:** Incluir aviso estándar de revisión profesional al final.
+## Guardrails
+- **No inventar:** Implementación directa de g1 — todo sin fuente queda marcado, nunca inventado.
+- **Separar hecho de inferencia:** No eliminar la distinción hecho/inferencia al marcar; solo etiquetar.
+- **Revision humana obligatoria:** Si impacto alto (etapa, memorial, término), bloquear uso externo hasta revisión humana.
+- **Aviso de borrador:** Incluir aviso estándar de revisión profesional al final.
 
 ## Handoff
 - Impacto alto → retener en despacho / HITL antes de uso externo.

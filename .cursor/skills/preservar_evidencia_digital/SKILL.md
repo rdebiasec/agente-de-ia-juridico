@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 8aeeb5b91b6a041b -->
+<!-- config-version: 2; checksum: 2b1fafa45960467d -->
 ---
 name: preservar-evidencia-digital
-description: Skill critico penal-victimas: definir medidas para proteger evidencia digital sin alterarla. Use when the workflow requires `preservar_evidencia_digital`.
+description: Contrato penal-víctimas: Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `preservar_evidencia_digital`. No sustituye a `controlar_cadena_custodia_preliminar`.
 disable-model-invocation: true
 ---
 
@@ -59,15 +59,19 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preservar
 - `evidence_vault_store` — no implementada
 - `chain_of_custody_logger` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar hashes ni metadatos.
-- **g6:** Minimizar copias innecesarias de material sensible.
-- **g4:** HITL antes de compartir evidencia digital fuera del despacho.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar hashes ni metadatos.
+- **Confidencialidad:** Minimizar copias innecesarias de material sensible.
+- **Revision humana obligatoria:** HITL antes de compartir evidencia digital fuera del despacho.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - Tras preservar → `controlar_cadena_custodia_preliminar`, `inventariar_evidencia`.
+
+## No duplicar
+- No cadena de custodia física completa (`controlar_cadena_custodia_preliminar`).
+- No inventario general (`inventariar_evidencia`).
 
 ## Riesgo si se omite
 Pérdida o alteración de chats, videos o archivos que soportan la versión de la víctima.

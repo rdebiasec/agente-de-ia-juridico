@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: b2b037d073029466 -->
+<!-- config-version: 2; checksum: e71f8e4b9d22f63e -->
 ---
 name: verificar-hechos-soportados
-description: Skill operativo penal-victimas: revisar si cada afirmacion factual tiene fuente. Use when the workflow requires `verificar_hechos_soportados`.
+description: Contrato penal-víctimas: Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte. Activar cuando el plan/HITL o el especialista requiera `verificar_hechos_soportados`. No sustituye a `marcar_pendientes_verificacion`.
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ disable-model-invocation: true
 ## Purpose
 Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Último control antes de entregar cronología/matriz al despacho o derivar a tipicidad. Complementa `marcar_pendientes_verificacion` con cruce activo contra expediente.
 
 ## Inputs
@@ -54,11 +54,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `verificar
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `source_reference_validator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** Implementación operativa de g1 — sin fuente, no soportado.
-- **g3:** Distinguir “no encontrado en expediente” de “falso”.
-- **g4:** Bloquear uso en memorial si hay hechos no soportados de impacto alto.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** Implementación operativa de g1 — sin fuente, no soportado.
+- **Separar hecho de inferencia:** Distinguir “no encontrado en expediente” de “falso”.
+- **Revision humana obligatoria:** Bloquear uso en memorial si hay hechos no soportados de impacto alto.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No insertar marcadores en texto (`marcar_pendientes_verificacion`).

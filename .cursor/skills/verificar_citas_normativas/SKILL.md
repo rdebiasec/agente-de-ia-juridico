@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 0b578bd89e2be08f -->
+<!-- config-version: 2; checksum: 8ea5409c983d6dae -->
 ---
 name: verificar-citas-normativas
-description: Skill atomico penal-victimas: verificar que normas, articulos y leyes citadas existan en el RAG o esten marcadas pendientes. Use when the workflow requires `verificar_citas_normativas`.
+description: Contrato penal-víctimas: Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso. Activar cuando el plan/HITL o el especialista requiera `verificar_citas_normativas`. No sustituye a `detectar_alucinaciones_legales`.
 disable-model-invocation: true
 ---
 
@@ -54,10 +54,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `verificar
 - `citation_checker` — no implementada
 - `rag_normativo_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No afirmar vigencia sin verificar en RAG.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No afirmar vigencia sin verificar en RAG.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No detectar alucinaciones globales (`detectar_alucinaciones_legales`).

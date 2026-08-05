@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 8d4dc3d4f5bfb1b7 -->
+<!-- config-version: 2; checksum: d3ddf1a45f1e49a9 -->
 ---
 name: identificar-intereses-victima
-description: Skill atomico penal-victimas: aclarar el objetivo real de la victima. Use when the workflow requires `identificar_intereses_victima`.
+description: Contrato penal-víctimas: Identificar intereses y expectativas de la víctima en el proceso (reparación, verdad, seguridad, celeridad, etc.). Activar cuando el plan/HITL o el especialista requiera `identificar_intereses_victima`. No sustituye a `analizar_derechos_victima`.
 disable-model-invocation: true
 ---
 
@@ -18,8 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Identificar intereses y expectativas de la víctima en el proceso (reparación, verdad, seguridad, celeridad, etc.).
 
-
-## Rol en representacion_victima
+## Rol en analista_representacion_victimas
 Traduce hechos y contexto en objetivos de representación centrada en la víctima.
 ## Inputs
 - Relato o declaración de la víctima (si consta).
@@ -51,11 +50,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g2:** Sin input de la víctima, marcar pendiente; no inventar intereses.
-- **g5:** No presionar objetivos que revictimicen.
-- **g4:** HITL obligatorio.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Pedir datos faltantes:** Sin input de la víctima, marcar pendiente; no inventar intereses.
+- **No revictimizar:** No presionar objetivos que revictimicen.
+- **Revision humana obligatoria:** HITL obligatorio.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No derechos procesales (`analizar_derechos_victima`).

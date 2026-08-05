@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 0e90e23e6e9a4966 -->
+<!-- config-version: 2; checksum: 95b13cbacf799d43 -->
 ---
 name: preparar-guion-intervencion-oral
-description: Skill critico penal-victimas: estructurar intervencion oral clara y breve. Use when the workflow requires `preparar_guion_intervencion_oral`.
+description: Contrato penal-víctimas: Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones. Activar cuando el plan/HITL o el especialista requiera `preparar_guion_intervencion_oral`. No sustituye a `preparar_preguntas_audie...
 disable-model-invocation: true
 ---
 
@@ -34,14 +34,9 @@ Producto táctico para audiencia; requiere `identificar_objetivo_audiencia` y he
 - Etiqueta: `GUION PRELIMINAR — ENSAYAR CON ABOGADO ANTES DE AUDIENCIA`.
 
 ## Steps
-1. Definir objetivo jurídico y táctico de la intervención en audiencia.
-2. Ubicar etapa procesal y norma Ley 906 que habilita la intervención.
-3. Estructurar apertura breve con postura de la víctima.
-4. Desarrollar núcleo argumentativo solo con hechos soportados.
-5. Anticipar réplicas a defensa y Fiscalía en puntos críticos.
-6. Revisar lenguaje para evitar revictimización y filtración de estrategia.
-7. Cerrar con peticiones concretas alineadas al objetivo de audiencia.
-8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Ordenar puntos orales alineados a objetivos y hechos soportados.
+2. Incluir solicitudes y respuestas a objeciones previsibles.
+3. Marcar datos no verificados; no inventar jurisprudencia oral.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_guion_intervencion_oral`.
@@ -58,12 +53,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preparar_
 - `hearing_template_loader` — no implementada
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar hechos ni normas en el argumento oral.
-- **g3:** Distinguir hechos soportados de hipótesis tácticas.
-- **g4:** HITL obligatorio; no usar guion sin ensayo del abogado.
-- **g5:** Lenguaje respetuoso; no exponer detalles gráficos innecesarios.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar hechos ni normas en el argumento oral.
+- **Separar hecho de inferencia:** Distinguir hechos soportados de hipótesis tácticas.
+- **Revision humana obligatoria:** HITL obligatorio; no usar guion sin ensayo del abogado.
+- **No revictimizar:** Lenguaje respetuoso; no exponer detalles gráficos innecesarios.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No listar preguntas a testigos (`preparar_preguntas_audiencia`).

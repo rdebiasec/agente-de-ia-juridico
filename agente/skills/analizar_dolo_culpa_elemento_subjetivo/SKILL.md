@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 7e895146ea24012c -->
+<!-- config-version: 2; checksum: 5e47801a596861f6 -->
 ---
 name: analizar-dolo-culpa-elemento-subjetivo
-description: Skill operativo penal-victimas: identificar hechos que podrian soportar dolo, culpa u otro elemento subjetivo. Use when the workflow requires `analizar_dolo_culpa_elemento_subjetivo`.
+description: Contrato penal-víctimas: Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza. Activar cuando el plan/HITL o el especialista requiera `analizar_dolo_culpa_elemento_subjetivo`. No sustituye a `descomponer_elementos_tipo_...
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ disable-model-invocation: true
 ## Purpose
 Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición de elementos cuando el tipo exige dolo o culpa. Crítico en delitos que admiten modalidad culposa vs dolosa.
 
 ## Inputs
@@ -53,12 +53,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_jurisprudencia_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inferir dolo solo del resultado; exigir hechos de conocimiento/voluntad.
-- **g3:** Indicio ≠ prueba de dolo; etiquetar separadamente.
-- **g4:** Conclusión subjetiva nunca va a memorial sin abogado.
-- **g5:** En violencia sexual, no inferir consentimiento o dolo de la víctima.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inferir dolo solo del resultado; exigir hechos de conocimiento/voluntad.
+- **Separar hecho de inferencia:** Indicio ≠ prueba de dolo; etiquetar separadamente.
+- **Revision humana obligatoria:** Conclusión subjetiva nunca va a memorial sin abogado.
+- **No revictimizar:** En violencia sexual, no inferir consentimiento o dolo de la víctima.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No descomponer tipo (`descomponer_elementos_tipo_penal`).

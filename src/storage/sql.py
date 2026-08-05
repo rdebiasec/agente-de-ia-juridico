@@ -1251,6 +1251,29 @@ class SqlRepository:
                 updated_at=db_row.updated_at,
             )
 
+    def delete_config_active(self, kind: str, key: str) -> bool:
+        with self._session() as s:
+            row = s.get(ConfigActiveRow, {"kind": kind, "key": key})
+            if row is None:
+                return False
+            s.delete(row)
+            s.commit()
+            return True
+
+    def delete_config_versions(self, kind: str, key: str) -> int:
+        with self._session() as s:
+            rows = s.scalars(
+                select(ConfigVersionRow).where(
+                    ConfigVersionRow.kind == kind,
+                    ConfigVersionRow.key == key,
+                )
+            ).all()
+            n = len(rows)
+            for row in rows:
+                s.delete(row)
+            s.commit()
+            return n
+
     def list_config_active(self, *, kind: str | None = None) -> list[ConfigActive]:
         with self._session() as s:
             stmt = select(ConfigActiveRow)

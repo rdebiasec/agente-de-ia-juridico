@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 5a6e7413e5e37cf9 -->
+<!-- config-version: 2; checksum: 67695d5921456b46 -->
 ---
 name: evaluar-oportunidad-procesal
-description: Skill operativo penal-victimas: determinar si una solicitud o intervencion es oportuna, prematura o extemporanea. Use when the workflow requires `evaluar_oportunidad_procesal`.
+description: Contrato penal-víctimas: Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual. Activar cuando el plan/HITL o el especialista requiera `evaluar_oportunidad_procesal`. No sustituye a `controlar_terminos_procesales_prelimi...
 disable-model-invocation: true
 ---
 
@@ -35,13 +35,10 @@ Decisión clave antes de cualquier solicitud, recurso o intervención. Requiere 
 - Advertencia: cálculo de términos requiere verificación humana.
 
 ## Steps
-1. Ubicar la actuación propuesta en la etapa exacta del proceso penal.
-2. Verificar plazos y términos aplicables con advertencia de cálculo humano.
-3. Contrastar con actuaciones previas y estado del radicado.
-4. Determinar si es oportuna, prematura o extemporánea para la víctima.
-5. Evaluar consecuencias de actuar o no actuar en este momento.
-6. Sugerir fecha o actuación alternativa si no es oportuna.
-7. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Relacionar etapa Ley 906 con la actuación pretendida.
+2. Señalar ventanas, términos y riesgos de extemporaneidad con fuentes.
+3. Marcar plazos no verificados como pendientes.
+4. No sustituir alertas operativas (`generar_alertas_terminos_vencimientos`).
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_oportunidad_procesal`.
@@ -58,13 +55,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_o
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `calendar_terms_calculator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar plazos ni actuaciones previas.
-- **g2:** Sin fecha de notificación de acto a impugnar, dictamen extemporaneidad = pendiente.
-- **g3:** Oportunidad es dictamen preliminar, no certeza judicial.
-- **g4:** HITL obligatorio antes de interponer recurso o solicitud.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso: términos deben verificarse por abogado.
+## Guardrails
+- **No inventar:** No inventar plazos ni actuaciones previas.
+- **Pedir datos faltantes:** Sin fecha de notificación de acto a impugnar, dictamen extemporaneidad = pendiente.
+- **Separar hecho de inferencia:** Oportunidad es dictamen preliminar, no certeza judicial.
+- **Revision humana obligatoria:** HITL obligatorio antes de interponer recurso o solicitud.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso: términos deben verificarse por abogado.
 
 ## No duplicar
 - No calcular todos los términos (`controlar_terminos_procesales_preliminares`).

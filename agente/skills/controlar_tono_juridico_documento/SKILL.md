@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 471ec86373752fda -->
+<!-- config-version: 2; checksum: e6cbd7119a40fbff -->
 ---
 name: controlar-tono-juridico-documento
-description: Skill atomico penal-victimas: asegurar tono formal, preciso, no agresivo y no especulativo. Use when the workflow requires `controlar_tono_juridico_documento`.
+description: Contrato penal-víctimas: Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo. Activar cuando el plan/HITL o el especialista requiera `controlar_tono_juridico_documento`. No sustituye a `controlar_tono_riesgo_reputaci...
 disable-model-invocation: true
 ---
 
@@ -35,10 +35,9 @@ Control final de estilo en salidas externas.
 - Etiqueta: `CONTROL TONO JURÍDICO`.
 
 ## Steps
-1. Revisar registro formal y respeto institucional del escrito.
-2. Detectar lenguaje emocional, acusatorio o coloquial impropio.
-3. Proponer reformulaciones manteniendo el contenido jurídico.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Revisar tono: formal, preciso, respetuoso con la víctima.
+2. Señalar lenguaje revictimizante, coloquial o sobreprometedor.
+3. Proponer ajustes puntuales; no reescribir todo el memorial.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `controlar_tono_juridico_documento`.
@@ -51,10 +50,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `leer_normas_clave` — normas penales clave (plan/especialistas)
 - `listar_areas_derecho` — catálogo de áreas (plan/especialistas según necesidad; chat Gerente off)
 
-## Guardrails (g1–g10)
-- **g5:** Tono respetuoso con la víctima y las autoridades.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No revictimizar:** Tono respetuoso con la víctima y las autoridades.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No riesgo reputacional público (`controlar_tono_riesgo_reputacional`).

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: c200ebbc7ee52aef -->
+<!-- config-version: 2; checksum: 66650ef2b33ae757 -->
 ---
 name: controlar-cadena-custodia-preliminar
-description: Skill critico penal-victimas: alertar si la evidencia puede requerir cadena de custodia. Use when the workflow requires `controlar_cadena_custodia_preliminar`.
+description: Contrato penal-víctimas: Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad. Activar cuando el plan/HITL o el especialista requiera `controlar_cadena_custodia_preliminar`. No sustituye a `preservar_evidencia_digital`.
 disable-model-invocation: true
 ---
 
@@ -61,12 +61,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `chain_of_custody_logger` — no implementada
 - `metadata_extractor` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar custodios, fechas ni protocolos.
-- **g3:** Ruptura documentada ≠ conclusión de inadmisibilidad automática.
-- **g4:** HITL antes de descartar evidencia en estrategia.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar custodios, fechas ni protocolos.
+- **Separar hecho de inferencia:** Ruptura documentada ≠ conclusión de inadmisibilidad automática.
+- **Revision humana obligatoria:** HITL antes de descartar evidencia en estrategia.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No preservar digital (`preservar_evidencia_digital` — hash y copia).

@@ -542,8 +542,8 @@ _RAW: dict = {
     "pasos": [
       "Verificar existencia de petición previa, destinatario y objeto solicitado.",
       "Constatar plazo de respuesta y silencio administrativo si aplica.",
-      "Determinar si procede derecho de petición, tutela u otra vía según el caso.",
-      "Documentar requisitos faltantes para interponer nueva petición o tutela.",
+      "Determinar si procede derecho de petición o impulso procesal penal-víctimas.",
+      "Documentar requisitos faltantes para nueva petición o memorial de impulso.",
       "Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana."
     ],
     "reasoning": "Gerencia penal-víctimas: skill estratégico («Revisar si existe derecho de peticion incumplido.»). Cada paso replica una decisión que el despacho exige antes de usar la salida de la IA; no se fusionan etapas distintas ni se repiten flujos de otros skills.",

@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 2402135b57e58ee0 -->
+<!-- config-version: 2; checksum: 5c6e08fe73716fab -->
 ---
 name: redactar-derecho-peticion-penal
-description: Skill atomico penal-victimas: redactar derecho de peticion relacionado con autoridad o informacion del caso. Use when the workflow requires `redactar_derecho_peticion_penal`.
+description: Contrato penal-víctimas: Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia. Activar cuando el plan/HITL o el especialista requiera `redactar_derecho_peticion_penal`. No sustituye a `evaluar_derecho_petic...
 disable-model-invocation: true
 ---
 
@@ -52,9 +52,9 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - `rag_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g4:** HITL y firma humana antes de radicar.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Revision humana obligatoria:** HITL y firma humana antes de radicar.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No evaluar procedencia de petición (`evaluar_derecho_peticion` — evaluador).

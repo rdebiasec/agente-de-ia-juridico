@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     # Default / laborers + POC (Opción A batch Udemy).
     openai_model: str = "gpt-4.1-mini"
-    # Modelo mas capaz para redaccion/tutela (alto riesgo). Vacio = usa openai_model.
+    # Modelo mas capaz para redaccion de alto riesgo. Vacio = usa openai_model.
     openai_model_high_risk: str = "gpt-4.1"
     # Respaldo operacional; vacío desactiva cambio de modelo en reintento.
     openai_model_fallback: str = ""

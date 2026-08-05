@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 275729d0f44a0be9 -->
+<!-- config-version: 2; checksum: 4cf60e492fd7031f -->
 ---
 name: analizar-derechos-victima
-description: Skill atomico penal-victimas: mapear derechos de victima aplicables al caso. Use when the workflow requires `analizar_derechos_victima`.
+description: Contrato penal-víctimas: Mapear derechos de la víctima en el proceso penal (participación, información, reparación, protección) y su vínculo con los hechos. Activar cuando el plan/HITL o el especialista requiera `analizar_derechos_victima`. No sustituye a `identificar_interese...
 disable-model-invocation: true
 ---
 
@@ -33,10 +33,9 @@ Insumo para teoría del caso y plan de actuación ordinaria Ley 906.
 - Etiqueta: `MAPEO DERECHOS VÍCTIMA — VÍA PENAL`.
 
 ## Steps
-1. Mapear derechos de participación, información, reparación y protección aplicables.
-2. Relacionar derechos con hechos y etapa del proceso.
-3. Priorizar derechos más vulnerados o urgentes.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Mapear derechos aplicables (participación, verdad, justicia, reparación, etc.) al caso.
+2. Anclar a hechos y etapa; marcar derechos sin soporte como pendientes.
+3. No convertir el análisis en memorial.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_derechos_victima`.
@@ -53,12 +52,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 - `rag_normas_victimas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_constitucional_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar vulneraciones ni normas.
-- **g3:** Derecho procesal de víctima se atiende en vía Ley 906 / petición / impulso.
-- **g5:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
-- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar vulneraciones ni normas.
+- **Separar hecho de inferencia:** Derecho procesal de víctima se atiende en vía Ley 906 / petición / impulso.
+- **No revictimizar:** Lenguaje respetuoso con la víctima; sin juicios de credibilidad ni exposición innecesaria.
+- **Revision humana obligatoria:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No intereses subjetivos (`identificar_intereses_victima`).

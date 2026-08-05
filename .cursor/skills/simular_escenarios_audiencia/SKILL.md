@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 90508181b21c5e11 -->
+<!-- config-version: 2; checksum: 627f0ba65ef2658c -->
 ---
 name: simular-escenarios-audiencia
-description: Skill estrategico penal-victimas: plantear escenarios probables y preparacion del abogado. Use when the workflow requires `simular_escenarios_audiencia`.
+description: Contrato penal-víctimas: Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado. Activar cuando el plan/HITL o el especialista requiera `simular_escenarios_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.
 disable-model-invocation: true
 ---
 
@@ -54,11 +54,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `simular_e
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No predecir decisiones del juez ni declaraciones de testigos no documentadas.
-- **g3:** Escenarios son hipótesis tácticas, no hechos.
-- **g4:** HITL; simulación para preparación del abogado, no para la víctima sin filtro.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No predecir decisiones del juez ni declaraciones de testigos no documentadas.
+- **Separar hecho de inferencia:** Escenarios son hipótesis tácticas, no hechos.
+- **Revision humana obligatoria:** HITL; simulación para preparación del abogado, no para la víctima sin filtro.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No guion literal (`preparar_guion_intervencion_oral`).

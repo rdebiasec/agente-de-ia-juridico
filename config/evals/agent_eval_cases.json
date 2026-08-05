@@ -1,23 +1,24 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
-    "config/guardrails/g1.md",
-    "config/guardrails/g2.md",
-    "config/guardrails/g4.md",
-    "config/guardrails/g7.md",
-    "config/guardrails/g8.md",
+    "config/guardrails/_shared/desk_policies.md",
+    "docs/canon/MAPA_POLITICAS_A_IOT.md",
+    "config/guardrails/agents/",
+    "docs/canon/PROMPT_REVISION_PROMPTS_Y_SKILLS.md",
+    "docs/canon/INFORME_AUDITORIA_PROMPTS_SKILLS.md",
     "agentic-architectures KB: Ch6, Ch7, Ch8, Ch10, Ch11, Ch12"
   ],
   "cases": [
     {
-      "id": "route-tutela-out-of-product",
+      "id": "route-other-team-scope",
       "category": "routing",
       "message": "Evalúe procedencia de tutela por vulneración de derecho fundamental en el proceso penal.",
       "expected_destination": "coordinador_caso",
       "expected_plan_required": false,
-      "notes": "Tutela fuera del producto: debe quedar en Coordinador del Caso."
+      "expected_out_of_scope": true,
+      "notes": "Materia de otro equipo Lexiatek: fuera de alcance de este asistente."
     },
     {
       "id": "route-memorial",
@@ -212,6 +213,28 @@
       "category": "instruction_budget",
       "agent_id": "analista_calidad_juridica",
       "max_chars": 12000
+    },
+    {
+      "id": "instruction-budget-evidencia",
+      "category": "instruction_budget",
+      "agent_id": "analista_evidencia",
+      "max_chars": 12000,
+      "notes": "Regresión: prompt evidencia debe existir completo (misión/formato) sin explotar tokens."
+    },
+    {
+      "id": "instruction-budget-redactor",
+      "category": "instruction_budget",
+      "agent_id": "redactor_documentos_juridicos",
+      "max_chars": 12000
+    },
+    {
+      "id": "route-other-team-no-redactor",
+      "category": "routing",
+      "message": "Prepáreme el borrador de tutela penal por vulneración de debido proceso.",
+      "expected_destination": "coordinador_caso",
+      "expected_plan_required": false,
+      "expected_out_of_scope": true,
+      "notes": "No enrutar a redactor: materia de otro equipo Lexiatek."
     },
     {
       "id": "tool-surface-tipicidad",

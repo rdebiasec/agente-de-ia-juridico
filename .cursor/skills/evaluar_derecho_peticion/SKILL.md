@@ -1,7 +1,8 @@
+<!-- config-version: 3; checksum: 664ccab649f3d2a3 -->
 <!-- config-version: 3; checksum: pending -->
 ---
 name: evaluar-derecho-peticion
-description: Skill estrategico penal-victimas: revisar si existe derecho de peticion incumplido. Use when the workflow requires `evaluar_derecho_peticion`.
+description: Contrato penal-víctimas: Verificar si hay petición previa incumplida y si procede un nuevo derecho de petición, impulso o seguimiento en vía penal. Activar cuando el plan/HITL o el especialista requiera `evaluar_derecho_peticion`. No sustituye a `redactar_derecho_peticion_penal`.
 disable-model-invocation: true
 ---
 
@@ -58,12 +59,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_d
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `calendar_terms_calculator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar peticiones ni fechas de radicación.
-- **g3:** Silencio administrativo solo si consta plazo y vencimiento.
-- **g4:** Redactor solo actúa con evaluación favorable a petición/impulso.
-- **g8:** Aviso de revisión profesional.
-- **g9:** No recomendar acción de tutela (fuera del producto).
+## Guardrails
+- **No inventar:** No inventar peticiones ni fechas de radicación.
+- **Separar hecho de inferencia:** Silencio administrativo solo si consta plazo y vencimiento.
+- **Revision humana obligatoria:** Redactor solo actúa con evaluación favorable a petición/impulso.
+- **Aviso de borrador:** Aviso de revisión profesional.
+- **Fuera de alcance:** No derivar a vías de otros equipos Lexiatek; limitar a petición/impulso penal-víctimas.
 
 ## No duplicar
 - No redactar petición (`redactar_derecho_peticion_penal` — redactor).

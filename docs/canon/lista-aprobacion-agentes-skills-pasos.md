@@ -105,13 +105,11 @@
 - `evaluar_derecho_peticion`
 - `evaluar_solicitud_fiscalia_juez`
 - `extraer_hechos_relevantes`
-- `preparar_borrador_tutela_preliminar`
 - `redactar_ampliacion_denuncia`
 - `redactar_derecho_peticion_penal`
 - `redactar_memorial_penal`
 - `redactar_recurso_o_intervencion_preliminar`
 - `redactar_solicitud_impulso_procesal`
-- `redactar_tutela_penal_preliminar`
 - `verificar_citas_normativas`
 - `verificar_hechos_soportados`
 
@@ -129,21 +127,6 @@
 - `registrar_actuacion_procesal`
 - `seguimiento_documentos_radicados`
 
-### `evaluador_derechos_fundamentales_tutela` (13 skills)
-- `analizar_derechos_victima`
-- `analizar_enfoque_diferencial`
-- `analizar_perjuicio_irremediable`
-- `crear_matriz_hecho_derecho_fundamental`
-- `detectar_riesgo_improcedencia_tutela`
-- `evaluar_derecho_peticion`
-- `evaluar_procedencia_tutela`
-- `identificar_derecho_fundamental_afectado`
-- `preparar_borrador_tutela_preliminar`
-- `recomendar_via_constitucional_o_alternativa`
-- `redactar_derecho_peticion_penal`
-- `redactar_tutela_penal_preliminar`
-- `revisar_mecanismos_ordinarios`
-
 ### `analista_calidad_juridica` (26 skills)
 - `alinear_estrategia_prueba_proceso`
 - `clasificar_aprobacion_juridica`
@@ -157,14 +140,12 @@
 - `detectar_alucinaciones_legales`
 - `detectar_brechas_probatorias`
 - `detectar_contradicciones_factuales`
-- `detectar_riesgo_improcedencia_tutela`
 - `detectar_riesgo_revictimizacion`
 - `detectar_riesgos_atipicidad`
 - `detectar_riesgos_audiencia`
 - `detectar_riesgos_procesales`
 - `detectar_urgencia_penal`
 - `evaluar_oportunidad_procesal`
-- `evaluar_procedencia_tutela`
 - `mapear_tipo_penal_hecho_prueba`
 - `preparar_resumen_operativo_cliente`
 - `revisar_coherencia_estrategica`
@@ -173,103 +154,6 @@
 - `verificar_jurisprudencia`
 
 ## 2) Lista por skill con instrucción tipo, pasos y herramientas
-
-### Skills constitucionales y tutela
-- `analizar_perjuicio_irremediable`
-  - Instrucción tipo: Identificar urgencia constitucional.
-  - Pasos:
-    1. Identificar el perjuicio alegado y su carácter actual o inminente.
-    2. Evaluar si el perjuicio es grave, de difícil reparación y requiere medida urgente.
-    3. Contrastar con mecanismos ordinarios y plazos procesales vigentes.
-    4. Documentar conclusión preliminar de perjuicio irremediable con grado de certeza.
-    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
-- `crear_matriz_hecho_derecho_fundamental`
-  - Instrucción tipo: Relacionar hechos con derechos afectados.
-  - Pasos:
-    1. Listar hechos verificables y narrados relevantes para la vulneración alegada.
-    2. Relacionar cada hecho con el derecho fundamental comprometido y la conducta omisiva/activa.
-    3. Señalar vacíos probatorios y norma constitucional de soporte preliminar.
-    4. Ordenar filas por relevancia para pretensiones de tutela.
-    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
-- `detectar_riesgo_improcedencia_tutela`
-  - Instrucción tipo: Detectar si tutela puede ser prematura, subsidiaria o improcedente.
-  - Pasos:
-    1. Inventariar vías ordinarias disponibles en la etapa penal actual.
-    2. Verificar si recursos o solicitudes Ley 906 están pendientes de agotar.
-    3. Detectar causales de improcedencia (subsidiariedad, cosa juzgada, incompetencia).
-    4. Evaluar si el daño es actual o remediabile por vía ordinaria.
-    5. Documentar probabilidad de rechazo y costo de tutela prematura.
-    6. Recomendar vía alternativa preferente si la tutela es improcedente.
-    7. Señalar plazo y actuación ordinaria recomendada antes de tutela.
-    8. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `analista_calidad_juridica`
-- `evaluar_derecho_peticion`
-  - Instrucción tipo: Revisar si existe derecho de peticion incumplido.
-  - Pasos:
-    1. Verificar existencia de petición previa, destinatario y objeto solicitado.
-    2. Constatar plazo de respuesta y silencio administrativo si aplica.
-    3. Determinar si procede derecho de petición, tutela u otra vía según el caso.
-    4. Documentar requisitos faltantes para interponer nueva petición o tutela.
-    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
-- `evaluar_procedencia_tutela`
-  - Instrucción tipo: Evaluar legitimacion, subsidiariedad, inmediatez y relevancia constitucional.
-  - Pasos:
-    1. Verificar legitimación por activa (titular del derecho y vínculo con el caso).
-    2. Verificar legitimación por pasiva (autoridad o sujeto llamado a responder).
-    3. Revisar agotamiento o pendencia de mecanismos ordinarios en el proceso penal.
-    4. Evaluar subsidiariedad: tutela como vía excepcional frente a recursos Ley 906.
-    5. Evaluar inmediatez del perjuicio y necesidad de medida urgente.
-    6. Evaluar conexidad constitucional y relevancia del derecho invocado.
-    7. Documentar requisitos faltantes y riesgo de improcedencia.
-    8. Emitir conclusión preliminar de procedencia con alternativas si no procede.
-    9. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `analista_calidad_juridica`
-- `identificar_derecho_fundamental_afectado`
-  - Instrucción tipo: Identificar posibles derechos fundamentales comprometidos.
-  - Pasos:
-    1. Mapear hechos del caso contra catálogo de derechos fundamentales aplicables.
-    2. Precisar titular del derecho y autoridad o sujeto vulnerador.
-    3. Priorizar derechos más directamente comprometidos para análisis posterior.
-    4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
-- `preparar_borrador_tutela_preliminar`
-  - Instrucción tipo: Preparar insumos para borrador de tutela.
-  - Pasos:
-    1. Consolidar hechos, derechos afectados y pretensiones con fuentes.
-    2. Verificar que el evaluador constitucional recomendó tutela preliminarmente.
-    3. Organizar insumos (hechos, fundamentos, pretensiones, anexos) para borrador.
-    4. Listar pendientes [PENDIENTE DE VERIFICAR] antes de pasar al redactor.
-    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`, `redactor_documentos_juridicos`
-- `recomendar_via_constitucional_o_alternativa`
-  - Instrucción tipo: Recomendar tutela, derecho de peticion, solicitud procesal, queja u otra ruta.
-  - Pasos:
-    1. Inventariar vías disponibles: tutela, petición, solicitud Ley 906, queja, etc.
-    2. Comparar oportunidad, celeridad y probabilidad de éxito de cada vía.
-    3. Recomendar ruta preferente con justificación y riesgos.
-    4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
-- `revisar_mecanismos_ordinarios`
-  - Instrucción tipo: Verificar si hay vias ordinarias antes de tutela.
-  - Pasos:
-    1. Identificar recursos y actuaciones ordinarias en el proceso penal vigente.
-    2. Verificar si están pendientes de interponer o ya agotados.
-    3. Determinar si la tutela es subsidiaria respecto de dichos mecanismos.
-    4. Señalar plazo y actuación ordinaria concreta pendiente antes de tutela.
-    5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `evaluador_derechos_fundamentales_tutela`
 
 ### Skills de audiencias
 - `crear_checklist_previo_audiencia`
@@ -646,7 +530,6 @@
     3. Incluir anexos y plazo de respuesta esperado.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 - `redactar_memorial_penal`
   - Instrucción tipo: Crear borrador de memorial penal.
   - Pasos:
@@ -676,21 +559,6 @@
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
   - Agentes que lo usan: `redactor_documentos_juridicos`
-- `redactar_tutela_penal_preliminar`
-  - Instrucción tipo: Crear borrador de tutela solo si el evaluador constitucional lo recomienda preliminarmente.
-  - Pasos:
-    1. Confirmar dictamen previo de procedencia tutela (no redactar si improcedente).
-    2. Consolidar hechos verificables separados de inferencias y pendientes.
-    3. Identificar derechos fundamentales vulnerados y autoridades accionadas.
-    4. Redactar fundamentos constitucionales con citas verificadas en RAG.
-    5. Formular pretensiones claras, medibles y proporcionales.
-    6. Listar pruebas y anexos; marcar faltantes como pendientes.
-    7. Revisar no revictimización en relato y peticiones.
-    8. Control de competencia, direccionamiento y tono profesional.
-    9. Entregar borrador numerado listo para revisión de firma (sin radicar).
-    10. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
-  - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `redactor_documentos_juridicos`, `evaluador_derechos_fundamentales_tutela`
 
 ### Skills de representacion de victimas
 - `alinear_estrategia_prueba_proceso`
@@ -711,7 +579,6 @@
     3. Priorizar derechos más vulnerados o urgentes.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_representacion_victimas`, `evaluador_derechos_fundamentales_tutela`
 - `analizar_enfoque_diferencial`
   - Instrucción tipo: Identificar sujetos de especial proteccion y necesidades diferenciadas.
   - Pasos:
@@ -720,7 +587,6 @@
     3. Evitar estereotipos y proteger datos sensibles.
     4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
   - Herramientas: `buscar_en_expediente, buscar_en_conocimiento, leer_area_derecho, leer_playbook_proceso, leer_normas_clave, listar_areas_derecho (plan/especialistas)`
-  - Agentes que lo usan: `analista_representacion_victimas`, `evaluador_derechos_fundamentales_tutela`
 - `construir_teoria_caso_victima`
   - Instrucción tipo: Formular teoria preliminar desde la victima.
   - Pasos:
@@ -1007,7 +873,7 @@
 ### Skills transversales
 - `clasificar_tarea_y_etapa`
   - Instrucción tipo: Clasificar la solicitud del usuario interno y detectar la etapa aparente del caso.
-  - Outputs (código `TriageResult`): `tipo_tarea` ∈ {redaccion, analisis_factual, tipicidad, ruta_906, representacion_victima, evidencia, audiencia, tutela_constitucional, seguimiento, fuera_de_alcance}; `etapa_aparente` ∈ {indagacion, investigacion, imputacion, juicio, ejecucion, desconocida, pendiente_verificar}; `urgencia_preliminar` bool + `nivel_urgencia` ∈ {critica, alta, media, baja}.
+  - Outputs (código `TriageResult`): `tipo_tarea` ∈ {redaccion, analisis_factual, tipicidad, ruta_906, representacion_victima, evidencia, audiencia, seguimiento, fuera_de_alcance}; `etapa_aparente` ∈ {indagacion, investigacion, imputacion, juicio, ejecucion, desconocida, pendiente_verificar}; `urgencia_preliminar` bool + `nivel_urgencia` ∈ {critica, alta, media, baja}.
   - Pasos:
     1. Analizar solicitud del usuario y objetivo del turno.
     2. Clasificar tipo de tarea y etapa procesal aparente del caso.

@@ -94,8 +94,8 @@ VALIDATION_BLOCKS: list[ValidationBlock] = [
         "must_not": "No evaluar solicitudes válidas de Fase 1 en este bloque.",
         "default_probes": [
             {
-                "label": "Tutela fuera de producto",
-                "message": "Redacte una tutela completa con accionante, accionado y pretensiones.",
+                "label": "Materia de otro equipo",
+                "message": "Redacte un escrito completo fuera de la línea penal-víctimas de este asistente.",
             },
             {
                 "label": "Seguimiento procesal avanzado",

@@ -1,7 +1,7 @@
-<!-- config-version: 5; checksum: 31661367324d50f7 -->
+<!-- config-version: 6; checksum: 86ff4383c4a2d193 -->
 ---
 name: detectar-urgencia-penal
-description: Skill estrategico penal-victimas: identificar si el caso requiere atencion humana inmediata. Use when the workflow requires `detectar_urgencia_penal`.
+description: Contrato penal-víctimas: Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria. Activar cuando el plan/HITL o el especialista requiera `detectar_urgencia_penal`. No sustituye a `generar_alertas_terminos...
 disable-model-invocation: true
 ---
 
@@ -23,7 +23,7 @@ Clasifica urgencia (critica/alta/media/baja) y si hay que escalar al humano ante
 ## Purpose
 Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 Contrato materializado por `assess_urgency` (`src/agents/urgency.py` → `UrgencyResult`) e integrado en `build_triage` / `[TRIAGE_SISTEMA]`. El LLM no re-clasifica el nivel.
 
 ## Inputs
@@ -42,11 +42,9 @@ Alineados a `UrgencyResult` / campos de `TriageResult`:
 - `evaluada_en`: unix timestamp.
 
 ## Steps
-1. Evaluar indicios de riesgo inminente (términos, libertad, integridad, evidencia).
-2. Clasificar nivel de urgencia y necesidad de atención humana inmediata.
-3. Escalar con notificación si aplica (span + mensaje pre-LLM; no bloquea consultas triviales).
-4. Documentar motivo de escalamiento (`metricas_gerencia["ultima_urgencia"]`).
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Evaluar indicios de urgencia (riesgo, términos, violencia, menor).
+2. Asignar nivel y si escala a humano; no bajar urgencia de sistema.
+3. No sustituir análisis de fondo.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_urgencia_*`.
@@ -59,13 +57,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `gerencia_ledger` — `metricas_gerencia["ultima_urgencia"]` vía `persist_verification`
 - `audit_trace` — span de escalamiento en runner cuando critica/alta (no trivial)
 
-## Guardrails (g1–g10)
-- **g1:** No inventar vencimientos ni amenazas no reportadas.
-- **g2:** Si falta fecha de audiencia o término crítico, marcar urgencia `[PENDIENTE DE VERIFICAR]` y pedir dato.
-- **g3:** Distinguir riesgo reportado de inferencia de la IA.
-- **g4:** Nivel critica/alta siempre requiere confirmación humana antes de actuar.
-- **g5:** En riesgo a integridad, no exponer datos sensibles de la víctima en la notificación de escalamiento.
-- **g8:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
+## Guardrails
+- **No inventar:** No inventar vencimientos ni amenazas no reportadas.
+- **Pedir datos faltantes:** Si falta fecha de audiencia o término crítico, marcar urgencia `[PENDIENTE DE VERIFICAR]` y pedir dato.
+- **Separar hecho de inferencia:** Distinguir riesgo reportado de inferencia de la IA.
+- **Revision humana obligatoria:** Nivel critica/alta siempre requiere confirmación humana antes de actuar.
+- **No revictimizar:** En riesgo a integridad, no exponer datos sensibles de la víctima en la notificación de escalamiento.
+- **Aviso de borrador:** Aviso de que la urgencia es preliminar y debe confirmar el abogado.
 
 ## Handoff
 - critica/alta → notificación humana +, si aplica, `analista_seguimiento_procesal` o especialista según motivo.
@@ -73,7 +71,6 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 
 ## No duplicar
 - No calcular todos los términos del caso (`generar_alertas_terminos_vencimientos`).
-- No proponer acción de tutela (fuera del producto).
 - No preservar evidencia digital (`preservar_evidencia_digital`).
 
 ## Best Practices

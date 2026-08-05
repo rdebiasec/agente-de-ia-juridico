@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: cf314adbe7ba9671 -->
+<!-- config-version: 2; checksum: 54475032dbc43c73 -->
 ---
 name: redactar-solicitud-impulso-procesal
-description: Skill atomico penal-victimas: crear borrador para solicitar impulso procesal o actuaciones. Use when the workflow requires `redactar_solicitud_impulso_procesal`.
+description: Contrato penal-víctimas: Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez. Activar cuando el plan/HITL o el especialista requiera `redactar_solicitud_impulso_procesal`. No sustituye a `detectar_inactividad_procesal`.
 disable-model-invocation: true
 ---
 
@@ -56,10 +56,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - `rag_plantillas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `case_state_reader` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar actuaciones ni fechas.
-- **g4:** HITL antes de radicar.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar actuaciones ni fechas.
+- **Revision humana obligatoria:** HITL antes de radicar.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No detectar inactividad (`detectar_inactividad_procesal` — seguimiento).

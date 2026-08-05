@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: b1cb2e30aa58b0d3 -->
+<!-- config-version: 2; checksum: 456fdeff7b3e24f8 -->
 ---
 name: detectar-riesgos-audiencia
-description: Skill atomico penal-victimas: detectar riesgos de intervencion, oportunidad, revelacion de estrategia o revictimizacion. Use when the workflow requires `detectar_riesgos_audiencia`.
+description: Contrato penal-víctimas: Identificar riesgos tácticos y procesales específicos de una audiencia programada. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_audiencia`. No sustituye a `simular_escenarios_audiencia`.
 disable-model-invocation: true
 ---
 
@@ -56,10 +56,10 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_ley906_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g3:** Riesgos son hipótesis, no predicciones certas.
-- **g4:** HITL obligatorio antes de usar en audiencia o comunicar a terceros.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **Separar hecho de inferencia:** Riesgos son hipótesis, no predicciones certas.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar en audiencia o comunicar a terceros.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No simular escenarios (`simular_escenarios_audiencia`).

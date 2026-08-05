@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 60ac8fb70bc57b36 -->
+<!-- config-version: 2; checksum: c4e4f63ae47432b2 -->
 ---
 name: mapear-tipo-penal-hecho-prueba
-description: Skill estrategico penal-victimas: relacionar elementos del tipo con hechos y pruebas. Use when the workflow requires `mapear_tipo_penal_hecho_prueba`.
+description: Contrato penal-víctimas: Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario. Activar cuando el plan/HITL o el especialista requiera `mapear_tipo_penal_hecho_prueba`. No sustituye a `construir_matriz_hecho_prue...
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ disable-model-invocation: true
 ## Purpose
 Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario.
 
-## Rol en analista_tipicidad
+## Rol en analista_responsabilidad_tipicidad
 Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/culpa. Alimenta plan probatorio (`crear_plan_recaudo_probatorio` → gestor evidencia).
 
 ## Inputs
@@ -34,11 +34,10 @@ Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/c
 - Etiqueta: `INSUMO ESTRATÉGICO — REVISIÓN ABOGADO`.
 
 ## Steps
-1. Relacionar cada elemento del tipo con hechos y pruebas.
-2. Visualizar fortalezas y debilidades por elemento.
-3. Proponer recaudo orientado a elementos débiles.
-4. Entregar matriz tabular por elemento del tipo con fortalezas y debilidades.
-5. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Tomar hipótesis tipica y elementos ya identificados.
+2. Mapear cada elemento a hecho(s) y medio(s) de prueba.
+3. Marcar celdas vacías como brecha; no inventar prueba.
+4. No sustituir inventario (`inventariar_evidencia`) ni matriz completa de evidencia.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_tipo_penal_hecho_prueba`.
@@ -55,11 +54,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_ti
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `rag_codigo_penal_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inventar pruebas ni elementos cubiertos artificialmente.
-- **g3:** Elemento “cubierto” requiere prueba identificada o hecho confirmado.
-- **g4:** HITL obligatorio antes de audiencia o memorial.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar pruebas ni elementos cubiertos artificialmente.
+- **Separar hecho de inferencia:** Elemento “cubierto” requiere prueba identificada o hecho confirmado.
+- **Revision humana obligatoria:** HITL obligatorio antes de audiencia o memorial.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - **vs `construir_matriz_hecho_prueba`:** esta matriz es por **elemento del tipo penal**; la otra es hecho→prueba genérica.

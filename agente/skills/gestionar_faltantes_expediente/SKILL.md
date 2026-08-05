@@ -1,7 +1,7 @@
-<!-- config-version: 5; checksum: d8f0366ad1ff7281 -->
+<!-- config-version: 6; checksum: 5a93b9db2ced861b -->
 ---
 name: gestionar-faltantes-expediente
-description: Skill operativo penal-victimas: identificar datos y documentos faltantes antes de analizar o redactar. Use when the workflow requires `gestionar_faltantes_expediente`.
+description: Contrato penal-víctimas: Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras. Activar cuando el plan/HITL o el especialista requiera `gestionar_faltantes_expediente`. No sus...
 disable-model-invocation: true
 ---
 
@@ -21,7 +21,7 @@ Gate documental del POC: lista faltantes bloqueantes/deseables y decide si puede
 ## Purpose
 Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 Gate de completitud documental exclusivo del coordinador. Runtime: `assess_completeness` → `CompletenessResult` (`src/agents/completeness.py`).
 
 ## Inputs
@@ -39,10 +39,9 @@ Gate de completitud documental exclusivo del coordinador. Runtime: `assess_compl
 - Mensaje al abogado con solicitud concreta (`format_missing_request`).
 
 ## Steps
-1. Inventariar datos y documentos mínimos para el análisis solicitado.
-2. Listar faltantes por prioridad (bloqueante vs deseable).
-3. Solicitar al abogado completar antes de concluir.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Listar faltantes críticos que bloquean el pedido.
+2. Priorizar preguntas concretas al abogado.
+3. No inventar datos para cerrar el gate.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `gestionar_faltantes_*` ni CRUD de faltantes.
@@ -57,13 +56,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `gestionar
 ### Tool omitida a propósito
 - `consultar_estado_gerencia` no se expone como function_tool: el estado ya llega en `[TRIAGE_SISTEMA]` / expediente / métricas; una tool de lectura sumaría superficie sin beneficio claro en el POC.
 
-## Guardrails (g1–g10)
-- **g1:** No afirmar que un documento existe si no está en expediente o adjuntos.
-- **g2:** Obligatorio pedir faltantes bloqueantes antes de derivar a redactor.
-- **g3:** Distinguir documento no aportado de documento mencionado pero no verificado.
-- **g4:** No autorizar redacción de memorial, petición o recurso con faltantes bloqueantes sin excepción aprobada por abogado.
-- **g6:** No listar datos sensibles innecesarios en la solicitud de completitud.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No afirmar que un documento existe si no está en expediente o adjuntos.
+- **Pedir datos faltantes:** Obligatorio pedir faltantes bloqueantes antes de derivar a redactor.
+- **Separar hecho de inferencia:** Distinguir documento no aportado de documento mencionado pero no verificado.
+- **Revision humana obligatoria:** No autorizar redacción de memorial, petición o recurso con faltantes bloqueantes sin excepción aprobada por abogado.
+- **Confidencialidad:** No listar datos sensibles innecesarios en la solicitud de completitud.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## Handoff
 - `puede_continuar=true` → tool del especialista según `tipo_tarea`.

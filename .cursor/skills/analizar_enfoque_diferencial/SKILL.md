@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: d18696736c9367df -->
+<!-- config-version: 2; checksum: c334170956e71217 -->
 ---
 name: analizar-enfoque-diferencial
-description: Skill atomico penal-victimas: identificar sujetos de especial proteccion y necesidades diferenciadas. Use when the workflow requires `analizar_enfoque_diferencial`.
+description: Contrato penal-víctimas: Identificar factores diferenciales relevantes (género, edad, discapacidad, etnia, etc.) que exijan enfoque especial en la representación. Activar cuando el plan/HITL o el especialista requiera `analizar_enfoque_diferencial`. No sustituye a `controlar_n...
 disable-model-invocation: true
 ---
 
@@ -55,12 +55,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_normas_victimas_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No inferir identidad o condición no documentada.
-- **g5:** No estigmatizar a la víctima al nombrar factores diferenciales.
-- **g6:** Minimizar datos sensibles innecesarios.
-- **g4:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inferir identidad o condición no documentada.
+- **No revictimizar:** No estigmatizar a la víctima al nombrar factores diferenciales.
+- **Confidencialidad:** Minimizar datos sensibles innecesarios.
+- **Revision humana obligatoria:** HITL obligatorio antes de incorporar hallazgos a escritos o comunicación externa.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No revisión detallada de revictimización (`controlar_no_revictimizacion`).

@@ -95,8 +95,8 @@ const VALIDATION_TESTS = [
       "El asistente ejecuta o desarrolla tareas de Fase 2/3.",
     defaultProbes: [
       {
-        label: "Tutela fuera de producto",
-        message: "Redacte una tutela completa con accionante, accionado y pretensiones.",
+        label: "Fuera de alcance (otro equipo)",
+        message: "Evalúe procedencia de una acción constitucional ajena a este asistente penal-víctimas.",
       },
       {
         label: "Seguimiento procesal",

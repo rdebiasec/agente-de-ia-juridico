@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: 29003e6eb063daa9 -->
+<!-- config-version: 2; checksum: e262fe9710a1a847 -->
 ---
 name: detectar-contradicciones-factuales
-description: Skill operativo penal-victimas: encontrar inconsistencias entre versiones, documentos, fechas, valores o actores. Use when the workflow requires `detectar_contradicciones_factuales`.
+description: Contrato penal-víctimas: Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad. Activar cuando el plan/HITL o el especialista requiera `detectar_contradicciones_factuales`. No sustituye a `co...
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 ## Purpose
 Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad.
 
-## Rol en analista_cronologia
+## Rol en analista_cronologia_hechos
 Ejecutar tras cronología o matriz hecho-fuente cuando hay múltiples fuentes. No sustituye preguntas de aclaración (`generar_preguntas_aclaracion`).
 
 ## Inputs
@@ -33,10 +33,10 @@ Ejecutar tras cronología o matriz hecho-fuente cuando hay múltiples fuentes. N
 - Nota: contradicción documentada ≠ hecho desmentido.
 
 ## Steps
-1. Comparar versiones de víctima, testigos, documentos y autoridades.
-2. Documentar contradicciones por hecho, fecha, monto o actor.
-3. Sugerir preguntas de aclaración no inductivas.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Comparar relatos/fuentes sobre el mismo evento (quién, qué, cuándo, dónde).
+2. Listar contradicciones con fragmentos enfrentados y fuentes.
+3. Clasificar severidad (menor|material) sin resolver el fondo del caso.
+4. No inventar versión conciliadora; pedir aclaración vía Gerente si aplica.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_contradicciones_factuales`.
@@ -53,12 +53,12 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 - `entity_extractor` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar versiones ni citar documentos no aportados.
-- **g3:** Contradicción es tensión entre fuentes, no conclusión de falsedad.
-- **g4:** No comunicar contradicciones a contraparte sin revisión del abogado.
-- **g5:** No formular contradicciones en lenguaje que culpe a la víctima (ej. “la víctima miente”).
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No inventar versiones ni citar documentos no aportados.
+- **Separar hecho de inferencia:** Contradicción es tensión entre fuentes, no conclusión de falsedad.
+- **Revision humana obligatoria:** No comunicar contradicciones a contraparte sin revisión del abogado.
+- **No revictimizar:** No formular contradicciones en lenguaje que culpe a la víctima (ej. “la víctima miente”).
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No señalar solo inconsistencias temporales en línea de tiempo (`construir_cronologia_penal` paso 3).

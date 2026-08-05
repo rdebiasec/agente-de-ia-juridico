@@ -34,7 +34,7 @@ _TEMPLATE_LABELS: dict[PlanTemplateKind, str] = {
     "generico": "Consulta general",
 }
 
-# Tutela fuera del producto: no plantilla constitucional.
+# Sin plantillas de materias de otros equipos Lexiatek.
 _VIF_RE = re.compile(
     r"\b(violencia\s+intrafamiliar|v\.?\s*i\.?\s*f\.?|inasistencia\s+alimentaria|"
     r"medidas?\s+de\s+protecci[oó]n|enfoque\s+diferencial|revictimizaci[oó]n)\b",

@@ -1209,10 +1209,10 @@
         { id: 'tools', title: 'Tools', label: 'Herramientas', hint: 'Tools que puede usar este skill.' },
         {
             id: 'guardrails',
-            title: 'Guardrails (g1–g10)',
+            title: 'Guardrails',
             label: 'Reglas y límites',
-            hint: 'Validaciones g1–g10 y restricciones que no puede romper.',
-            aliases: ['Guardrails (g1-g10)', 'Guardrails'],
+            hint: 'Políticas del despacho (desk I/O/T) y restricciones que no puede romper.',
+            aliases: ['Guardrails (g1-g10)', 'Guardrails (g1–g10)', 'Guardrails'],
         },
         { id: 'handoff', title: 'Handoff', label: 'Derivación (handoff)', hint: 'A dónde pasar según el resultado o el fallo.' },
         { id: 'no_duplicar', title: 'No duplicar', label: 'No duplicar', hint: 'Qué no debe hacer porque otro skill ya lo cubre.' },

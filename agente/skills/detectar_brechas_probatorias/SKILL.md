@@ -1,7 +1,7 @@
-<!-- config-version: 2; checksum: da796f4c5a8e9ddc -->
+<!-- config-version: 2; checksum: 8be68901fa47a411 -->
 ---
 name: detectar-brechas-probatorias
-description: Skill atomico penal-victimas: identificar hechos relevantes sin soporte suficiente. Use when the workflow requires `detectar_brechas_probatorias`.
+description: Contrato penal-víctimas: Identificar hechos relevantes sin prueba suficiente en el expediente. Activar cuando el plan/HITL o el especialista requiera `detectar_brechas_probatorias`. No sustituye a `crear_plan_recaudo_probatorio`.
 disable-model-invocation: true
 ---
 
@@ -35,10 +35,10 @@ Informa debilidades para teoría del caso.
 - Etiqueta: `BRECHAS PROBATORIAS PRELIMINARES`.
 
 ## Steps
-1. Contrastar hechos relevantes con prueba disponible en expediente.
-2. Clasificar brechas por impacto procesal.
-3. Priorizar recaudo urgente según etapa y audiencias próximas.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Partir del inventario/matriz disponible.
+2. Listar hechos esenciales sin medio de prueba suficiente.
+3. Priorizar brechas por impacto en pretensión de la víctima.
+4. No inventariar de nuevo ni redactar memorial.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_brechas_probatorias`.
@@ -54,11 +54,11 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `rag_expediente_search` — usar `buscar_en_conocimiento` / `buscar_en_expediente` mientras tanto
 
-## Guardrails (g1–g10)
-- **g1:** No asumir prueba existente sin constar en inventario.
-- **g9:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
-- **g4:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
-- **g8:** Aviso de revisión profesional.
+## Guardrails
+- **No inventar:** No asumir prueba existente sin constar en inventario.
+- **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
+- **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
+- **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
 - No plan de recaudo (`crear_plan_recaudo_probatorio`).

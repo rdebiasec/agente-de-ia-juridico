@@ -1,7 +1,7 @@
-<!-- config-version: 4; checksum: 3b54a26e87ebef1a -->
+<!-- config-version: 5; checksum: 98df36e5ba9caef1 -->
 ---
 name: clasificar-fuente-factual
-description: Skill estrategico penal-victimas: distinguir documento, relato de victima, relato de tercero, autoridad, inferencia o dato pendiente. Use when the workflow requires `clasificar_fuente_factual`.
+description: Contrato penal-víctimas: Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados. Activar cuando el plan/HITL o el especialista requiera `clasif...
 disable-model-invocation: true
 ---
 
@@ -18,9 +18,8 @@ disable-model-invocation: true
 ## Purpose
 Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados.
 
-## Rol en coordinador
+## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
-
 
 ## Inputs
 - Texto del turno: consulta del abogado, relato de víctima, extractos documentales.
@@ -54,14 +53,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `clasifica
 ### Planned capabilities (no implementadas — no invocar como tools)
 - `source_reference_validator` — no implementada
 
-## Guardrails (g1–g10)
-- **g1:** No inventar fuentes, folios ni documentos no aportados.
-- **g2:** Si no hay insumos factuales, pedir relato o documentos antes de clasificar.
-- **g3:** Obligatorio: separar confirmado, narrado, inferido y pendiente en columnas distintas.
-- **g4:** La matriz es insumo interno; no usar como memorial ni escrito externo sin revisión.
-- **g5:** Al clasificar relatos de víctima, no usar lenguaje que implique culpa o incredibilidad.
-- **g6:** Minimizar datos sensibles en la matriz; referir al documento fuente cuando baste.
-- **g8:** Cerrar con aviso de revisión profesional antes de usar en estrategia o redacción.
+## Guardrails
+- **No inventar:** No inventar fuentes, folios ni documentos no aportados.
+- **Pedir datos faltantes:** Si no hay insumos factuales, pedir relato o documentos antes de clasificar.
+- **Separar hecho de inferencia:** Obligatorio: separar confirmado, narrado, inferido y pendiente en columnas distintas.
+- **Revision humana obligatoria:** La matriz es insumo interno; no usar como memorial ni escrito externo sin revisión.
+- **No revictimizar:** Al clasificar relatos de víctima, no usar lenguaje que implique culpa o incredibilidad.
+- **Confidencialidad:** Minimizar datos sensibles en la matriz; referir al documento fuente cuando baste.
+- **Aviso de borrador:** Cerrar con aviso de revisión profesional antes de usar en estrategia o redacción.
 
 ## Handoff
 - Entregar matriz preliminar a `analista_cronologia_hechos` → `crear_matriz_hecho_fuente` (referencias exactas).
