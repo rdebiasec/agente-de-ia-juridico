@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Consulta penal LexiaTek — IA que orienta; un abogado revisa cada respuesta."
+      content="Consulta LexiaTek para víctimas en materia penal. La IA orienta; un abogado revisa cada respuesta."
     />
     <link rel="icon" href="/static/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,11 +25,16 @@
         <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
           <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="160" height="32" />
         </a>
-        <h1 id="cliente-start-title">Consulta penal</h1>
+        <h1 id="cliente-start-title">Consulta para víctimas</h1>
         <p class="cliente-start-lead">
-          Orientación con IA especializada en derecho penal. Un abogado del despacho revisa cada
-          respuesta antes de enviársela.
+          Cuéntenos su situación en materia penal. Un asistente de IA prepara la orientación y
+          <strong>un abogado del despacho la revisa</strong> antes de enviársela.
         </p>
+        <ul class="cliente-trust" aria-label="Cómo funciona">
+          <li>Solo representación de víctimas en Colombia</li>
+          <li>Usted escribe → el despacho revisa → usted recibe respuesta</li>
+          <li>No es línea de emergencias ni denuncia oficial</li>
+        </ul>
         <form class="cliente-start-form" id="cliente-start-form">
           <label class="cliente-field">
             <span>Nombre <abbr title="obligatorio">*</abbr></span>
@@ -69,26 +74,29 @@
             <input type="checkbox" id="cliente-consent-start" required />
             <span>
               Autorizo el tratamiento de mis datos de caso conforme a la Ley 1581
-              (<a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">aviso</a>).
+              (<a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">leer aviso</a>).
             </span>
           </label>
           <p class="cliente-start-error" id="cliente-start-error" hidden role="alert"></p>
           <button type="submit" class="cliente-cta" id="cliente-start-btn">Comenzar consulta</button>
         </form>
+        <p class="cliente-start-foot">
+          Si está en peligro inmediato, contacte a la policía (123) o a la línea 155.
+        </p>
       </div>
     </section>
 
-    <div class="cliente-shell" id="cliente-chat" hidden>
+    <div class="cliente-shell" id="cliente-chat" hidden aria-hidden="true">
       <header class="cliente-header">
         <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
           <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="140" height="28" />
         </a>
-        <p class="cliente-tagline">Coordinador del Caso · representación de víctimas</p>
+        <p class="cliente-tagline">Coordinador del Caso · víctimas</p>
         <p class="cliente-case" id="cliente-case-label" hidden></p>
       </header>
 
       <p class="cliente-status" id="cliente-status" aria-live="polite">
-        Escriba su mensaje. El despacho revisará la respuesta antes de enviársela.
+        Escriba su mensaje. La respuesta llegará cuando el abogado la apruebe.
       </p>
 
       <main class="cliente-main" id="cliente-messages" aria-live="polite"></main>
@@ -99,13 +107,13 @@
             id="cliente-input"
             rows="2"
             maxlength="4000"
-            placeholder="Cuéntenos su consulta…"
+            placeholder="Cuéntenos qué ocurrió o qué necesita…"
             required
           ></textarea>
           <button type="submit" id="cliente-send">Enviar</button>
         </div>
         <p class="cliente-hint">
-          Habla con el Coordinador del Caso. Toda respuesta pasa por el abogado del despacho.
+          Habla con el Coordinador del Caso. Mientras el despacho revisa, verá el estado arriba.
         </p>
       </form>
     </div>

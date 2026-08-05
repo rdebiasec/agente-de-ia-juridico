@@ -81,9 +81,9 @@ def _welcome_text(*, display_name: str) -> str:
     except Exception:
         pass
     return (
-        f"{greeting}, {name}. Soy el Coordinador del Caso de Lexiatek. "
-        "Puede contarme su situación con tranquilidad; un abogado del despacho "
-        "revisará cada respuesta antes de enviársela."
+        f"{greeting}, {name}. Soy el Coordinador del Caso de LexiaTek. "
+        "Puede contarme su situación con tranquilidad. Preparo una orientación "
+        "y un abogado del despacho la revisa antes de enviársela."
     )
 
 
@@ -399,11 +399,17 @@ def list_cliente_visible_messages(cliente_subject: str) -> dict:
     ]
     has_gerente = any(m.get("role") == "gerente" for m in msgs)
     if pending:
-        status, label = "en_revision", "En revisión del despacho"
+        status, label = (
+            "en_revision",
+            "En revisión del despacho. Le avisaremos aquí cuando haya respuesta.",
+        )
     elif has_gerente:
-        status, label = "respuesta_lista", "Respuesta del Coordinador disponible"
+        status, label = "respuesta_lista", "Hay una respuesta aprobada para usted."
     else:
-        status, label = "al_dia", "Listo para su mensaje"
+        status, label = (
+            "al_dia",
+            "Escriba su mensaje. La respuesta llegará cuando el abogado la apruebe.",
+        )
     meta = dict(thread.meta or {})
     return {
         "thread_id": thread.thread_id,

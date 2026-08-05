@@ -1,5 +1,7 @@
 # Guia de aprobacion juridica de la firma virtual penal-victimas
 
+> Actualizado 2026-08-04: **10 roles** (sin evaluador de tutela). Tutela fuera del producto. Pack diario: `docs/formacion/PACK_USO_DIARIO_ABOGADOS.md`.
+
 ## 1) Proposito del documento
 
 Este documento esta disenado para aprobacion de la abogada lider. Explica:
@@ -16,7 +18,8 @@ Este documento esta disenado para aprobacion de la abogada lider. Explica:
 
 - Jurisdiccion: Colombia.
 - Materia: penal con enfoque en representacion de victimas.
-- Cobertura operativa: intake factual, tipicidad preliminar, ruta procesal Ley 906, estrategia de victima, evidencia, audiencias, redaccion, seguimiento, tutela y control de calidad.
+- Cobertura operativa: intake factual, tipicidad preliminar, ruta procesal Ley 906, estrategia de victima, evidencia, audiencias, redaccion, seguimiento y control de calidad.
+- Fuera del producto: accion de tutela / via constitucional (usar impulso, derecho de peticion o seguimiento en via penal).
 
 ### Limites no negociables
 
@@ -42,7 +45,6 @@ flowchart TD
   hearings["analista_audiencias"]
   drafting["redactor_documentos_juridicos"]
   tracking["analista_seguimiento_procesal"]
-  tutela["evaluador_derechos_fundamentales_tutela"]
   quality["analista_calidad_juridica"]
   lawyer["abogada_responsable_HITL"]
 
@@ -54,7 +56,6 @@ flowchart TD
   coordinator --> hearings
   coordinator --> drafting
   coordinator --> tracking
-  coordinator --> tutela
 
   chronology --> quality
   typicity --> quality
@@ -64,17 +65,19 @@ flowchart TD
   hearings --> quality
   drafting --> quality
   tracking --> quality
-  tutela --> quality
 
   quality --> lawyer
 ```
 
 ### Lectura juridica de la arquitectura
 
+- **10 roles:** 1 Coordinador (voz unica al abogado) + 9 especialistas de backoffice.
 - `coordinador_caso` administra el triage legal-operativo y evita dispersion.
-- Los agentes especialistas producen trabajo modular por funcion juridica.
+- Los agentes especialistas producen trabajo modular por funcion juridica (`as_tool` interno; el chat no los expone como caras distintas).
+- Redaccion accionable solo via **plan aprobado** (HITL); no desde chat libre.
 - `analista_calidad_juridica` opera como puerta tecnica de control previo.
 - La decision final siempre recae en `abogada_responsable_HITL`.
+- Tutela / evaluador constitucional: **retirados del producto**.
 
 ## 4) Roles de agentes y skills que usa cada uno
 
@@ -86,18 +89,14 @@ flowchart TD
 
 **No reemplaza:** analisis de fondo por especialidad ni aprobacion final.
 
-**Skills:**
+**Skills (ownership POC — uso diario):**
 - `clasificar_tarea_y_etapa`
 - `detectar_urgencia_penal`
 - `gestionar_faltantes_expediente`
-- `identificar_etapa_procesal_ley906`
-- `priorizar_objetivos_representacion`
-- `recomendar_via_constitucional_o_alternativa`
-- `actualizar_tareas_responsable`
-- `detectar_vacios_factuales`
 - `marcar_pendientes_verificacion`
-- `clasificar_fuente_factual`
-- `crear_ruta_procesal_recomendada`
+- `actualizar_tareas_responsable`
+
+> Nota: ruta 906, vacios factuales y priorizacion de victima viven en los especialistas correspondientes (MOVE desde el POC).
 
 ### 4.2 `analista_cronologia_hechos`
 
@@ -232,7 +231,6 @@ flowchart TD
 - `redactar_ampliacion_denuncia`
 - `redactar_derecho_peticion_penal`
 - `redactar_recurso_o_intervencion_preliminar`
-- `redactar_tutela_penal_preliminar`
 - `estructurar_hechos_fundamentos_solicitudes`
 - `controlar_tono_juridico_documento`
 - `controlar_tono_riesgo_reputacional`
@@ -240,9 +238,10 @@ flowchart TD
 - `extraer_hechos_relevantes`
 - `evaluar_derecho_peticion`
 - `evaluar_solicitud_fiscalia_juez`
-- `preparar_borrador_tutela_preliminar`
 - `verificar_citas_normativas`
 - `verificar_hechos_soportados`
+
+> Fuera de producto: `redactar_tutela_penal_preliminar` / `preparar_borrador_tutela_preliminar` (no usar).
 
 ### 4.9 `analista_seguimiento_procesal`
 
@@ -264,28 +263,7 @@ flowchart TD
 - `crear_checklist_previo_audiencia`
 - `detectar_urgencia_penal`
 
-### 4.10 `evaluador_derechos_fundamentales_tutela`
-
-**Rol juridico:** filtro constitucional para definir procedencia de tutela y alternativas.
-
-**No reemplaza:** decision final de litigio constitucional.
-
-**Skills:**
-- `identificar_derecho_fundamental_afectado`
-- `evaluar_procedencia_tutela`
-- `analizar_perjuicio_irremediable`
-- `revisar_mecanismos_ordinarios`
-- `crear_matriz_hecho_derecho_fundamental`
-- `evaluar_derecho_peticion`
-- `preparar_borrador_tutela_preliminar`
-- `detectar_riesgo_improcedencia_tutela`
-- `recomendar_via_constitucional_o_alternativa`
-- `analizar_derechos_victima`
-- `analizar_enfoque_diferencial`
-- `redactar_derecho_peticion_penal`
-- `redactar_tutela_penal_preliminar`
-
-### 4.11 `analista_calidad_juridica`
+### 4.10 `analista_calidad_juridica`
 
 **Rol juridico:** control de calidad legal antes de salida externa.
 
@@ -309,15 +287,15 @@ flowchart TD
 - `detectar_riesgos_atipicidad`
 - `detectar_brechas_probatorias`
 - `detectar_contradicciones_factuales`
-- `detectar_riesgo_improcedencia_tutela`
 - `detectar_urgencia_penal`
 - `evaluar_oportunidad_procesal`
-- `evaluar_procedencia_tutela`
 - `mapear_tipo_penal_hecho_prueba`
 - `preparar_resumen_operativo_cliente`
 - `alinear_estrategia_prueba_proceso`
 - `crear_matriz_hecho_fuente`
 - `controlar_cadena_custodia_preliminar`
+
+> Fuera de producto: skills de procedencia/improcedencia de tutela (no listar en operacion diaria).
 
 ## 5) Flujos de conversacion con ejemplos juridicos
 
@@ -441,35 +419,35 @@ flowchart TD
 - fuentes verificadas,
 - pendientes de validacion marcados.
 
-## 5.5 Flujo E: evaluacion de tutela relacionada con proceso penal
+## 5.5 Flujo E: mora de peticion o inactividad (sin tutela)
 
-**Escenario:** posible vulneracion de derechos fundamentales por dilacion o falta de respuesta.
+**Escenario:** derecho de peticion sin respuesta oportuna, o inactividad del radicado penal.
 
 **Conversacion ejemplo (interna):**
 
-- **Abogada:** "Evalua si procede tutela por afectacion del debido proceso y acceso a justicia."
-- **Sistema:** "Analizo subsidiariedad, inmediatez, perjuicio irremediable y vias ordinarias activas."
-- **Abogada:** "Si el riesgo de improcedencia es alto, proponga alternativa."
-- **Sistema:** "Entrego concepto preliminar de procedencia y ruta recomendada (tutela o via alterna)."
+- **Abogada:** "No hay respuesta a la peticion; evalua impulso y seguimiento en via penal."
+- **Sistema:** "Confirmo radicado, fecha de peticion, autoridad y ultima actuacion; no abro ruta de tutela (fuera del producto)."
+- **Abogada:** "Priorice memorial de impulso y alertas de termino."
+- **Sistema:** "Entrego borrador de impulso + plan de seguimiento para su revision y firma."
 
 **Cadena de agentes y skills:**
 
-1. `evaluador_derechos_fundamentales_tutela`
-   - `identificar_derecho_fundamental_afectado`
-   - `evaluar_procedencia_tutela`
-   - `detectar_riesgo_improcedencia_tutela`
-   - `recomendar_via_constitucional_o_alternativa`
-2. `redactor_documentos_juridicos` (si procede)
-   - `redactar_tutela_penal_preliminar`
+1. `analista_seguimiento_procesal`
+   - `detectar_inactividad_procesal`
+   - `generar_alertas_terminos_vencimientos`
+2. `redactor_documentos_juridicos` (via plan HITL)
+   - `redactar_solicitud_impulso_procesal` o `redactar_derecho_peticion_penal`
+   - `estructurar_hechos_fundamentos_solicitudes`
 3. `analista_calidad_juridica`
    - `verificar_citas_normativas`
    - `clasificar_aprobacion_juridica`
 
 **Salida esperada para aprobacion:**
 
-- matriz de procedencia,
-- riesgos de improcedencia,
-- borrador preliminar (si aplica).
+- borrador de impulso o nueva peticion,
+- alertas de seguimiento,
+- pendientes de verificacion marcados.
+- (sin concepto ni borrador de tutela).
 
 ## 5.6 Flujo F: seguimiento semanal y comunicacion al cliente
 
@@ -505,7 +483,7 @@ La abogada conserva control en cinco decisiones criticas:
 
 1. **Aprobacion de estrategia** (no automatizable).
 2. **Aprobacion de toda salida externa** (cliente, autoridad, terceros).
-3. **Decision de litigio constitucional** en tutela (procedencia y riesgo).
+3. **Decision de via procesal en mora** (impulso / peticion / seguimiento; tutela fuera del producto).
 4. **Validacion de fuentes y radicados** antes de radicar o comunicar.
 5. **Ajuste final de tono, tesis y pretensiones** conforme a la teoria del caso del despacho.
 
@@ -517,14 +495,16 @@ La abogada conserva control en cinco decisiones criticas:
 | Analisis de tipicidad preliminar | Si | Si | Si |
 | Guion de audiencia | No | Si | Si |
 | Memorial/recurso/derecho de peticion | No | Si | Si (obligatorio) |
-| Tutela preliminar | No | Si | Si (obligatorio reforzado) |
+| Impulso por inactividad / mora | No | Si | Si (obligatorio) |
 | Reporte a cliente | No | Si | Si |
+
+> Tutela preliminar: **no aplica** (fuera del producto).
 
 ## 8) Checklist de aprobacion para la abogada lider
 
-- [ ] El alcance penal-victimas refleja la operacion real del despacho.
-- [ ] Los 11 roles agenticos representan funciones juridicas utiles y no redundantes.
-- [ ] Los skills por agente son suficientes para soportar trabajo diario.
+- [ ] El alcance penal-victimas refleja la operacion real del despacho (sin tutela).
+- [ ] Los **10** roles agenticos (1 Coordinador + 9 especialistas) representan funciones juridicas utiles y no redundantes.
+- [ ] Los skills por agente / pack de uso diario son suficientes para soportar trabajo diario.
 - [ ] La secuencia de flujos coincide con la practica procesal bajo Ley 906.
 - [ ] La gobernanza HITL preserva responsabilidad profesional y reserva.
 - [ ] El sistema no habilita salidas externas sin validacion juridica humana.

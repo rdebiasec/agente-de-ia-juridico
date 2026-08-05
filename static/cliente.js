@@ -83,16 +83,28 @@
   }
 
   function showChat() {
-    if (startEl) startEl.hidden = true;
-    if (chatEl) chatEl.hidden = false;
+    if (startEl) {
+      startEl.hidden = true;
+      startEl.setAttribute("aria-hidden", "true");
+    }
+    if (chatEl) {
+      chatEl.hidden = false;
+      chatEl.setAttribute("aria-hidden", "false");
+    }
     localStorage.setItem(STORAGE_STARTED, "1");
     document.querySelector(".skip-link")?.setAttribute("href", "#cliente-messages");
     ensurePoll();
   }
 
   function showStart() {
-    if (startEl) startEl.hidden = false;
-    if (chatEl) chatEl.hidden = true;
+    if (startEl) {
+      startEl.hidden = false;
+      startEl.setAttribute("aria-hidden", "false");
+    }
+    if (chatEl) {
+      chatEl.hidden = true;
+      chatEl.setAttribute("aria-hidden", "true");
+    }
     localStorage.removeItem(STORAGE_STARTED);
   }
 
@@ -139,12 +151,12 @@
     updateCaseLabel(data.client_display_name || data.subject_label || "");
     const label = data.status_label;
     if (data.status === "en_revision") {
-      setStatus(label || "Su mensaje está en revisión del despacho.", "review");
+      setStatus(label || "En revisión del despacho. Le avisaremos aquí cuando haya respuesta.", "review");
     } else if (data.status === "respuesta_lista") {
-      setStatus(label || "Hay respuesta del Coordinador del Caso para usted.", "ok");
+      setStatus(label || "Hay una respuesta aprobada para usted.", "ok");
     } else {
       setStatus(
-        label || "Escriba su mensaje. El despacho revisará la respuesta antes de enviársela.",
+        label || "Escriba su mensaje. La respuesta llegará cuando el abogado la apruebe.",
         "ok"
       );
     }
@@ -190,7 +202,7 @@
       }
       showChat();
       updateCaseLabel(data.client_display_name || nombre);
-      setStatus("Consulta iniciada. Puede escribir su mensaje.", "ok");
+      setStatus("Consulta iniciada. Cuéntenos su situación; el abogado revisará la respuesta.", "ok");
       await refreshMessages();
       inputEl?.focus();
     } catch (err) {
