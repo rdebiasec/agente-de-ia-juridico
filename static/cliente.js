@@ -151,12 +151,21 @@
     updateCaseLabel(data.client_display_name || data.subject_label || "");
     const label = data.status_label;
     if (data.status === "en_revision") {
-      setStatus(label || "En revisión del despacho. Le avisaremos aquí cuando haya respuesta.", "review");
+      setStatus(
+        label || "El despacho está preparando su orientación jurídica.",
+        "review"
+      );
+    } else if (data.status === "en_dialogo") {
+      setStatus(
+        label ||
+          "Sigamos la conversación abajo. El abogado valida la orientación jurídica en paralelo.",
+        "ok"
+      );
     } else if (data.status === "respuesta_lista") {
-      setStatus(label || "Hay una respuesta aprobada para usted.", "ok");
+      setStatus(label || "Puede seguir escribiendo; estoy aquí para ayudarle.", "ok");
     } else {
       setStatus(
-        label || "Escriba su mensaje. La respuesta llegará cuando el abogado la apruebe.",
+        label || "Cuéntenos su situación. Le responderé de inmediato para armar el caso.",
         "ok"
       );
     }
@@ -245,8 +254,10 @@
       const out = await sendMessage(text);
       inputEl.value = "";
       setStatus(
-        out.status_label || out.client_ack || "Mensaje recibido. En revisión del despacho.",
-        "review"
+        out.status_label ||
+          out.client_ack ||
+          "Le respondí abajo. Sigamos armando su caso.",
+        out.status === "en_dialogo" || out.status === "respuesta_lista" ? "ok" : "review"
       );
       await refreshMessages();
     } catch (err) {

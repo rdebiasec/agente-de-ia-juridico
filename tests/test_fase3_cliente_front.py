@@ -128,16 +128,25 @@ def test_start_consent_then_chat(repo, monkeypatch):
     )
     assert post.status_code == 200, post.text
     draft_id = post.json()["draft_id"]
-    assert post.json()["status"] == "en_revision"
+    assert post.json()["status"] == "en_dialogo"
+    assert post.json().get("intake_message_id")
 
     before = client.get(
         "/cliente/messages", params={"cliente_session_id": "fase3-victima"}
     )
-    roles = [m["role"] for m in before.json()["messages"]]
+    before_body = before.json()
+    roles = [m["role"] for m in before_body["messages"]]
     assert "cliente" in roles
-    assert all(m.get("visibility", "client_visible") == "client_visible" for m in before.json()["messages"])
+    gerente_before = [m for m in before_body["messages"] if m["role"] == "gerente"]
+    assert len(gerente_before) >= 2, "bienvenida + intake inmediato"
+    assert any(
+        "¿" in (m.get("content") or "") or "?" in (m.get("content") or "")
+        for m in gerente_before
+    ), "intake debe pedir información"
+    assert before_body.get("status") == "en_dialogo"
+    assert all(m.get("visibility", "client_visible") == "client_visible" for m in before_body["messages"])
     # Cliente nunca ve pending_hitl
-    assert "pending_hitl" not in str(before.json())
+    assert "pending_hitl" not in str(before_body)
 
     approve = client.post(
         f"/abogado/cliente-drafts/{draft_id}/approve",

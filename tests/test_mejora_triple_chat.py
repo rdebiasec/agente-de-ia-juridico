@@ -45,8 +45,9 @@ def test_contextual_draft_uses_expediente(repo):
         lawyer_session_id="web:abogada",
     )
     assert "indagación" in text.lower() or "radicado" in text.lower()
-    assert "Gerente" in text
+    assert "abogado" in text.lower() or "orientación" in text.lower()
     assert "no invent" in text.lower() or "expediente" in text.lower()
+    assert "intake" in text.lower()
 
 
 def test_quality_flags_harsh_tone():
@@ -58,7 +59,11 @@ def test_quality_flags_harsh_tone():
 
 
 def test_enqueue_builds_real_draft_with_quality(repo):
-    from src.services.triple_chat import enqueue_client_message, list_cliente_inbox
+    from src.services.triple_chat import (
+        enqueue_client_message,
+        list_cliente_inbox,
+        list_cliente_visible_messages,
+    )
     from src.services import triple_chat as tc
 
     _start_cliente(tc, subject="victima-mejora-1", nombre="VIF demo")
@@ -69,9 +74,10 @@ def test_enqueue_builds_real_draft_with_quality(repo):
         lawyer_session_id="web:abogada",
         subject_label="VIF demo",
     )
-    assert out["status"] == "en_revision"
+    assert out["status"] == "en_dialogo"
     assert out["status_label"]
     assert "draft_id" in out
+    assert out.get("intake_message_id")
     assert "quality_flags" in out
 
     inbox = list_cliente_inbox(status="proposed")
@@ -79,7 +85,12 @@ def test_enqueue_builds_real_draft_with_quality(repo):
     draft = inbox["drafts"][0]
     assert draft["case_label"] == "VIF demo"
     assert "quality_flags" in draft
-    assert "Gerente" in draft["proposed_text"] or "despacho" in draft["proposed_text"].lower()
+    assert "abogado" in draft["proposed_text"].lower() or "orientación" in draft["proposed_text"].lower()
+
+    visible = list_cliente_visible_messages("victima-mejora-1")
+    assert visible["status"] == "en_dialogo"
+    gerente = [m for m in visible["messages"] if m["role"] == "gerente"]
+    assert any("¿" in (m.get("content") or "") or "?" in (m.get("content") or "") for m in gerente)
 
 
 def test_list_cliente_status_labels(repo):
@@ -98,8 +109,8 @@ def test_list_cliente_status_labels(repo):
         lawyer_session_id="web:abogada",
     )
     mid = list_cliente_visible_messages("victima-status-1")
-    assert mid["status"] == "en_revision"
-    assert "revisión" in mid["status_label"].lower()
+    assert mid["status"] == "en_dialogo"
+    assert "conversación" in mid["status_label"].lower() or "abogado" in mid["status_label"].lower()
 
     approve_outbound_draft(out["draft_id"], revisor="abogada", edited_text="Respuesta lista del Gerente.")
     after = list_cliente_visible_messages("victima-status-1")

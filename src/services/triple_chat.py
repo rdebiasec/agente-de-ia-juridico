@@ -183,8 +183,10 @@ def enqueue_client_message(
     lawyer_actor_id: str | None = None,
 ) -> dict:
     """
-    Recibe mensaje de la víctima (o impersonación del despacho), encola propuesta HITL.
-    No publica respuesta del Gerente al cliente.
+    Recibe mensaje de la víctima (o impersonación del despacho).
+
+    1) Publica de inmediato un intake conversacional (visible).
+    2) Encola propuesta HITL de orientación jurídica (no visible hasta aprobar).
     """
     text = (message or "").strip()
     if not text:
@@ -214,6 +216,11 @@ def enqueue_client_message(
         inbound_meta["lawyer_actor_id"] = str(lawyer_actor_id).strip()[:120]
 
     repo = get_repository()
+    prior_cliente = sum(
+        1
+        for m in repo.list_client_messages(thread.thread_id)
+        if m.role == "cliente" and m.visibility == MSG_VIS_CLIENT
+    )
     inbound = ClientMessage(
         thread_id=thread.thread_id,
         role="cliente",
@@ -223,7 +230,25 @@ def enqueue_client_message(
     )
     inbound = repo.add_client_message(inbound)
 
-    from src.services.cliente_reply_draft import build_outbound_proposal
+    from src.services.cliente_reply_draft import (
+        build_intake_visible_reply,
+        build_outbound_proposal,
+    )
+
+    display_name = (thread.meta or {}).get("client_display_name") or thread.subject_label
+    intake_text = build_intake_visible_reply(
+        text,
+        display_name=str(display_name or ""),
+        prior_cliente_messages=prior_cliente,
+    )
+    intake_msg = ClientMessage(
+        thread_id=thread.thread_id,
+        role="gerente",
+        content=intake_text,
+        visibility=MSG_VIS_CLIENT,
+        meta={"kind": "intake_auto", "needs_hitl": False},
+    )
+    intake_msg = repo.add_client_message(intake_msg)
 
     proposed, quality_flags = build_outbound_proposal(
         text, lawyer_session_id=lawyer_sid
@@ -249,7 +274,7 @@ def enqueue_client_message(
         content=draft.proposed_text,
         visibility=MSG_VIS_PENDING,
         outbound_draft_id=draft.id,
-        meta={"draft_status": "pending_hitl"},
+        meta={"draft_status": "pending_hitl", "kind": "orientacion_hitl"},
     )
     repo.add_client_message(pending)
 
@@ -298,16 +323,18 @@ def enqueue_client_message(
                 "Bitácora impersonación omitida session=%s", lawyer_sid
             )
 
+    status_label = (
+        "Le respondí abajo. Sigamos armando su caso; "
+        "el abogado valida la orientación jurídica en paralelo."
+    )
     return {
-        "status": "en_revision",
-        "status_label": "En revisión del despacho",
+        "status": "en_dialogo",
+        "status_label": status_label,
         "thread_id": thread.thread_id,
         "draft_id": draft.id,
         "inbound_message_id": inbound.id,
-        "client_ack": (
-            "Su mensaje fue recibido. El despacho lo está revisando; "
-            "le responderá el Coordinador del Caso cuando el abogado apruebe."
-        ),
+        "intake_message_id": intake_msg.id,
+        "client_ack": status_label,
         "cliente_session_id": cliente_sid,
         "lawyer_session_id": lawyer_sid,
         "quality_flags": quality_flags,
@@ -398,17 +425,30 @@ def list_cliente_visible_messages(cliente_subject: str) -> dict:
         if d.status == OUTBOUND_PROPOSED
     ]
     has_gerente = any(m.get("role") == "gerente" for m in msgs)
-    if pending:
+    # ¿Hay intake auto reciente (visible) además del pending HITL?
+    raw_msgs = repo.list_client_messages(thread.thread_id)
+    has_intake = any(
+        m.role == "gerente"
+        and m.visibility == MSG_VIS_CLIENT
+        and (m.meta or {}).get("kind") == "intake_auto"
+        for m in raw_msgs
+    )
+    if pending and has_intake:
+        status, label = (
+            "en_dialogo",
+            "Sigamos la conversación abajo. El abogado valida la orientación jurídica en paralelo.",
+        )
+    elif pending:
         status, label = (
             "en_revision",
-            "En revisión del despacho. Le avisaremos aquí cuando haya respuesta.",
+            "El despacho está preparando su orientación jurídica.",
         )
     elif has_gerente:
-        status, label = "respuesta_lista", "Hay una respuesta aprobada para usted."
+        status, label = "respuesta_lista", "Puede seguir escribiendo; estoy aquí para ayudarle."
     else:
         status, label = (
             "al_dia",
-            "Escriba su mensaje. La respuesta llegará cuando el abogado la apruebe.",
+            "Cuéntenos su situación. Le responderé de inmediato para armar el caso.",
         )
     meta = dict(thread.meta or {})
     return {
