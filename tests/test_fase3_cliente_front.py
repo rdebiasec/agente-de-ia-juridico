@@ -35,8 +35,9 @@ def test_cliente_static_assets_exist():
     assert "Ley 1581" in html
     assert "Comenzar consulta" in html
     assert "Coordinador del Caso" in html
-    assert "Consulta para víctimas" in html
-    assert "No es línea de emergencias" in html
+    assert "Consulta para víctimas" not in html or "penal víctimas" in html
+    assert "cliente-file-input" in html
+    assert "Orientación clara" in html
     assert "TriageResult" not in html
     js = Path("static/cliente.js").read_text(encoding="utf-8")
     assert "/cliente/start" in js

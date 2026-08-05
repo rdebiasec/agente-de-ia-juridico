@@ -84,7 +84,10 @@
 
     box.innerHTML = messages
       .map((m) => {
-        const badge = m.badge_label || m.badge || m.role || "";
+        const isAttach = (m.meta && m.meta.kind === "attachment") || /^\s*📎/.test(m.content || "");
+        const badge = isAttach
+          ? "Adjunto víctima"
+          : m.badge_label || m.badge || m.role || "";
         const pendingNote =
           m.visibility === "pending_hitl" || m.badge === "borrador_pendiente"
             ? '<span class="canal-pending-note">borrador en revisión</span>'
@@ -95,13 +98,28 @@
             : m.badge === "escrito_por_despacho"
               ? "canal-msg--despacho"
               : "canal-msg--cliente";
+        let download = "";
+        if (isAttach && m.meta && m.meta.attachment_id) {
+          const href = `/abogado/cliente-attachments/${encodeURIComponent(m.meta.attachment_id)}?session_id=${encodeURIComponent(sessionId())}`;
+          download = `<div class="canal-msg-actions"><a href="${href}" target="_blank" rel="noopener">Descargar</a></div>`;
+        }
         return `<article class="canal-msg ${roleClass}">
           <span class="${badgeClass(m.badge)}">${esc(badge)}</span>
           ${pendingNote}
           <div class="canal-msg-body">${esc(m.content || "")}</div>
+          ${download}
         </article>`;
       })
       .join("");
+
+    const anexos = Array.isArray(data.anexos_cliente) ? data.anexos_cliente : [];
+    if (anexos.length && meta) {
+      const names = anexos
+        .slice(-5)
+        .map((a) => a.filename || a.id)
+        .join(", ");
+      meta.textContent = `${meta.textContent} · anexos: ${names}`;
+    }
     box.scrollTop = box.scrollHeight;
   }
 

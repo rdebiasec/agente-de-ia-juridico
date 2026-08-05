@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from collections import defaultdict, deque
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Cookie, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel, Field
 
 from src.auth.cliente_session import (
@@ -190,6 +190,45 @@ async def cliente_chat(
     return out
 
 
+@cliente_router.post("/cliente/upload")
+async def cliente_upload(
+    request: Request,
+    response: Response,
+    file: UploadFile = File(...),
+    lawyer_session_id: str | None = Form(default=None),
+    cliente_session_id: str | None = Form(default=None),
+    lexiatek_cliente_session: str | None = Cookie(default=None, alias=CLIENTE_COOKIE_NAME),
+):
+    """Adjunto de la víctima → expediente del abogado + mensaje en el hilo."""
+    _ = request.cookies.get(LAWYER_COOKIE_NAME)
+    try:
+        subject = _resolve_cliente_subject(
+            body_subject=cliente_session_id,
+            cookie_token=lexiatek_cliente_session,
+        )
+    except tc.TripleChatError as exc:
+        raise _http(exc) from exc
+
+    client_ip = request.client.host if request.client else "unknown"
+    _rate_limit_or_429(f"upload:{client_ip}:{subject}", max_hits=8)
+
+    try:
+        out = tc.register_cliente_upload(
+            cliente_subject=subject,
+            lawyer_session_id=lawyer_session_id,
+            filename=file.filename or "archivo",
+            data=await file.read(),
+            content_type=file.content_type,
+        )
+    except tc.TripleChatError as exc:
+        raise _http(exc) from exc
+
+    bare = subject.split(":", 1)[-1] if subject.startswith("cliente:") else subject
+    _apply_cliente_cookie(response, bare)
+    out["session_cookie"] = CLIENTE_COOKIE_NAME
+    return out
+
+
 @cliente_router.get("/cliente/messages")
 async def cliente_messages(
     response: Response,
@@ -301,6 +340,27 @@ async def abogado_cliente_thread(session_id: str):
         return tc.list_lawyer_cliente_thread(session_id)
     except tc.TripleChatError as exc:
         raise _http(exc) from exc
+
+
+@abogado_router.get("/abogado/cliente-attachments/{attachment_id}")
+async def abogado_cliente_attachment(attachment_id: str, session_id: str):
+    """Descarga un adjunto subido por la víctima (solo desk)."""
+    from fastapi.responses import FileResponse
+
+    from src.services.cliente_uploads import find_attachment, resolve_attachment_path
+
+    lawyer_sid = tc.normalize_lawyer_session(session_id)
+    meta = find_attachment(lawyer_session_id=lawyer_sid, attachment_id=attachment_id)
+    if not meta:
+        raise HTTPException(status_code=404, detail="Adjunto no encontrado.")
+    path = resolve_attachment_path(str(meta.get("rel_path") or ""))
+    if not path:
+        raise HTTPException(status_code=404, detail="Archivo no disponible.")
+    return FileResponse(
+        path,
+        filename=str(meta.get("filename") or path.name),
+        media_type=str(meta.get("content_type") or "application/octet-stream"),
+    )
 
 
 @abogado_router.post("/abogado/cliente-as-client")

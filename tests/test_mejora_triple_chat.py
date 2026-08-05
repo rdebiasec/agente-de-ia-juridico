@@ -159,7 +159,8 @@ def test_desk_and_cliente_ui_markers():
 
     cliente_js = Path("static/cliente.js").read_text(encoding="utf-8")
     assert "status_label" in cliente_js
-    assert "CASO-" in cliente_js
+    assert "cliente/upload" in cliente_js
+    assert "CASO-" not in cliente_js
     assert "lexiatek_cliente_started_v1" in cliente_js
     assert "lexiatek_cliente_subject" in cliente_js
     assert "internal-transcript" not in cliente_js

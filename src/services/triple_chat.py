@@ -342,6 +342,51 @@ def enqueue_client_message(
     }
 
 
+def register_cliente_upload(
+    *,
+    cliente_subject: str,
+    lawyer_session_id: str | None,
+    filename: str,
+    data: bytes,
+    content_type: str | None = None,
+) -> dict:
+    """Valida sesión/consentimiento y guarda el adjunto en expediente + hilo."""
+    from src.services.cliente_uploads import ClienteUploadError, store_cliente_upload
+
+    cliente_sid = normalize_cliente_session(cliente_subject)
+    lawyer_sid = normalize_lawyer_session(lawyer_session_id)
+    thread = get_or_create_thread(
+        cliente_session_id=cliente_sid,
+        lawyer_session_id=lawyer_sid,
+    )
+    if not (thread.meta or {}).get("consent_1581"):
+        raise TripleChatError(
+            "Debe completar el inicio de consulta y autorizar el tratamiento de datos (Ley 1581)."
+        )
+    try:
+        stored = store_cliente_upload(
+            thread_id=thread.thread_id,
+            lawyer_session_id=lawyer_sid,
+            cliente_session_id=cliente_sid,
+            filename=filename,
+            data=data,
+            content_type=content_type,
+        )
+    except ClienteUploadError as exc:
+        raise TripleChatError(str(exc)) from exc
+
+    thread.updated_at = _now()
+    get_repository().save_client_thread(thread)
+    return {
+        **stored,
+        "status": "en_dialogo",
+        "status_label": "Archivo recibido y guardado en su expediente del despacho.",
+        "thread_id": thread.thread_id,
+        "cliente_session_id": cliente_sid,
+        "lawyer_session_id": lawyer_sid,
+    }
+
+
 def link_expediente_sessions(
     *,
     lawyer_session_id: str,
@@ -392,7 +437,16 @@ def get_or_create_thread(
 
 def _cliente_public_message(msg: ClientMessage) -> dict:
     """Vista víctima: sin meta interna ni authored_by del despacho."""
-    return {
+    meta = msg.meta or {}
+    public_meta = None
+    if meta.get("kind") == "attachment":
+        public_meta = {
+            "kind": "attachment",
+            "filename": meta.get("filename"),
+            "file_kind": meta.get("file_kind"),
+            "size_bytes": meta.get("size_bytes"),
+        }
+    out = {
         "id": msg.id,
         "thread_id": msg.thread_id,
         "role": msg.role,
@@ -400,6 +454,9 @@ def _cliente_public_message(msg: ClientMessage) -> dict:
         "visibility": msg.visibility,
         "created_at": msg.created_at.isoformat(),
     }
+    if public_meta:
+        out["meta"] = public_meta
+    return out
 
 
 def list_cliente_visible_messages(cliente_subject: str) -> dict:
@@ -500,6 +557,16 @@ def list_lawyer_cliente_thread(lawyer_session_id: str) -> dict:
         if m.role == "cliente" and authored == AUTH_BY_LAWYER_IMPERSONATION:
             data["badge"] = "escrito_por_despacho"
             data["badge_label"] = "Escrito por el despacho"
+        elif m.role == "cliente" and (m.meta or {}).get("kind") == "attachment":
+            data["badge"] = "adjunto_victima"
+            data["badge_label"] = "Adjunto víctima"
+            # Exponer id para descarga en desk
+            data["meta"] = {
+                "kind": "attachment",
+                "attachment_id": (m.meta or {}).get("attachment_id"),
+                "filename": (m.meta or {}).get("filename"),
+                "file_kind": (m.meta or {}).get("file_kind"),
+            }
         elif m.role == "cliente":
             data["badge"] = "victima"
             data["badge_label"] = "Víctima"
@@ -517,6 +584,8 @@ def list_lawyer_cliente_thread(lawyer_session_id: str) -> dict:
         enriched.append(data)
 
     meta = dict(thread.meta or {})
+    exp = repo.get_expediente(lawyer_sid)
+    anexos = list((exp.metricas_gerencia or {}).get("anexos_cliente") or []) if exp else []
     return {
         "thread_id": thread.thread_id,
         "messages": enriched,
@@ -532,6 +601,7 @@ def list_lawyer_cliente_thread(lawyer_session_id: str) -> dict:
             "consent_at": meta.get("consent_at"),
             "consent_1581": meta.get("consent_1581"),
         },
+        "anexos_cliente": anexos,
     }
 
 

@@ -21,102 +21,129 @@
     <a class="skip-link" href="#cliente-start">Ir al inicio</a>
 
     <section class="cliente-start" id="cliente-start" aria-labelledby="cliente-start-title">
-      <div class="cliente-start-inner">
-        <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
-          <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="160" height="32" />
-        </a>
-        <h1 id="cliente-start-title">Consulta para víctimas</h1>
-        <p class="cliente-start-lead">
-          Cuéntenos su situación en materia penal. Un asistente de IA prepara la orientación y
-          <strong>un abogado del despacho la revisa</strong> antes de enviársela.
-        </p>
-        <ul class="cliente-trust" aria-label="Cómo funciona">
-          <li>Solo representación de víctimas en Colombia</li>
-          <li>Usted escribe → el despacho revisa → usted recibe respuesta</li>
-          <li>No es línea de emergencias ni denuncia oficial</li>
-        </ul>
-        <form class="cliente-start-form" id="cliente-start-form">
-          <label class="cliente-field">
-            <span>Nombre <abbr title="obligatorio">*</abbr></span>
-            <input
-              type="text"
-              id="cliente-nombre"
-              name="nombre"
-              autocomplete="name"
-              maxlength="120"
-              required
-              placeholder="Su nombre"
-            />
-          </label>
-          <label class="cliente-field">
-            <span>Teléfono <span class="cliente-optional">(opcional)</span></span>
-            <input
-              type="tel"
-              id="cliente-telefono"
-              name="telefono"
-              autocomplete="tel"
-              maxlength="40"
-              placeholder="Celular de contacto"
-            />
-          </label>
-          <label class="cliente-field">
-            <span>Correo <span class="cliente-optional">(opcional)</span></span>
-            <input
-              type="email"
-              id="cliente-email"
-              name="email"
-              autocomplete="email"
-              maxlength="120"
-              placeholder="correo@ejemplo.com"
-            />
-          </label>
-          <label class="cliente-consent cliente-consent--start">
-            <input type="checkbox" id="cliente-consent-start" required />
-            <span>
-              Autorizo el tratamiento de mis datos de caso conforme a la Ley 1581
-              (<a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">leer aviso</a>).
-            </span>
-          </label>
-          <p class="cliente-start-error" id="cliente-start-error" hidden role="alert"></p>
-          <button type="submit" class="cliente-cta" id="cliente-start-btn">Comenzar consulta</button>
-        </form>
-        <p class="cliente-start-foot">
-          Si está en peligro inmediato, contacte a la policía (123) o a la línea 155.
-        </p>
+      <div class="cliente-start-stage">
+        <aside class="cliente-brand-panel" aria-hidden="false">
+          <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
+            <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="180" height="36" />
+          </a>
+          <p class="cliente-brand-kicker">Firma virtual · penal víctimas</p>
+          <h1 id="cliente-start-title" class="cliente-brand-title">
+            Orientación clara.<br />Un abogado con usted.
+          </h1>
+          <p class="cliente-brand-copy">
+            Cuéntenos su situación. El Coordinador del Caso le responde de inmediato para armar el
+            caso; un abogado del despacho valida la orientación jurídica.
+          </p>
+          <ul class="cliente-trust" aria-label="Cómo funciona">
+            <li>Representación de víctimas en Colombia</li>
+            <li>Usted escribe → conversamos → el abogado valida</li>
+            <li>Puede adjuntar pruebas (fotos, docs, videos)</li>
+            <li>No es línea de emergencias ni denuncia oficial</li>
+          </ul>
+        </aside>
+
+        <div class="cliente-start-card">
+          <h2 class="cliente-start-card-title">Comenzar consulta</h2>
+          <p class="cliente-start-card-lead">
+            Solo necesitamos su nombre y autorización de datos para abrir el canal seguro.
+          </p>
+          <form class="cliente-start-form" id="cliente-start-form">
+            <label class="cliente-field">
+              <span>Nombre <abbr title="obligatorio">*</abbr></span>
+              <input
+                type="text"
+                id="cliente-nombre"
+                name="nombre"
+                autocomplete="name"
+                maxlength="120"
+                required
+                placeholder="Su nombre"
+              />
+            </label>
+            <label class="cliente-field">
+              <span>Teléfono <span class="cliente-optional">(opcional)</span></span>
+              <input
+                type="tel"
+                id="cliente-telefono"
+                name="telefono"
+                autocomplete="tel"
+                maxlength="40"
+                placeholder="Celular de contacto"
+              />
+            </label>
+            <label class="cliente-field">
+              <span>Correo <span class="cliente-optional">(opcional)</span></span>
+              <input
+                type="email"
+                id="cliente-email"
+                name="email"
+                autocomplete="email"
+                maxlength="120"
+                placeholder="correo@ejemplo.com"
+              />
+            </label>
+            <label class="cliente-consent cliente-consent--start">
+              <input type="checkbox" id="cliente-consent-start" required />
+              <span>
+                Autorizo el tratamiento de mis datos de caso conforme a la Ley 1581
+                (<a href="/legal/tratamiento-datos-casos" target="_blank" rel="noopener">leer aviso</a>).
+              </span>
+            </label>
+            <p class="cliente-start-error" id="cliente-start-error" hidden role="alert"></p>
+            <button type="submit" class="cliente-cta" id="cliente-start-btn">Comenzar consulta</button>
+          </form>
+          <p class="cliente-start-foot">
+            Si está en peligro inmediato, contacte a la policía (123) o a la línea 155.
+          </p>
+        </div>
       </div>
     </section>
 
     <div class="cliente-shell" id="cliente-chat" hidden aria-hidden="true">
-      <header class="cliente-header">
-        <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
-          <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="140" height="28" />
-        </a>
-        <p class="cliente-tagline">Coordinador del Caso · víctimas</p>
-        <p class="cliente-case" id="cliente-case-label" hidden></p>
-      </header>
+      <div class="cliente-shell-frame">
+        <header class="cliente-header">
+          <a class="cliente-logo" href="https://lexiatek.com" target="_blank" rel="noopener">
+            <img src="/static/lexiatek-logo.svg" alt="LexiaTek" width="140" height="28" />
+          </a>
+          <div class="cliente-header-copy">
+            <p class="cliente-tagline">Coordinador del Caso</p>
+            <p class="cliente-case" id="cliente-case-label" hidden></p>
+          </div>
+        </header>
 
-      <p class="cliente-status" id="cliente-status" aria-live="polite">
-        Cuéntenos su situación. Le responderé de inmediato para armar el caso.
-      </p>
-
-      <main class="cliente-main" id="cliente-messages" aria-live="polite"></main>
-
-      <form class="cliente-composer" id="cliente-form">
-        <div class="cliente-composer-row">
-          <textarea
-            id="cliente-input"
-            rows="2"
-            maxlength="4000"
-            placeholder="Cuéntenos qué ocurrió o qué necesita…"
-            required
-          ></textarea>
-          <button type="submit" id="cliente-send">Enviar</button>
-        </div>
-        <p class="cliente-hint">
-          Habla con el Coordinador del Caso. Responde de inmediato para armar el caso; el abogado
-          valida la orientación jurídica.
+        <p class="cliente-status" id="cliente-status" aria-live="polite">
+          Cuéntenos su situación. Le responderé de inmediato para armar el caso.
         </p>
-      </form>
+
+        <main class="cliente-main" id="cliente-messages" aria-live="polite"></main>
+
+        <form class="cliente-composer" id="cliente-form">
+          <p class="cliente-attach-status" id="cliente-attach-status" hidden></p>
+          <div class="cliente-composer-row">
+            <label class="cliente-attach-btn" title="Adjuntar archivo">
+              <input
+                type="file"
+                id="cliente-file-input"
+                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,.mp4,.mov,application/pdf,image/*,video/mp4,video/quicktime"
+                hidden
+              />
+              <span aria-hidden="true">+</span>
+              <span class="sr-only">Adjuntar archivo</span>
+            </label>
+            <textarea
+              id="cliente-input"
+              rows="2"
+              maxlength="4000"
+              placeholder="Cuéntenos qué ocurrió o qué necesita…"
+            ></textarea>
+            <button type="submit" id="cliente-send">Enviar</button>
+          </div>
+          <p class="cliente-hint">
+            Puede adjuntar PDF, Word, fotos o video (docs/fotos hasta 10&nbsp;MB; video hasta 50&nbsp;MB).
+            El abogado valida la orientación jurídica.
+          </p>
+        </form>
+      </div>
     </div>
     <script src="/static/cliente.js" defer></script>
   </body>

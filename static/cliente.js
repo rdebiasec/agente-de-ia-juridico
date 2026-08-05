@@ -1,4 +1,4 @@
-/** Webchat consumidor — start 1581 + POST /cliente/chat + poll mensajes visibles. */
+/** Webchat LexiaTek — start 1581 + chat + adjuntos al expediente. */
 (function () {
   const STORAGE_SUBJECT = "lexiatek_cliente_subject";
   const STORAGE_LAWYER = "lexiatek_lawyer_session";
@@ -20,6 +20,8 @@
   const sendBtn = document.getElementById("cliente-send");
   const statusEl = document.getElementById("cliente-status");
   const caseEl = document.getElementById("cliente-case-label");
+  const fileInputEl = document.getElementById("cliente-file-input");
+  const attachStatusEl = document.getElementById("cliente-attach-status");
 
   let pollTimer = null;
 
@@ -55,18 +57,16 @@
     return localStorage.getItem(STORAGE_LAWYER) || "web:abogado";
   }
 
-  function shortCaseCode(lawyerSid) {
-    const raw = String(lawyerSid || "").replace(/^web:/, "");
-    const tail = raw.slice(-6).toUpperCase() || "LOCAL";
-    return `CASO-${tail}`;
-  }
-
-  function updateCaseLabel(extraLabel) {
+  function updateCaseLabel(displayName) {
     if (!caseEl) return;
-    const code = shortCaseCode(lawyerSession());
-    const label = extraLabel ? `${extraLabel} · ${code}` : code;
+    const name = String(displayName || "").trim();
+    if (!name) {
+      caseEl.hidden = true;
+      caseEl.textContent = "";
+      return;
+    }
     caseEl.hidden = false;
-    caseEl.textContent = label;
+    caseEl.textContent = name;
   }
 
   function setStatus(text, mode) {
@@ -74,6 +74,14 @@
     statusEl.textContent = text;
     statusEl.classList.toggle("is-review", mode === "review");
     statusEl.classList.toggle("is-ok", mode === "ok");
+  }
+
+  function setAttachStatus(text, mode) {
+    if (!attachStatusEl) return;
+    attachStatusEl.hidden = !text;
+    attachStatusEl.textContent = text || "";
+    attachStatusEl.classList.toggle("is-ok", mode === "ok");
+    attachStatusEl.classList.toggle("is-error", mode === "error");
   }
 
   function showStartError(msg) {
@@ -119,14 +127,17 @@
     if (!messagesEl) return;
     if (!messages.length) {
       messagesEl.innerHTML =
-        '<p class="cliente-empty">Aún no hay mensajes. Escriba su consulta abajo.</p>';
+        '<p class="cliente-empty">Aún no hay mensajes. Escriba su consulta o adjunte una prueba.</p>';
       return;
     }
     messagesEl.innerHTML = messages
       .map((m) => {
         const role = m.role === "gerente" ? "gerente" : "cliente";
-        const label = role === "gerente" ? "Coordinador del Caso" : "Usted";
-        return `<article class="cliente-msg cliente-msg--${role}">
+        const isAttach = (m.meta && m.meta.kind === "attachment") || /^\s*📎/.test(m.content || "");
+        const label =
+          role === "gerente" ? "Coordinador del Caso" : isAttach ? "Archivo enviado" : "Usted";
+        const extra = isAttach ? " cliente-msg--attachment" : "";
+        return `<article class="cliente-msg cliente-msg--${role}${extra}">
           <span class="cliente-msg-meta">${escapeHtml(label)}</span>
           ${escapeHtml(m.content || "")}
         </article>`;
@@ -151,10 +162,7 @@
     updateCaseLabel(data.client_display_name || data.subject_label || "");
     const label = data.status_label;
     if (data.status === "en_revision") {
-      setStatus(
-        label || "El despacho está preparando su orientación jurídica.",
-        "review"
-      );
+      setStatus(label || "El despacho está preparando su orientación jurídica.", "review");
     } else if (data.status === "en_dialogo") {
       setStatus(
         label ||
@@ -211,7 +219,7 @@
       }
       showChat();
       updateCaseLabel(data.client_display_name || nombre);
-      setStatus("Consulta iniciada. Cuéntenos su situación; el abogado revisará la respuesta.", "ok");
+      setStatus("Consulta iniciada. Cuéntenos su situación o adjunte una prueba.", "ok");
       await refreshMessages();
       inputEl?.focus();
     } catch (err) {
@@ -239,6 +247,27 @@
     return data;
   }
 
+  async function uploadFile(file) {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("cliente_session_id", getSubject());
+    fd.append("lawyer_session_id", lawyerSession());
+    setAttachStatus(`Subiendo ${file.name}…`);
+    const res = await fetch("/cliente/upload", {
+      method: "POST",
+      credentials: "same-origin",
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.detail || "No se pudo subir el archivo.");
+    }
+    setAttachStatus(`${data.filename || file.name} guardado en el expediente.`, "ok");
+    setStatus(data.status_label || "Archivo recibido.", "ok");
+    await refreshMessages();
+  }
+
   startForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     await startConsultation();
@@ -254,9 +283,7 @@
       const out = await sendMessage(text);
       inputEl.value = "";
       setStatus(
-        out.status_label ||
-          out.client_ack ||
-          "Le respondí abajo. Sigamos armando su caso.",
+        out.status_label || out.client_ack || "Le respondí abajo. Sigamos armando su caso.",
         out.status === "en_dialogo" || out.status === "respuesta_lista" ? "ok" : "review"
       );
       await refreshMessages();
@@ -265,6 +292,17 @@
     } finally {
       sendBtn.disabled = false;
       inputEl?.focus();
+    }
+  });
+
+  fileInputEl?.addEventListener("change", async () => {
+    const file = fileInputEl.files && fileInputEl.files[0];
+    fileInputEl.value = "";
+    if (!file) return;
+    try {
+      await uploadFile(file);
+    } catch (err) {
+      setAttachStatus(err?.message || "Error al subir.", "error");
     }
   });
 
