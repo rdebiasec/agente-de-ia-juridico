@@ -201,6 +201,10 @@ WEB_LOGIN_RATE_MAX = 12
 WEB_LOGIN_RATE_WINDOW = 900
 CHAT_PLAN_RATE_MAX = 20
 CHAT_PLAN_RATE_WINDOW = 900
+# Multi-turn desk chat: generous per subject; coarser IP ceiling for shared office NAT.
+CHAT_RATE_MAX = 60
+CHAT_RATE_WINDOW = 900
+CHAT_IP_RATE_MAX = 180
 
 
 def _client_ip(request: Request) -> str:
@@ -213,6 +217,14 @@ def _web_login_rate_key(request: Request) -> str:
 
 def _chat_plan_rate_key(subject_id: str) -> str:
     return f"chat-plan:{subject_id}"
+
+
+def _chat_rate_key(subject_id: str) -> str:
+    return f"chat:{subject_id}"
+
+
+def _chat_ip_rate_key(request: Request) -> str:
+    return f"chat-ip:{_client_ip(request)}"
 
 
 def _audit_cors_origins() -> list[str]:
@@ -664,6 +676,24 @@ async def chat(
         client_fallback=req.user_id,
         response=response,
     )
+    if not check_rate_limit(
+        _chat_rate_key(uid),
+        max_attempts=CHAT_RATE_MAX,
+        window_seconds=CHAT_RATE_WINDOW,
+    ):
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados mensajes. Espere unos minutos.",
+        )
+    if not check_rate_limit(
+        _chat_ip_rate_key(request),
+        max_attempts=CHAT_IP_RATE_MAX,
+        window_seconds=CHAT_RATE_WINDOW,
+    ):
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados mensajes desde esta red. Espere unos minutos.",
+        )
     result = await handle_message(
         InboundMessage(channel=req.channel, user_id=uid, text=req.message)
     )
