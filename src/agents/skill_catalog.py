@@ -168,9 +168,9 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
         "analizar_autoria_y_participacion",
     ),
     "analista_evidencia": (
-        "detectar_brechas_probatorias",
+        "clasificar_tipo_prueba",
         "construir_matriz_hecho_prueba",
-        "crear_plan_recaudo_probatorio",
+        "detectar_brechas_probatorias",
     ),
     "redactor_documentos_juridicos": (
         "estructurar_hechos_fundamentos_solicitudes",

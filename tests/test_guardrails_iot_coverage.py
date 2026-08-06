@@ -91,8 +91,8 @@ def test_other_team_scope_routes_to_poc_fuera_de_alcance():
     assert triage.tipo_tarea == "fuera_de_alcance"
 
 
-def test_tipicidad_ruta_cronologia_output_grounding_policies():
-    """A0/A1 residual: guardrails deben exigir grounding / domain_limits no vacíos."""
+def test_tipicidad_ruta_cronologia_evidencia_output_grounding_policies():
+    """A0–A2: guardrails deben exigir grounding / domain_limits no vacíos."""
     for agent_id, needles in (
         (
             "analista_responsabilidad_tipicidad",
@@ -105,6 +105,10 @@ def test_tipicidad_ruta_cronologia_output_grounding_policies():
         (
             "analista_cronologia_hechos",
             ("groundedness_policy", "pendiente_verificar", "tipicidad"),
+        ),
+        (
+            "analista_evidencia",
+            ("groundedness_policy", "fuente_o_ubicacion", "integridad"),
         ),
     ):
         text = (AGENTS_GR / agent_id / "output.md").read_text(encoding="utf-8").lower()

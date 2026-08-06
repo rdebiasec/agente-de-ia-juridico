@@ -139,11 +139,13 @@ def test_orchestrator_poc_chat_has_no_output_type():
     assert getattr(poc, "output_type", None) is None
 
 
-def test_matriz_tipicidad_and_cronologia_fuentes_kb():
+def test_matriz_tipicidad_cronologia_y_evidencia_fuentes_kb():
     from src.agents.schemas import (
         CronologiaPenal,
         ElementoTipoPenal,
         EventoCronologia,
+        InventarioEvidencia,
+        ItemEvidencia,
         MatrizTipicidad,
     )
     from src.agents.structured_render import render_structured_output
@@ -179,3 +181,23 @@ def test_matriz_tipicidad_and_cronologia_fuentes_kb():
     crono_txt = render_structured_output(crono)
     assert "Hora exacta" in crono_txt
     assert crono.fuentes_kb == ["expediente"]
+
+    inv = InventarioEvidencia(
+        items=[
+            ItemEvidencia(
+                descripcion="Fotos de lesiones",
+                tipo="digital",
+                fuente_o_ubicacion="chat WhatsApp — pendiente hash",
+                cadena_custodia="pendiente_verificar",
+            )
+        ],
+        brechas_probatorias=["Falta dictamen médico"],
+        plan_recaudo_sugerido=["Solicitar pericia médico-legal"],
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+        pendientes_verificacion=["Hash e integridad del chat"],
+    )
+    inv_txt = render_structured_output(inv)
+    assert "Fotos de lesiones" in inv_txt
+    assert "proceso-penal-906.md" in inv_txt
+    assert "Falta dictamen médico" in inv_txt
+    assert inv.fuentes_kb[0].endswith("proceso-penal-906.md")

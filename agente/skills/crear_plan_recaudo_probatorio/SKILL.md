@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: cf73cc140f37bf4a -->
+<!-- config-version: 3; checksum: e57266621521e718 -->
 ---
 name: crear-plan-recaudo-probatorio
 description: Contrato penal-víctimas: Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal. Activar cuando el plan/HITL o el especialista requiera `crear_plan_recaudo_probatorio`. No sustituye a `inventariar_evidencia`.
@@ -24,6 +24,12 @@ Ejecutar tras `detectar_brechas_probatorias` o matriz hecho-prueba.
 
 ## Rol en analista_representacion_victimas
 Alinear recaudo con objetivos de la víctima y teoría del caso.
+
+## Fuentes KB
+- Brechas/matriz del expediente; etapa aparente si consta (no inventar plazos).
+- `agente/conocimiento/proceso-penal-906.md` — vías de obtención según etapa; días hábiles solo con `fecha_base`.
+- `agente/conocimiento/normas-clave.md` — no revictimizar en vías de obtención; HITL antes de oficios/contactos.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_playbook_proceso` si ancla etapa.
 
 ## Inputs
 - Brechas probatorias (`detectar_brechas_probatorias`) o matriz hecho-prueba.

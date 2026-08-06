@@ -291,7 +291,19 @@ class ItemEvidencia(BaseModel):
     """Ítem del inventario probatorio."""
 
     descripcion: str = Field(..., description="Qué es la evidencia.")
-    tipo: str = Field(default="otro", description="documental|testimonial|pericial|digital|otro.")
+    tipo: Literal[
+        "documental",
+        "testimonial",
+        "pericial",
+        "digital",
+        "fisica",
+        "institucional",
+        "otro",
+        "pendiente_verificar",
+    ] = Field(
+        default="otro",
+        description="Tipología probatoria preliminar.",
+    )
     fuente_o_ubicacion: str = Field(default="", description="Dónde está o de dónde proviene.")
     hechos_que_soporta: list[str] = Field(default_factory=list)
     cadena_custodia: Literal["ok", "dudosa", "desconocida", "pendiente_verificar"] = Field(
@@ -307,6 +319,10 @@ class InventarioEvidencia(BaseModel):
     items: list[ItemEvidencia] = Field(default_factory=list)
     brechas_probatorias: list[str] = Field(default_factory=list)
     plan_recaudo_sugerido: list[str] = Field(default_factory=list)
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Orígenes KB/expediente consultados (si aplica).",
+    )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
         default_factory=list,

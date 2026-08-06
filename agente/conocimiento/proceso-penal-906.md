@@ -39,6 +39,19 @@ Aliases tolerados al mapear: `indagación`/`investigación` → `indagacion_inve
 - **Juez de control de garantías** (etapa preliminar) vs. **juez de conocimiento** (acusación, preparatoria y juicio).
 - Salidas alternas: preacuerdos y negociaciones, principio de oportunidad (verificar procedencia).
 
+## Checklist evidencia / prueba (ancla skills O4)
+
+Uso operativo para `analista_evidencia` (sin inventar artículos ni admisibilidad):
+
+1. Inventariar medios allegados o narrados; separar existente vs solo narrado.
+2. Clasificar tipología preliminar (documental, testimonial, pericial, digital, física, institucional).
+3. Matriz hecho ↔ prueba; marcar soporte directo / indiciario / ausente / pendiente.
+4. Detectar brechas críticas para la pretensión de la víctima; priorizar recaudo.
+5. Integridad: no alterar digitales; alertar cadena de custodia dudosa → escalar humano/perito.
+6. Cruzar etapa aparente (`etapa_ley906`): descubrimiento/admisión suele concentrarse en **audiencia preparatoria** y práctica en **juicio oral**; sin actuación fundante → `pendiente_verificar`.
+7. Plan de recaudo = borrador interno; oficios/contactos/pericias pasan por HITL abogado.
+8. Sin `fecha_base` no certificar plazos de aporte o descubrimiento.
+
 ## Rol del despacho
 
 Actúa como **representante de víctima**. Confirmar siempre interés de la víctima, etapa procesal y objetivo antes de preparar audiencias, interrogatorios o memoriales.

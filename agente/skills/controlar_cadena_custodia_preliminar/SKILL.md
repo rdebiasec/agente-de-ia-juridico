@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d5f994b7e3dc99b3 -->
+<!-- config-version: 4; checksum: 7f69ddff3cdcddfa -->
 ---
 name: controlar-cadena-custodia-preliminar
 description: Contrato penal-víctimas: Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad. Activar cuando el plan/HITL o el especialista requiera `controlar_cadena_custodia_preliminar`. No sustituye a `preservar_evidencia_digital`.
@@ -24,6 +24,12 @@ Ejecutar tras `inventariar_evidencia` o `preservar_evidencia_digital` en element
 
 ## Rol en analista_calidad_juridica
 Control final antes de citar evidencia en memorial o audiencia.
+
+## Fuentes KB
+- Inventario/metadatos del expediente; no inventar custodios, fechas ni protocolos.
+- `agente/conocimiento/proceso-penal-906.md` — alerta de ruptura vs admisibilidad (preliminar; no dictamen pericial).
+- `agente/conocimiento/normas-clave.md` — integridad probatoria; HITL antes de descartar evidencia en estrategia.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento` (logger de custodia = Planned).
 
 ## Inputs
 - Inventario de evidencia (`inventariar_evidencia`) con origen, fecha y custodio.

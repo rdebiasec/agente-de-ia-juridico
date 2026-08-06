@@ -30,6 +30,14 @@ Antes de citar CP o cerrar hipótesis:
 3. Separar hecho confirmado / narrado / inferido.
 4. No sembrar `art. N` sin verificación; usar `[PENDIENTE DE VERIFICAR]`.
 
+## Checklist evidencia / integridad (ancla skills O4)
+
+1. Leer checklist en `agente/conocimiento/proceso-penal-906.md` (evidencia/prueba).
+2. No inventar folios, hashes, custodios ni peritajes.
+3. Integridad > conveniencia: no “limpiar” metadatos ni alterar originales.
+4. Suficiencia = preliminar; nunca certeza judicial ni culpa de la víctima por brechas.
+5. Piezas o diligencias accionables (oficios, pericias, contacto a terceros) → HITL abogado.
+
 ## Advertencia / Regla de citación
 
 Verificar vigencia y modificaciones antes de citar artículos concretos en escritos.

@@ -120,6 +120,7 @@ def render_structured_output(output: Any) -> str:
         for label, key in (
             ("Brechas probatorias", "brechas_probatorias"),
             ("Plan de recaudo sugerido", "plan_recaudo_sugerido"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 99b01d20d7a15f6f -->
+<!-- config-version: 4; checksum: 4ffd5d70c26a88ed -->
 ---
 name: inventariar-evidencia
 description: Contrato penal-víctimas: Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `inventariar_evidencia`. No sustituye a `clasificar_tipo_prueba`.
@@ -20,6 +20,12 @@ Recopilar y numerar todos los elementos probatorios con metadatos y custodia pre
 
 ## Rol en analista_evidencia
 Base del inventario probatorio; antecede clasificación, matrices y brechas.
+## Fuentes KB
+- Expediente/relato del caso (existencia y descripción de soportes); no inventar folios ni hashes.
+- `agente/conocimiento/proceso-penal-906.md` — momento procesal del recaudo/descubrimiento (etapas 5–7) sin certificar admisibilidad.
+- `agente/conocimiento/normas-clave.md` — integridad, no revictimización y HITL antes de uso externo.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`, lecturas KB (`leer_area_derecho` / `leer_playbook_proceso` / `leer_normas_clave`).
+
 ## Inputs
 - Documentos, audios, mensajes, objetos aportados o en expediente.
 - Metadatos disponibles (fecha, origen, formato).
