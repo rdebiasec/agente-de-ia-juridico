@@ -1,5 +1,5 @@
 {
-  "version": "3.8",
+  "version": "3.9",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -413,6 +413,36 @@
       "expected_destination": "coordinador_caso",
       "expected_plan_required": false,
       "notes": "Cobertura A8: gate faltantes / gerencia permanece en POC."
+    },
+    {
+      "id": "tool-surface-ruta",
+      "category": "tool_surface",
+      "message": "Ubique la etapa procesal Ley 906 y proponga la ruta de intervención de la víctima.",
+      "expected_enabled_contains": [
+        "analista_ruta_procesal",
+        "analista_seguimiento_procesal",
+        "analista_audiencias",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Oleada X / F-12: vecinos ruta = seguimiento+audiencias+calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-tipicidad",
+      "category": "instruction_budget",
+      "agent_id": "analista_responsabilidad_tipicidad",
+      "max_chars": 12000,
+      "notes": "Oleada X: cierre F-07 budget tipicidad."
+    },
+    {
+      "id": "instruction-budget-ruta",
+      "category": "instruction_budget",
+      "agent_id": "analista_ruta_procesal",
+      "max_chars": 12000,
+      "notes": "Oleada X: cierre F-07 budget ruta 906."
     }
   ]
 }

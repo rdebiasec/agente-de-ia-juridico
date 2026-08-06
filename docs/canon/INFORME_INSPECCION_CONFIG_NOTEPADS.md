@@ -1,13 +1,14 @@
 # Informe vivo — Inspección config + notepads (F1–F4)
 
 **Plan inspección:** [`PLAN_INSPECCION_CONFIG_NOTEPADS.md`](PLAN_INSPECCION_CONFIG_NOTEPADS.md)  
-**Plan análisis por agente:** [`PLAN_ANALISIS_PROMPTS_SKILLS_HERRAMIENTAS.md`](PLAN_ANALISIS_PROMPTS_SKILLS_HERRAMIENTAS.md) (`A0–A8 COMPLETO` — pendiente oleada X cruzada)  
+**Plan análisis por agente:** [`PLAN_ANALISIS_PROMPTS_SKILLS_HERRAMIENTAS.md`](PLAN_ANALISIS_PROMPTS_SKILLS_HERRAMIENTAS.md) (`A0–A8 COMPLETO` + oleada **X COMPLETA** 2026-08-05)  
 **Fecha:** 2026-08-05  
 **E0:** Auto (humano)  
 **Modo:** panel IA personificado + síntesis E0  
-**Piloto:** `config/evals/agent_eval_cases.json` (v3.8)  
+**Piloto:** `config/evals/agent_eval_cases.json` (v3.9)  
 **Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; notepads F5 diferido por prioridad #6)  
-**Rama de trabajo A0–A8:** `cursor/analisis-a0-a1-prompts-skills`
+**Rama de trabajo A0–A8/X:** `cursor/analisis-a0-a1-prompts-skills`  
+**PR:** https://github.com/rdebiasec/agente-de-ia-juridico/pull/9
 
 ---
 
@@ -31,6 +32,7 @@
 | **A6** Deep calidad | **Hecho** (scorecard + A-cali + patches P0/P1 + eval) |
 | **A7** Deep seguimiento | **Hecho** (scorecard + A-segu + patches P0/P1 + eval) |
 | **A8** Deep coordinador | **Hecho** (scorecard + A-coord + O8 gerencia + patches P0/P1 + eval) |
+| **X** Cruzado | **Hecho** (A-xcut + Top 15 post-X + F-05 residual + F-06 CI + evals v3.9) |
 
 ---
 
@@ -49,7 +51,7 @@
 | A7 | seguimiento | PASS post-patch | ≥4 | ≥4 | O8 términos + eval surface |
 | A8 | coordinador | PASS post-patch | ≥4 | ≥4 | O8 gerencia + anclas POC + surface |
 
-**Cierre deep-dives:** A0–A8 **completos** en esta rama. Siguiente: oleada **X** (cruzado/Top 15), PR de la rama de análisis, F5 notepads, F4 auth portal.
+**Cierre deep-dives:** A0–A8 **completos**. Oleada **X** (cruzado/Top 15 + quick wins F-05/F-06/F-07 residual) **completa**. Backlog externo: F5 notepads Drive, F4 auth portal (servicio).
 
 ---
 
@@ -61,14 +63,14 @@
 | Prompts agentes | **10/10** | Roster canónico completo |
 | Guardrails I/O/T por agente | **10/10** (input+output+tools) | PASS cobertura archivos |
 | Guardrails globales g1–g10 | **10** | Presentes |
-| Eval cases | **44** (v3.7) | Routing/scope/HITL/PII + tool-surface/budget A0–A7 |
+| Eval cases | **49** (v3.9) | Routing/scope/HITL/PII + tool-surface/budget A0–A8 + X (ruta/tipicidad) |
 | Evals → `analista_ruta_procesal` | **1** (`route-ruta-906`) | **PASS** (A0) |
 | Evals → `analista_representacion_victimas` | **3** (`route-victimas`, `tool-surface-victimas`, `instruction-budget-victimas`) | **PASS** (A3) |
 | Evals → `analista_audiencias` | **3** (`route-audiencia`, `tool-surface-audiencias`, `instruction-budget-audiencias`) | **PASS** (A4) |
 | Evals → `redactor_documentos_juridicos` | **4** (`route-memorial`, `completeness-*`, `instruction-budget-redactor`, `tool-surface-redactor`) | **PASS** (A5) |
 | Evals → `analista_calidad_juridica` | **4+** (`route-calidad-via-plan`, `tool-surface-calidad`, `instruction-budget-calidad`, `quality-gate-*`) | **PASS** (A6) |
 | Evals → `analista_seguimiento_procesal` | **3** (`route-seguimiento`, `tool-surface-seguimiento`, `instruction-budget-seguimiento`) | **PASS** (A7) |
-| Referencias KB path en skills O1–O8 parcial | **77+** con Fuentes KB | **PASS** (A0–A7) |
+| Referencias KB path en skills O1–O8 | **81/81** con Fuentes KB | **PASS** (X: residual `controlar_separacion_hecho_inferencia`) |
 | KB `penal.md` | marco tipico operativo | **PASS** (A0) |
 | KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención/prep. audiencia/redacción/calidad/seguimiento | **PASS** (A0–A7) |
 | KB `normas-clave.md` | marco + derechos + checklist O5/O6/O7/O8 seguimiento | **PASS** (A3–A7) |
@@ -354,7 +356,7 @@ Los IDs `H-*` se conservan; la ejecución real de esos residuales se documenta c
 - **A-segu-***: ver scorecard A7
 - **A-coord-***: ver scorecard A8; G01–G09 reafirmados PASS
 
-**Tests (A0–A8 focused):** **39 passed** (`test_l03_structured_output`, `test_quality_gate_plan`, `test_guardrails_iot_coverage`, `test_prompt_skill_quality`, `test_skill_tools_registry`, `test_agent_evals`, `test_skill_config`) + evals suite **46/46**.
+**Tests (A0–A8 + X focused):** ver commit oleada X (`test_prompt_skill_quality`, `test_agent_evals`, `test_l03_structured_output`, `test_guardrails_iot_coverage`, `test_skill_config`, `test_fase3_plan_product`). Evals suite **v3.9**.
 
 **Siguiente oleada:** **X** — hallazgos cruzados + Top 15 (o PR de rama de análisis).
 
@@ -1368,7 +1370,7 @@ evals_a_ampliar: []
 
 ---
 
-## Cola E0 (post A0–A8)
+## Cola E0 (post A0–A8 + X)
 
 | # | ID | Acción | Sev | Estado |
 |---|---|---|---|---|
@@ -1382,34 +1384,151 @@ evals_a_ampliar: []
 | 8 | A-cali-* | Patches calidad O7 + eval | P1 | **Hecho** |
 | 9 | A-segu-* | Patches seguimiento O8 + eval | P1 | **Hecho** |
 | 10 | A-coord-* | Patches coordinador O8 gerencia + eval | P1 | **Hecho** |
-| 11 | — | **X** hallazgos cruzados + Top 15 | P1 | **Siguiente** |
-| 12 | — | PR rama `cursor/analisis-a0-a1-prompts-skills` | P1 | Recomendado |
-| 13 | — | F5 notepads / F4 auth portal | P2/P1 | Diferido |
+| 11 | A-xcut-* | **X** hallazgos cruzados + Top 15 + quick wins | P0/P1 | **Hecho** |
+| 12 | — | PR `#9` rama `cursor/analisis-a0-a1-prompts-skills` | P1 | **Abierto** |
+| 13 | — | F5 notepads / F4 auth portal | P2/P1 | **Diferido** (documentado) |
 
-### Evals gap (post A8)
+### Evals gap (post X)
 
-- **Hecho A7:** `route-seguimiento`, `tool-surface-seguimiento`, `instruction-budget-seguimiento` (evals v3.7)
-- **Hecho A8:** `route-coordinador-gerencia`, `tool-surface-coordinador` (evals v3.8); budget coordinador ya existía
-- **Pendiente P2:** groundedness eval por campos schema; oleada X
+- **Hecho A7/A8:** surfaces + budgets seguimiento/coordinador
+- **Hecho X:** `tool-surface-ruta`, `instruction-budget-tipicidad`, `instruction-budget-ruta` (evals v3.9)
+- **Pendiente P2:** groundedness por campos schema (`fuentes_kb` en runtime LLM); ampliar secundarios runtime (>3) si tokens lo permiten
 
-## Notas panel (personas) — post A0–A8
+## Notas panel (personas) — post A0–A8 + X
 
-- **L1:** Checklists O1–O8 (seguimiento + gerencia/POC) en KB; sin arts/radicados inventados.
-- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor/calidad/seguimiento/**coordinador** alineados.
-- **T5:** Superficies tipicidad…seguimiento/**coordinador** + budgets + quality-gate; suite 46/46.
-- **L3:** HITL redactor/audiencias/seguimiento cableado; POC una voz + plan para redacción.
+- **L1:** Checklists O1–O8 en KB; 81/81 Fuentes KB; sin arts/radicados inventados.
+- **T2:** Secundarios 2–3 por agente = techo token consciente; owned-sin-ancla = backlog P2 no conflicto de ownership.
+- **T5:** Suite evals v3.9; F-06 CI Fuentes KB + anti-`art. N`.
+- **L3:** HITL redactor/audiencias/seguimiento cableado; POC una voz.
 
-> Deep-dives A0–A8 cerrados en esta rama.
+> Deep-dives A0–A8 + oleada X cerrados en esta rama. PR abierto para revisión.
 
-**Siguiente ejecución sugerida:** **X** (cruzado) o **PR** de la rama de análisis.
+**Siguiente:** merge tras CI verde + revisión humana; F4/F5 fuera de este track.
+
+---
+
+## Oleada X — hallazgos cruzados (2026-08-05)
+
+### Matriz cruzada (síntesis)
+
+| Tema | Hallazgo | Severidad | Acción X |
+|---|---|---|---|
+| Duplicación / ownership | Skills owned sin ancla `_SECONDARY` (máx 3) en casi todos los agentes | P2 | **Aceptado** — techo tokens; documentado en matriz F1 |
+| Ownership POC vs MOVE | `POC_OWNED_SKILLS` + `_MOVED_SKILL_OWNERS` coherentes post-A8 | PASS | Ninguna |
+| Fuentes KB | 80/81 → residual `controlar_separacion_hecho_inferencia` | P0 | **Patched** (A-xcut-001) |
+| Evals F-07/F-12 | Tipicidad sin budget; ruta sin tool-surface dedicado | P1 | **Patched** (evals v3.9) |
+| CI F-06 | No había lint Fuentes KB / art. N en skills+prompts | P0 | **Patched** (`test_prompt_skill_quality`) |
+| HITL | Redactor/audiencias/seguimiento en `HITL_OUTPUT_AGENTS`; memorial vía plan | PASS | Ninguna |
+| Tools honesty | Skills ≠ function_tools; allowlist `REAL_FUNCTION_TOOL_NAMES` | PASS | Mantener F-11 |
+| Notepads F5 / Drive | Dual DB+Drive diferido | P2 | **Documentado** — no impl |
+| Auth portal F4 | Panel 12 servicio **NO LISTO** | P1 (servicio) | **Documentado** — track aparte |
+| Legacy prose | IDs/roles legacy residuales en skills O1/O2 | P2 | Lint `test_no_legacy_rol` ya existe; prosa OK |
+
+### Hallazgos A-xcut
+
+```yaml
+id: A-xcut-001
+severidad: P0
+bloque: skills
+archivo: agente/skills/controlar_separacion_hecho_inferencia/SKILL.md
+experto: L1+T2
+veredicto: PASS (patched)
+evidencia_repo: "único skill 81 sin ## Fuentes KB post A0–A8"
+evidencia_kb: "proceso-penal-906.md + normas-clave.md (hecho vs inferencia)"
+impacto: "brecha F-05 residual en skill transversal calidad/redactor"
+fix_aplicado: "Fuentes KB + bump v3 + sync .cursor"
+porque: "cerrar cobertura 81/81 antes de merge"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-xcut-002
+severidad: P0
+bloque: ci
+archivo: tests/test_prompt_skill_quality.py
+experto: T5+T3
+veredicto: PASS (patched)
+evidencia_repo: "F-06 planificado; solo planes tenían anti-art en test_fase3"
+evidencia_kb: "H-304 patrón"
+impacto: "regresión de siembra art. N o skills sin Fuentes KB invisible en CI"
+fix_aplicado: "test_all_skills_have_fuentes_kb + test_skills_and_agent_prompts_do_not_seed_bare_article_numbers"
+porque: "F-06 P0 del plan análisis"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-xcut-003
+severidad: P1
+bloque: evals
+archivo: config/evals/agent_eval_cases.json
+experto: T5
+veredicto: PASS (patched)
+evidencia_repo: "tipicidad sin instruction-budget; ruta sin tool-surface propio"
+evidencia_kb: "N/A"
+impacto: "hueco F-07/F-12 en dos agentes canónicos A0"
+fix_aplicado: "tool-surface-ruta + instruction-budget-tipicidad/ruta; version 3.9 (49 cases)"
+porque: "cierre matriz agente×eval mínima"
+evals_a_ampliar: ["groundedness schema campos fuentes_kb (P2)"]
+```
+
+```yaml
+id: A-xcut-004
+severidad: P2
+bloque: ownership
+archivo: src/agents/skill_catalog.py _SECONDARY_SKILLS
+experto: T2
+veredicto: PASS (aceptado)
+evidencia_repo: "owned skills sin ancla runtime en tipicidad/ruta/evidencia/víctimas/audiencias/redactor/calidad/seguimiento"
+evidencia_kb: "N/A"
+impacto: "primario+3 secundarios no cubren todo el Used By; riesgo de under-anchor en pasos raros"
+fix_aplicado: "ninguno (techo tokens documentado); rotar secundarios solo con evidencia de fallo"
+porque: "no hervir el océano; anclas actuales pasan scorecard ≥4"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-xcut-005
+severidad: P1
+bloque: servicio
+archivo: INFORME_AUDITORIA_12_ESPECIALISTAS_SERVICIO_WEB.md
+experto: E0
+veredicto: OPEN (fuera de track)
+evidencia_repo: "F4 auth portal NO LISTO; F5 notepads Drive diferido"
+evidencia_kb: "N/A"
+impacto: "bloquea escala comercial / memoria de caso, no calidad skills A0–A8"
+fix_aplicado: "documentado en Top 15; no implementar en esta PR"
+porque: "decisión #6 prioridad skills; F4/F5 tracks separados"
+evals_a_ampliar: []
+```
+
+### Top 15 acciones priorizadas (post-X)
+
+| # | ID | Acción | Sev | Estado |
+|---|---|---|---|---|
+| 1 | A-xcut-001 | Fuentes KB residual (81/81) | P0 | **Hecho** |
+| 2 | A-xcut-002 | CI F-06 Fuentes KB + anti-art. N | P0 | **Hecho** |
+| 3 | A-xcut-003 | Evals tipicidad/ruta budget+surface | P1 | **Hecho** |
+| 4 | F-11 | Ampliar registry honesty CI (Planned vs REAL) | P1 | Backlog |
+| 5 | F-03 | Script score skill quality (Fuentes KB/Used By) | P1 | Backlog |
+| 6 | F-04 | Diff prompt↔I/O/T↔schema (portal/script) | P1 | Backlog |
+| 7 | A-xcut-004 | Rotar secundarios runtime si evals fallan | P2 | Aceptado/monitor |
+| 8 | F-07+ | Groundedness `fuentes_kb` en outputs LLM | P2 | Backlog |
+| 9 | Legacy prose | Limpiar “gestor/calidad” residual O1/O2 | P2 | Backlog |
+| 10 | F-08/F5 | Notepads `{agent_id}.md` Drive+DB piloto | P2 | **Diferido** |
+| 11 | F4 | Auth portal / panel 12 servicio | P1 | **Diferido** (NO LISTO) |
+| 12 | F-10 | Portal checklist análisis por agente | P2 | Tras F4 |
+| 13 | F-13 | Plantilla notepad inspección sin PII | P1 | Tras F-08 |
+| 14 | PR #9 | Review humano + merge si CI verde | P1 | **Abierto** |
+| 15 | F-14 | Mantener sync skills en todo patch | P0 | Proceso (hecho en X) |
 
 ---
 
 ## Piloto evals (decisión #7) — actualizado
 
-- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `route-calidad-via-plan`, `route-seguimiento`, `route-coordinador-gerencia`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias/redactor/calidad/seguimiento/**coordinador**), budgets, `quality-gate-*`
+- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `route-calidad-via-plan`, `route-seguimiento`, `route-coordinador-gerencia`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias/redactor/calidad/seguimiento/coordinador/**ruta**), budgets (incl. tipicidad/ruta), `quality-gate-*`
 - **Hecho A8:** route + tool-surface coordinador (evals v3.8)
-- Backlog: groundedness eval campos tipicidad/evidencia/víctimas/audiencias/redactor/calidad/seguimiento (P2); notepads F-08 (P2)
+- **Hecho X:** `tool-surface-ruta` + `instruction-budget-tipicidad` + `instruction-budget-ruta` (evals **v3.9**, 49 cases)
+- Backlog P2: groundedness eval por campos schema `fuentes_kb`; notepads F-08; F4 auth portal
 
 ---
 

@@ -1,6 +1,6 @@
 # Plan — Análisis profundo por agente (prompts, skills, herramientas)
 
-**Estado:** `A0–A8 COMPLETO` (deep-dives cerrados 2026-08-05; pendiente oleada **X** cruzada / PR).  
+**Estado:** `A0–A8 COMPLETO` + oleada **X COMPLETA** (2026-08-05). PR: https://github.com/rdebiasec/agente-de-ia-juridico/pull/9  
 **Fecha:** 2026-08-05  
 **Editor humano (E0):** Auto / Cursor  
 **Modo panel:** agentes IA personificados (`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`) + E0 consolida  
@@ -284,9 +284,9 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **F-02** | Informe vivo unificado | Un solo lugar de scorecards/hallazgos | `docs/canon/INFORME_INSPECCION_CONFIG_NOTEPADS.md` (secciones A-*) o fork `INFORME_ANALISIS_POR_AGENTE.md` si crece | **P0** | E0 |
 | **F-03** | Scorecard automation (script) | Calcular ejes estructurales (Fuentes KB, Used By, No duplicar, tools allowlist) | `scripts/score_skill_quality.py` (nuevo) + CI opcional | **P1** | Inventario skills |
 | **F-04** | Diff view prompt ↔ I/O/T ↔ schema | Detectar drift enforceable | Portal `/auditoria` o script `scripts/diff_agent_contract.py` leyendo `prompts/`, `config/guardrails/agents/`, `schemas.py` | **P1** | F3 patrón tipicidad/ruta |
-| **F-05** | Sección obligatoria `## Fuentes KB` | Anclar procedural knowledge | Convención en `agente/skills/*/SKILL.md` (ya O1/O2); extender O3–O8 + lint | **P0** | Decisión #6 |
-| **F-06** | CI: citas KB / anti-alucinación de artículos | Fallar si skill/prompt/plan siembra `art.\s*\d+` sin path KB o marca pendiente | Extender `tests/test_fase3_plan_product.py` + nuevo test skills/prompts | **P0** | H-304 patrón |
-| **F-07** | Evals groundedness / procedural por agente | Regresión routing + campos etapa/fuentes_kb | `config/evals/agent_eval_cases.json` + `src/agents/evals.py` | **P0** | T5; ya hay tipicidad/ruta |
+| **F-05** | Sección obligatoria `## Fuentes KB` | Anclar procedural knowledge | Convención en `agente/skills/*/SKILL.md` (81/81 post-X) + lint CI | **P0 Hecho** | Decisión #6 |
+| **F-06** | CI: citas KB / anti-alucinación de artículos | Fallar si skill/prompt/plan siembra `art.\s*\d+` sin path KB o marca pendiente | `tests/test_prompt_skill_quality.py` + `test_fase3_plan_product.py` | **P0 Hecho** | H-304 patrón |
+| **F-07** | Evals groundedness / procedural por agente | Regresión routing + campos etapa/fuentes_kb | `config/evals/agent_eval_cases.json` v3.9 (route/surface/budget; groundedness schema = P2) | **P0 Parcial** | T5; tipicidad/ruta cerrados X |
 | **F-08** | Notepads `{agent_id}.md` Drive + DB | Memoria de caso por especialista para panel y despacho | Postgres `Expediente.bitacora` / `notas_trabajo`; espejo Drive `casos/<id>/notepads/`; `src/services/bitacora.py`, `drive_bitacora.py` | **P1** (impl) / **P2** sprint si skills primero | Decisión #2; DPA Google |
 | **F-09** | Cola revisión humana E0 | Lista de A-* aprobables con un comando | Sección “Cola E0” en informe + convención `aprobado, ejecuta A-tipi-001` | **P0** | Informe vivo |
 | **F-10** | Portal: checklist análisis por agente | UI para abogados auditores | Extender audit-portal / panel config (tras F-01) | **P2** | Portal auth; no bloquear análisis MD |
@@ -312,7 +312,7 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A6** | `aprobado, ejecuta A6` | Deep calidad + O7 calidad/citas | **Hecho** |
 | **A7** | `aprobado, ejecuta A7` | Deep seguimiento + O8 parcial + eval | **Hecho** |
 | **A8** | `aprobado, ejecuta A8` | Deep coordinador + O8 gerencia | **Hecho** |
-| **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |
+| **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 + quick wins F-05/F-06/F-07 | **Hecho** |
 | **E** | `aprobado, ejecuta A-…` (lista) | Patches + evals + tests | Por lote P0 |
 | **N** | `aprobado, ejecuta F-08` | Notepads Drive dual (piloto eval) | Tras o paralelo P2 |
 
@@ -357,12 +357,12 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 
 ## 13) Criterio de cierre
 
-Inspección por-agente **cerrada** cuando:
+Inspección por-agente **cerrada** (A0–A8 + X, 2026-08-05):
 
 1. Scorecards A0–A8 en informe vivo.  
-2. Hallazgos P0/P1 con KB o pendiente.  
-3. Matriz cruzada + Top acciones E0.  
-4. Backlog F-* priorizado (implementación aparte).  
+2. Hallazgos P0/P1 con KB o pendiente (A-* + A-xcut).  
+3. Matriz cruzada + Top 15 E0 post-X.  
+4. Backlog F-* priorizado (F4/F5 diferidos; F-06 CI hecho).  
 
 Mejora **cerrada por lote** cuando patches aprobados + tests/evals verdes + sync skills si aplica.
 
