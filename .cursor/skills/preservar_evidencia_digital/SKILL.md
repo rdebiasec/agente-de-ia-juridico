@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 685dd8c0d059dce6 -->
+<!-- config-version: 5; checksum: 9d11cc51db1fdb09 -->
 ---
 name: preservar-evidencia-digital
 description: Contrato penal-víctimas: Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `preservar_evidencia_digital`. No sustituye a `controlar_cadena_custodia_preliminar`.

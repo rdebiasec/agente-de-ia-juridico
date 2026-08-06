@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 28af5830ee6ad367 -->
+<!-- config-version: 4; checksum: 506b5fcc6ba5ce42 -->
 ---
 name: simular-escenarios-audiencia
 description: Contrato penal-víctimas: Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado. Activar cuando el plan/HITL o el especialista requiera `simular_escenarios_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.

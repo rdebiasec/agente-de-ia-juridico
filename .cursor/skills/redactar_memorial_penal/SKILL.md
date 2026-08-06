@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: a92eba6f59fc3eb3 -->
+<!-- config-version: 4; checksum: 64af5b00c57de6b9 -->
 ---
 name: redactar-memorial-penal
 description: Contrato penal-víctimas: Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones. Activar cuando el plan/HITL o el especialista requiera `redactar_memorial_penal`. No sustituye a `estructurar_hechos_fundamentos_solicitudes`.

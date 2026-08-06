@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c2482e24de4fecd5 -->
+<!-- config-version: 4; checksum: 3a6a8e2e26f1d1a6 -->
 ---
 name: generar-alertas-terminos-vencimientos
 description: Contrato penal-víctimas: Generar alertas de vencimientos próximos clasificadas por criticidad. Activar cuando el plan/HITL o el especialista requiera `generar_alertas_terminos_vencimientos`. No sustituye a `controlar_terminos_procesales_preliminares`.

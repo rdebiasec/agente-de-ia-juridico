@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: de9207935fd17b7f -->
+<!-- config-version: 4; checksum: 23a79d75cca81ca5 -->
 ---
 name: crear-reporte-estado-caso
 description: Contrato penal-víctimas: Generar reporte interno del estado del caso para el despacho (no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_reporte_estado_caso`. No sustituye a `preparar_resumen_operativo_cliente`.

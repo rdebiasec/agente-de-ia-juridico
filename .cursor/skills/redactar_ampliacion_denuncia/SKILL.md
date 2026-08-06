@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 3c012b778ef327d0 -->
+<!-- config-version: 4; checksum: 40aa26d1cd82a550 -->
 ---
 name: redactar-ampliacion-denuncia
 description: Contrato penal-víctimas: Redactar borrador de ampliación de denuncia con nuevos hechos o elementos. Activar cuando el plan/HITL o el especialista requiera `redactar_ampliacion_denuncia`. No sustituye a `redactar_memorial_penal`.

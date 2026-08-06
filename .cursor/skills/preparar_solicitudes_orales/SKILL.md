@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 72e95053a8a7fc7a -->
+<!-- config-version: 4; checksum: c130fb441ce1477d -->
 ---
 name: preparar-solicitudes-orales
 description: Contrato penal-víctimas: Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_solicitudes_orales`. No sustituye a `preparar_guion_intervencion_oral`.

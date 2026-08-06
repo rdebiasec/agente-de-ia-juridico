@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 07bae43d7367ac0e -->
+<!-- config-version: 4; checksum: 735956f09117e150 -->
 ---
 name: detectar-brechas-probatorias
 description: Contrato penal-víctimas: Identificar hechos relevantes sin prueba suficiente en el expediente. Activar cuando el plan/HITL o el especialista requiera `detectar_brechas_probatorias`. No sustituye a `crear_plan_recaudo_probatorio`.

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: f0735de07df7532c -->
+<!-- config-version: 4; checksum: 00fde74d4a491f04 -->
 ---
 name: crear-checklist-previo-audiencia
 description: Contrato penal-víctimas: Generar lista verificable de tareas y documentos antes de una audiencia penal. Activar cuando el plan/HITL o el especialista requiera `crear_checklist_previo_audiencia`. No sustituye a `identificar_objetivo_audiencia`.

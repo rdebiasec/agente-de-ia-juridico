@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 6b7ae5beca09a03e -->
+<!-- config-version: 4; checksum: 2f4728c964fd7e69 -->
 ---
 name: extraer-hechos-relevantes
 description: Contrato penal-víctimas: Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias. Activar cuando el plan/HITL o el especialista requiera `extraer_hechos_relevantes`. No sustituye a `crear_matriz_hecho_fue...

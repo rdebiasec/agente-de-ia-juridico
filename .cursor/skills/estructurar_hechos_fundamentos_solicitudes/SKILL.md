@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d1cc13086238439d -->
+<!-- config-version: 4; checksum: d4175a4038c1fa98 -->
 ---
 name: estructurar-hechos-fundamentos-solicitudes
 description: Contrato penal-víctimas: Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito. Activar cuando el plan/HITL o el especialista requiera `estructurar_hechos_fundamentos_solicitudes`. No sustituye a `redactar_memorial_penal`.

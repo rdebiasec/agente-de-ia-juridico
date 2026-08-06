@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 1e6dcaaac4dd708f -->
+<!-- config-version: 4; checksum: 3ca22a2680822415 -->
 ---
 name: descomponer-elementos-tipo-penal
 description: Contrato penal-víctimas: Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente. Activar cuando el plan/HITL o el especialista requiera `descomponer_elementos_tipo_penal`. No sustituye a `mapear_tipo_penal_hecho_...

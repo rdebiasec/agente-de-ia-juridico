@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 50a2cfa6c3839701 -->
+<!-- config-version: 4; checksum: aa0e975d53b00be6 -->
 ---
 name: detectar-riesgos-procesales
 description: Contrato penal-víctimas: Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_procesales`. No sustituye a `evaluar_oportunidad_procesal`.

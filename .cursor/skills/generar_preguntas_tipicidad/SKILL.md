@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 23b3569780bed194 -->
+<!-- config-version: 4; checksum: d6963558a4f54574 -->
 ---
 name: generar-preguntas-tipicidad
 description: Contrato penal-víctimas: Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_tipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
