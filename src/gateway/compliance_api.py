@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from src.auth.deps import get_web_subject_id, require_web_session
+from src.auth.deps import get_session_bound_subject_id
 from src.compliance.arco import erase_web_subject
 from src.compliance.consent import record_web_chat_consent
 from src.compliance.policy import CURRENT_POLICY_VERSION, DATA_CONTROLLER
@@ -39,9 +39,9 @@ async def record_web_consent(body: WebConsentBody, request: Request):
     return {"ok": True, "policy_version": CURRENT_POLICY_VERSION}
 
 
-@router.post("/arco-erase", dependencies=[Depends(require_web_session)])
-async def arco_erase_own_data(uid: str = Depends(get_web_subject_id)):
-    """Supresión ARCO de chat, trazas, borradores, expediente y planes del titular web."""
+@router.post("/arco-erase")
+async def arco_erase_own_data(uid: str = Depends(get_session_bound_subject_id)):
+    """Supresión ARCO solo del titular autenticado (cookie); ignora `?user_id=`."""
     result = erase_web_subject(uid, channel="web")
     if not result.get("ok"):
         raise HTTPException(status_code=400, detail=result.get("detail") or "No se pudo borrar.")

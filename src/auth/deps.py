@@ -130,3 +130,25 @@ async def get_web_subject_id(
     )
     request.state.web_subject_id = uid
     return uid
+
+
+async def get_session_bound_subject_id(
+    request: Request,
+    response: Response,
+    agente_session: str | None = Cookie(default=None),
+    settings: Settings = Depends(get_settings),
+) -> str:
+    """Sujeto solo desde cookie de sesión — nunca `?user_id=` (anti-BOLA / ARCO)."""
+    if not auth_enabled(settings.site_password):
+        raise HTTPException(
+            status_code=503,
+            detail="Operación sensible requiere autenticación web.",
+        )
+    uid = resolve_web_user_id(
+        settings,
+        agente_session,
+        client_fallback=None,
+        response=response,
+    )
+    request.state.web_subject_id = uid
+    return uid

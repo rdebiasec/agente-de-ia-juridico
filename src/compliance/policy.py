@@ -6,7 +6,7 @@ CURRENT_POLICY_VERSION = "2026-07-07"
 
 DATA_CONTROLLER = {
     "name": "Firma1 de Abogados LexiaTek",
-    "contact_email": "contacto@lexiatek.com",
+    "contact_email": "privacidad@dbxsolutions.com",
     "country": "Colombia",
     "retention_audit_days": 365 * 3,
     "retention_chat_days": 365 * 5,
