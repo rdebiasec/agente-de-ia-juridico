@@ -94,6 +94,32 @@ def test_parse_skill_md_prefers_function_tools_section():
     assert "rag_plantillas_search" not in tools
 
 
+def test_planned_section_documents_non_real_escape_hatch():
+    """F-11: Planned puede listar aspiracionales; Function tools no."""
+    from src.mcp.tools import REAL_FUNCTION_TOOL_NAMES
+
+    planned_only_ok = 0
+    for path in sorted(SKILLS_DIR.glob("*/SKILL.md")):
+        text = path.read_text(encoding="utf-8")
+        body = text.split("---", 2)[-1] if "---" in text[:120] else text
+        m = re.search(r"## Tools\n(.*?)(?=\n## |\Z)", body, re.S)
+        if not m:
+            continue
+        pl = re.search(
+            r"### Planned capabilities[^\n]*\n(.*?)(?=\n### |\Z)", m.group(1), re.S
+        )
+        if not pl:
+            continue
+        for line in pl.group(1).splitlines():
+            line = line.strip()
+            if not line.startswith("-"):
+                continue
+            for name in re.findall(r"`([^`]+)`", line):
+                if name not in REAL_FUNCTION_TOOL_NAMES:
+                    planned_only_ok += 1
+    assert planned_only_ok >= 1
+
+
 def test_cursor_mirror_optional_sync_script_exists():
     script = ROOT / "scripts" / "sync_skills_agente_a_cursor.py"
     assert script.is_file()

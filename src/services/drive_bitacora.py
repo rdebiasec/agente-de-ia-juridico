@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 _DRIVE_SCOPE = ("https://www.googleapis.com/auth/drive",)
 _CASOS_FOLDER_NAME = "casos"
 _BITACORA_FILENAME = "bitacora.md"
+_NOTEPADS_FOLDER_NAME = "notepads"
 _FOLDER_MIME = "application/vnd.google-apps.folder"
 _MD_MIME = "text/markdown"
 
@@ -230,40 +231,50 @@ def upsert_bitacora_md(
     case_folder_id: str | None = None,
 ) -> bool:
     """Crea o actualiza bitacora.md en la carpeta del caso."""
-    try:
-        from googleapiclient.http import MediaIoBaseUpload
-    except ImportError:
-        logger.warning("Drive Lexiatek: falta googleapiclient")
-        return False
-
     svc = service or build_drive_service()
     if svc is None:
         return False
     folder_id = case_folder_id or ensure_case_folder(session_id, service=svc)
     if not folder_id:
         return False
-
-    file_id = _list_children(
-        svc, parent_id=folder_id, name=_BITACORA_FILENAME, mime_type=None
+    return _upsert_md_file(
+        svc, parent_id=folder_id, filename=_BITACORA_FILENAME, content=content
     )
+
+
+def _upsert_md_file(
+    service,
+    *,
+    parent_id: str,
+    filename: str,
+    content: str,
+) -> bool:
+    """Crea o actualiza un .md bajo parent_id."""
+    try:
+        from googleapiclient.http import MediaIoBaseUpload
+    except ImportError:
+        logger.warning("Drive Lexiatek: falta googleapiclient")
+        return False
+
+    file_id = _list_children(service, parent_id=parent_id, name=filename, mime_type=None)
     media = MediaIoBaseUpload(
         io.BytesIO((content or "").encode("utf-8")),
         mimetype=_MD_MIME,
         resumable=False,
     )
     if file_id:
-        svc.files().update(
+        service.files().update(
             fileId=file_id,
             media_body=media,
             supportsAllDrives=True,
         ).execute()
     else:
         meta = {
-            "name": _BITACORA_FILENAME,
-            "parents": [folder_id],
+            "name": filename,
+            "parents": [parent_id],
             "mimeType": _MD_MIME,
         }
-        svc.files().create(
+        service.files().create(
             body=meta,
             media_body=media,
             fields="id",
@@ -272,8 +283,76 @@ def upsert_bitacora_md(
     return True
 
 
+def upsert_notepad_md(
+    session_id: str,
+    agent_id: str,
+    content: str,
+    *,
+    service=None,
+    case_folder_id: str | None = None,
+) -> bool:
+    """Crea o actualiza notepads/{agent_id}.md en la carpeta del caso."""
+    from src.agents.agent_ids import resolve_agent_id
+
+    aid = resolve_agent_id(agent_id) or (agent_id or "").strip()
+    if not aid:
+        return False
+    filename = f"{aid}.md"
+    svc = service or build_drive_service()
+    if svc is None:
+        return False
+    folder_id = case_folder_id or ensure_case_folder(session_id, service=svc)
+    if not folder_id:
+        return False
+    notepads_id = ensure_child_folder(
+        svc, parent_id=folder_id, name=_NOTEPADS_FOLDER_NAME
+    )
+    return _upsert_md_file(
+        svc, parent_id=notepads_id, filename=filename, content=content
+    )
+
+
+def sync_expediente_notepads(session_id: str, *, agent_ids: list[str] | None = None) -> int:
+    """Best-effort: escribe notepads/{agent_id}.md. Devuelve cuántos OK. Nunca raise."""
+    sid = (session_id or "").strip()
+    if not sid or not drive_configured():
+        return 0
+    try:
+        from src.gateway.expediente import expediente_store
+        from src.services.notepads import NOTEPAD_AGENT_IDS, render_notepad_md
+
+        exp = expediente_store.get(sid)
+        if exp is None:
+            return 0
+        svc = build_drive_service()
+        if svc is None:
+            return 0
+        folder_id = ensure_case_folder(sid, service=svc)
+        if not folder_id:
+            return 0
+        targets = list(agent_ids) if agent_ids else list(NOTEPAD_AGENT_IDS)
+        bitacora = list(getattr(exp, "bitacora", None) or [])
+        ok_n = 0
+        for aid in targets:
+            content = render_notepad_md(
+                aid, session_id=sid, bitacora=bitacora, eval_or_session=sid
+            )
+            if upsert_notepad_md(
+                sid, aid, content, service=svc, case_folder_id=folder_id
+            ):
+                ok_n += 1
+        if ok_n:
+            logger.info(
+                "Drive Lexiatek: notepads sync OK session=%s count=%s", sid, ok_n
+            )
+        return ok_n
+    except Exception:
+        logger.exception("Drive Lexiatek: error sync notepads session=%s", sid)
+        return 0
+
+
 def sync_expediente_bitacora(session_id: str) -> bool:
-    """Best-effort: reescribe bitacora.md desde el expediente. Nunca raise."""
+    """Best-effort: reescribe bitacora.md (+ notepads) desde el expediente. Nunca raise."""
     sid = (session_id or "").strip()
     if not sid:
         return False
@@ -288,6 +367,11 @@ def sync_expediente_bitacora(session_id: str) -> bool:
             return False
         content = render_bitacora_md(exp, session_id=sid)
         ok = upsert_bitacora_md(sid, content)
+        # F5: espejo por especialista (best-effort; no falla bitácora maestra).
+        try:
+            sync_expediente_notepads(sid)
+        except Exception:
+            logger.exception("Drive Lexiatek: notepads omitidos session=%s", sid)
         if ok:
             logger.info("Drive Lexiatek: sync OK session=%s", sid)
         else:

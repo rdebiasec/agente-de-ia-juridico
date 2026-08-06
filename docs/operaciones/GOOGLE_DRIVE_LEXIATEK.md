@@ -86,8 +86,19 @@ Lexiatek/
   casos/
     web-smoke-001/
       bitacora.md
+      notepads/                 # F5 — un MD por agent_id
+        coordinador_caso.md
+        analista_cronologia_hechos.md
+        …
     _smoke/
       bitacora.md
+```
+
+Notepads por especialista (contrato + sync): [`RUNBOOK_NOTEPADS_DRIVE.md`](./RUNBOOK_NOTEPADS_DRIVE.md).
+
+```bash
+python scripts/sync_drive_notepads.py --local-only   # sin API
+python scripts/sync_drive_notepads.py                # con SA
 ```
 
 ## Troubleshooting
