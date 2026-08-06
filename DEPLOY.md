@@ -371,14 +371,16 @@ Cada archivo lleva `<!-- config-version: N; checksum: X -->`. Esa marca distingu
 | Estado | Significado | Resuelve |
 |--------|-------------|----------|
 | `in_sync` | archivo y DB coinciden | — |
-| `file_ahead` | editaste el `.md` | `--apply` |
+| `file_ahead` | editaste el `.md`, o header `vN` > versión activa en DB (sin baseline en prod) | `--apply` |
 | `db_ahead` | el portal cambió después | `--export` |
-| `conflict` | ambos cambiaron | decisión manual |
-| `unknown` | archivo sin header (falta baseline) | `--export` una vez |
+| `conflict` | ambos cambiaron desde un header válido `<` DB | decisión manual |
+| `unknown` | archivo sin header | añadir header con `--export` una vez |
 
 Códigos de salida: `0` sincronizado · `1` hay diferencias · `2` conflicto o error (nada se escribió).
 
-**Producción (GitOps).** El workflow `.github/workflows/sync-config.yml` corre en cada push a `main` que toque `agente/prompts/**`, `config/guardrails/**` o `**/SKILL.md`: aplica los archivos a la DB de Render (`PROD_DATABASE_URL`) y commitea los headers actualizados. Ante conflicto **falla sin escribir**; resuélvalo con `--export` o editando en el portal. Los agentes se reconstruyen por turno, así que el cambio aplica al siguiente mensaje.
+**Headers adelantados (GitOps).** Si el archivo declara `config-version` mayor que la activa en prod (típico tras editar contra otra DB o conservar headers de una rama de análisis), el sync lo trata como `file_ahead` y **el archivo gana**. Cualquier edición intermedia solo en el portal para ese ítem se sobrescribe; rollback en Historial de `/auditoria/`. No uses `--allow-conflicts` para este caso: ese flag **omite** los bloqueados y no los publica.
+
+**Producción (GitOps).** El workflow `.github/workflows/sync-config.yml` corre en cada push a `main` que toque `agente/prompts/**`, `config/guardrails/**` o `**/SKILL.md`: aplica los archivos a la DB de Render (`PROD_DATABASE_URL`) y commitea los headers actualizados. Ante `conflict` real **falla sin escribir**; resuélvalo con `--export` o editando en el portal. También: `workflow_dispatch` con `dry_run=false`. Los agentes se reconstruyen por turno, así que el cambio aplica al siguiente mensaje.
 
 ---
 

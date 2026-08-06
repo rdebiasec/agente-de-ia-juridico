@@ -122,9 +122,14 @@ def diff_item(kind: str, key: str) -> ConfigDiff:
     if header_version == db_version:
         return build(STATUS_FILE_AHEAD, "el archivo fue editado después del último sync")
     if header_version > db_version:
+        # Headers inflados (p. ej. historial local o rama de análisis) sin fila
+        # baseline en prod: GitOps trata el archivo como fuente de verdad.
+        # Si el portal editó el mismo ítem, esa edición se sobrescribe al aplicar;
+        # rollback vía Historial en /auditoria/.
         return build(
-            STATUS_UNKNOWN,
-            f"header v{header_version} es mayor que la versión activa v{db_version}",
+            STATUS_FILE_AHEAD,
+            f"header v{header_version} adelantado vs DB v{db_version} "
+            "(sin baseline en prod; se trata como edición de archivo)",
         )
 
     base = repo.get_config_version(kind, key, header_version)
