@@ -204,7 +204,7 @@ flowchart TD
 | **F2** | L1 L2 L3 + T2 | Hallazgos skills por oleada O1→O8 con citas KB | Scorecard; P0 primero |
 | **F3** | T1 T3 T4 | Hallazgos prompts / I/O/T / HITL | Paridad catalog |
 | **F4** | S1–S12 | Checklist 1 día + informe servicio | PASS/PARTIAL/FAIL |
-| **F5** | T6 T7 | Spec notepads + gaps vs `drive_bitacora.py` | Diseño dual Drive+DB |
+| **F5** | T6 T7 | Spec notepads + gaps vs `drive_bitacora.py` | **En progreso** — plantillas + sync + runbook |
 | **F6** | E0 | Top 15 acciones; separar skills vs servicio vs Drive | Documento síntesis |
 | **F7** | Operador humano | Lista `aprobado, ejecuta H-xxx` | **Sin esto no hay patches** |
 | **F8** | E0 + T5 | Edits canónicos skills/prompts + bump version + sync cursor + tests/evals | Prioridad #6 |

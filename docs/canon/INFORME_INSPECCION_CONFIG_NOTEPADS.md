@@ -6,9 +6,10 @@
 **E0:** Auto (humano)  
 **Modo:** panel IA personificado + síntesis E0  
 **Piloto:** `config/evals/agent_eval_cases.json` (v3.9)  
-**Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; notepads F5 diferido por prioridad #6)  
-**Rama de trabajo A0–A8/X:** `cursor/analisis-a0-a1-prompts-skills`  
-**PR:** https://github.com/rdebiasec/agente-de-ia-juridico/pull/9
+**Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; **F5 notepads en progreso** — plantillas + sync)  
+**Rama de trabajo A0–A8/X:** `cursor/analisis-a0-a1-prompts-skills` (merged PR #9)  
+**PR análisis:** https://github.com/rdebiasec/agente-de-ia-juridico/pull/9  
+**Rama F5 / Top-15:** `cursor/f5-notepads-top15`
 
 ---
 
@@ -21,7 +22,7 @@
 | F2 O2 Ruta 906 | **Hecho** (hallazgos + patches H-201…H-203) |
 | F3 Prompts/guardrails/HITL | **Hecho** (H-301…H-304) |
 | F4 Panel 12 servicio | **Hecho — NO LISTO** (ver `INFORME_AUDITORIA_12_ESPECIALISTAS_SERVICIO_WEB.md`) |
-| F5 Spec notepads | Diferido (prioridad skills) |
+| F5 Spec notepads | **En progreso** — plantillas `agente/notepads/`, render DB, sync Drive, runbook |
 | F6 Top acciones E0 | **Hecho** |
 | **A0** Re-score tipicidad + ruta | **Hecho** (residuales A-tipi / A-ruta + patches P0/P1) |
 | **A1** Deep cronología | **Hecho** (scorecard + A-crono + patches P0/P1) |
@@ -51,7 +52,7 @@
 | A7 | seguimiento | PASS post-patch | ≥4 | ≥4 | O8 términos + eval surface |
 | A8 | coordinador | PASS post-patch | ≥4 | ≥4 | O8 gerencia + anclas POC + surface |
 
-**Cierre deep-dives:** A0–A8 **completos**. Oleada **X** (cruzado/Top 15 + quick wins F-05/F-06/F-07 residual) **completa**. Backlog externo: F5 notepads Drive, F4 auth portal (servicio).
+**Cierre deep-dives:** A0–A8 **completos**. Oleada **X** **completa** (PR #9 merged). Track F5 notepads + quick wins P1 (F-03/F-04/F-11) en `cursor/f5-notepads-top15`. F4 auth portal = track aparte.
 
 ---
 
@@ -1508,17 +1509,17 @@ evals_a_ampliar: []
 | 1 | A-xcut-001 | Fuentes KB residual (81/81) | P0 | **Hecho** |
 | 2 | A-xcut-002 | CI F-06 Fuentes KB + anti-art. N | P0 | **Hecho** |
 | 3 | A-xcut-003 | Evals tipicidad/ruta budget+surface | P1 | **Hecho** |
-| 4 | F-11 | Ampliar registry honesty CI (Planned vs REAL) | P1 | Backlog |
-| 5 | F-03 | Script score skill quality (Fuentes KB/Used By) | P1 | Backlog |
-| 6 | F-04 | Diff prompt↔I/O/T↔schema (portal/script) | P1 | Backlog |
+| 4 | F-11 | Ampliar registry honesty CI (Planned vs REAL) | P1 | **Hecho** (test overlap + Planned escape) |
+| 5 | F-03 | Script score skill quality (Fuentes KB/Used By) | P1 | **Hecho** (`scripts/score_skill_quality.py`) |
+| 6 | F-04 | Diff prompt↔I/O/T↔schema (portal/script) | P1 | **Hecho** (`scripts/diff_agent_contract.py`) |
 | 7 | A-xcut-004 | Rotar secundarios runtime si evals fallan | P2 | Aceptado/monitor |
-| 8 | F-07+ | Groundedness `fuentes_kb` en outputs LLM | P2 | Backlog |
+| 8 | F-07+ | Groundedness `fuentes_kb` en outputs LLM | P2 | **Parcial** (schema CI; runtime LLM = backlog) |
 | 9 | Legacy prose | Limpiar “gestor/calidad” residual O1/O2 | P2 | Backlog |
-| 10 | F-08/F5 | Notepads `{agent_id}.md` Drive+DB piloto | P2 | **Diferido** |
-| 11 | F4 | Auth portal / panel 12 servicio | P1 | **Diferido** (NO LISTO) |
+| 10 | F-08/F5 | Notepads `{agent_id}.md` Drive+DB piloto | P2 | **En progreso** (plantillas + sync + runbook) |
+| 11 | F4 | Auth portal / panel 12 servicio | P1 | **Diferido** (NO LISTO; track aparte) |
 | 12 | F-10 | Portal checklist análisis por agente | P2 | Tras F4 |
-| 13 | F-13 | Plantilla notepad inspección sin PII | P1 | Tras F-08 |
-| 14 | PR #9 | Review humano + merge si CI verde | P1 | **Abierto** |
+| 13 | F-13 | Plantilla notepad inspección sin PII | P1 | **Hecho** (`agente/notepads/_TEMPLATE.md`) |
+| 14 | PR #9 | Review humano + merge si CI verde | P1 | **Merged** |
 | 15 | F-14 | Mantener sync skills en todo patch | P0 | Proceso (hecho en X) |
 
 ---

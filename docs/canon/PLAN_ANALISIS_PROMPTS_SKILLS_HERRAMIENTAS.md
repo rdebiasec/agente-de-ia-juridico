@@ -282,17 +282,17 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 |---|---|---|---|---|---|
 | **F-01** | Checklist deep-dive por agente (MD template) | Estandarizar auditoría A0–A8 | `docs/canon/templates/CHECKLIST_ANALISIS_AGENTE.md` (crear en ejecución) + sección en informe vivo | **P0** | Plan aprobado |
 | **F-02** | Informe vivo unificado | Un solo lugar de scorecards/hallazgos | `docs/canon/INFORME_INSPECCION_CONFIG_NOTEPADS.md` (secciones A-*) o fork `INFORME_ANALISIS_POR_AGENTE.md` si crece | **P0** | E0 |
-| **F-03** | Scorecard automation (script) | Calcular ejes estructurales (Fuentes KB, Used By, No duplicar, tools allowlist) | `scripts/score_skill_quality.py` (nuevo) + CI opcional | **P1** | Inventario skills |
-| **F-04** | Diff view prompt ↔ I/O/T ↔ schema | Detectar drift enforceable | Portal `/auditoria` o script `scripts/diff_agent_contract.py` leyendo `prompts/`, `config/guardrails/agents/`, `schemas.py` | **P1** | F3 patrón tipicidad/ruta |
+| **F-03** | Scorecard automation (script) | Calcular ejes estructurales (Fuentes KB, Used By, No duplicar, tools allowlist) | `scripts/score_skill_quality.py` + tests Top-15 | **P1 Hecho** | Inventario skills |
+| **F-04** | Diff view prompt ↔ I/O/T ↔ schema | Detectar drift enforceable | `scripts/diff_agent_contract.py` | **P1 Hecho** | F3 patrón tipicidad/ruta |
 | **F-05** | Sección obligatoria `## Fuentes KB` | Anclar procedural knowledge | Convención en `agente/skills/*/SKILL.md` (81/81 post-X) + lint CI | **P0 Hecho** | Decisión #6 |
 | **F-06** | CI: citas KB / anti-alucinación de artículos | Fallar si skill/prompt/plan siembra `art.\s*\d+` sin path KB o marca pendiente | `tests/test_prompt_skill_quality.py` + `test_fase3_plan_product.py` | **P0 Hecho** | H-304 patrón |
-| **F-07** | Evals groundedness / procedural por agente | Regresión routing + campos etapa/fuentes_kb | `config/evals/agent_eval_cases.json` v3.9 (route/surface/budget; groundedness schema = P2) | **P0 Parcial** | T5; tipicidad/ruta cerrados X |
-| **F-08** | Notepads `{agent_id}.md` Drive + DB | Memoria de caso por especialista para panel y despacho | Postgres `Expediente.bitacora` / `notas_trabajo`; espejo Drive `casos/<id>/notepads/`; `src/services/bitacora.py`, `drive_bitacora.py` | **P1** (impl) / **P2** sprint si skills primero | Decisión #2; DPA Google |
+| **F-07** | Evals groundedness / procedural por agente | Regresión routing + campos etapa/fuentes_kb | `config/evals/…` v3.9 + test schema `fuentes_kb` (runtime LLM = P2) | **P0 Parcial** | T5; tipicidad/ruta cerrados X |
+| **F-08** | Notepads `{agent_id}.md` Drive + DB | Memoria de caso por especialista | `agente/notepads/`, `src/services/notepads.py`, `drive_bitacora.sync_expediente_notepads`, runbook | **P1 En progreso** | Decisión #2; DPA Google |
 | **F-09** | Cola revisión humana E0 | Lista de A-* aprobables con un comando | Sección “Cola E0” en informe + convención `aprobado, ejecuta A-tipi-001` | **P0** | Informe vivo |
 | **F-10** | Portal: checklist análisis por agente | UI para abogados auditores | Extender audit-portal / panel config (tras F-01) | **P2** | Portal auth; no bloquear análisis MD |
-| **F-11** | Registry honesty check en CI | Skills no listan tools fuera de `REAL_FUNCTION_TOOL_NAMES` salvo Planned | `tests/test_skill_tools_registry.py` (ampliar) | **P1** | `src/mcp/tools.py` |
+| **F-11** | Registry honesty check en CI | Skills no listan tools fuera de `REAL_FUNCTION_TOOL_NAMES` salvo Planned | `tests/test_skill_tools_registry.py` + overlap Function/Planned | **P1 Hecho** | `src/mcp/tools.py` |
 | **F-12** | Matriz agente×eval en CI | Fallar si agente canónico sin al menos 1 eval (excepto excepción documentada) | `tests/test_agent_evals.py` o nuevo | **P1** | Gap seguimiento (víctimas cerrado A3) |
-| **F-13** | Plantilla notepad de inspección | Expertos dejan notas por agente sin PII real | Drive `casos/eval-<id>/notepads/{agent_id}.md` + contrato §4.5 plan notepads | **P1** | F-08 diseño |
+| **F-13** | Plantilla notepad de inspección | Expertos dejan notas por agente sin PII real | `agente/notepads/_TEMPLATE.md` + `{agent_id}.md`; Drive vía sync | **P1 Hecho** | F-08 diseño |
 | **F-14** | Sync skills agente→cursor en gate de patch | Evitar divergencia espejo | `scripts/sync_skills_agente_a_cursor.py` (ya existe; checklist cierre) | **P0** | Patches skills |
 | **F-15** | KB enrichment track | `penal.md` / 906 / normas con checklists sin arts inventados | `agente/conocimiento/*` | **P0** | L1; ya iniciado O1 |
 
