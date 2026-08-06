@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 9def3638a96efeba -->
+<!-- config-version: 3; checksum: 1c823b9358e14ae3 -->
 ---
 name: analizar-intervencion-victima
 description: Contrato penal-víctimas: Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906. Activar cuando el plan/HITL o el especialista requiera `analizar_intervencion_victima`. No sustituye a `preparar_guion_intervencion_oral`.
@@ -25,6 +25,11 @@ Marco procesal de intervención (qué puede pedir la víctima y cuándo). La pre
 ## Rol en analista_audiencias
 Usar este marco como base para guion, preguntas y solicitudes orales.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, rol representante, checklist intervención víctima.
+- `agente/conocimiento/normas-clave.md` — participación y protección; sin inventar facultades.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+
 ## Inputs
 - Tipo de audiencia o actuación (fecha si consta).
 - Etapa procesal.
@@ -39,6 +44,7 @@ Usar este marco como base para guion, preguntas y solicitudes orales.
 - Etiqueta: `MARCO PROCESAL — PREPARACIÓN TÁCTICA EN OTRO AGENTE`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar actuación o audiencia específica y marco Ley 906.
 2. Determinar formas de intervención de la víctima procedentes.
 3. Proponer contenido y momento de la intervención.

@@ -1,6 +1,6 @@
 # Plan — Análisis profundo por agente (prompts, skills, herramientas)
 
-**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2; 2026-08-05).  
+**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3; 2026-08-05).  
 **Fecha:** 2026-08-05  
 **Editor humano (E0):** Auto / Cursor  
 **Modo panel:** agentes IA personificados (`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`) + E0 consolida  
@@ -109,7 +109,7 @@ Fuente: `scripts/lib/catalogo_aprobacion.py` + `src/agents/skill_catalog.py` + `
 | **A0b** | Re-score | `analista_ruta_procesal` | Verificar O2+F3; cubrir eval ya añadido | O2 | Patches hechos; scorecard post-patch |
 | **A1** | Deep | `analista_cronologia_hechos` | Siguiente gap procedural (hechos → tipicidad) | O3 | **Hecho** |
 | **A2** | Deep | `analista_evidencia` | Cadena hecho-prueba | O4 | **Hecho** |
-| **A3** | Deep | `analista_representacion_victimas` | Hueco eval + derechos víctima | O5 | Pendiente profundo |
+| **A3** | Deep | `analista_representacion_victimas` | Hueco eval + derechos víctima | O5 | **Hecho** |
 | **A4** | Deep | `analista_audiencias` | Oralidad / HITL | O6 | Pendiente profundo |
 | **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | Pendiente profundo |
 | **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | Pendiente profundo |
@@ -290,7 +290,7 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **F-09** | Cola revisión humana E0 | Lista de A-* aprobables con un comando | Sección “Cola E0” en informe + convención `aprobado, ejecuta A-tipi-001` | **P0** | Informe vivo |
 | **F-10** | Portal: checklist análisis por agente | UI para abogados auditores | Extender audit-portal / panel config (tras F-01) | **P2** | Portal auth; no bloquear análisis MD |
 | **F-11** | Registry honesty check en CI | Skills no listan tools fuera de `REAL_FUNCTION_TOOL_NAMES` salvo Planned | `tests/test_skill_tools_registry.py` (ampliar) | **P1** | `src/mcp/tools.py` |
-| **F-12** | Matriz agente×eval en CI | Fallar si agente canónico sin al menos 1 eval (excepto excepción documentada) | `tests/test_agent_evals.py` o nuevo | **P1** | Gaps víctimas/seguimiento |
+| **F-12** | Matriz agente×eval en CI | Fallar si agente canónico sin al menos 1 eval (excepto excepción documentada) | `tests/test_agent_evals.py` o nuevo | **P1** | Gap seguimiento (víctimas cerrado A3) |
 | **F-13** | Plantilla notepad de inspección | Expertos dejan notas por agente sin PII real | Drive `casos/eval-<id>/notepads/{agent_id}.md` + contrato §4.5 plan notepads | **P1** | F-08 diseño |
 | **F-14** | Sync skills agente→cursor en gate de patch | Evitar divergencia espejo | `scripts/sync_skills_agente_a_cursor.py` (ya existe; checklist cierre) | **P0** | Patches skills |
 | **F-15** | KB enrichment track | `penal.md` / 906 / normas con checklists sin arts inventados | `agente/conocimiento/*` | **P0** | L1; ya iniciado O1 |
@@ -305,7 +305,7 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A0** | `aprobado, ejecuta A0` | Re-score tipicidad + ruta; residuales A-tipi / A-ruta | 0.5 turno |
 | **A1** | `aprobado, ejecuta A1` | Deep `analista_cronologia_hechos` + skills O3 | **Hecho** |
 | **A2** | `aprobado, ejecuta A2` | Deep evidencia + O4 | **Hecho** |
-| **A3** | `aprobado, ejecuta A3` | Deep víctimas + O5 + eval nuevo | 1 turno |
+| **A3** | `aprobado, ejecuta A3` | Deep víctimas + O5 + eval nuevo | **Hecho** |
 | **A4–A6** | `aprobado, ejecuta A4` … | Audiencias → redactor → calidad | 1 turno c/u |
 | **A7–A8** | `aprobado, ejecuta A7` … | Seguimiento → coordinador | 0.5–1 c/u |
 | **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |

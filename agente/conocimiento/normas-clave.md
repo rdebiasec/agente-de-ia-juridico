@@ -21,6 +21,19 @@
 - Sustentar cada recomendación en etapa procesal, evidencia disponible y riesgo.
 - Tipicidad y ruta = preliminares; piezas accionables pasan por HITL/abogado.
 
+## Checklist representación de víctimas (ancla skills O5)
+
+Uso operativo para `analista_representacion_victimas` (sin inventar artículos):
+
+1. Leer este archivo y `agente/conocimiento/proceso-penal-906.md` (rol + checklist intervención).
+2. Separar **intereses** (expectativas de la víctima) de **derechos** procesales (participación, información, protección, reparación).
+3. Teoría del caso = preliminar; etiqueta implícita: aprobación abogado (y víctima cuando aplique).
+4. Daño/afectación = narrado o documentado; **no es peritaje**; sin soporte → pendiente.
+5. Enfoque diferencial: solo factores documentados (edad, género, discapacidad, etnia, etc.); no inferir ni estigmatizar.
+6. Riesgo de revictimización: lenguaje que culpe/minimice/exponga; detalle gráfico innecesario → mitigar o escalar.
+7. Objetivos priorizados sin prometer resultados judiciales; trade-offs explícitos para el abogado.
+8. Comunicación al cliente o pieza accionable → HITL abogado.
+
 ## Checklist tipicidad (ancla para skills O1)
 
 Antes de citar CP o cerrar hipótesis:

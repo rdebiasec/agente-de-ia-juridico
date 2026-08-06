@@ -88,10 +88,12 @@ def test_render_new_schemas_is_prose_not_raw_json():
             teoria_caso="Hechos de violencia intrafamiliar",
             derechos_relevantes=["integridad", "acceso a la justicia"],
             riesgos_revictimizacion=["Declaraciones reiteradas"],
+            fuentes_kb=["agente/conocimiento/normas-clave.md"],
         )
     )
     assert "Teoría del caso" in vict_txt
     assert "integridad" in vict_txt
+    assert "normas-clave.md" in vict_txt
 
     aud_txt = render_structured_output(
         PreparacionAudiencia(

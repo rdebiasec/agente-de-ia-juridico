@@ -5,9 +5,9 @@
 **Fecha:** 2026-08-05  
 **E0:** Auto (humano)  
 **Modo:** panel IA personificado + síntesis E0  
-**Piloto:** `config/evals/agent_eval_cases.json` (v3.2)  
+**Piloto:** `config/evals/agent_eval_cases.json` (v3.3)  
 **Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; notepads F5 diferido por prioridad #6)  
-**Rama de trabajo A0–A2:** `cursor/analisis-a0-a1-prompts-skills`
+**Rama de trabajo A0–A3:** `cursor/analisis-a0-a1-prompts-skills`
 
 ---
 
@@ -25,6 +25,7 @@
 | **A0** Re-score tipicidad + ruta | **Hecho** (residuales A-tipi / A-ruta + patches P0/P1) |
 | **A1** Deep cronología | **Hecho** (scorecard + A-crono + patches P0/P1) |
 | **A2** Deep evidencia | **Hecho** (scorecard + A-evid + patches P0/P1) |
+| **A3** Deep víctimas | **Hecho** (scorecard + A-vict + patches P0/P1 + eval) |
 
 ---
 
@@ -38,12 +39,12 @@
 | Guardrails globales g1–g10 | **10** | Presentes |
 | Eval cases | **33** | Routing/scope/HITL/PII; tipicidad solo `route-tipicidad` |
 | Evals → `analista_ruta_procesal` | **1** (`route-ruta-906`) | **PASS** (A0) |
-| Evals → `analista_representacion_victimas` | **0** | **FAIL** cobertura eval |
+| Evals → `analista_representacion_victimas` | **3** (`route-victimas`, `tool-surface-victimas`, `instruction-budget-victimas`) | **PASS** (A3) |
 | Evals → `analista_seguimiento_procesal` | **0** | **FAIL** cobertura eval |
-| Referencias KB path en skills O1/O2/O3/O4 | **34** con Fuentes KB | **PASS** (A0–A2) |
+| Referencias KB path en skills O1/O2/O3/O4/O5 | **45+** con Fuentes KB | **PASS** (A0–A3) |
 | KB `penal.md` | marco tipico operativo | **PASS** (A0) |
-| KB `proceso-penal-906.md` | 28 líneas (etapas OK, términos diferidos) | PARTIAL |
-| KB `normas-clave.md` | 25 líneas (marco + derechos) | PARTIAL |
+| KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención víctima | **PASS** (A0–A3) |
+| KB `normas-clave.md` | marco + derechos + checklist O5 | **PASS** (A3) |
 | Legacy prose residual O1/O2 | varios (“calidad”, “gestor”, “coordinador”) | PARTIAL |
 
 ### Matriz agente × primario × secundarios (runtime)
@@ -56,6 +57,7 @@ Fuente: `src/agents/skill_catalog.py`.
 | `analista_ruta_procesal` | `identificar_etapa_procesal_ley906` | oportunidad, ruta, términos | **OK (A0)** — riesgos/impulso owned sin ancla runtime |
 | `analista_cronologia_hechos` | `construir_cronologia_penal` | extraer, contradicciones, clasificar_fuente | **OK (A1)** |
 | `analista_evidencia` | `inventariar_evidencia` | clasificar_tipo, matriz, brechas | **OK (A2)** — recaudo/custodia/preservar owned sin ancla runtime |
+| `analista_representacion_victimas` | `construir_teoria_caso_victima` | derechos, riesgo_revictimizacion, priorizar_objetivos | **OK (A3)** — intereses/daño/diferencial/mapear owned sin ancla runtime |
 | Resto | ver informe prompts previo | — | OK para esta ola |
 
 ---
@@ -298,7 +300,7 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 | 12 | — | F4: checklist panel 12 (1 día) | P1 | Pendiente |
 | 13 | — | F5: notepads `{agent_id}.md` en Drive `0ABOGkPnKHSC5Uk9PVA` | P2 | Diferido |
 | 14 | — | Evals tipicidad groundedness (matriz elementos) | P2 | Pendiente |
-| 15 | — | Oleadas A2–A8 (ex O3–O8) | P1 | **A2 Hecho; siguiente A3** |
+| 15 | — | Oleadas A3–A8 (ex O5–O8) | P1 | **A3 Hecho; siguiente A4** |
 
 ---
 
@@ -307,18 +309,18 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 **Hallazgo de proceso (A0):** el bloque “Cierre parcial de ejecución” abajo marcó H-101…H-304 como **Hecho**, pero al iniciar A0 en el árbol de trabajo **no** estaban aplicados (skills sin `## Fuentes KB`, `penal.md` sin marco tipico, schemas sin `etapa_ley906`/`fuentes_kb`, sin `route-ruta-906`).  
 Los IDs `H-*` se conservan; la ejecución real de esos residuales se documenta como `A-tipi-*` / `A-ruta-*` / patches A0.
 
-**Patches A0/A1/A2 aplicados (2026-08-05)**
-- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklist evidencia O4)
-- 34 skills O1–O4 → `## Fuentes KB` + steps verificables + bump checksum
-- `src/agents/skill_catalog.py` secundarios tipicidad (dolo/autoría), ruta (términos), cronología (`clasificar_fuente_factual`), evidencia (`clasificar_tipo_prueba`)
-- Schemas/renderer: `fuentes_kb`, `estado` elemento, `etapa_ley906`, `evidencia_etapa`, `ruta_detallada`, `InventarioEvidencia.fuentes_kb` + `tipo` Literal
-- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 + guardrails I/O grounding
-- Evals `3.2` + caso `route-ruta-906` (evidencia ya tenía route/tool-surface)
+**Patches A0–A3 aplicados (2026-08-05)**
+- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklists evidencia O4 + representación O5)
+- Skills O1–O5 → `## Fuentes KB` + steps verificables + bump checksum (O5: 11 skills)
+- `src/agents/skill_catalog.py` secundarios tipicidad/ruta/cronología/evidencia/víctimas (`priorizar_objetivos_representacion`)
+- Schemas/renderer: `fuentes_kb` en tipicidad/ruta/crono/evidencia/**víctimas**
+- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 / **víctimas v6** + guardrails I/O grounding
+- Evals `3.3` + `route-victimas` / `tool-surface-victimas` / `instruction-budget-victimas` (+ `route-ruta-906` previo)
 - Sync: `python scripts/sync_skills_agente_a_cursor.py` (81 skills)
 
-**Tests (A0–A2 focused):** **51 passed** (`test_l03_structured_output`, `test_guardrails_iot_coverage`, `test_agent_evals`, `test_skill_config`, `test_fase3_plan_product`, `test_prompt_skill_quality`, `test_bitacora_notas`).
+**Tests (A0–A3 focused):** **51 passed** (`test_l03_structured_output`, `test_guardrails_iot_coverage`, `test_agent_evals`, `test_skill_config`, `test_prompt_skill_quality`, `test_fase3_plan_product`, `test_bitacora_notas`).
 
-**Siguiente oleada:** **A3** — deep-dive `analista_representacion_victimas` (+ O5 + eval).
+**Siguiente oleada:** **A4** — deep-dive `analista_audiencias` (+ O6).
 
 ---
 
@@ -738,7 +740,155 @@ evals_a_ampliar: []
 
 ---
 
-## Cola E0 (post A0–A2)
+## A3 — Scorecard `analista_representacion_victimas`
+
+| Campo | Valor |
+|---|---|
+| Fecha | 2026-08-05 |
+| Oleada | A3 |
+| Expertos | L1, L2, L3, T1–T7, E0 |
+| Primario | `construir_teoria_caso_victima` |
+| Secundarios anclados | analizar_derechos_victima, detectar_riesgo_revictimizacion, priorizar_objetivos_representacion |
+| Skills owned / O5 core | 10 (+ shared: mapear_actuaciones, analizar_intervencion vía ruta/audiencias) |
+| Veredicto global | **PARTIAL → PASS tras patches** |
+
+### Técnica (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Prompt | 5 | v6: pasos con skills, tools reales, `fuentes_kb`, schema explícito |
+| Few-shots / anti-drift | 4 | Menor/sexual + fallo culpabilizante |
+| Ancla skills | 5 | + `priorizar_objetivos` (antes solo 2 secundarios) |
+| Tools honesty | 5 | REAL tools; Planned checkers no invocables |
+| Guardrails I/O/T | 5 | groundedness + no_revictimizar + HITL teoría→cliente |
+| Schema | 5 | RepresentacionVictimas + `fuentes_kb` |
+| HITL | 4 | Fuera HITL_OUTPUT (analítico OK); skills marcan HITL comunicación/cliente |
+| Evals | 5 | route + tool-surface + instruction-budget |
+| Config parity | 4 | Prompt/guardrails/skills versionados |
+
+### Jurídico-procedural (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Grounding KB | 5 | Checklist O5 en normas-clave + 906 |
+| Etapa 906 | 4 | Remite etapa/actuaciones; sin arts inventados |
+| Tipicidad/dogmática | 5 | Fuera de alcance (límite correcto) |
+| Derechos víctima | 5 | Intereses≠derechos; no revictimizar; diferencial |
+| Hecho vs inferencia | 4 | Teoría preliminar; daño no es peritaje |
+| Términos/oportunidad | 3 | Remite fecha_base vía 906; no certifica plazos |
+| Citas | 4 | Quitó Ley 1712 inventada en skill derechos |
+| HITL accionable | 5 | Teoría/objetivos → abogado; no “lista para cliente” |
+| Alcance | 5 | Solo representación penal-víctimas |
+| Litigabilidad | 5 | Teoría + derechos + riesgos + objetivos usable |
+
+### Análisis panel (síntesis)
+
+- **L1:** Cadena intereses/derechos→teoría→daño/diferencial/riesgo→objetivos es litigable; KB tenía hueco checklist O5 — cerrado.
+- **L2:** Few-shots y skills ya protegían no culpabilizar; guardrail output + groundedness lo refuerzan; minimizar relato gráfico.
+- **L3:** Agente fuera de `HITL_OUTPUT_AGENTS` correcto; skills etiquetan HITL antes de comunicar teoría al cliente — OK.
+- **T1:** Prompt v5 genérico; v6 alinea skills nombrados + schema como evidencia/tipicidad.
+- **T2:** Secundario `priorizar_objetivos` añadido (paso 4); `analizar_intervencion` sigue owned por ruta/audiencias (O5 consume).
+- **T3:** I/O groundedness + domain_limits anti-promesa / anti-estigma.
+- **T4:** No fuga de pieza radicable desde víctimas.
+- **T5:** Hueco eval cerrado (route/tool-surface/budget).
+- **T6:** `notas_trabajo` OK; Drive diferido.
+- **T7:** PII/minimización gráfica en guardrails.
+
+### Hallazgos A3
+
+```yaml
+id: A-vict-001
+severidad: P1
+bloque: skills
+archivo: agente/skills/{O5 core}/*/SKILL.md
+experto: L1+T2
+veredicto: PASS (patched)
+evidencia_repo: "9/10 O5 sin Fuentes KB al inicio A3 (mapear sí tenía)"
+evidencia_kb: "normas-clave.md checklist O5; proceso-penal-906.md checklist intervención"
+impacto: "representación sin contrato explícito de grounding / anti-invención de facultades"
+fix_aplicado: "Fuentes KB en 11 skills O5/shared + bump version/checksum + sync .cursor"
+porque: "F-05 convención Fuentes KB; prioridad procedural"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-vict-002
+severidad: P1
+bloque: prompt+schema+guardrails
+archivo: analista_representacion_victimas.md; schemas.RepresentacionVictimas; guardrails output
+experto: T1+T3
+veredicto: PASS (patched)
+evidencia_repo: "prompt v5 sin fuentes_kb/tools; schema sin fuentes_kb; groundedness_policy ausente"
+evidencia_kb: "normas-clave.md derechos + checklist O5"
+impacto: "drift prompt↔schema; invención de vulneraciones/diagnósticos menos enforceable"
+fix_aplicado: "prompt v6 + fuentes_kb + groundedness_policy + domain_limits"
+porque: "alineación tipicidad/ruta/cronología/evidencia post-F3 como estándar"
+evals_a_ampliar: ["completeness intereses documentados (P2)"]
+```
+
+```yaml
+id: A-vict-003
+severidad: P1
+bloque: evals
+archivo: config/evals/agent_eval_cases.json
+experto: T5
+veredicto: PASS (patched)
+evidencia_repo: "0 evals hacia analista_representacion_victimas (FAIL F1)"
+evidencia_kb: "N/A"
+impacto: "regresión de routing/superficie víctimas invisible en CI"
+fix_aplicado: "route-victimas + tool-surface-victimas + instruction-budget-victimas (evals v3.3)"
+porque: "plan A3 hueco eval; F-07/F-12"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-vict-004
+severidad: P1
+bloque: kb
+archivo: agente/conocimiento/normas-clave.md; proceso-penal-906.md
+experto: L1+L2
+veredicto: PASS (patched)
+evidencia_repo: "KB sin checklist representación/intervención O5"
+evidencia_kb: "checklist O5 (intereses≠derechos, no peritaje, diferencial documentado)"
+impacto: "skills O5 sin ancla procedural concreta"
+fix_aplicado: "checklist representación + checklist intervención víctima"
+porque: "F-15 KB enrichment; no inventar arts CPP"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-vict-005
+severidad: P2
+bloque: catalog
+archivo: src/agents/skill_catalog.py
+experto: T2
+veredicto: PASS (patched)
+evidencia_repo: "solo 2 secundarios; prompt paso 4 prioriza objetivos"
+evidencia_kb: "N/A"
+impacto: "ancla incompleta vs misión"
+fix_aplicado: "secundario priorizar_objetivos_representacion"
+porque: "mejor match pasos 1–4 del prompt (techo 3)"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-vict-006
+severidad: P2
+bloque: ownership
+archivo: analizar_intervencion_victima
+experto: T2
+veredicto: PASS (documentado)
+evidencia_repo: "O5 lista intervención; Used By = ruta/audiencias"
+evidencia_kb: "N/A"
+impacto: "oleada O5 no implica ownership exclusivo víctimas"
+fix_aplicado: "Fuentes KB sin MOVE; víctimas consume derechos/teoría; intervención queda ruta/A4"
+porque: "evitar solape ownership"
+evals_a_ampliar: []
+```
+
+---
+
+## Cola E0 (post A0–A3)
 
 | # | ID | Acción | Sev | Estado |
 |---|---|---|---|---|
@@ -746,35 +896,37 @@ evals_a_ampliar: []
 | 2 | A-ruta-* | Patches ruta + eval | P0/P1 | **Hecho** |
 | 3 | A-crono-* | Patches cronología O3 | P1 | **Hecho** |
 | 4 | A-evid-* | Patches evidencia O4 | P1 | **Hecho** |
-| 5 | — | **A3** deep `analista_representacion_victimas` (+ O5 + eval) | P1 | **Siguiente** |
-| 6 | — | Evals seguimiento | P1 | Cola A7 |
-| 7 | F-08 | Notepads Drive dual | P2 | Diferido |
-| 8 | — | Groundedness eval tipicidad/evidencia campos | P2 | Backlog |
+| 5 | A-vict-* | Patches víctimas O5 + eval | P1 | **Hecho** |
+| 6 | — | **A4** deep `analista_audiencias` (+ O6) | P1 | **Siguiente** |
+| 7 | — | Evals seguimiento | P1 | Cola A7 |
+| 8 | F-08 | Notepads Drive dual | P2 | Diferido |
+| 9 | — | Groundedness eval tipicidad/evidencia/víctimas campos | P2 | Backlog |
 
 ---
 
 ## Piloto evals (decisión #7) — actualizado
 
-- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `tool-surface-tipicidad`, `tool-surface-cronologia`, `tool-surface-evidencia`
-- **Hecho:** `route-ruta-906` → `analista_ruta_procesal`, `expected_plan_required: false` (evals v3.2)
+- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas), budgets
+- **Hecho A3:** `route-victimas` → `analista_representacion_victimas` (evals v3.3)
 
 ---
 
-## Notas panel (personas) — post A0–A2
+## Notas panel (personas) — post A0–A3
 
-- **L1:** KB tipicidad/ruta/cronología/evidencia con suelo mínimo litigable; no inventar arts concretos — verificación vía RAG sigue siendo gate.
-- **L3:** Términos endurecidos; evidencia no certifica plazos ni admisibilidad.
-- **T2:** Secundarios tipicidad/ruta/crono/evidencia alineados a prompts.
-- **T5:** Hueco eval ruta cerrado; quedan víctimas/seguimiento.
-- **T6:** Notepads diferidos; contrato `notas_especialista` OK en los 4 agentes deep.
+- **L1:** KB tipicidad/ruta/cronología/evidencia/víctimas con suelo mínimo litigable; no inventar arts — RAG sigue siendo gate.
+- **L2:** O5 ahora ancla intereses≠derechos, no revictimización y diferencial documentado.
+- **L3:** Teoría al cliente / piezas accionables siguen HITL; víctimas analítico OK fuera de HITL_OUTPUT.
+- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas alineados a prompts.
+- **T5:** Huecos eval ruta+víctimas cerrados; queda seguimiento.
+- **T6:** Notepads diferidos; contrato `notas_especialista` OK en los 5 agentes deep.
 
 ---
 
 ## Anexo — texto previo “Cierre parcial F1–F3” (histórico)
 
-> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A2 arriba.
+> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A3 arriba.
 
 **Patches pretendidos (histórico)**
-- KB / 17 skills O1+O2 / secundarios / evals 3.2 / F3 prompts — **reclamados como Hecho antes de existir en árbol**; ejecutados en A0–A2.
+- KB / 17 skills O1+O2 / secundarios / evals 3.2 / F3 prompts — **reclamados como Hecho antes de existir en árbol**; ejecutados en A0–A3.
 
-**Siguiente ejecución sugerida (histórico):** O3 / F4 → **reemplazado por A3 víctimas**.
+**Siguiente ejecución sugerida (histórico):** O3 / F4 → **reemplazado por A4 audiencias**.

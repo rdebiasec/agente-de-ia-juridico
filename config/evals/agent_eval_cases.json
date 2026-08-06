@@ -1,5 +1,5 @@
 {
-  "version": "3.2",
+  "version": "3.3",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -55,6 +55,14 @@
       "expected_destination": "analista_ruta_procesal",
       "expected_plan_required": false,
       "notes": "Cobertura eval A0 residual H-203 / A-ruta."
+    },
+    {
+      "id": "route-victimas",
+      "category": "routing",
+      "message": "Construya la teoría del caso centrada en derechos e intereses de la víctima y evalúe riesgo de revictimización y enfoque diferencial.",
+      "expected_destination": "analista_representacion_victimas",
+      "expected_plan_required": false,
+      "notes": "Cobertura eval A3 / hueco víctimas."
     },
     {
       "id": "route-audiencia",
@@ -257,6 +265,27 @@
         "analista_audiencias"
       ],
       "include_kb_search_tool": false
+    },
+    {
+      "id": "tool-surface-victimas",
+      "category": "tool_surface",
+      "message": "Construya la teoría del caso centrada en derechos e intereses de la víctima y evalúe riesgo de revictimización y enfoque diferencial.",
+      "expected_enabled_contains": [
+        "analista_representacion_victimas",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Vecinos víctimas: cronología + calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-victimas",
+      "category": "instruction_budget",
+      "agent_id": "analista_representacion_victimas",
+      "max_chars": 12000,
+      "notes": "Regresión A3: prompt víctimas completo sin explotar tokens."
     },
     {
       "id": "route-calidad-via-plan",

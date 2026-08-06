@@ -171,6 +171,7 @@ def render_structured_output(output: Any) -> str:
             ("Enfoque diferencial", "enfoque_diferencial"),
             ("Riesgos de revictimización", "riesgos_revictimizacion"),
             ("Objetivos de representación", "objetivos_representacion"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []
