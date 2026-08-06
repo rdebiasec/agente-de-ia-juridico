@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 3c5ced4bcf34026b -->
+<!-- config-version: 3; checksum: 72e95053a8a7fc7a -->
 ---
 name: preparar-solicitudes-orales
 description: Contrato penal-víctimas: Identificar y formular solicitudes orales procedentes según etapa y tipo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_solicitudes_orales`. No sustituye a `preparar_guion_intervencion_oral`.
@@ -25,6 +25,11 @@ Identificar y formular solicitudes orales procedentes según etapa y tipo de aud
 ## Rol en analista_audiencias
 Formulación completa con fundamento, prioridad y dependencias probatorias para estrados.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapa `etapa_ley906` y solicitudes según momento.
+- `agente/conocimiento/normas-clave.md` — derechos de participación; sin inventar artículos CPP.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Etapa procesal y tipo de audiencia.
 - Objetivo de intervención (`analizar_intervencion_victima`).
@@ -35,6 +40,7 @@ Formulación completa con fundamento, prioridad y dependencias probatorias para 
 - Etiqueta en ruta 906: `PRELIMINAR — DETALLE EN PREPARADOR AUDIENCIAS`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar solicitudes orales procedentes según etapa y tipo de audiencia.
 2. Formular peticiones con fundamento normativo preliminar.
 3. Ordenar por prioridad y dependencias probatorias.

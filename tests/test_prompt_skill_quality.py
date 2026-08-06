@@ -48,6 +48,39 @@ def test_all_skills_have_no_duplicar():
     assert missing == []
 
 
+def test_all_skills_have_fuentes_kb():
+    """F-05/F-06: ancla procedural obligatoria en skills canónicos."""
+    missing = [
+        p.parent.name
+        for p in SKILLS.glob("*/SKILL.md")
+        if "## Fuentes KB" not in p.read_text(encoding="utf-8")
+    ]
+    assert missing == [], f"Skills sin ## Fuentes KB: {missing}"
+
+
+_ART_NUM = re.compile(r"\bart\.?\s*\d+", re.I)
+_ART_OK = re.compile(
+    r"PENDIENTE\s+DE\s+VERIFICAR|conocimiento/|norma\s+verificada|"
+    r"sin\s+inventar|no\s+inventar|no\s+citar|no\s+sembrar",
+    re.I,
+)
+
+
+def test_skills_and_agent_prompts_do_not_seed_bare_article_numbers():
+    """F-06: no sembrar art. N sin path KB o marca pendiente (anti-alucinación)."""
+    offenders: list[str] = []
+    paths = list(SKILLS.glob("*/SKILL.md")) + list(PROMPTS.glob("*.md"))
+    for path in paths:
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not _ART_NUM.search(line):
+                continue
+            if _ART_OK.search(line):
+                continue
+            rel = path.relative_to(ROOT)
+            offenders.append(f"{rel}:{i}:{line.strip()[:100]}")
+    assert offenders == [], "Citas art. N sin ancla/pendiente:\n" + "\n".join(offenders[:20])
+
+
 def test_no_legacy_rol_en_headers():
     hits = []
     for path in SKILLS.glob("*/SKILL.md"):

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4f9597371c9c3c27 -->
+<!-- config-version: 4; checksum: b23770fa2d68235f -->
 ---
 name: identificar-conductas-punibles-preliminares
 description: Contrato penal-víctimas: Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación. Activar cuando el plan/HITL o el especialista requiera `identificar_conductas_punibles_preliminares`. No sustituye a `descompone...
@@ -21,6 +21,10 @@ Mapear conductas descritas en hechos verificados contra tipos penales hipotétic
 ## Rol en analista_responsabilidad_tipicidad
 Punto de entrada del agente tras cronología verificada. Alimenta `descomponer_elementos_tipo_penal` y `detectar_riesgos_atipicidad`.
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Cronología y hechos soportados (`verificar_hechos_soportados` del analista de cronología).
 - Mapa de actores.
@@ -33,6 +37,7 @@ Punto de entrada del agente tras cronología verificada. Alimenta `descomponer_e
 - Etiqueta obligatoria: `HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN`.
 
 ## Steps
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Listar conductas narradas con soporte fáctico mínimo.
 2. Asociar hipótesis tipicas tentativas (no definitivas) sin forzar tipo.
 3. Marcar conductas atípicas o insuficientes como riesgo/pendiente.

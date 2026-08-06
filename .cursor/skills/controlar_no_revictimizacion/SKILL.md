@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8910b04454b85269 -->
+<!-- config-version: 3; checksum: 899226d1d8875ce1 -->
 ---
 name: controlar-no-revictimizacion
 description: Contrato penal-víctimas: Detectar lenguaje, preguntas o estrategias que culpen, minimicen o expongan indebidamente a la víctima; proponer reformulaciones. Activar cuando el plan/HITL o el especialista requiera `controlar_no_revictimizacion`. No sustituye a `clasificar_aprobaci...
@@ -25,6 +25,11 @@ Filtro obligatorio antes de aprobar escritos, preguntas de audiencia o comunicac
 ## Rol en analista_representacion_victimas
 Revisión temprana de teoría del caso y materiales dirigidos a la víctima.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — no revictimizar; minimizar PII/relato gráfico.
+- `agente/conocimiento/proceso-penal-906.md` — dignidad de la víctima en intervenciones.
+- Tools reales: `buscar_en_conocimiento`, `leer_normas_clave` (planned checker no invocable).
+
 ## Inputs
 - Texto a revisar (memorial, guion, preguntas, resumen cliente, teoría del caso).
 - Tipo de audiencia o documento y destinatario (juez, víctima, Fiscalía).
@@ -37,6 +42,7 @@ Revisión temprana de teoría del caso y materiales dirigidos a la víctima.
 - Etiqueta: `REVISIÓN REVICTIMIZACIÓN — NO ENVIAR SIN ABOGADO`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Revisar lenguaje que culpe, minimice o exponga indebidamente a la víctima.
 2. Evaluar preguntas y estrategias propuestas con enfoque de derechos.
 3. Detectar exposición innecesaria de datos sensibles o relato gráfico.

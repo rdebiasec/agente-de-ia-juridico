@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 0b2841aa091a644d -->
+<!-- config-version: 3; checksum: dc3ca59c1a8901bd -->
 ---
 name: alinear-estrategia-prueba-proceso
 description: Contrato penal-víctimas: Detectar desalineación entre teoría del caso, ruta Ley 906 y plan probatorio; proponer ajustes coordinados. Activar cuando el plan/HITL o el especialista requiera `alinear_estrategia_prueba_proceso`. No sustituye a `construir_teoria_caso_victima`.
@@ -25,6 +25,11 @@ Ejecutar tras `construir_teoria_caso_victima` y `crear_ruta_procesal_recomendada
 ## Rol en analista_calidad_juridica
 Verificar coherencia estratégica antes de aprobar memorial o plan de actuación.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapa `etapa_ley906` vs prueba/teoría.
+- `agente/conocimiento/normas-clave.md` — coherencia con derechos/intereses de la víctima; HITL antes de cambiar estrategia aprobada.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_expediente`, `buscar_en_conocimiento`.
+
 ## Inputs
 - Teoría del caso de la víctima (`construir_teoria_caso_victima`).
 - Ruta procesal recomendada y etapa Ley 906.
@@ -38,6 +43,7 @@ Verificar coherencia estratégica antes de aprobar memorial o plan de actuación
 - Etiqueta: `ESTRATEGIA PRELIMINAR — APROBACIÓN ABOGADO`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Contrastar teoría del caso con etapa procesal y prueba disponible.
 2. Detectar desalineaciones entre ruta 906 y plan probatorio.
 3. Proponer ajustes coordinados para representación de la víctima.

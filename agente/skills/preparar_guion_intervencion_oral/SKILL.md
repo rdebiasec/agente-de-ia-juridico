@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 95b13cbacf799d43 -->
+<!-- config-version: 3; checksum: ec180e3314de75ea -->
 ---
 name: preparar-guion-intervencion-oral
 description: Contrato penal-víctimas: Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones. Activar cuando el plan/HITL o el especialista requiera `preparar_guion_intervencion_oral`. No sustituye a `preparar_preguntas_audie...
@@ -21,6 +21,11 @@ Armar guion breve de intervención oral del abogado de la víctima: apertura, ar
 ## Rol en analista_audiencias
 Producto táctico para audiencia; requiere `identificar_objetivo_audiencia` y hechos soportados.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — intervención oral/táctica; checklist O6.
+- `agente/conocimiento/normas-clave.md` — participación víctima; sin inventar normas orales.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Objetivo jurídico y táctico (`identificar_objetivo_audiencia`).
 - Cronología verificada y matriz hecho-prueba.
@@ -34,6 +39,7 @@ Producto táctico para audiencia; requiere `identificar_objetivo_audiencia` y he
 - Etiqueta: `GUION PRELIMINAR — ENSAYAR CON ABOGADO ANTES DE AUDIENCIA`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Ordenar puntos orales alineados a objetivos y hechos soportados.
 2. Incluir solicitudes y respuestas a objeciones previsibles.
 3. Marcar datos no verificados; no inventar jurisprudencia oral.

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 21da80ef276bc781 -->
+<!-- config-version: 6; checksum: 604d14803f6c9c52 -->
 ---
 name: actualizar-tareas-responsable
 description: Contrato penal-víctimas: Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento. Activar cuando el plan/HITL o el especialista requiera `actualizar_tareas_responsable`. No sustituye ...
@@ -25,6 +25,11 @@ Mantener actualizada la lista de tareas del caso con estado, plazo y responsable
 ## Rol en coordinador_caso
 Registrar o actualizar tareas surgidas del triage inicial (derivación, faltantes, urgencias). Runtime: `tareas_gerencia` en `completeness.py` (no CRUD LLM).
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist gerencia/POC (ledger de tareas).
+- `agente/conocimiento/normas-clave.md` — no inventar plazos procesales; sin `fecha_base` no certificar oportunidad.
+- Convención: ledger POC usa `pendiente`|`cerrada`; no inventar cierres ni responsables.
+
 ## Inputs
 - Lista de tareas abiertas del caso (id, descripción, estado actual).
 - Cambios reportados en el turno (nueva tarea, cierre, replazo de responsable, nuevo plazo).
@@ -41,6 +46,7 @@ Alineados al ledger real (`src/agents/completeness.py`):
 Nota: estados ricos (`abierta`/`en_curso`/`bloqueada`) no viven en el ledger del POC; el código usa solo `pendiente`|`cerrada` para menos churn.
 
 ## Steps
+0. Anclar tareas/plazos a Fuentes KB/ledger/turno; sin soporte → `[PENDIENTE DE VERIFICAR]`; no inventar cierres.
 1. Actualizar estado, plazo y responsable de cada tarea pendiente del caso.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 

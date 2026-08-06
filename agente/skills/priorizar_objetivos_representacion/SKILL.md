@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c780a54ff269c8f7 -->
+<!-- config-version: 3; checksum: 78985058d35f0b86 -->
 ---
 name: priorizar-objetivos-representacion
 description: Contrato penal-víctimas: Listar y ordenar objetivos posibles de la representación de la víctima según urgencia, viabilidad y alineación con sus intereses, documentando trade-offs para decisión del abogado. Activar cuando el plan/HITL o el especialista requiera `priorizar_objet...
@@ -21,6 +21,11 @@ Listar y ordenar objetivos posibles de la representación de la víctima según 
 ## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — priorizar seguridad, dignidad y enfoque diferencial; no prometer resultados.
+- `agente/conocimiento/proceso-penal-906.md` — actuaciones posibles según etapa; sin `fecha_base` no certificar plazos.
+- Tools reales: `leer_normas_clave`, `leer_playbook_proceso`, `buscar_en_conocimiento`.
+
 ## Inputs
 - Intereses declarados por la víctima o el abogado (justicia, reparación, celeridad, protección, no confrontación).
 - Etapa procesal aparente y actuaciones disponibles.
@@ -33,6 +38,7 @@ Listar y ordenar objetivos posibles de la representación de la víctima según 
 - Etiqueta: `PRELIMINAR — VALIDAR CON VÍCTIMA Y ABOGADO TITULAR`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Listar objetivos posibles de la representación en el caso.
 2. Ordenar por urgencia, viabilidad y alineación con intereses de la víctima.
 3. Documentar trade-offs para decisión del abogado.

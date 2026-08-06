@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: b93d991fd9d4cb61 -->
+<!-- config-version: 3; checksum: d2e5fa01755fdbe9 -->
 ---
 name: evaluar-dano-y-afectacion
 description: Contrato penal-víctimas: Describir preliminarmente el daño o afectación a la víctima con base documentada (físico, psicológico, patrimonial, social). Activar cuando el plan/HITL o el especialista requiera `evaluar_dano_y_afectacion`. No sustituye a `identificar_intereses_victi...
@@ -21,6 +21,11 @@ Describir preliminarmente el daño o afectación a la víctima con base document
 ## Rol en analista_representacion_victimas
 Insumo para teoría del caso y pretensiones de reparación.
 
+## Fuentes KB
+- Expediente/relatos/informes documentados; no inventar diagnósticos ni secuelas.
+- `agente/conocimiento/normas-clave.md` — reparación cuando proceda; no es peritaje.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_normas_clave`.
+
 ## Inputs
 - Relatos, informes médicos/psicológicos, declaraciones (si constan).
 - Hechos verificados del caso.
@@ -32,6 +37,7 @@ Insumo para teoría del caso y pretensiones de reparación.
 - Etiqueta: `AFECTACIÓN PRELIMINAR — NO ES PERITAJE`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar tipos de daño o afectación alegados o documentados.
 2. Vincular cada afectación con hechos y fuentes del expediente.
 3. Señalar vacíos que requieran prueba pericial o documental.

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 7775a4dfa585a120 -->
+<!-- config-version: 3; checksum: 98cc77947d50b6f6 -->
 ---
 name: evaluar-suficiencia-probatoria
 description: Contrato penal-víctimas: Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena. Activar cuando el plan/HITL o el especialista requiera `evaluar_suficiencia_probatoria`. No sustituye a `detectar_brechas_probatorias`.
@@ -24,6 +24,12 @@ Cierre analítico tras matriz hecho-prueba e inventario.
 
 ## Rol en analista_representacion_victimas
 Informar fortalezas/debilidades para teoría del caso y audiencias.
+
+## Fuentes KB
+- Matriz e inventario del caso; no afirmar certeza judicial ni culpabilidad.
+- `agente/conocimiento/proceso-penal-906.md` — suficiencia preliminar vs momento procesal (sin dictamen de condena).
+- `agente/conocimiento/normas-clave.md` — análisis preliminar; etiqueta NO ES CERTEZA JUDICIAL.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`.
 
 ## Inputs
 - Matriz hecho-prueba (`construir_matriz_hecho_prueba`).

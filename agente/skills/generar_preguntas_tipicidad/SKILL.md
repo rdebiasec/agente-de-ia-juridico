@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 23e96a1db43a28bf -->
+<!-- config-version: 3; checksum: 23b3569780bed194 -->
 ---
 name: generar-preguntas-tipicidad
 description: Contrato penal-víctimas: Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_tipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -25,6 +25,10 @@ Formular preguntas para completar elementos del tipo penal, sin presuponer culpa
 ## Rol en analista_cronologia_hechos
 **Uso limitado:** solo cuando un vacío factual obvio impide plantear hipótesis de conducta. Derivar al analista de tipicidad si el vacío es dogmático.
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Vacíos factuales ya documentados (`detectar_vacios_factuales`).
 - Hipótesis de conducta preliminar (si existe, marcada como tal).
@@ -36,6 +40,7 @@ Formular preguntas para completar elementos del tipo penal, sin presuponer culpa
 - Etiqueta: `NO SUSTITUYE ANÁLISIS DE TIPICIDAD`.
 
 ## Steps
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar vacíos en elementos del tipo penal.
 2. Formular preguntas para víctima, testigos o abogado.
 3. Evitar preguntas que presupongan culpabilidad.
@@ -60,7 +65,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_p
 - **Aviso de borrador:** Aviso de revisión profesional.
 
 ## No duplicar
-- No descomponer tipos penales (`descomponer_elementos_tipo_penal` → tipicidad).
+- No descomponer tipos penales (`descomponer_elementos_tipo_penal` → analista_responsabilidad_tipicidad).
 - No preguntas solo factuales sin vínculo tipico (`generar_preguntas_aclaracion`).
 - No mapear hecho-prueba (`mapear_tipo_penal_hecho_prueba`).
 

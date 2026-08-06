@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 3da08213d54edf1c -->
+<!-- config-version: 3; checksum: 209324afb96061b5 -->
 ---
 name: preparar-contraargumentos
 description: Contrato penal-víctimas: Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial. Activar cuando el plan/HITL o el especialista requiera `preparar_contraargumentos`. No sustituye a `preparar_guion_intervencion_oral`.
@@ -20,6 +20,11 @@ Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia 
 
 ## Rol en analista_audiencias
 Réplicas anticipadas para audiencia o memorial; insumo estratégico, no conclusión.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — postura por etapa; hipótesis ≠ hechos.
+- `agente/conocimiento/normas-clave.md` — no inventar jurisprudencia ni facultades.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Teoría del caso contraria (hipótesis documentada).
 - Prueba disponible y matriz hecho-prueba.
@@ -30,6 +35,7 @@ Réplicas anticipadas para audiencia o memorial; insumo estratégico, no conclus
 - Etiqueta: `HIPÓTESIS TÁCTICA — NO AFIRMAR HECHOS NO PROBADOS`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar líneas argumentativas probables de la contraparte.
 2. Preparar réplicas con hechos soportados y norma aplicable.
 3. Señalar puntos débiles de la réplica que requieren prueba adicional.

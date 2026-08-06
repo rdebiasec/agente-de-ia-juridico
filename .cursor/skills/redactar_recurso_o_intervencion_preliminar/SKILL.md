@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4378b1bb5bded21a -->
+<!-- config-version: 3; checksum: df4e59040dcbf9e5 -->
 ---
 name: redactar-recurso-o-intervencion-preliminar
 description: Contrato penal-víctimas: Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor. Activar cuando el plan/HITL o el especialista requiera `redactar_recurso_o_intervencion_preliminar`. No sustituye a `evaluar_oportunidad_pr...
@@ -25,6 +25,10 @@ Confirmar oportunidad y preparar insumos para recurso o intervención; el borrad
 ## Rol en redactor_documentos_juridicos
 Ejecutar los 4 pasos completos incluyendo borrador.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Acto a impugnar o intervención objetivo.
 - `evaluar_oportunidad_procesal` y términos (`controlar_terminos_procesales_preliminares`).
@@ -39,6 +43,7 @@ Ejecutar los 4 pasos completos incluyendo borrador.
 - Borrador completo + pendientes + términos.
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Confirmar oportunidad procesal y tipo de recurso/intervención.
 2. Redactar borrador con argumentos y peticiones procedentes. *(Solo redactor)*
 3. Alertar términos y requisitos de forma pendientes de verificación.

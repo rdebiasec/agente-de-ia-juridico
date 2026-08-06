@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 67695d5921456b46 -->
+<!-- config-version: 3; checksum: 0a401996735f1be8 -->
 ---
 name: evaluar-oportunidad-procesal
 description: Contrato penal-víctimas: Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual. Activar cuando el plan/HITL o el especialista requiera `evaluar_oportunidad_procesal`. No sustituye a `controlar_terminos_procesales_prelimi...
@@ -22,6 +22,10 @@ Determinar si una actuación propuesta es oportuna, prematura o extemporánea pa
 ## Rol en analista_ruta_procesal
 Decisión clave antes de cualquier solicitud, recurso o intervención. Requiere etapa y términos preliminares.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Actuación o solicitud propuesta (tipo, destinatario, objeto).
 - Etapa procesal y actuaciones previas del radicado.
@@ -35,6 +39,7 @@ Decisión clave antes de cualquier solicitud, recurso o intervención. Requiere 
 - Advertencia: cálculo de términos requiere verificación humana.
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Relacionar etapa Ley 906 con la actuación pretendida.
 2. Señalar ventanas, términos y riesgos de extemporaneidad con fuentes.
 3. Marcar plazos no verificados como pendientes.

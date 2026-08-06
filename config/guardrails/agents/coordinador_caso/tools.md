@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 28c265295e06a315 -->
+<!-- config-version: 7; checksum: cad00ce415b8163e -->
 # Guardrails de tools — coordinador_caso
 
 ## desk_policies
@@ -9,6 +9,8 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## allowed_tools_policy
+Skills `POC_OWNED_SKILLS` (clasificar/faltantes/urgencia/tareas/pendientes) son **contratos**,
+no function_tools: el código (`triage`/`completeness`/`urgency`) ya los materializa.
 Solo invocar tools del **canal chat**: `buscar_en_expediente` (+ KB search si no hubo prefetch) y especialistas as-tool de bajo riesgo listados en la sección chat de `tool_routing`.
 No invocar herramientas ajenas al pedido ni “por curiosidad”.
 `listar_areas_derecho` y lecturas MD completas no están en el chat del Gerente.

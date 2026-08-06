@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 81029d074ff6580f -->
+<!-- config-version: 3; checksum: 230b4d8cfa9a79bc -->
 ---
 name: seguimiento-documentos-radicados
 description: Contrato penal-víctimas: Hacer seguimiento a documentos enviados o radicados y su estado de respuesta. Activar cuando el plan/HITL o el especialista requiera `seguimiento_documentos_radicados`. No sustituye a `monitorear_radicado`.
@@ -20,6 +20,11 @@ Hacer seguimiento a documentos enviados o radicados y su estado de respuesta.
 
 ## Rol en analista_seguimiento_procesal
 Seguimiento de peticiones y respuestas; alerta vencimientos y faltantes.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Lista de documentos radicados (fecha, destinatario, radicado interno).
 - Plazos de respuesta esperados.
@@ -29,6 +34,7 @@ Seguimiento de peticiones y respuestas; alerta vencimientos y faltantes.
 - Alertas de vencimiento.
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Cruzar documentos radicados con plazos y respuestas recibidas.
 2. Marcar vencidos y próximos a vencer.
 3. Sugerir acción de seguimiento (llamado, memorial, petición).

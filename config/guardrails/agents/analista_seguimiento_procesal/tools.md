@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 85a737ce3364d496 -->
+<!-- config-version: 4; checksum: 6caf9ae1ed31a7ad -->
 # Guardrails de tools — analista_seguimiento_procesal
 
 ## desk_policies
@@ -9,9 +9,12 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## allowed_tools_policy
-Solo tools de conocimiento del especialista: `buscar_en_expediente`, `buscar_en_conocimiento`,
-lecturas MD de área/playbook/normas según cableado del builder.
+Solo tools reales de conocimiento del especialista: `buscar_en_expediente`, `buscar_en_conocimiento`,
+lecturas MD (`leer_area_derecho` / `leer_playbook_proceso` / `leer_normas_clave` / `listar_areas_derecho`)
+según cableado del builder.
 No invocar redacción ni otros especialistas (eso lo hace el Gerente vía `as_tool`).
+No invocar planned: `process_lookup_query`, `calendar_terms_calculator`, `case_state_writer`,
+`notification_create` (no implementadas).
 
 ## args_sensitivity_policy
 Minimizar PII en argumentos (`confidencialidad`).

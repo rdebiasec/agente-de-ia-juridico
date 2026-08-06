@@ -1,5 +1,5 @@
 {
-  "version": "3.1",
+  "version": "3.9",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -47,6 +47,22 @@
       "message": "Analice preliminarmente tipicidad, dolo y autoría en el caso penal.",
       "expected_destination": "analista_responsabilidad_tipicidad",
       "expected_plan_required": false
+    },
+    {
+      "id": "route-ruta-906",
+      "category": "routing",
+      "message": "Ubique la etapa procesal Ley 906 y proponga la ruta de intervención de la víctima.",
+      "expected_destination": "analista_ruta_procesal",
+      "expected_plan_required": false,
+      "notes": "Cobertura eval A0 residual H-203 / A-ruta."
+    },
+    {
+      "id": "route-victimas",
+      "category": "routing",
+      "message": "Construya la teoría del caso centrada en derechos e intereses de la víctima y evalúe riesgo de revictimización y enfoque diferencial.",
+      "expected_destination": "analista_representacion_victimas",
+      "expected_plan_required": false,
+      "notes": "Cobertura eval A3 / hueco víctimas."
     },
     {
       "id": "route-audiencia",
@@ -251,6 +267,80 @@
       "include_kb_search_tool": false
     },
     {
+      "id": "tool-surface-victimas",
+      "category": "tool_surface",
+      "message": "Construya la teoría del caso centrada en derechos e intereses de la víctima y evalúe riesgo de revictimización y enfoque diferencial.",
+      "expected_enabled_contains": [
+        "analista_representacion_victimas",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Vecinos víctimas: cronología + calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-victimas",
+      "category": "instruction_budget",
+      "agent_id": "analista_representacion_victimas",
+      "max_chars": 12000,
+      "notes": "Regresión A3: prompt víctimas completo sin explotar tokens."
+    },
+    {
+      "id": "tool-surface-audiencias",
+      "category": "tool_surface",
+      "message": "Prepare preguntas y guion para la audiencia penal de la víctima.",
+      "expected_enabled_contains": [
+        "analista_audiencias",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Vecinos audiencias: ruta + víctimas + calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-audiencias",
+      "category": "instruction_budget",
+      "agent_id": "analista_audiencias",
+      "max_chars": 12000,
+      "notes": "Regresión A4: prompt audiencias completo sin explotar tokens."
+    },
+    {
+      "id": "tool-surface-redactor",
+      "category": "tool_surface",
+      "message": "Redacte un memorial penal de impulso procesal.",
+      "expected_enabled_contains": [
+        "analista_calidad_juridica",
+        "analista_ruta_procesal"
+      ],
+      "expected_enabled_excludes": [
+        "analista_audiencias",
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=redactor HIGH RISK: chat_pool excluye redactor; vecinos calidad+ruta. Memorial vía plan HITL (route-memorial)."
+    },
+    {
+      "id": "tool-surface-calidad",
+      "category": "tool_surface",
+      "message": "Necesito control de calidad jurídica y verificar coherencia estratégica antes de entregarlo.",
+      "expected_enabled_contains": [
+        "analista_calidad_juridica",
+        "analista_cronologia_hechos",
+        "analista_ruta_procesal"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos",
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=calidad: vecinos cronología+ruta (orchestrator); chat excluye HIGH RISK redactor."
+    },
+    {
       "id": "route-calidad-via-plan",
       "category": "routing",
       "message": "Necesito control de calidad jurídica y verificar coherencia estratégica antes de entregarlo.",
@@ -268,6 +358,91 @@
       "category": "quality_gate",
       "veredicto": "aprobable",
       "expected_blocks": false
+    },
+    {
+      "id": "route-seguimiento",
+      "category": "routing",
+      "message": "Necesito seguimiento del radicado, alertas de términos e inactividad procesal del caso.",
+      "expected_destination": "analista_seguimiento_procesal",
+      "expected_plan_required": false
+    },
+    {
+      "id": "tool-surface-seguimiento",
+      "category": "tool_surface",
+      "message": "Necesito seguimiento del radicado, alertas de términos e inactividad procesal del caso.",
+      "expected_enabled_contains": [
+        "analista_seguimiento_procesal",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos",
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=seguimiento: vecinos ruta+calidad (orchestrator); chat excluye HIGH RISK redactor."
+    },
+    {
+      "id": "instruction-budget-seguimiento",
+      "category": "instruction_budget",
+      "agent_id": "analista_seguimiento_procesal",
+      "max_chars": 12000,
+      "notes": "Regresión A7: prompt seguimiento completo sin explotar tokens."
+    },
+    {
+      "id": "tool-surface-coordinador",
+      "category": "tool_surface",
+      "message": "¿Qué falta en el expediente para continuar el análisis?",
+      "focus_agent_id": "coordinador_caso",
+      "expected_enabled_contains": [
+        "analista_cronologia_hechos",
+        "analista_responsabilidad_tipicidad",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=POC: superficie completa de especialistas chat; redactor HIGH RISK excluido del chat_pool."
+    },
+    {
+      "id": "route-coordinador-gerencia",
+      "category": "routing",
+      "message": "¿Qué falta en el expediente para continuar el análisis?",
+      "expected_destination": "coordinador_caso",
+      "expected_plan_required": false,
+      "notes": "Cobertura A8: gate faltantes / gerencia permanece en POC."
+    },
+    {
+      "id": "tool-surface-ruta",
+      "category": "tool_surface",
+      "message": "Ubique la etapa procesal Ley 906 y proponga la ruta de intervención de la víctima.",
+      "expected_enabled_contains": [
+        "analista_ruta_procesal",
+        "analista_seguimiento_procesal",
+        "analista_audiencias",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Oleada X / F-12: vecinos ruta = seguimiento+audiencias+calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-tipicidad",
+      "category": "instruction_budget",
+      "agent_id": "analista_responsabilidad_tipicidad",
+      "max_chars": 12000,
+      "notes": "Oleada X: cierre F-07 budget tipicidad."
+    },
+    {
+      "id": "instruction-budget-ruta",
+      "category": "instruction_budget",
+      "agent_id": "analista_ruta_procesal",
+      "max_chars": 12000,
+      "notes": "Oleada X: cierre F-07 budget ruta 906."
     }
   ]
 }

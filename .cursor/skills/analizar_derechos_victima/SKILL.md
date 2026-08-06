@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4cf60e492fd7031f -->
+<!-- config-version: 3; checksum: 4912595c5c47ec5c -->
 ---
 name: analizar-derechos-victima
 description: Contrato penal-víctimas: Mapear derechos de la víctima en el proceso penal (participación, información, reparación, protección) y su vínculo con los hechos. Activar cuando el plan/HITL o el especialista requiera `analizar_derechos_victima`. No sustituye a `identificar_interese...
@@ -21,10 +21,15 @@ Mapear derechos de la víctima en el proceso penal (participación, información
 ## Rol en analista_representacion_victimas
 Insumo para teoría del caso y plan de actuación ordinaria Ley 906.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — checklist derechos/participación/protección/reparación (sin inventar arts).
+- `agente/conocimiento/proceso-penal-906.md` — etapa `etapa_ley906` y rol de representación.
+- Tools reales: `leer_normas_clave`, `leer_playbook_proceso`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Hechos verificados y etapa procesal Ley 906.
 - Conductas u omisiones de Fiscalía, juez o autoridad que afecten a la víctima.
-- Normativa de víctimas (Ley 906, Ley 1712, etc.) vía RAG.
+- Normativa de víctimas vía KB/RAG (`normas-clave.md`, Ley 906); sin inventar artículos.
 
 ## Outputs
 - `derechos_mapeados`: participación | información | reparación | protección | otros.
@@ -33,6 +38,7 @@ Insumo para teoría del caso y plan de actuación ordinaria Ley 906.
 - Etiqueta: `MAPEO DERECHOS VÍCTIMA — VÍA PENAL`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Mapear derechos aplicables (participación, verdad, justicia, reparación, etc.) al caso.
 2. Anclar a hechos y etapa; marcar derechos sin soporte como pendientes.
 3. No convertir el análisis en memorial.

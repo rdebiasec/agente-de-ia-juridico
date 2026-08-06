@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: e262fe9710a1a847 -->
+<!-- config-version: 3; checksum: 8bb94931ddfa16a6 -->
 ---
 name: detectar-contradicciones-factuales
 description: Contrato penal-víctimas: Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad. Activar cuando el plan/HITL o el especialista requiera `detectar_contradicciones_factuales`. No sustituye a `co...
@@ -22,6 +22,11 @@ Detectar y documentar inconsistencias entre versiones (víctima, testigos, docum
 ## Rol en analista_cronologia_hechos
 Ejecutar tras cronología o matriz hecho-fuente cuando hay múltiples fuentes. No sustituye preguntas de aclaración (`generar_preguntas_aclaracion`).
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Cronología o matriz hecho-fuente.
 - Versiones de víctima, testigos, informes de autoridad, documentos.
@@ -33,6 +38,7 @@ Ejecutar tras cronología o matriz hecho-fuente cuando hay múltiples fuentes. N
 - Nota: contradicción documentada ≠ hecho desmentido.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Comparar relatos/fuentes sobre el mismo evento (quién, qué, cuándo, dónde).
 2. Listar contradicciones con fragmentos enfrentados y fuentes.
 3. Clasificar severidad (menor|material) sin resolver el fondo del caso.

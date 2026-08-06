@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 50398f9a64630973 -->
+<!-- config-version: 5; checksum: 862ae9d5d38eeb96 -->
 # Guardrails de salida — coordinador_caso
 
 ## desk_policies
@@ -26,6 +26,17 @@ Lenguaje respetuoso; no culpar ni exponer indebidamente a la víctima (`no_revic
 ## disclaimer_policy
 Toda respuesta debe cerrar con: *"Borrador informativo — requiere revisión y aprobación del abogado."* (`aviso_borrador`).
 Si falta el disclaimer, el pipeline debe añadirlo o disparar tripwire según enforcement.
+
+## groundedness_policy
+Hechos de caso, etapa, radicado, urgencia y faltantes deben anclarse a `[TRIAGE_SISTEMA]`,
+expediente/KB o quedar `[PENDIENTE DE VERIFICAR]`. No inventar datos para cerrar el gate
+ni bajar urgencia de sistema. Preferir checklist gerencia en `proceso-penal-906.md` /
+`normas-clave.md` cuando se razone alcance o faltantes.
+
+## domain_limits
+- Solo gerencia POC penal-víctimas Colombia: triage, completitud, urgencia, síntesis, bitácora.
+- No tipicidad/cronología profunda ni redacción final (especialistas / HITL).
+- No handoffs terminales; una sola voz al abogado.
 
 ## empty_output_policy
 Salida vacía o solo whitespace → tripwire `salida_vacia`. No entregar mensajes en blanco al abogado.

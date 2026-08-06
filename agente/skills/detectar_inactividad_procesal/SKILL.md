@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 521472bc509898e5 -->
+<!-- config-version: 4; checksum: fb3307efec24c6e2 -->
 ---
 name: detectar-inactividad-procesal
 description: Contrato penal-víctimas: Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde. Activar cuando el plan/HITL o el especialista requiera `detectar_inactividad_procesal`. No sustituye a `redactar_solicitud_impulso_procesal`.
@@ -25,10 +25,14 @@ Evaluación estratégica de silencio fiscal/judicial para recomendar solicitud d
 ## Rol en analista_seguimiento_procesal
 Alerta operativa periódica sobre radicado.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Última actuación registrada (fecha, tipo, fuente).
 - Etapa procesal y plazos razonables de la etapa.
-- Consulta estado radicado (`process_lookup_query`).
+- Consulta estado radicado (si hay dato en expediente; `process_lookup_query` es planned — no invocar).
 
 ## Outputs
 - `periodo_inactividad` (días/meses).
@@ -38,6 +42,7 @@ Alerta operativa periódica sobre radicado.
 - Derivar a `evaluar_solicitud_fiscalia_juez` si procede impulso.
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Comparar última actuación conocida vs tiempo transcurrido.
 2. Señalar inactividad material y posibles impulsos.
 3. No inventar actuaciones; no sustituir monitoreo de radicado.
@@ -66,7 +71,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 
 ## No duplicar
 - No redactar impulso (`redactar_solicitud_impulso_procesal` → redactor).
-- No monitoreo continuo (`monitorear_radicado` → gestor).
+- No monitoreo continuo (`monitorear_radicado` → analista_seguimiento_procesal).
 
 ## Riesgo si se omite
 Archivo o abandono del caso por inactividad institucional no impugnada.

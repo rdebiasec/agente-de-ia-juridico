@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4b6241ebc4beba61 -->
+<!-- config-version: 3; checksum: 3c012b778ef327d0 -->
 ---
 name: redactar-ampliacion-denuncia
 description: Contrato penal-víctimas: Redactar borrador de ampliación de denuncia con nuevos hechos o elementos. Activar cuando el plan/HITL o el especialista requiera `redactar_ampliacion_denuncia`. No sustituye a `redactar_memorial_penal`.
@@ -20,6 +20,11 @@ Redactar borrador de ampliación de denuncia con nuevos hechos o elementos.
 
 ## Rol en redactor_documentos_juridicos
 Borrador de ampliación; HITL y radicación son del despacho.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapa indagación/investigación; no inventar radicado/noticia.
+- `agente/conocimiento/normas-clave.md` — no inventar hechos; HITL antes de radicar.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Denuncia o informe previo (si consta).
 - Nuevos hechos verificados o narrados con fuente.
@@ -30,6 +35,7 @@ Borrador de ampliación; HITL y radicación son del despacho.
 - Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 ## Steps
+0. Anclar denuncia previa/radicado a expediente o marcar `[PENDIENTE DE VERIFICAR]`; no inventar noticia criminal.
 1. Identificar hechos nuevos no incluidos en denuncia anterior.
 2. Redactar ampliación vinculando con radicado o noticia existente.
 3. Marcar hechos sin fuente como pendientes.

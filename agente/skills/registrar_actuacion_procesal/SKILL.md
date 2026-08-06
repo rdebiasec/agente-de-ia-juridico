@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c2a25604d37c9567 -->
+<!-- config-version: 3; checksum: 1faa8cdac5441944 -->
 ---
 name: registrar-actuacion-procesal
 description: Contrato penal-víctimas: Registrar en el sistema una actuación procesal nueva con fuente y fecha. Activar cuando el plan/HITL o el especialista requiera `registrar_actuacion_procesal`. No sustituye a `monitorear_radicado`.
@@ -20,6 +20,11 @@ Registrar en el sistema una actuación procesal nueva con fuente y fecha.
 
 ## Rol en analista_seguimiento_procesal
 Bitácora operativa del expediente para cronología y reportes.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Descripción de la actuación, fecha, documento fuente.
 - Radicado del caso.
@@ -29,6 +34,7 @@ Bitácora operativa del expediente para cronología y reportes.
 - Confirmación de actualización de estado del caso.
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Registrar actuación con descripción, fecha y fuente documental.
 2. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
 

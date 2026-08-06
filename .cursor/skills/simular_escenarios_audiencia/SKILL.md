@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 627f0ba65ef2658c -->
+<!-- config-version: 3; checksum: 28af5830ee6ad367 -->
 ---
 name: simular-escenarios-audiencia
 description: Contrato penal-víctimas: Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar respuesta táctica del abogado. Activar cuando el plan/HITL o el especialista requiera `simular_escenarios_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.
@@ -21,6 +21,11 @@ Anticipar escenarios favorable, intermedio y adverso en audiencia y preparar res
 ## Rol en analista_audiencias
 Ejecutar tras `identificar_objetivo_audiencia` y antes o junto al guion oral.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist O6; escenarios no predicen fallo.
+- `agente/conocimiento/normas-clave.md` — no prometer resultado judicial.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Objetivo de audiencia y teoría del caso.
 - Contraargumentos anticipados (`preparar_contraargumentos`, si existe).
@@ -34,6 +39,7 @@ Ejecutar tras `identificar_objetivo_audiencia` y antes o junto al guion oral.
 - Etiqueta: `SIMULACIÓN PRELIMINAR — NO PREDICE DECISIÓN DEL JUEZ`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Plantear escenarios favorable, intermedio y adverso probables.
 2. Definir respuesta táctica para cada escenario.
 3. Listar señales en audiencia que indiquen cambio de escenario.

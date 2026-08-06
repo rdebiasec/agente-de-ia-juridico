@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c334170956e71217 -->
+<!-- config-version: 3; checksum: a50daed6e1dd96bb -->
 ---
 name: analizar-enfoque-diferencial
 description: Contrato penal-víctimas: Identificar factores diferenciales relevantes (género, edad, discapacidad, etnia, etc.) que exijan enfoque especial en la representación. Activar cuando el plan/HITL o el especialista requiera `analizar_enfoque_diferencial`. No sustituye a `controlar_n...
@@ -25,6 +25,11 @@ Ajustar teoría del caso y comunicación con enfoque de derechos.
 ## Rol en analista_calidad_juridica
 Verificar que escritos y preguntas respeten enfoque diferencial.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — enfoque diferencial y protección frente a revictimización.
+- Expediente/relato: solo factores documentados; sin inventar identidad/condición.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_normas_clave`.
+
 ## Inputs
 - Datos de la víctima disponibles (solo los documentados; no inferir).
 - Tipo de delito y contexto del caso.
@@ -36,6 +41,7 @@ Verificar que escritos y preguntas respeten enfoque diferencial.
 - `alertas` si el material ignora enfoque diferencial obligatorio.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar factores diferenciales relevantes con base documentada.
 2. Evaluar impacto en representación, comunicación y medidas de protección.
 3. Proponer ajustes concretos al plan de actuación.

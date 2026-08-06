@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 98df36e5ba9caef1 -->
+<!-- config-version: 6; checksum: 6112f0d298f7bceb -->
 ---
 name: clasificar-fuente-factual
 description: Contrato penal-víctimas: Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados. Activar cuando el plan/HITL o el especialista requiera `clasif...
@@ -21,6 +21,11 @@ Clasificar cada afirmación factual según su fuente y nivel de soporte, antes d
 ## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Texto del turno: consulta del abogado, relato de víctima, extractos documentales.
 - Documentos o fragmentos disponibles en el expediente (denuncia, informe de policía, actuaciones).
@@ -32,6 +37,7 @@ Clasificar cada afirmación factual según su fuente y nivel de soporte, antes d
 - Nota explícita: no es cronología ni conclusión de tipicidad.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Inventariar cada afirmación factual en los insumos del turno.
 2. Clasificar fuente: documento, relato víctima, tercero, autoridad, inferencia o pendiente.
 3. Asignar nivel de soporte sin mezclar hecho confirmado, narrado e inferido.

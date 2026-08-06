@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 8ea5409c983d6dae -->
+<!-- config-version: 3; checksum: 0beb107cd983640c -->
 ---
 name: verificar-citas-normativas
 description: Contrato penal-víctimas: Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso. Activar cuando el plan/HITL o el especialista requiera `verificar_citas_normativas`. No sustituye a `detectar_alucinaciones_legales`.
@@ -25,6 +25,12 @@ Control en borrador antes de calidad.
 ## Rol en analista_calidad_juridica
 Verificación en salida final.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — checklist calidad/citas O7; no inventar arts ni vigencia.
+- `agente/conocimiento/proceso-penal-906.md` — checklist control de calidad; etapa solo si la cita lo exige.
+- Tools reales: `leer_normas_clave`, `leer_playbook_proceso`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+- Sin localización en KB/expediente → `existe_en_rag=pendiente` / `[PENDIENTE DE VERIFICAR]`; no inventar verificación.
+
 ## Inputs
 - Lista de citas normativas en el documento.
 - Contexto del caso (penal-víctimas Colombia).
@@ -35,6 +41,7 @@ Verificación en salida final.
 - Etiqueta: `VERIFICACIÓN NORMATIVA — NO ES APROBACIÓN FINAL`.
 
 ## Steps
+0. Anclar cada cita a Fuentes KB/expediente; sin soporte → pendiente. No inventar vigencia ni numerales.
 1. Validar existencia de leyes, artículos y decretos citados.
 2. Verificar vigencia y pertinencia al caso penal-víctimas.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.

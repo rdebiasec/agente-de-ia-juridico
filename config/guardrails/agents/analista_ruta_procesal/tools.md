@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: ad9239b9aa576cc3 -->
+<!-- config-version: 3; checksum: ad9239b9aa576cc3 -->
 # Guardrails de tools — analista_ruta_procesal
 
 ## desk_policies

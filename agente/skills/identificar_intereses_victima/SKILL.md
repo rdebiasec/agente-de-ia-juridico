@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d3ddf1a45f1e49a9 -->
+<!-- config-version: 3; checksum: abb83d44205b715d -->
 ---
 name: identificar-intereses-victima
 description: Contrato penal-víctimas: Identificar intereses y expectativas de la víctima en el proceso (reparación, verdad, seguridad, celeridad, etc.). Activar cuando el plan/HITL o el especialista requiera `identificar_intereses_victima`. No sustituye a `analizar_derechos_victima`.
@@ -20,6 +20,11 @@ Identificar intereses y expectativas de la víctima en el proceso (reparación, 
 
 ## Rol en analista_representacion_victimas
 Traduce hechos y contexto en objetivos de representación centrada en la víctima.
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — derechos de víctimas, no revictimización, enfoque diferencial.
+- `agente/conocimiento/proceso-penal-906.md` — rol representante de víctima; etapa aparente si afecta opciones.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`, `leer_normas_clave` / `leer_playbook_proceso`.
+
 ## Inputs
 - Relato o declaración de la víctima (si consta).
 - Notas del abogado sobre objetivos del cliente.
@@ -31,6 +36,7 @@ Traduce hechos y contexto en objetivos de representación centrada en la víctim
 - Etiqueta: `INTERVIEW HITL — NO SUSTITUYE DECISIÓN ABOGADO`.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Recopilar intereses expresados por la víctima o documentados.
 2. Clasificar y priorizar sin imponer objetivos ajenos.
 3. Señalar intereses que requieren confirmación con la víctima.

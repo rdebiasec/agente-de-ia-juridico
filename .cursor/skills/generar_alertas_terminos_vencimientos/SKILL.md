@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: d30420f51c9c5c65 -->
+<!-- config-version: 3; checksum: c2482e24de4fecd5 -->
 ---
 name: generar-alertas-terminos-vencimientos
 description: Contrato penal-víctimas: Generar alertas de vencimientos próximos clasificadas por criticidad. Activar cuando el plan/HITL o el especialista requiera `generar_alertas_terminos_vencimientos`. No sustituye a `controlar_terminos_procesales_preliminares`.
@@ -25,6 +25,11 @@ Alertas ligadas a actuación estratégica inminente (recurso, audiencia). Comple
 ## Rol en analista_seguimiento_procesal
 Calendario operativo del caso.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Términos identificados (`controlar_terminos_procesales_preliminares`).
 - Calendario de audiencias y actuaciones.
@@ -35,6 +40,7 @@ Calendario operativo del caso.
 - Notificación sugerida (sí/no).
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Identificar términos/plazos con fuente y fecha de cómputo si consta.
 2. Clasificar alerta: informativa | próxima | vencida | incierta.
 3. No inventar dies a quo; marcar incertidumbre.

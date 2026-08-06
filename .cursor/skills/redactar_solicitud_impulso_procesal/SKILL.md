@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 54475032dbc43c73 -->
+<!-- config-version: 3; checksum: be808f335864bc15 -->
 ---
 name: redactar-solicitud-impulso-procesal
 description: Contrato penal-víctimas: Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez. Activar cuando el plan/HITL o el especialista requiera `redactar_solicitud_impulso_procesal`. No sustituye a `detectar_inactividad_procesal`.
@@ -25,6 +25,11 @@ Redacta borrador formal.
 ## Rol en analista_seguimiento_procesal
 Aporta hechos de inactividad (`detectar_inactividad_procesal`); no redacta texto final.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, inactividad, términos (días hábiles); sin fecha_base no certificar.
+- `agente/conocimiento/normas-clave.md` — derechos de víctima; HITL antes de radicar.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Registro de inactividad y última actuación.
 - Etapa procesal y actuación solicitada.
@@ -35,6 +40,7 @@ Aporta hechos de inactividad (`detectar_inactividad_procesal`); no redacta texto
 - Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 ## Steps
+0. Anclar última actuación/etapa a Fuentes KB; sin fecha_base no certificar términos; marcar pendientes.
 1. Documentar inactividad procesal con fechas y actuaciones omitidas.
 2. Fundamentar solicitud en Ley 906 y derechos de la víctima.
 3. Formular petición concreta de actuación al Fiscal o juez.

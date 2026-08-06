@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 1d785e286072cef0 -->
+<!-- config-version: 7; checksum: 9811648d4f3d4d1d -->
 ---
 name: clasificar-tarea-y-etapa
 description: Contrato penal-víctimas: Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes. Activar cuando el plan/HITL o el especialista requiera `clasificar_tarea_y_etapa`....
@@ -25,6 +25,11 @@ Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar
 ## Rol en coordinador_caso
 Primer skill en cada consulta nueva. En runtime el contrato lo materializa `build_triage` (`src/agents/triage.py` → `TriageResult`); el LLM no re-clasifica si ya hay `[TRIAGE_SISTEMA]`.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas aparentes (enum triage), checklist gerencia/POC (O8).
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar etapa/radicado; checklist gerencia.
+- Convención: `etapa_aparente` es hipótesis de enrutamiento, no dictamen 906; preferir `desconocida` / `[PENDIENTE DE VERIFICAR]`.
+
 ## Inputs
 - Solicitud textual del abogado o usuario interno.
 - Resumen de caso y radicado (si existe).
@@ -43,6 +48,7 @@ Alineados a `TriageResult` (`src/agents/schemas.py`):
 - `motivos_urgencia`, `escalar_humano`, `accion_inmediata_urgencia`.
 
 ## Steps
+0. Anclar tipo/etapa a Fuentes KB y a `[TRIAGE_SISTEMA]` si existe; no inventar etapa, radicado ni actuaciones.
 1. Clasificar tipo de tarea y etapa aparente con base en el mensaje.
 2. Alinear con triage de sistema; no contradecir `[TRIAGE_SISTEMA]`.
 3. No hacer análisis de fondo de tipicidad/cronología.

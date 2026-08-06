@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: b2aba86a8d0f2232 -->
+<!-- config-version: 3; checksum: e1aa89a89ce027f7 -->
 ---
 name: identificar-actores-y-roles
 description: Contrato penal-víctimas: Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar. Activar cuando el plan/HITL o el especialista requiera `identificar_actores_y_roles`. No sustituye a `analizar_autoria_y_participacion`.
@@ -22,6 +22,11 @@ Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal p
 ## Rol en analista_cronologia_hechos
 Ejecutar en paralelo o justo después de `extraer_hechos_relevantes`. Alimenta cronología y detección de contradicciones.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Hechos extraídos y documentos del expediente.
 - Denuncia, informes de policía, actuaciones procesales (si existen).
@@ -33,6 +38,7 @@ Ejecutar en paralelo o justo después de `extraer_hechos_relevantes`. Alimenta c
 - Alertas PII para control de confidencialidad.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Extraer personas y entidades mencionadas en las fuentes.
 2. Asignar rol procesal preliminar (víctima, imputado, testigo, autoridad, tercero).
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.

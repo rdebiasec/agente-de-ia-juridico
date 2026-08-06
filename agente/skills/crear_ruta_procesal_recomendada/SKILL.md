@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: dfd1dfaf6a8e5476 -->
+<!-- config-version: 3; checksum: 2c8bb10156dc1210 -->
 ---
 name: crear-ruta-procesal-recomendada
 description: Contrato penal-víctimas: Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado. Activar cuando el plan/HITL o el especialista requiera `crear_ruta_procesal_recomendada`. No sustituye a `evalua...
@@ -24,6 +24,10 @@ Producto integrador del agente. Ejecutar tras etapa, actuaciones mapeadas, oport
 ## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Etapa procesal actual (confirmada o `[PENDIENTE DE VERIFICAR]`).
 - Actuaciones pendientes y últimas actuaciones del radicado.
@@ -38,9 +42,12 @@ Producto integrador del agente. Ejecutar tras etapa, actuaciones mapeadas, oport
 - Etiqueta: `BORRADOR PARA REVISIÓN — NO EJECUTAR SIN APROBACIÓN`.
 
 ## Steps
-1. Partir de etapa e intereses de la víctima.
-2. Proponer secuencia de actuaciones posibles con justificación breve.
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
+1. Partir de `etapa_ley906` canónica (playbook) e intereses de la víctima.
+2. Proponer secuencia numerada: actuación, responsable, dependencia, plazo estimado (días hábiles / ESTIMACIÓN IA).
 3. Separar recomendación de decisión del abogado; HITL para piezas accionables.
+4. Registrar riesgos (oportunidad, improcedencia) y pendientes.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `crear_ruta_procesal_recomendada`.

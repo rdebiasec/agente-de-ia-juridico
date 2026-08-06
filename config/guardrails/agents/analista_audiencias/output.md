@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 76fe3f64b3511257 -->
+<!-- config-version: 4; checksum: c1b409e7956629e1 -->
 # Guardrails de salida — analista_audiencias
 
 ## desk_policies
@@ -9,20 +9,31 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## schema_policy
-Salida alineada a: PreparacionAudiencia (objetivos, preguntas, guion).
+Salida alineada a: PreparacionAudiencia (objetivo, guion, solicitudes, preguntas,
+riesgos, checklist, fuentes_kb).
 
 ## empty_policy
 Salida vacía → tripwire `salida_vacia`.
 
 ## no_invention_policy
-No inventar hechos, normas, radicados ni citas (`no_inventar`). Sin soporte → `[PENDIENTE DE VERIFICAR]`.
+No inventar hechos, normas, radicados, fechas de audiencia ni citas (`no_inventar`).
+Sin soporte → `[PENDIENTE DE VERIFICAR]`.
 Invención sospechosa = soft-flag `invention_suspect` (HITL del abogado); no tripwire duro.
+
+## groundedness_policy
+Objetivo, guion, solicitudes y preguntas deben anclarse a expediente/KB o quedar
+en `pendientes_verificacion`. Registrar `fuentes_kb` si se consultó KB/expediente.
+No inventar tipo de audiencia, facultades de intervención ni decisiones judiciales previas.
 
 ## pii_policy
 No exponer PII sensible innecesaria (`confidencialidad`). Flags en `output_info`.
+Minimizar detalle gráfico del relato (menor / violencia sexual) en preguntas y guion.
 
 ## domain_limits
-No revictimizar en preguntas; no sustituir al abogado en sala.
+- No revictimizar en preguntas ni guion (`no_revictimizar`).
+- No sustituir al abogado en sala; producto = preparación interna (HITL antes de estrados).
+- No tipicidad definitiva ni memorial escrito (otros agentes / plan).
+- Sin fecha/notificación fundante → no certificar oportunidad ni términos.
 
 ## tripwire_message
 "La salida de analista_audiencias está vacía o no es usable; se retiene para corrección."

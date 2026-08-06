@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c0862e02adb27aa4 -->
+<!-- config-version: 4; checksum: 5f95be848dd26d40 -->
 # Guardrails de salida — analista_seguimiento_procesal
 
 ## desk_policies
@@ -9,20 +9,27 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## schema_policy
-Salida alineada a: SeguimientoProcesal (radicado, alertas, inactividad).
+Salida alineada a `SeguimientoProcesal` (radicado, alertas, inactividad, `fuentes_kb`).
 
 ## empty_policy
 Salida vacía → tripwire `salida_vacia`.
 
 ## no_invention_policy
-No inventar hechos, normas, radicados ni citas (`no_inventar`). Sin soporte → `[PENDIENTE DE VERIFICAR]`.
+No inventar hechos, normas, radicados ni actuaciones (`no_inventar`). Sin soporte → `[PENDIENTE DE VERIFICAR]`.
 Invención sospechosa = soft-flag `invention_suspect` (HITL del abogado); no tripwire duro.
+
+## groundedness_policy
+Estado de radicado, actuaciones, términos e inactividad deben anclarse a expediente/KB
+o quedar en `pendientes_verificacion`. Registrar `fuentes_kb` si se consultó KB/expediente.
+Sin `fecha_base` no certificar vencimientos; estimaciones = `ESTIMACIÓN IA — VERIFICAR CON ABOGADO`.
 
 ## pii_policy
 No exponer PII sensible innecesaria (`confidencialidad`). Flags en `output_info`.
 
 ## domain_limits
-No inventar actuaciones ni radicados.
+- Solo seguimiento procesal operativo (radicado, actuaciones, términos, inactividad, reporte).
+- No tipicidad ni redacción de piezas; impulso escrito → redactor vía Gerente.
+- Salida accionable → HITL (`HITL_OUTPUT_AGENTS`).
 
 ## tripwire_message
 "La salida de analista_seguimiento_procesal está vacía o no es usable; se retiene para corrección."

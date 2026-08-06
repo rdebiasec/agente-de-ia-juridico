@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 6dfbce8de435dae9 -->
+<!-- config-version: 3; checksum: d1cc13086238439d -->
 ---
 name: estructurar-hechos-fundamentos-solicitudes
 description: Contrato penal-víctimas: Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o escrito. Activar cuando el plan/HITL o el especialista requiera `estructurar_hechos_fundamentos_solicitudes`. No sustituye a `redactar_memorial_penal`.
@@ -20,6 +20,11 @@ Organizar esquema hechos-fundamentos-peticiones antes de redactar memorial o esc
 
 ## Rol en redactor_documentos_juridicos
 Esquema previo a redacción de escritos; insumo del redactor, no pieza final.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist redacción O7 (hechos→fundamentos→peticiones).
+- `agente/conocimiento/normas-clave.md` — no inventar normas; separar hecho/inferencia.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Hechos soportados y pretensiones.
 - Norma y plantilla aplicable.
@@ -31,6 +36,7 @@ Esquema previo a redacción de escritos; insumo del redactor, no pieza final.
 - Etiqueta: `ESQUEMA — NO ES BORRADOR FINAL`.
 
 ## Steps
+0. Anclar cada bloque a fuente (expediente/KB); sin soporte → pendiente por bloque.
 1. Organizar esquema hechos → fundamentos → peticiones sin prosa final.
 2. Anclar cada bloque a fuente; marcar pendientes.
 3. No redactar el memorial completo (`redactar_memorial_penal`).

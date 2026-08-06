@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 603cac65bf26b886 -->
+<!-- config-version: 4; checksum: 5e4addcbb219de52 -->
 # Guardrails de tools — analista_calidad_juridica
 
 ## desk_policies
@@ -9,7 +9,12 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## allowed_tools_policy
-Knowledge/expediente para verificar citas. No reescribir memoriales vía otras tools.
+Tools reales permitidas para verificar citas/hechos:
+`buscar_en_expediente`, `buscar_en_conocimiento`, `leer_playbook_proceso`,
+`leer_normas_clave`, `leer_area_derecho`, `listar_areas_derecho`.
+No reescribir memoriales vía otras tools.
+No invocar capacidades planeadas (`citation_checker`, `rag_jurisprudencia_search`,
+`rag_source_validator`, `approval_gate_decision`) como function_tools.
 
 ## tripwire_message
 "Tool de calidad bloqueada por política."

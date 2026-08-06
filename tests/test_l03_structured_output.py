@@ -27,8 +27,15 @@ def test_new_schemas_require_core_fields():
         SeguimientoProcesal,
     )
 
-    ruta = RutaProcesalLey906(resumen="Impulso en indagación", etapa_aparente="indagacion")
+    ruta = RutaProcesalLey906(
+        resumen="Impulso en indagación",
+        etapa_ley906="indagacion_investigacion",
+        etapa_aparente="indagacion",
+        evidencia_etapa="Denuncia SPOA — fecha narrada",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+    )
     assert ruta.pendientes_verificacion == []
+    assert ruta.etapa_ley906 == "indagacion_investigacion"
     with pytest.raises(ValidationError):
         RutaProcesalLey906(resumen=" ")
 
@@ -60,14 +67,20 @@ def test_render_new_schemas_is_prose_not_raw_json():
     ruta_txt = render_structured_output(
         RutaProcesalLey906(
             resumen="Evaluar impulso",
+            etapa_ley906="indagacion_investigacion",
             etapa_aparente="indagacion",
+            evidencia_etapa="Última actuación: denuncia",
             ruta_recomendada=["Solicitar impulso", "Verificar radicado"],
+            ruta_detallada=["1. Impulso — abogado — ESTIMACIÓN IA"],
+            fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
             pendientes_verificacion=["Confirmar número SPOA"],
         )
     )
     assert "Ruta procesal" in ruta_txt
+    assert "indagacion_investigacion" in ruta_txt
     assert "Solicitar impulso" in ruta_txt
     assert "Confirmar número SPOA" in ruta_txt
+    assert "proceso-penal-906.md" in ruta_txt
     assert "'ruta_recomendada'" not in ruta_txt  # no dump dict crudo tipico
 
     vict_txt = render_structured_output(
@@ -75,10 +88,12 @@ def test_render_new_schemas_is_prose_not_raw_json():
             teoria_caso="Hechos de violencia intrafamiliar",
             derechos_relevantes=["integridad", "acceso a la justicia"],
             riesgos_revictimizacion=["Declaraciones reiteradas"],
+            fuentes_kb=["agente/conocimiento/normas-clave.md"],
         )
     )
     assert "Teoría del caso" in vict_txt
     assert "integridad" in vict_txt
+    assert "normas-clave.md" in vict_txt
 
     aud_txt = render_structured_output(
         PreparacionAudiencia(
@@ -96,13 +111,26 @@ def test_render_new_schemas_is_prose_not_raw_json():
             actuaciones_relevantes=["Denuncia 2024-01"],
             proximas_acciones=["Derecho de petición a Fiscalía"],
             terminos_alertas=["Revisar términos de impulso"],
+            fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+            pendientes_verificacion=["Confirmar última actuación en SPOA"],
         )
     )
     assert "Seguimiento procesal" in seg_txt
     assert "Derecho de petición" in seg_txt
+    assert "proceso-penal-906.md" in seg_txt
+    assert "Confirmar última actuación" in seg_txt
 
 
-def test_redactor_schema_still_valid():
+def test_seguimiento_schema_fuentes_kb():
+    from src.agents.schemas import SeguimientoProcesal
+
+    seg = SeguimientoProcesal(
+        resumen="Sin movimiento reciente",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+        pendientes_verificacion=["Verificar radicado SPOA"],
+    )
+    assert seg.fuentes_kb[0].endswith("proceso-penal-906.md")
+    assert "[PENDIENTE" in seg.radicado_o_referencia
     from src.agents.schemas import BorradorDocumentoPenal
     from src.agents.structured_render import render_structured_output
 
@@ -110,12 +138,34 @@ def test_redactor_schema_still_valid():
         tipo="memorial",
         titulo="Impulso",
         cuerpo="Solicito impulso del radicado…",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
         pendientes_verificacion=["Confirmar radicado"],
     )
     text = render_structured_output(draft)
     assert "Impulso" in text
     assert "Confirmar radicado" in text
+    assert "proceso-penal-906.md" in text
     assert draft.tipo == "memorial"
+    assert draft.fuentes_kb[0].endswith("proceso-penal-906.md")
+
+
+def test_dictamen_calidad_fuentes_kb():
+    from src.agents.schemas import DictamenCalidad
+    from src.agents.structured_render import render_structured_output
+
+    dictamen = DictamenCalidad(
+        veredicto="con_cambios",
+        hallazgos=["Cita C-999/99 sin soporte"],
+        cambios_requeridos=["Retirar o marcar pendiente la sentencia"],
+        resumen="Dictamen preliminar con cita no localizada",
+        fuentes_kb=["agente/conocimiento/normas-clave.md"],
+        pendientes_verificacion=["Verificar sentencia citada"],
+    )
+    text = render_structured_output(dictamen)
+    assert "con_cambios" in text
+    assert "normas-clave.md" in text
+    assert dictamen.fuentes_kb[0].endswith("normas-clave.md")
+    assert dictamen.bloquea_entrega is False
 
 
 def test_orchestrator_poc_chat_has_no_output_type():
@@ -124,3 +174,67 @@ def test_orchestrator_poc_chat_has_no_output_type():
     poc = build_orchestrator(use_cache=False)
     assert poc.name == POC_AGENT_ID
     assert getattr(poc, "output_type", None) is None
+
+
+def test_matriz_tipicidad_cronologia_y_evidencia_fuentes_kb():
+    from src.agents.schemas import (
+        CronologiaPenal,
+        ElementoTipoPenal,
+        EventoCronologia,
+        InventarioEvidencia,
+        ItemEvidencia,
+        MatrizTipicidad,
+    )
+    from src.agents.structured_render import render_structured_output
+
+    matriz = MatrizTipicidad(
+        hipotesis_tipica="Lesiones personales preliminares",
+        elementos=[
+            ElementoTipoPenal(
+                elemento="resultado lesión",
+                estado="vacio",
+                riesgo_o_brecha="Falta pericia",
+            )
+        ],
+        fuentes_kb=["agente/conocimiento/penal.md"],
+    )
+    txt = render_structured_output(matriz)
+    assert "NO IMPUTACIÓN" in matriz.etiqueta_preliminar
+    assert "penal.md" in txt
+    assert "[vacio]" in txt
+
+    crono = CronologiaPenal(
+        eventos=[
+            EventoCronologia(
+                fecha_o_momento="2024-01",
+                descripcion="Golpe narrado",
+                clasificacion="narrado",
+                fuente="relato víctima",
+            )
+        ],
+        fuentes_kb=["expediente"],
+        vacios_factuales=["Hora exacta"],
+    )
+    crono_txt = render_structured_output(crono)
+    assert "Hora exacta" in crono_txt
+    assert crono.fuentes_kb == ["expediente"]
+
+    inv = InventarioEvidencia(
+        items=[
+            ItemEvidencia(
+                descripcion="Fotos de lesiones",
+                tipo="digital",
+                fuente_o_ubicacion="chat WhatsApp — pendiente hash",
+                cadena_custodia="pendiente_verificar",
+            )
+        ],
+        brechas_probatorias=["Falta dictamen médico"],
+        plan_recaudo_sugerido=["Solicitar pericia médico-legal"],
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+        pendientes_verificacion=["Hash e integridad del chat"],
+    )
+    inv_txt = render_structured_output(inv)
+    assert "Fotos de lesiones" in inv_txt
+    assert "proceso-penal-906.md" in inv_txt
+    assert "Falta dictamen médico" in inv_txt
+    assert inv.fuentes_kb[0].endswith("proceso-penal-906.md")

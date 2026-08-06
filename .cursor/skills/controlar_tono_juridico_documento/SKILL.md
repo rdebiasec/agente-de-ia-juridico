@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: e6cbd7119a40fbff -->
+<!-- config-version: 3; checksum: a5facd6af4e3af3c -->
 ---
 name: controlar-tono-juridico-documento
 description: Contrato penal-víctimas: Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo. Activar cuando el plan/HITL o el especialista requiera `controlar_tono_juridico_documento`. No sustituye a `controlar_tono_riesgo_reputaci...
@@ -25,6 +25,11 @@ Revisión de tono antes de pasar a calidad.
 ## Rol en analista_calidad_juridica
 Control final de estilo en salidas externas.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — dignidad/no revictimizar; criterio operativo del despacho.
+- `agente/conocimiento/proceso-penal-906.md` — rol representante de víctima; tono formal.
+- Tools reales: `leer_normas_clave`, `buscar_en_conocimiento` (si hace falta anclar lenguaje).
+
 ## Inputs
 - Borrador de memorial, petición o solicitud.
 - Destinatario (juez, Fiscalía, autoridad administrativa).
@@ -35,6 +40,7 @@ Control final de estilo en salidas externas.
 - Etiqueta: `CONTROL TONO JURÍDICO`.
 
 ## Steps
+0. Revisar contra criterio de dignidad/no revictimizar (Fuentes KB) antes de reformular.
 1. Revisar tono: formal, preciso, respetuoso con la víctima.
 2. Señalar lenguaje revictimizante, coloquial o sobreprometedor.
 3. Proponer ajustes puntuales; no reescribir todo el memorial.

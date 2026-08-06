@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 988d0c7102190da6 -->
+<!-- config-version: 5; checksum: 7adf624e896eee72 -->
 # Guardrails de entrada — analista_cronologia_hechos
 
 ## desk_policies
@@ -10,6 +10,9 @@ Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
 Solo pedidos internos del Gerente sobre **cronología y hechos** en penal-víctimas Colombia.
+
+## required_context_policy
+Pedido debe aportar relato/hechos o expediente; sin fechas → pendientes, no invención.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

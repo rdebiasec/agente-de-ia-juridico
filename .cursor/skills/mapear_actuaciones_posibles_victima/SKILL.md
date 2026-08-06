@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 499ab2264c6ae78d -->
+<!-- config-version: 4; checksum: 5996c63fb6978df6 -->
 ---
 name: mapear-actuaciones-posibles-victima
 description: Contrato penal-víctimas: Listar actuaciones que la representación de víctimas puede promover en la etapa actual, con requisitos y efectos esperados. Activar cuando el plan/HITL o el especialista requiera `mapear_actuaciones_posibles_victima`. No sustituye a `evaluar_oportunida...
@@ -25,6 +25,11 @@ Ejecutar inmediatamente tras `identificar_etapa_procesal_ley906`. Catálogo de o
 ## Rol en analista_representacion_victimas
 Alinear actuaciones con intereses y teoría del caso de la víctima.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — derechos de víctima y checklist representación.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
+
 ## Inputs
 - Etapa Ley 906 confirmada o `[PENDIENTE DE VERIFICAR]`.
 - Objetivos preliminares de la víctima.
@@ -37,6 +42,7 @@ Alinear actuaciones con intereses y teoría del caso de la víctima.
 - Actuaciones no procedentes en etapa marcadas con motivo.
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Listar actuaciones que la representación de víctimas puede promover en la etapa actual.
 2. Indicar requisitos, oportunidad y efectos esperados de cada una.
 3. Priorizar según intereses de la víctima.

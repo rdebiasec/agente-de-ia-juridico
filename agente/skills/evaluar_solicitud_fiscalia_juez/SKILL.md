@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d368168e652e6ef0 -->
+<!-- config-version: 3; checksum: c96f33abc2dd35b1 -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Contrato penal-víctimas: Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento. Activar cuando el plan/HITL o el especialista requiera `evaluar_solicitud_fiscalia_juez`. No sustituye a `redactar_memorial...
@@ -25,6 +25,10 @@ Dictamen preliminar antes de derivar a redactor. Incluye oportunidad, requisitos
 ## Rol en redactor_documentos_juridicos
 Validar que la solicitud a redactar tuvo evaluación procesal previa.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Tipo de solicitud propuesta (oficio, memorial, incidente, etc.).
 - Autoridad destino (Fiscalía, Juez PGA/JUEZ).
@@ -39,6 +43,7 @@ Validar que la solicitud a redactar tuvo evaluación procesal previa.
 - `riesgos` (improcedencia, rechazo, efecto adverso).
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Verificar procedencia formal de la solicitud a Fiscalía o juez.
 2. Evaluar conveniencia estratégica para la víctima.
 3. Listar requisitos y anexos necesarios.

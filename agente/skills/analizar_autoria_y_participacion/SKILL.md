@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 22b07fae999888bb -->
+<!-- config-version: 3; checksum: 35c7c872eec68c0d -->
 ---
 name: analizar-autoria-y-participacion
 description: Contrato penal-víctimas: Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal. Activar cuando el plan/HITL o el especialista requiera `analizar_autoria_y_participacion`. No sustituye a `identificar_actores_y_roles`.
@@ -21,6 +21,10 @@ Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) se
 ## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición de elementos y mapa de actores. En representación de víctimas: identificar posibles responsables, no absolver ni condenar.
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Mapa de actores (`identificar_actores_y_roles`).
 - Hechos soportados sobre conducta de cada interviniente.
@@ -31,10 +35,12 @@ Ejecutar tras descomposición de elementos y mapa de actores. En representación
 - Etiqueta: `PRELIMINAR — NO IMPUTACIÓN FORMAL`.
 
 ## Steps
-1. Identificar posibles autores, coautores y partícipes según hechos.
-2. Evaluar preliminarmente conductas de cada interviniente.
-3. Señalar vacíos probatorios en autoría/participación.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
+1. Describir aporte fáctico de cada persona (quién hizo qué) sin cerrar título de intervención.
+2. Hipótesis preliminar: autor | coautor | cómplice | determinador | indeterminado — con hechos soporte.
+3. Sin hechos de aporte → `[PENDIENTE DE VERIFICAR]`; no inventar roles.
+4. Etiqueta `NO IMPUTACIÓN`; deferir calificación al abogado.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_autoria_y_participacion`.

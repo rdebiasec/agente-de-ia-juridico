@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 47cf61b8fbc6e234 -->
+<!-- config-version: 3; checksum: c9321c51d296acc5 -->
 ---
 name: controlar-audiencias
 description: Contrato penal-víctimas: Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención. Activar cuando el plan/HITL o el especialista requiera `controlar_audiencias`. No sustituye a `preparar_preguntas_audiencia`.
@@ -25,6 +25,11 @@ Checklist de control previo a audiencia.
 ## Rol en analista_calidad_juridica
 Segunda revisión si el paquete de audiencia va a uso externo.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — control formal/sustantivo prep. O6.
+- `agente/conocimiento/normas-clave.md` — participación/protección; sin inventar arts.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Tipo de audiencia, fecha y etapa procesal.
 - Objetivo, guion, preguntas y solicitudes orales preparadas.
@@ -36,6 +41,7 @@ Segunda revisión si el paquete de audiencia va a uso externo.
 - Etiqueta: `CONTROL AUDIENCIA — REVISAR CON ABOGADO`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Verificar tipo de audiencia y competencia del despacho/juez.
 2. Contrastar preparación con requisitos Ley 906 de intervención de la víctima.
 3. Señalar omisiones formales o sustantivas antes de la audiencia.

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: f3ef3d392108d79a -->
+<!-- config-version: 3; checksum: ab3284e98d6b86b5 -->
 ---
 name: identificar-objetivo-audiencia
 description: Contrato penal-víctimas: Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal). Activar cuando el plan/HITL o el especialista requiera `identificar_objetivo_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.
@@ -21,6 +21,11 @@ Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 90
 ## Rol en analista_audiencias
 Antecede guion, preguntas, solicitudes orales y simulación de escenarios.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, tipos de audiencia, checklist preparación O6.
+- `agente/conocimiento/normas-clave.md` — participación/protección víctima; sin inventar facultades.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Tipo de audiencia programada (legalización, formulación, juicio, etc.).
 - Etapa procesal y actuación que se discute.
@@ -36,6 +41,7 @@ Antecede guion, preguntas, solicitudes orales y simulación de escenarios.
 - Etiqueta: `OBJETIVO AUDIENCIA — VALIDAR CON ABOGADO`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar tipo de audiencia y pretensión de la víctima.
 2. Listar 1–5 objetivos medibles para la intervención.
 3. No redactar guion ni checklist completo aquí.

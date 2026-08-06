@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 111430392bc5f502 -->
+<!-- config-version: 3; checksum: 6b417f4e34612430 -->
 ---
 name: construir-cronologia-penal
 description: Contrato penal-víctimas: Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos. Activar cuando el plan/HITL o el especialista requiera `construir_cronologia_penal`. No sustituye a `extraer_hechos_relevantes`.
@@ -22,6 +22,11 @@ Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte
 ## Rol en analista_cronologia_hechos
 Producto central del agente. Ejecutar tras `extraer_hechos_relevantes` y `crear_matriz_hecho_fuente`. Las contradicciones profundas van a `detectar_contradicciones_factuales`.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Hechos extraídos con referencia de fuente (`extraer_hechos_relevantes`).
 - Matriz hecho-fuente (si existe).
@@ -35,6 +40,7 @@ Producto central del agente. Ejecutar tras `extraer_hechos_relevantes` y `crear_
 - Tres bloques separados: hechos confirmados | narrados | inferidos.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Ordenar hechos/eventos por fecha u orden relativo cuando falte fecha exacta.
 2. Etiquetar cada evento: confirmado | narrado | inferido | pendiente_verificar.
 3. Registrar actores y fuente por evento; no inventar fechas.

@@ -157,20 +157,25 @@ def skill_contract_brief(skill_id: str | None, *, max_chars: int = 900) -> str:
 
 # Anclas secundarias cortas (primario + 2–3) sin explotar tokens.
 _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
+    "coordinador_caso": (
+        "gestionar_faltantes_expediente",
+        "detectar_urgencia_penal",
+        "actualizar_tareas_responsable",
+    ),
     "analista_cronologia_hechos": (
         "extraer_hechos_relevantes",
         "detectar_contradicciones_factuales",
-        "detectar_vacios_factuales",
+        "clasificar_fuente_factual",
     ),
     "analista_responsabilidad_tipicidad": (
         "identificar_conductas_punibles_preliminares",
-        "detectar_riesgos_atipicidad",
-        "mapear_tipo_penal_hecho_prueba",
+        "analizar_dolo_culpa_elemento_subjetivo",
+        "analizar_autoria_y_participacion",
     ),
     "analista_evidencia": (
-        "detectar_brechas_probatorias",
+        "clasificar_tipo_prueba",
         "construir_matriz_hecho_prueba",
-        "crear_plan_recaudo_probatorio",
+        "detectar_brechas_probatorias",
     ),
     "redactor_documentos_juridicos": (
         "estructurar_hechos_fundamentos_solicitudes",
@@ -179,24 +184,28 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     ),
     "analista_calidad_juridica": (
         "detectar_alucinaciones_legales",
-        "controlar_confidencialidad_datos_sensibles",
+        "verificar_citas_normativas",
         "clasificar_aprobacion_juridica",
     ),
     "analista_ruta_procesal": (
         "evaluar_oportunidad_procesal",
         "crear_ruta_procesal_recomendada",
+        "controlar_terminos_procesales_preliminares",
     ),
     "analista_representacion_victimas": (
         "analizar_derechos_victima",
         "detectar_riesgo_revictimizacion",
+        "priorizar_objetivos_representacion",
     ),
     "analista_audiencias": (
         "identificar_objetivo_audiencia",
         "preparar_guion_intervencion_oral",
+        "detectar_riesgos_audiencia",
     ),
     "analista_seguimiento_procesal": (
         "generar_alertas_terminos_vencimientos",
         "detectar_inactividad_procesal",
+        "crear_reporte_estado_caso",
     ),
 }
 

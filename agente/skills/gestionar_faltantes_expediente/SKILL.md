@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 5a93b9db2ced861b -->
+<!-- config-version: 7; checksum: 352db686ccbd3406 -->
 ---
 name: gestionar-faltantes-expediente
 description: Contrato penal-víctimas: Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras. Activar cuando el plan/HITL o el especialista requiera `gestionar_faltantes_expediente`. No sus...
@@ -24,6 +24,11 @@ Identificar datos y documentos mínimos que faltan en el expediente **antes** de
 ## Rol en coordinador_caso
 Gate de completitud documental exclusivo del coordinador. Runtime: `assess_completeness` → `CompletenessResult` (`src/agents/completeness.py`).
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist gerencia/POC (gate documental vs vacíos factuales).
+- `agente/conocimiento/normas-clave.md` — no inventar documentos; pedir faltantes bloqueantes antes de redactor.
+- Convención: checklist administrativo ≠ `detectar_vacios_factuales` (cronología).
+
 ## Inputs
 - Tipo de tarea / destino clasificado.
 - Inventario de documentos en expediente o adjuntos del turno.
@@ -39,6 +44,7 @@ Gate de completitud documental exclusivo del coordinador. Runtime: `assess_compl
 - Mensaje al abogado con solicitud concreta (`format_missing_request`).
 
 ## Steps
+0. Contrastar inventario con Fuentes KB/checklist gerencia; no inventar documentos ni cerrar el gate sin soporte.
 1. Listar faltantes críticos que bloquean el pedido.
 2. Priorizar preguntas concretas al abogado.
 3. No inventar datos para cerrar el gate.

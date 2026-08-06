@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: a58113eba6d1c1a6 -->
+<!-- config-version: 3; checksum: 6a7a659236d9e289 -->
 ---
 name: preparar-resumen-operativo-cliente
 description: Contrato penal-víctimas: Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible. Activar cuando el plan/HITL o el especialista requiera `preparar_resumen_operativo_cliente`. No sustituye a `crear_resumen_ejecutivo_litigante`.
@@ -25,6 +25,11 @@ Comunicación periódica de avance procesal.
 ## Rol en analista_calidad_juridica
 Aprobar tono y confidencialidad antes de envío.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Estado del radicado y últimas actuaciones.
 - Próximos pasos procesales públicos (no estrategia interna).
@@ -36,6 +41,7 @@ Aprobar tono y confidencialidad antes de envío.
 - Etiqueta: `SOLO_TRAS_APROBACION_ABOGADO — NO ENVIAR DIRECTO`.
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Sintetizar estado del proceso en lenguaje accesible.
 2. Incluir próximos pasos sin revelar estrategia sensible.
 3. Marcar para revisión humana antes de envío al cliente.

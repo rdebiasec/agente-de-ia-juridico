@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: ab40b6337fca7493 -->
+<!-- config-version: 3; checksum: c056f35a965e5edf -->
 ---
 name: revisar-coherencia-estrategica
 description: Contrato penal-víctimas: Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivos aprobados de la víctima. Activar cuando el plan/HITL o el especialista requiera `revisar_coherencia_estrategica`. No sustituye a `clasificar_aprobacion_juridica`.
@@ -21,6 +21,12 @@ Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivo
 ## Rol en analista_calidad_juridica
 Skill primario del agente; primer filtro de coherencia estratégica.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapa/ruta; checklist calidad (coherencia estrategia↔pieza).
+- `agente/conocimiento/normas-clave.md` — derechos/intereses víctima; no contradecir objetivos aprobados.
+- Expediente / teoría del caso (si constan); tools: `buscar_en_expediente`, `buscar_en_conocimiento`.
+- Sin teoría/objetivos documentados → coherencia `[PENDIENTE DE VERIFICAR]`.
+
 ## Inputs
 - Documento o recomendación a revisar.
 - Teoría del caso y objetivos aprobados (si constan).
@@ -31,6 +37,7 @@ Skill primario del agente; primer filtro de coherencia estratégica.
 - Contradicciones detectadas y recomendación de ajuste o escalamiento.
 
 ## Steps
+0. Anclar teoria/objetivos/etapa a Fuentes KB o expediente; sin soporte → pendiente.
 1. Cruzar teoría del caso, ruta y prueba propuesta.
 2. Señalar inconsistencias estratégicas y riesgos.
 3. No dictaminar aprobación final ni solo cazar citas falsas.

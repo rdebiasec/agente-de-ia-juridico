@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 63d17506c74d9ad0 -->
+<!-- config-version: 3; checksum: a63f514e7d0a83dd -->
 ---
 name: construir-matriz-hecho-prueba
 description: Contrato penal-víctimas: Vincular hechos relevantes con prueba existente, faltante o en trámite, priorizando brechas críticas. Activar cuando el plan/HITL o el especialista requiera `construir_matriz_hecho_prueba`. No sustituye a `mapear_tipo_penal_hecho_prueba`.
@@ -22,6 +22,12 @@ Vincular hechos relevantes con prueba existente, faltante o en trámite, prioriz
 
 ## Rol en analista_responsabilidad_tipicidad
 Vista **factual** de soporte probatorio antes o en paralelo con `mapear_tipo_penal_hecho_prueba`. No sustituye la matriz por elemento del tipo.
+
+## Fuentes KB
+- Hechos de cronología/inventario del expediente; no inventar prueba existente ni “en trámite”.
+- `agente/conocimiento/proceso-penal-906.md` — oportunidad de recaudo según etapa aparente (sin plazos inventados).
+- `agente/conocimiento/normas-clave.md` — separar hecho/inferencia; HITL antes de memorial.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento` (+ lecturas KB).
 
 ## Inputs
 - Hechos relevantes de la teoría del caso (cronología verificada).

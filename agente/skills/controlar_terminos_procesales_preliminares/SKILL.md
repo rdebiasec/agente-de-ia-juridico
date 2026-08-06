@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 6fd862e6389a4488 -->
+<!-- config-version: 3; checksum: e1022839c6f0358c -->
 ---
 name: controlar-terminos-procesales-preliminares
 description: Contrato penal-víctimas: Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana. Activar cuando el plan/HITL o el especialista requiera `controlar_terminos_procesales_preliminares`. No sustituye a `generar_alertas_t...
@@ -25,6 +25,10 @@ Soporte a `evaluar_oportunidad_procesal` y recursos. **No sustituye** el cálcul
 ## Rol en analista_seguimiento_procesal
 Monitoreo operativo continuo de vencimientos.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Etapa procesal y tipo de actuación (recurso, solicitud, audiencia).
 - Fecha de notificación o actuación fundante (si consta).
@@ -36,10 +40,12 @@ Monitoreo operativo continuo de vencimientos.
 - Pendientes si falta fecha base.
 
 ## Steps
-1. Identificar términos relevantes según etapa y actuación pendiente.
-2. Calcular o estimar fechas límite con advertencia de verificación humana.
-3. Generar alertas con acción recomendada.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
+1. Identificar términos según etapa/actuación; anclar a playbook 906.
+2. Exigir `fecha_base`; sin ella → no cerrar `fecha_limite`; `[PENDIENTE DE VERIFICAR]`.
+3. Contar en **días hábiles** salvo norma especial verificada; etiqueta `ESTIMACIÓN IA — VERIFICAR CON ABOGADO`.
+4. Nunca certificar vencimiento ni autorizar radicación automática.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `controlar_terminos_procesales_preliminares`.
@@ -65,7 +71,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - **Aviso de borrador:** Aviso de verificación humana obligatoria en cada salida.
 
 ## No duplicar
-- No alertas de calendario operativo (`generar_alertas_terminos_vencimientos` → gestor).
+- No alertas de calendario operativo (`generar_alertas_terminos_vencimientos` → analista_seguimiento_procesal).
 - No oportunidad global (`evaluar_oportunidad_procesal`).
 
 ## Riesgo si se omite

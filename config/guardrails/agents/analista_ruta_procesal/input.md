@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 9a2e9ee2c43e8709 -->
+<!-- config-version: 5; checksum: 52bedda262603b86 -->
 # Guardrails de entrada — analista_ruta_procesal
 
 ## desk_policies
@@ -10,6 +10,9 @@ Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
 Solo pedidos internos del Gerente sobre **ruta procesal Ley 906** en penal-víctimas Colombia.
+
+## required_context_policy
+Contexto mínimo: radicado/actuaciones o declaración de etapa; sin ello marcar pendiente.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

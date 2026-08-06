@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 3506d8d0897d586d -->
+<!-- config-version: 3; checksum: fc5e721751b95089 -->
 ---
 name: clasificar-tipo-prueba
 description: Contrato penal-víctimas: Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.). Activar cuando el plan/HITL o el especialista requiera `clasificar_tipo_prueba`. No sustituye a `inventariar_evidencia`.
@@ -20,6 +20,12 @@ Clasificar cada elemento probatorio según tipo procesal (documental, testimonia
 
 ## Rol en analista_evidencia
 Tipificación que alimenta matriz hecho-prueba y evaluación de fuerza probatoria.
+## Fuentes KB
+- Inventario del caso (`inventariar_evidencia`); no inventar tipología sin descripción.
+- `agente/conocimiento/proceso-penal-906.md` — contexto de descubrimiento/admisión (etapas 6–7) solo si consta actuación.
+- `agente/conocimiento/normas-clave.md` — clasificación preliminar; no afirmar admisibilidad judicial.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento` (+ lecturas KB si hace falta anclar etapa).
+
 ## Inputs
 - Inventario de evidencia (`inventariar_evidencia`).
 - Descripción y origen de cada elemento.

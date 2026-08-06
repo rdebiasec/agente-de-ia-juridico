@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 020d3e7a46b50d37 -->
+<!-- config-version: 3; checksum: 00d92c802f788b00 -->
 ---
 name: generar-preguntas-aclaracion
 description: Contrato penal-víctimas: Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_aclaracion`. No sustituye a `generar_preguntas_tipicidad`.
@@ -22,6 +22,11 @@ Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales,
 ## Rol en analista_cronologia_hechos
 Ejecutar tras `detectar_vacios_factuales` o `detectar_contradicciones_factuales`. Las preguntas requieren aprobación del abogado antes de enviarse a la víctima.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Vacíos factuales o contradicciones documentadas.
 - Cronología o matriz hecho-fuente.
@@ -34,6 +39,7 @@ Ejecutar tras `detectar_vacios_factuales` o `detectar_contradicciones_factuales`
 - Etiqueta: `REVISAR CON ABOGADO ANTES DE ENVIAR A VÍCTIMA`.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Identificar puntos ambiguos o incompletos en la narrativa.
 2. Redactar preguntas abiertas y no inductivas para víctima, testigos o abogado.
 3. Ordenar preguntas por prioridad probatoria.

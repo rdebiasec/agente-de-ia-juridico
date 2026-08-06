@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 028415a34dd58ed9 -->
+<!-- config-version: 3; checksum: 790b41c0c3af76b8 -->
 ---
 name: controlar-separacion-hecho-inferencia
 description: Contrato penal-víctimas: Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida. Activar cuando el plan/HITL o el especialista requiera `controlar_separacion_hecho_inferencia`. No sustituye a `verificar_hechos_soportados`.
@@ -24,6 +24,12 @@ Autocontrol antes de entregar borrador.
 
 ## Rol en analista_calidad_juridica
 Control de calidad en documentos para uso externo.
+
+## Fuentes KB
+- Relato/expediente y matriz hecho-fuente del caso; no inventar soporte.
+- `agente/conocimiento/proceso-penal-906.md` — separar hecho/inferencia en piezas revisables.
+- `agente/conocimiento/normas-clave.md` — no presentar sospechas como hechos; HITL antes de memorial.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar afirmaciones.
 
 ## Inputs
 - Texto del memorial, petición o análisis.

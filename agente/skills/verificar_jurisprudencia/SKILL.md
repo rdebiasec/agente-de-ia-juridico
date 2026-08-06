@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4cceb1817108ff94 -->
+<!-- config-version: 3; checksum: a4afe5290a2ac989 -->
 ---
 name: verificar-jurisprudencia
 description: Contrato penal-víctimas: Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento. Activar cuando el plan/HITL o el especialista requiera `verificar_jurisprudencia`. No sustituye a `verificar_citas_normativas`.
@@ -25,6 +25,12 @@ Control en borrador antes de calidad.
 ## Rol en analista_calidad_juridica
 Verificación final.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — no inventar sentencias ni extractos; checklist citas.
+- `agente/conocimiento/proceso-penal-906.md` — checklist calidad; pertinencia al argumento.
+- Tools reales: `buscar_en_conocimiento`, `buscar_en_expediente` (no hay `rag_jurisprudencia_search` invocable).
+- Sentencia no localizada → `localizada=pendiente` / `[PENDIENTE DE VERIFICAR]`.
+
 ## Inputs
 - Citas jurisprudenciales en el documento.
 - Tema jurídico del argumento donde se citan.
@@ -34,6 +40,7 @@ Verificación final.
 - Etiqueta: `VERIFICACIÓN JURISPRUDENCIAL`.
 
 ## Steps
+0. Anclar cada sentencia a Fuentes KB/RAG; no inventar extractos ni existencia.
 1. Buscar cada sentencia citada en RAG jurisprudencial.
 2. Evaluar pertinencia al argumento del caso.
 3. Marcar citas no localizadas o irrelevantes.

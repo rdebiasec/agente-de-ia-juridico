@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: a6246750767df617 -->
+<!-- config-version: 3; checksum: 00e734ffebac9bb9 -->
 ---
 name: identificar-etapa-procesal-ley906
 description: Contrato penal-víctimas: Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres. Activar cuando el plan/HITL o el especialista requiera `identificar_etapa_procesal_ley906`. No sustituye a `evaluar_oportun...
@@ -24,6 +24,10 @@ Primer paso del agente tras recibir caso del coordinador. Toda actuación poster
 ## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Radicado y últimas actuaciones procesales (auto, informe, audiencia, imputación).
 - Consulta a estado del proceso (`process_lookup_query`) si está disponible.
@@ -31,16 +35,19 @@ Primer paso del agente tras recibir caso del coordinador. Toda actuación poster
 - Declaración de etapa por el abogado (si existe) para contrastar.
 
 ## Outputs
-- `etapa_ley906`: indagación | investigación | etapa_intermedia | juicio | ejecución_penal | archivo | `[PENDIENTE DE VERIFICAR]`.
+- `etapa_ley906`: indagacion_investigacion | audiencias_preliminares | formulacion_imputacion | medida_aseguramiento | acusacion | audiencia_preparatoria | juicio_oral | recursos | ejecucion_penal | archivo | pendiente_verificar (ver playbook).
 - `evidencia_etapa`: actuación + fecha + fuente.
 - `incertidumbres` y `siguiente_dato_a_verificar`.
 - Nota: conclusión preliminar, no dictamen procesal vinculante.
 
+
 ## Steps
-1. Identificar etapa aparente con base en actuaciones/radicado aportados.
-2. Justificar con hechos procesales; marcar incertidumbre si faltan datos.
-3. No inventar actuaciones ni fechas de audiencia.
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
+1. Leer `proceso-penal-906.md` (etapas + enum) vía `leer_playbook_proceso(penal)` si hace falta anclar.
+2. Mapear actuaciones/radicado al valor canónico `etapa_ley906`; registrar `evidencia_etapa`.
+3. Si faltan datos → `pendiente_verificar`; no inventar actuaciones ni fechas.
 4. Derivar ruta completa a `crear_ruta_procesal_recomendada` si se pide plan.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `identificar_etapa_procesal_ley906`.

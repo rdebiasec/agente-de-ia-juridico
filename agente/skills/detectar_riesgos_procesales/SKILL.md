@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4597bfc899bb4525 -->
+<!-- config-version: 3; checksum: 50a2cfa6c3839701 -->
 ---
 name: detectar-riesgos-procesales
 description: Contrato penal-víctimas: Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_procesales`. No sustituye a `evaluar_oportunidad_procesal`.
@@ -22,6 +22,10 @@ Identificar y priorizar riesgos procesales que puedan causar improcedencia, pér
 ## Rol en analista_ruta_procesal
 Ejecutar tras identificar etapa y antes de `crear_ruta_procesal_recomendada`. Complementa `evaluar_oportunidad_procesal` (caso por caso).
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas, enum `etapa_ley906`, términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y derechos de víctima.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de afirmar etapa/plazos.
 ## Inputs
 - Etapa procesal y actuaciones del expediente.
 - Legitimación de la víctima/apoderado (poder, calidad).
@@ -33,6 +37,7 @@ Ejecutar tras identificar etapa y antes de `crear_ruta_procesal_recomendada`. Co
 - Riesgos críticos destacados para decisión inmediata.
 
 ## Steps
+0. Anclar etapa/ruta a `proceso-penal-906.md` (enum `etapa_ley906`); términos en días hábiles; sin `fecha_base` no certificar plazos.
 1. Revisar oportunidad, legitimación, competencia e improcedencia.
 2. Documentar riesgos de pérdida de derechos o extemporaneidad.
 3. Priorizar riesgos críticos para decisión inmediata.

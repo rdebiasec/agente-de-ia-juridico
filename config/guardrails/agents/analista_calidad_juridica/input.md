@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: edf2e2c639de8c90 -->
+<!-- config-version: 3; checksum: edf2e2c639de8c90 -->
 # Guardrails de entrada — analista_calidad_juridica
 
 ## desk_policies

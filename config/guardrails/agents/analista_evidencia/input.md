@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 291ab72ecbf4be39 -->
+<!-- config-version: 4; checksum: 98a76af21a6e4ce8 -->
 # Guardrails de entrada — analista_evidencia
 
 ## desk_policies
@@ -9,7 +9,7 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
-Solo pedidos internos del Gerente sobre **evidencia y pruebas** en penal-víctimas Colombia.
+Solo pedidos internos del Gerente sobre **evidencia y pruebas** (inventario, matriz, brechas, custodia/integridad, recaudo) en penal-víctimas Colombia.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

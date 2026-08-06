@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: a595263c93bfa277 -->
+<!-- config-version: 3; checksum: d017ae1953a58ad1 -->
 ---
 name: detectar-riesgo-revictimizacion
 description: Contrato penal-víctimas: Alertar tempranamente sobre riesgo de revictimización en materiales o estrategia propuesta. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgo_revictimizacion`. No sustituye a `controlar_no_revictimizacion`.
@@ -25,6 +25,11 @@ Triaje rápido en teoría del caso y comunicación con víctima.
 ## Rol en analista_calidad_juridica
 Alerta antes de revisión profunda (`controlar_no_revictimizacion`).
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — protección frente a revictimización; confidencialidad.
+- `agente/conocimiento/proceso-penal-906.md` — checklist representación (mitigar exposición innecesaria).
+- Tools reales: `buscar_en_conocimiento`, `leer_normas_clave` (planned `revictimization_risk_checker` no invocable).
+
 ## Inputs
 - Texto o estrategia a evaluar (preguntas, teoría, resumen).
 - Tipo de delito y contexto (si consta).
@@ -35,6 +40,7 @@ Alerta antes de revisión profunda (`controlar_no_revictimizacion`).
 - `derivar_a`: `controlar_no_revictimizacion` si riesgo medio/alto.
 
 ## Steps
+0. Anclar derechos/etapa/no-revictimización a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar actos/lenguaje/prácticas que puedan revictimizar.
 2. Clasificar riesgo y proponer mitigaciones al Gerente.
 3. No culpabilizar a la víctima; proteger datos sensibles (/).

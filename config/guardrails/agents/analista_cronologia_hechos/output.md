@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: ee07142ce12fb2a8 -->
+<!-- config-version: 5; checksum: 941d0f1fd9c127cf -->
 # Guardrails de salida — analista_cronologia_hechos
 
 ## desk_policies
@@ -9,7 +9,7 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## schema_policy
-Salida alineada a: CronologiaPenal (eventos, contradicciones, vacíos).
+Salida alineada a: CronologiaPenal (eventos clasificados, contradicciones, vacíos, fuentes_kb).
 
 ## empty_policy
 Salida vacía → tripwire `salida_vacia`.
@@ -18,11 +18,16 @@ Salida vacía → tripwire `salida_vacia`.
 No inventar hechos, normas, radicados ni citas (`no_inventar`). Sin soporte → `[PENDIENTE DE VERIFICAR]`.
 Invención sospechosa = soft-flag `invention_suspect` (HITL del abogado); no tripwire duro.
 
+## groundedness_policy
+Cada evento debe tener fuente o quedar en `pendiente_verificar`; separar hecho de inferencia.
+
 ## pii_policy
 No exponer PII sensible innecesaria (`confidencialidad`). Flags en `output_info`.
 
 ## domain_limits
-No calificar tipicidad ni redactar memoriales.
+- No calificar tipicidad ni redactar memoriales.
+- No inventar fechas/horas/actuaciones.
+- No revictimizar al contrastar relatos.
 
 ## tripwire_message
 "La salida de analista_cronologia_hechos está vacía o no es usable; se retiene para corrección."

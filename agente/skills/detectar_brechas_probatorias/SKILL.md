@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 8be68901fa47a411 -->
+<!-- config-version: 3; checksum: 07bae43d7367ac0e -->
 ---
 name: detectar-brechas-probatorias
 description: Contrato penal-víctimas: Identificar hechos relevantes sin prueba suficiente en el expediente. Activar cuando el plan/HITL o el especialista requiera `detectar_brechas_probatorias`. No sustituye a `crear_plan_recaudo_probatorio`.
@@ -24,6 +24,12 @@ Antecede plan de recaudo.
 
 ## Rol en analista_representacion_victimas
 Informa debilidades para teoría del caso.
+
+## Fuentes KB
+- Matriz hecho-prueba / inventario del expediente; no asumir prueba no inventariada.
+- `agente/conocimiento/proceso-penal-906.md` — impacto de la brecha según etapa (descubrimiento/juicio) si consta.
+- `agente/conocimiento/normas-clave.md` — priorizar pretensión de la víctima sin culpar por “falta de prueba”.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento`.
 
 ## Inputs
 - Matriz hecho-prueba (`construir_matriz_hecho_prueba`).

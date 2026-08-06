@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 86ff4383c4a2d193 -->
+<!-- config-version: 7; checksum: 42e7422c9f436998 -->
 ---
 name: detectar-urgencia-penal
 description: Contrato penal-víctimas: Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria. Activar cuando el plan/HITL o el especialista requiera `detectar_urgencia_penal`. No sustituye a `generar_alertas_terminos...
@@ -26,6 +26,11 @@ Detectar si el caso o el turno exigen atención humana inmediata por riesgo a de
 ## Rol en coordinador_caso
 Contrato materializado por `assess_urgency` (`src/agents/urgency.py` → `UrgencyResult`) e integrado en `build_triage` / `[TRIAGE_SISTEMA]`. El LLM no re-clasifica el nivel.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist gerencia (urgencia/escalamiento) + términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — no inventar vencimientos ni amenazas; confirmar humana si critica/alta.
+- Convención: no bajar `nivel_urgencia` de sistema; sin fecha de término → `[PENDIENTE DE VERIFICAR]`.
+
 ## Inputs
 - Solicitud del turno y hechos reportados.
 - Fechas de audiencias, términos o vencimientos mencionados o en expediente.
@@ -42,6 +47,7 @@ Alineados a `UrgencyResult` / campos de `TriageResult`:
 - `evaluada_en`: unix timestamp.
 
 ## Steps
+0. Anclar indicios a Fuentes KB/expediente/turno; no inventar plazos ni riesgos no reportados; respetar nivel de `[TRIAGE_SISTEMA]`.
 1. Evaluar indicios de urgencia (riesgo, términos, violencia, menor).
 2. Asignar nivel y si escala a humano; no bajar urgencia de sistema.
 3. No sustituir análisis de fondo.

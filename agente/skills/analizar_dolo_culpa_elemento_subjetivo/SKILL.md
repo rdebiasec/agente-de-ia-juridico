@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 5e47801a596861f6 -->
+<!-- config-version: 3; checksum: e1686261245ad6de -->
 ---
 name: analizar-dolo-culpa-elemento-subjetivo
 description: Contrato penal-víctimas: Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza. Activar cuando el plan/HITL o el especialista requiera `analizar_dolo_culpa_elemento_subjetivo`. No sustituye a `descomponer_elementos_tipo_...
@@ -21,6 +21,10 @@ Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento
 ## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición de elementos cuando el tipo exige dolo o culpa. Crítico en delitos que admiten modalidad culposa vs dolosa.
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Elementos subjetivos del tipo penal descompuesto.
 - Hechos sobre intención, conocimiento, advertencia, inobservancia de deber.
@@ -33,10 +37,12 @@ Ejecutar tras descomposición de elementos cuando el tipo exige dolo o culpa. Cr
 - Etiqueta: `NO AFIRMAR ELEMENTO SUBJETIVO SIN SOPORTE`.
 
 ## Steps
-1. Analizar elementos subjetivos (dolo, culpa) según hechos narrados.
-2. Distinguir intención, conocimiento y negligencia preliminarmente.
-3. No afirmar elemento subjetivo sin soporte suficiente.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
+1. Listar indicios de **conocimiento** y **voluntad** (o deber de cuidado) separados del resultado.
+2. Proponer `modalidad_preliminar` solo con ancla fáctica; si no → `indeterminado`.
+3. Etiqueta: `NO AFIRMAR ELEMENTO SUBJETIVO SIN SOPORTE` / `NO IMPUTACIÓN`.
+4. Marcar `[PENDIENTE DE VERIFICAR]` y deferir al abogado antes de memorial.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_dolo_culpa_elemento_subjetivo`.
@@ -62,7 +68,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 
 ## No duplicar
 - No descomponer tipo (`descomponer_elementos_tipo_penal`).
-- No jurisprudencia de fondo (`verificar_jurisprudencia` → calidad).
+- No jurisprudencia de fondo (`verificar_jurisprudencia` → analista_calidad_juridica).
 - No preguntas a víctima (`generar_preguntas_tipicidad`).
 
 ## Riesgo si se omite

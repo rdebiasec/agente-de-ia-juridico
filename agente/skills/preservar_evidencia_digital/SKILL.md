@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 037ca6a8d5cd25e3 -->
+<!-- config-version: 4; checksum: 685dd8c0d059dce6 -->
 ---
 name: preservar-evidencia-digital
 description: Contrato penal-víctimas: Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `preservar_evidencia_digital`. No sustituye a `controlar_cadena_custodia_preliminar`.
@@ -20,6 +20,12 @@ Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash 
 
 ## Rol en analista_evidencia
 Ejecutar de inmediato cuando ingresa evidencia digital nueva o vulnerable a borrado.
+
+## Fuentes KB
+- Archivos/mensajes aportados; no inventar hashes ni metadatos (capabilities forenses = Planned).
+- `agente/conocimiento/proceso-penal-906.md` — integridad/admisibilidad preliminar; escalar perito/autoridad si crítico.
+- `agente/conocimiento/normas-clave.md` — confidencialidad e integridad; no alterar originales.
+- Tools reales: `buscar_en_expediente`, `buscar_en_conocimiento` (hash/vault = Planned, no invocar).
 
 ## Inputs
 - Archivos digitales: chats, correos, fotos, videos, audios, capturas.

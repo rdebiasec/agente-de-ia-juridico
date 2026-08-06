@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 5c6e08fe73716fab -->
+<!-- config-version: 3; checksum: 0938bd9dd0b1cbf9 -->
 ---
 name: redactar-derecho-peticion-penal
 description: Contrato penal-víctimas: Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia. Activar cuando el plan/HITL o el especialista requiera `redactar_derecho_peticion_penal`. No sustituye a `evaluar_derecho_petic...
@@ -21,6 +21,11 @@ Redactar borrador de derecho de petición relacionado con el caso penal cuando `
 ## Rol en redactor_documentos_juridicos
 Ejecutar redacción solo con evaluación favorable preliminar de petición.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — derechos de petición / información; sin inventar plazos constitucionales.
+- `agente/conocimiento/proceso-penal-906.md` — si la petición se ancla a actuación 906.
+- Tools reales: `leer_normas_clave`, `leer_playbook_proceso`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Salida de `evaluar_derecho_peticion` (procedencia preliminar).
 - Destinatario, objeto, hechos y anexos disponibles.
@@ -32,6 +37,7 @@ Ejecutar redacción solo con evaluación favorable preliminar de petición.
 - Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 ## Steps
+0. Confirmar procedencia vía `evaluar_derecho_peticion`; anclar destinatario/objeto a Fuentes KB o marcar pendiente.
 1. Precisar destinatario, objeto y hechos que motivan la petición.
 2. Redactar peticiones claras con fundamento constitucional/legal.
 3. Incluir anexos y plazo de respuesta esperado.
