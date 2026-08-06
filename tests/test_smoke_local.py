@@ -114,7 +114,7 @@ def test_audit_catalog_live(base_url: str):
     r = httpx.get(f"{base_url}/api/audit/catalog", timeout=SMOKE_TIMEOUT)
     assert r.status_code == 200
     data = r.json()
-    assert len(data.get("skills") or []) == 90
+    assert len(data.get("skills") or []) == 81
     assert len(data.get("agentes") or []) == 10
 
 

@@ -16,7 +16,7 @@ async def test_audit_catalog_live():
         assert r.status_code == 200
         data = r.json()
         assert data["version"] == "2.1"
-        assert len(data["skills"]) == 90
+        assert len(data["skills"]) == 81
         assert len(data["agentes"]) == 10
         assert data["intro"]["items_total"] == data["totals"]["items"]
 

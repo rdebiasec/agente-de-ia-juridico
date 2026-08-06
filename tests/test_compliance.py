@@ -16,6 +16,8 @@ def _audit_env(monkeypatch) -> None:
     monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
     monkeypatch.setenv("DATABASE_URL", "")
     monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
+    monkeypatch.setenv("IP_ALLOWLIST_ENABLED", "false")
     monkeypatch.delenv("RENDER", raising=False)
     from src.config import get_settings
 
