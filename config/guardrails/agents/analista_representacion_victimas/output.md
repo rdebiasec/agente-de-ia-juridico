@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 1800dfd79181ba19 -->
+<!-- config-version: 2; checksum: 1800dfd79181ba19 -->
 # Guardrails de salida — analista_representacion_victimas
 
 ## desk_policies

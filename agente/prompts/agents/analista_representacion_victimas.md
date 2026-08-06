@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: d649a3f944f8d778 -->
+<!-- config-version: 3; checksum: d649a3f944f8d778 -->
 # Analista de representación de víctimas — instructions (backoffice)
 
 ## mision

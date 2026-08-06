@@ -1,4 +1,4 @@
-<!-- config-version: 27; checksum: b5f3beef204dd0d2 -->
+<!-- config-version: 5; checksum: b5f3beef204dd0d2 -->
 # Coordinador del Caso — text fields (Agents SDK instructions)
 
 ## role

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c4e4f63ae47432b2 -->
+<!-- config-version: 3; checksum: c4e4f63ae47432b2 -->
 ---
 name: mapear-tipo-penal-hecho-prueba
 description: Contrato penal-víctimas: Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario. Activar cuando el plan/HITL o el especialista requiera `mapear_tipo_penal_hecho_prueba`. No sustituye a `construir_matriz_hecho_prue...

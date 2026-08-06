@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 0d2a5d3173438c42 -->
+<!-- config-version: 3; checksum: 0d2a5d3173438c42 -->
 ---
 name: controlar-confidencialidad-datos-sensibles
 description: Contrato penal-víctimas: Detectar y mitigar exposición innecesaria de datos personales sensibles en salidas del sistema. Activar cuando el plan/HITL o el especialista requiera `controlar_confidencialidad_datos_sensibles`. No sustituye a `controlar_no_revictimizacion`.

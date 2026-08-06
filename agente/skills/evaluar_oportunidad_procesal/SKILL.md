@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 67695d5921456b46 -->
+<!-- config-version: 3; checksum: 67695d5921456b46 -->
 ---
 name: evaluar-oportunidad-procesal
 description: Contrato penal-víctimas: Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual. Activar cuando el plan/HITL o el especialista requiera `evaluar_oportunidad_procesal`. No sustituye a `controlar_terminos_procesales_prelimi...

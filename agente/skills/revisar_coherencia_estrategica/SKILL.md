@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: ab40b6337fca7493 -->
+<!-- config-version: 3; checksum: ab40b6337fca7493 -->
 ---
 name: revisar-coherencia-estrategica
 description: Contrato penal-víctimas: Contrastar salidas (documentos, recomendaciones) con teoría del caso y objetivos aprobados de la víctima. Activar cuando el plan/HITL o el especialista requiera `revisar_coherencia_estrategica`. No sustituye a `clasificar_aprobacion_juridica`.

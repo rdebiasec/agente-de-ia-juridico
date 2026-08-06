@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: a595263c93bfa277 -->
+<!-- config-version: 3; checksum: a595263c93bfa277 -->
 ---
 name: detectar-riesgo-revictimizacion
 description: Contrato penal-víctimas: Alertar tempranamente sobre riesgo de revictimización en materiales o estrategia propuesta. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgo_revictimizacion`. No sustituye a `controlar_no_revictimizacion`.

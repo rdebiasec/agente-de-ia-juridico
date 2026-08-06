@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8910b04454b85269 -->
+<!-- config-version: 3; checksum: 8910b04454b85269 -->
 ---
 name: controlar-no-revictimizacion
 description: Contrato penal-víctimas: Detectar lenguaje, preguntas o estrategias que culpen, minimicen o expongan indebidamente a la víctima; proponer reformulaciones. Activar cuando el plan/HITL o el especialista requiera `controlar_no_revictimizacion`. No sustituye a `clasificar_aprobaci...

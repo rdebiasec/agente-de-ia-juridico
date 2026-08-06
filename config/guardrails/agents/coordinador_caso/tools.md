@@ -1,4 +1,4 @@
-<!-- config-version: 6; checksum: 28c265295e06a315 -->
+<!-- config-version: 3; checksum: 28c265295e06a315 -->
 # Guardrails de tools — coordinador_caso
 
 ## desk_policies

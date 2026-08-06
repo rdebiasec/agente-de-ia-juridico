@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 6478e8939e885d1a -->
+<!-- config-version: 3; checksum: 6478e8939e885d1a -->
 ---
 name: monitorear-radicado
 description: Contrato penal-víctimas: Consultar o registrar estado del radicado con fuente y timestamp. Activar cuando el plan/HITL o el especialista requiera `monitorear_radicado`. No sustituye a `seguimiento_documentos_radicados`.

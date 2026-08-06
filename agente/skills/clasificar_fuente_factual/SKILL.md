@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 98df36e5ba9caef1 -->
+<!-- config-version: 3; checksum: 98df36e5ba9caef1 -->
 ---
 name: clasificar-fuente-factual
 description: Contrato penal-víctimas: Clasificar cada afirmación factual según su fuente y nivel de soporte, antes de derivar análisis o redacción. Evita que inferencias o relatos no corroborados se traten como hechos probados. Activar cuando el plan/HITL o el especialista requiera `clasif...

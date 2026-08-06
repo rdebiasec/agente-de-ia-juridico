@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 81029d074ff6580f -->
+<!-- config-version: 3; checksum: 81029d074ff6580f -->
 ---
 name: seguimiento-documentos-radicados
 description: Contrato penal-víctimas: Hacer seguimiento a documentos enviados o radicados y su estado de respuesta. Activar cuando el plan/HITL o el especialista requiera `seguimiento_documentos_radicados`. No sustituye a `monitorear_radicado`.

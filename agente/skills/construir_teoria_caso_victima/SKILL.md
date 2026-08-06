@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 1dac009587bfa87a -->
+<!-- config-version: 3; checksum: 1dac009587bfa87a -->
 ---
 name: construir-teoria-caso-victima
 description: Contrato penal-víctimas: Formular teoría preliminar del caso centrada en la víctima: hechos, intereses, tipicidad preliminar y plan probatorio. Activar cuando el plan/HITL o el especialista requiera `construir_teoria_caso_victima`. No sustituye a `priorizar_objetivos_represent...

@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: ffc1ae8e29bedc62 -->
+<!-- config-version: 3; checksum: 67f0189c028dc9a5 -->
 # Analista de tipicidad y responsabilidad — instructions (backoffice)
 
 ## mision

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 5c6e08fe73716fab -->
+<!-- config-version: 3; checksum: 5c6e08fe73716fab -->
 ---
 name: redactar-derecho-peticion-penal
 description: Contrato penal-víctimas: Redactar borrador de derecho de petición relacionado con el caso penal cuando `evaluar_derecho_peticion` indica procedencia. Activar cuando el plan/HITL o el especialista requiera `redactar_derecho_peticion_penal`. No sustituye a `evaluar_derecho_petic...

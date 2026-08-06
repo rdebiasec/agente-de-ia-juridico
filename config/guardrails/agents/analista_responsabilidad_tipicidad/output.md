@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d83cd5519c76df13 -->
+<!-- config-version: 2; checksum: d83cd5519c76df13 -->
 # Guardrails de salida — analista_responsabilidad_tipicidad
 
 ## desk_policies

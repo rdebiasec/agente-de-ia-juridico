@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: e6cbd7119a40fbff -->
+<!-- config-version: 3; checksum: e6cbd7119a40fbff -->
 ---
 name: controlar-tono-juridico-documento
 description: Contrato penal-víctimas: Revisar que el tono del escrito sea profesional, respetuoso y adecuado al destinatario judicial o administrativo. Activar cuando el plan/HITL o el especialista requiera `controlar_tono_juridico_documento`. No sustituye a `controlar_tono_riesgo_reputaci...

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 22b07fae999888bb -->
+<!-- config-version: 3; checksum: 22b07fae999888bb -->
 ---
 name: analizar-autoria-y-participacion
 description: Contrato penal-víctimas: Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal. Activar cuando el plan/HITL o el especialista requiera `analizar_autoria_y_participacion`. No sustituye a `identificar_actores_y_roles`.

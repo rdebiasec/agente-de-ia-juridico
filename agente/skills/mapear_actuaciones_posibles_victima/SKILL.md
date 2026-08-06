@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 499ab2264c6ae78d -->
+<!-- config-version: 3; checksum: 499ab2264c6ae78d -->
 ---
 name: mapear-actuaciones-posibles-victima
 description: Contrato penal-víctimas: Listar actuaciones que la representación de víctimas puede promover en la etapa actual, con requisitos y efectos esperados. Activar cuando el plan/HITL o el especialista requiera `mapear_actuaciones_posibles_victima`. No sustituye a `evaluar_oportunida...

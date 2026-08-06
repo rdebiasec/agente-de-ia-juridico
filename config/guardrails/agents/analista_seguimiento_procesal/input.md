@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4660b1b77fc5d230 -->
+<!-- config-version: 2; checksum: 4660b1b77fc5d230 -->
 # Guardrails de entrada — analista_seguimiento_procesal
 
 ## desk_policies

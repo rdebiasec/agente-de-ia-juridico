@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: af27481a08853900 -->
+<!-- config-version: 3; checksum: af27481a08853900 -->
 ---
 name: detectar-vacios-factuales
 description: Contrato penal-víctimas: Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero. Activar cuando el plan/HITL o el especialista requiera `detectar_vacios_factuales`. No sustituye a `gestionar_faltantes_exp...

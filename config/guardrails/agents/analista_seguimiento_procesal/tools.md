@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 85a737ce3364d496 -->
+<!-- config-version: 2; checksum: 85a737ce3364d496 -->
 # Guardrails de tools — analista_seguimiento_procesal
 
 ## desk_policies

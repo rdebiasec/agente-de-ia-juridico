@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8151ad6478ea5e5d -->
+<!-- config-version: 3; checksum: 8151ad6478ea5e5d -->
 ---
 name: detectar-riesgos-atipicidad
 description: Contrato penal-víctimas: Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_atipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.

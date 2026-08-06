@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 3506d8d0897d586d -->
+<!-- config-version: 3; checksum: 3506d8d0897d586d -->
 ---
 name: clasificar-tipo-prueba
 description: Contrato penal-víctimas: Clasificar cada elemento probatorio según tipo procesal (documental, testimonial, pericial, etc.). Activar cuando el plan/HITL o el especialista requiera `clasificar_tipo_prueba`. No sustituye a `inventariar_evidencia`.

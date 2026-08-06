@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4378b1bb5bded21a -->
+<!-- config-version: 3; checksum: 4378b1bb5bded21a -->
 ---
 name: redactar-recurso-o-intervencion-preliminar
 description: Contrato penal-víctimas: Confirmar oportunidad y preparar insumos para recurso o intervención; el borrador lo redacta el agente redactor. Activar cuando el plan/HITL o el especialista requiera `redactar_recurso_o_intervencion_preliminar`. No sustituye a `evaluar_oportunidad_pr...

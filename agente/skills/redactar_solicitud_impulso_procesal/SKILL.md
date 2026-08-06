@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 54475032dbc43c73 -->
+<!-- config-version: 3; checksum: 54475032dbc43c73 -->
 ---
 name: redactar-solicitud-impulso-procesal
 description: Contrato penal-víctimas: Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez. Activar cuando el plan/HITL o el especialista requiera `redactar_solicitud_impulso_procesal`. No sustituye a `detectar_inactividad_procesal`.

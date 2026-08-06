@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c2a25604d37c9567 -->
+<!-- config-version: 3; checksum: c2a25604d37c9567 -->
 ---
 name: registrar-actuacion-procesal
 description: Contrato penal-víctimas: Registrar en el sistema una actuación procesal nueva con fuente y fecha. Activar cuando el plan/HITL o el especialista requiera `registrar_actuacion_procesal`. No sustituye a `monitorear_radicado`.

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: cf73cc140f37bf4a -->
+<!-- config-version: 3; checksum: cf73cc140f37bf4a -->
 ---
 name: crear-plan-recaudo-probatorio
 description: Contrato penal-víctimas: Planificar obtención de pruebas faltantes críticas según matriz hecho-prueba y etapa procesal. Activar cuando el plan/HITL o el especialista requiera `crear_plan_recaudo_probatorio`. No sustituye a `inventariar_evidencia`.

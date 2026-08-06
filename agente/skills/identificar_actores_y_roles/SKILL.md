@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: b2aba86a8d0f2232 -->
+<!-- config-version: 3; checksum: b2aba86a8d0f2232 -->
 ---
 name: identificar-actores-y-roles
 description: Contrato penal-víctimas: Extraer personas y entidades mencionadas en las fuentes y asignar rol procesal preliminar. Activar cuando el plan/HITL o el especialista requiera `identificar_actores_y_roles`. No sustituye a `analizar_autoria_y_participacion`.

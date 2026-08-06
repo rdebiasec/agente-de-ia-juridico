@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4f9597371c9c3c27 -->
+<!-- config-version: 3; checksum: 4f9597371c9c3c27 -->
 ---
 name: identificar-conductas-punibles-preliminares
 description: Contrato penal-víctimas: Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación. Activar cuando el plan/HITL o el especialista requiera `identificar_conductas_punibles_preliminares`. No sustituye a `descompone...

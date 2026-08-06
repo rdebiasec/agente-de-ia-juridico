@@ -1,4 +1,4 @@
-<!-- config-version: 6; checksum: 5a93b9db2ced861b -->
+<!-- config-version: 3; checksum: 5a93b9db2ced861b -->
 ---
 name: gestionar-faltantes-expediente
 description: Contrato penal-víctimas: Identificar datos y documentos mínimos que faltan en el expediente **antes** de autorizar análisis de fondo o redacción, y bloquear conclusiones prematuras. Activar cuando el plan/HITL o el especialista requiera `gestionar_faltantes_expediente`. No sus...

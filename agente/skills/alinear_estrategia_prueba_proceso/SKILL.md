@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 0b2841aa091a644d -->
+<!-- config-version: 3; checksum: 0b2841aa091a644d -->
 ---
 name: alinear-estrategia-prueba-proceso
 description: Contrato penal-víctimas: Detectar desalineación entre teoría del caso, ruta Ley 906 y plan probatorio; proponer ajustes coordinados. Activar cuando el plan/HITL o el especialista requiera `alinear_estrategia_prueba_proceso`. No sustituye a `construir_teoria_caso_victima`.

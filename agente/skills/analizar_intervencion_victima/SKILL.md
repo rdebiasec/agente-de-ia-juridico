@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 9def3638a96efeba -->
+<!-- config-version: 3; checksum: 9def3638a96efeba -->
 ---
 name: analizar-intervencion-victima
 description: Contrato penal-víctimas: Definir formas de intervención procedentes de la víctima en una actuación o audiencia específica bajo Ley 906. Activar cuando el plan/HITL o el especialista requiera `analizar_intervencion_victima`. No sustituye a `preparar_guion_intervencion_oral`.

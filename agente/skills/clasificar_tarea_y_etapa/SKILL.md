@@ -1,4 +1,4 @@
-<!-- config-version: 6; checksum: 1d785e286072cef0 -->
+<!-- config-version: 3; checksum: 1d785e286072cef0 -->
 ---
 name: clasificar-tarea-y-etapa
 description: Contrato penal-víctimas: Entender qué pide el despacho en el turno, clasificar el tipo de tarea y ubicar la etapa procesal aparente para derivar al especialista correcto o pedir datos faltantes. Activar cuando el plan/HITL o el especialista requiera `clasificar_tarea_y_etapa`....

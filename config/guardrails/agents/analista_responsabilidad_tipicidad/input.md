@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d66d7b38f41c91c2 -->
+<!-- config-version: 2; checksum: d66d7b38f41c91c2 -->
 # Guardrails de entrada — analista_responsabilidad_tipicidad
 
 ## desk_policies

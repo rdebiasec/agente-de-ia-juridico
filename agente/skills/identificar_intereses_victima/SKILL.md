@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: d3ddf1a45f1e49a9 -->
+<!-- config-version: 3; checksum: d3ddf1a45f1e49a9 -->
 ---
 name: identificar-intereses-victima
 description: Contrato penal-víctimas: Identificar intereses y expectativas de la víctima en el proceso (reparación, verdad, seguridad, celeridad, etc.). Activar cuando el plan/HITL o el especialista requiera `identificar_intereses_victima`. No sustituye a `analizar_derechos_victima`.

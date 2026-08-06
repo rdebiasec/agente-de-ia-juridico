@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c780a54ff269c8f7 -->
+<!-- config-version: 3; checksum: c780a54ff269c8f7 -->
 ---
 name: priorizar-objetivos-representacion
 description: Contrato penal-víctimas: Listar y ordenar objetivos posibles de la representación de la víctima según urgencia, viabilidad y alineación con sus intereses, documentando trade-offs para decisión del abogado. Activar cuando el plan/HITL o el especialista requiera `priorizar_objet...

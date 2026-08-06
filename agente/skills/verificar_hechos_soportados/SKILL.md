@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: e71f8e4b9d22f63e -->
+<!-- config-version: 3; checksum: e71f8e4b9d22f63e -->
 ---
 name: verificar-hechos-soportados
 description: Contrato penal-víctimas: Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte. Activar cuando el plan/HITL o el especialista requiera `verificar_hechos_soportados`. No sustituye a `marcar_pendientes_verificacion`.

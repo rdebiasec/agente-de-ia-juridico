@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 111430392bc5f502 -->
+<!-- config-version: 3; checksum: 111430392bc5f502 -->
 ---
 name: construir-cronologia-penal
 description: Contrato penal-víctimas: Construir línea de tiempo penal con hechos fechados, actores y nivel de soporte, separando confirmados, narrados e inferidos. Activar cuando el plan/HITL o el especialista requiera `construir_cronologia_penal`. No sustituye a `extraer_hechos_relevantes`.

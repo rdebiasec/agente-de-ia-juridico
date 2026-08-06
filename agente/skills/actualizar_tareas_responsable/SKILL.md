@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 21da80ef276bc781 -->
+<!-- config-version: 3; checksum: 21da80ef276bc781 -->
 ---
 name: actualizar-tareas-responsable
 description: Contrato penal-víctimas: Mantener actualizada la lista de tareas del caso con estado, plazo y responsable, para que el despacho no pierda actuaciones por falta de seguimiento. Activar cuando el plan/HITL o el especialista requiera `actualizar_tareas_responsable`. No sustituye ...

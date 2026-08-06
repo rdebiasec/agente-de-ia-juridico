@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4cceb1817108ff94 -->
+<!-- config-version: 3; checksum: 4cceb1817108ff94 -->
 ---
 name: verificar-jurisprudencia
 description: Contrato penal-víctimas: Verificar que sentencias citadas existan en RAG y sean pertinentes al argumento. Activar cuando el plan/HITL o el especialista requiera `verificar_jurisprudencia`. No sustituye a `verificar_citas_normativas`.

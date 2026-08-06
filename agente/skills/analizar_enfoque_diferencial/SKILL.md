@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c334170956e71217 -->
+<!-- config-version: 3; checksum: c334170956e71217 -->
 ---
 name: analizar-enfoque-diferencial
 description: Contrato penal-víctimas: Identificar factores diferenciales relevantes (género, edad, discapacidad, etnia, etc.) que exijan enfoque especial en la representación. Activar cuando el plan/HITL o el especialista requiera `analizar_enfoque_diferencial`. No sustituye a `controlar_n...

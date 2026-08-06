@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: b93d991fd9d4cb61 -->
+<!-- config-version: 3; checksum: b93d991fd9d4cb61 -->
 ---
 name: evaluar-dano-y-afectacion
 description: Contrato penal-víctimas: Describir preliminarmente el daño o afectación a la víctima con base documentada (físico, psicológico, patrimonial, social). Activar cuando el plan/HITL o el especialista requiera `evaluar_dano_y_afectacion`. No sustituye a `identificar_intereses_victi...

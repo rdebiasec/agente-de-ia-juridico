@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 603cac65bf26b886 -->
+<!-- config-version: 2; checksum: 603cac65bf26b886 -->
 # Guardrails de tools — analista_calidad_juridica
 
 ## desk_policies

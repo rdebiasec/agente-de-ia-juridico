@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 34ba0d85a1962a35 -->
+<!-- config-version: 3; checksum: 34ba0d85a1962a35 -->
 ---
 name: generar-preguntas-testigos-peritos
 description: Contrato penal-víctimas: Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_testigos_peritos`. No sustituye a `preparar_preguntas_audiencia`.

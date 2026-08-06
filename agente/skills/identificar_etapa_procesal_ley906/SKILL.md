@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: a6246750767df617 -->
+<!-- config-version: 3; checksum: a6246750767df617 -->
 ---
 name: identificar-etapa-procesal-ley906
 description: Contrato penal-víctimas: Determinar la etapa procesal del caso penal bajo Ley 906 de 2004 con base en actuaciones verificables, señalando incertidumbres. Activar cuando el plan/HITL o el especialista requiera `identificar_etapa_procesal_ley906`. No sustituye a `evaluar_oportun...

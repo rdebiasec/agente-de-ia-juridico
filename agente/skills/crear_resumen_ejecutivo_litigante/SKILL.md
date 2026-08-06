@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 6618c656d396a545 -->
+<!-- config-version: 3; checksum: 6618c656d396a545 -->
 ---
 name: crear-resumen-ejecutivo-litigante
 description: Contrato penal-víctimas: Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_resumen_ejecutivo_litigante`. No sustituye a `preparar_resumen_operativo_cliente`.

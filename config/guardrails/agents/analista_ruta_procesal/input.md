@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 9a2e9ee2c43e8709 -->
+<!-- config-version: 2; checksum: 9a2e9ee2c43e8709 -->
 # Guardrails de entrada — analista_ruta_procesal
 
 ## desk_policies

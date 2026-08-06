@@ -1,4 +1,4 @@
-<!-- config-version: 6; checksum: 86ff4383c4a2d193 -->
+<!-- config-version: 3; checksum: 86ff4383c4a2d193 -->
 ---
 name: detectar-urgencia-penal
 description: Contrato penal-víctimas: Detectar si el caso o el turno exigen atención humana inmediata por riesgo a derechos, términos, integridad o pérdida probatoria. Activar cuando el plan/HITL o el especialista requiera `detectar_urgencia_penal`. No sustituye a `generar_alertas_terminos...

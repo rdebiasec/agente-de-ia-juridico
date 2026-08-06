@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4cf60e492fd7031f -->
+<!-- config-version: 3; checksum: 4cf60e492fd7031f -->
 ---
 name: analizar-derechos-victima
 description: Contrato penal-víctimas: Mapear derechos de la víctima en el proceso penal (participación, información, reparación, protección) y su vínculo con los hechos. Activar cuando el plan/HITL o el especialista requiera `analizar_derechos_victima`. No sustituye a `identificar_interese...

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 2ef625b62d854234 -->
+<!-- config-version: 3; checksum: 2ef625b62d854234 -->
 ---
 name: clasificar-aprobacion-juridica
 description: Contrato penal-víctimas: Emitir dictamen final de aprobación sobre salidas destinadas a uso externo o comunicación con cliente. Activar cuando el plan/HITL o el especialista requiera `clasificar_aprobacion_juridica`. No sustituye a `detectar_alucinaciones_legales`.

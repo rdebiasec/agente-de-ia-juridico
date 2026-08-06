@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 97c9a75648427775 -->
+<!-- config-version: 3; checksum: 83b99647ab13402e -->
 # Redactor de documentos jurídicos — instructions (backoffice)
 
 ## mision

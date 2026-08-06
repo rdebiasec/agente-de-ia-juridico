@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8ea5409c983d6dae -->
+<!-- config-version: 3; checksum: 8ea5409c983d6dae -->
 ---
 name: verificar-citas-normativas
 description: Contrato penal-víctimas: Verificar que leyes, artículos y decretos citados existan, estén vigentes y sean pertinentes al caso. Activar cuando el plan/HITL o el especialista requiera `verificar_citas_normativas`. No sustituye a `detectar_alucinaciones_legales`.

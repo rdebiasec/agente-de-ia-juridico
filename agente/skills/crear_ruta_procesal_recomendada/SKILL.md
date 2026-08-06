@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: dfd1dfaf6a8e5476 -->
+<!-- config-version: 3; checksum: dfd1dfaf6a8e5476 -->
 ---
 name: crear-ruta-procesal-recomendada
 description: Contrato penal-víctimas: Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado. Activar cuando el plan/HITL o el especialista requiera `crear_ruta_procesal_recomendada`. No sustituye a `evalua...

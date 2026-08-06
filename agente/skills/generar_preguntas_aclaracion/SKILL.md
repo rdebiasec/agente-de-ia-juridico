@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 020d3e7a46b50d37 -->
+<!-- config-version: 3; checksum: 020d3e7a46b50d37 -->
 ---
 name: generar-preguntas-aclaracion
 description: Contrato penal-víctimas: Formular preguntas abiertas y no inductivas para cerrar ambigüedades factuales, dirigidas a víctima, testigos o abogado. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_aclaracion`. No sustituye a `generar_preguntas_tipicidad`.

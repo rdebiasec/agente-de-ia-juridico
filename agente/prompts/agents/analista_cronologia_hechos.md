@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 8048529c4f1aa058 -->
+<!-- config-version: 3; checksum: e01914d9ab56e65c -->
 # Analista de cronología y hechos — instructions (backoffice)
 
 ## mision

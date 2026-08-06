@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 055f6d52e5539112 -->
+<!-- config-version: 3; checksum: 055f6d52e5539112 -->
 ---
 name: preparar-preguntas-audiencia
 description: Contrato penal-víctimas: Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_preguntas_audiencia`. No sustituye a `preparar_guio...
