@@ -1,5 +1,5 @@
 {
-  "version": "3.6",
+  "version": "3.7",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -358,6 +358,36 @@
       "category": "quality_gate",
       "veredicto": "aprobable",
       "expected_blocks": false
+    },
+    {
+      "id": "route-seguimiento",
+      "category": "routing",
+      "message": "Necesito seguimiento del radicado, alertas de términos e inactividad procesal del caso.",
+      "expected_destination": "analista_seguimiento_procesal",
+      "expected_plan_required": false
+    },
+    {
+      "id": "tool-surface-seguimiento",
+      "category": "tool_surface",
+      "message": "Necesito seguimiento del radicado, alertas de términos e inactividad procesal del caso.",
+      "expected_enabled_contains": [
+        "analista_seguimiento_procesal",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos",
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=seguimiento: vecinos ruta+calidad (orchestrator); chat excluye HIGH RISK redactor."
+    },
+    {
+      "id": "instruction-budget-seguimiento",
+      "category": "instruction_budget",
+      "agent_id": "analista_seguimiento_procesal",
+      "max_chars": 12000,
+      "notes": "Regresión A7: prompt seguimiento completo sin explotar tokens."
     }
   ]
 }

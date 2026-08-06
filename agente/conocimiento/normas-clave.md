@@ -64,6 +64,16 @@ Uso operativo para `analista_representacion_victimas` (sin inventar artículos):
 7. Objetivos priorizados sin prometer resultados judiciales; trade-offs explícitos para el abogado.
 8. Comunicación al cliente o pieza accionable → HITL abogado.
 
+## Checklist seguimiento procesal / términos (ancla skills O8 parcial)
+
+Uso operativo para `analista_seguimiento_procesal` (sin inventar radicados):
+
+1. Leer `agente/conocimiento/proceso-penal-906.md` (checklist seguimiento + sección Términos).
+2. No inventar radicados, actuaciones ni estados de portales judiciales.
+3. Términos en días hábiles; sin `fecha_base` → pendiente / estimación etiquetada.
+4. Inactividad = señal operativa; impulso escrito → redactor vía Gerente + HITL.
+5. Reporte interno ≠ comunicación al cliente; esta última requiere aprobación abogado.
+
 ## Checklist tipicidad (ancla para skills O1)
 
 Antes de citar CP o cerrar hipótesis:

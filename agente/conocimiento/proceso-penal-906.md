@@ -106,6 +106,18 @@ Uso operativo para `analista_calidad_juridica` (sin inventar normas, sentencias 
 6. No reescribir el memorial completo: hallazgos y cambios concretos; registrar `fuentes_kb` si se consultó KB/expediente.
 7. Dictamen = preliminar de la IA; el abogado decide uso externo.
 
+## Checklist seguimiento procesal operativo (ancla skills O8 parcial)
+
+Uso operativo para `analista_seguimiento_procesal` (sin inventar radicados ni actuaciones):
+
+1. Ubicar radicado y última actuación con fuente/timestamp (`monitorear_radicado` / `registrar_actuacion_procesal`); sin dato → `[PENDIENTE DE VERIFICAR]` (no simular portales externos).
+2. Cruzar documentos radicados/enviados y respuestas (`seguimiento_documentos_radicados`).
+3. Detectar inactividad material vs última actuación (`detectar_inactividad_procesal`); no inventar causas de la demora.
+4. Alertas de términos/vencimientos (`generar_alertas_terminos_vencimientos`): días hábiles; sin `fecha_base` no certificar.
+5. Consolidar reporte interno (`crear_reporte_estado_caso`); comunicación a cliente → HITL + `preparar_resumen_operativo_cliente` si aplica.
+6. Impulso escrito o petición → escalar a `redactor_documentos_juridicos` vía Gerente (este agente no redacta piezas).
+7. Registrar `fuentes_kb` si se consultó KB/expediente; salida accionable → HITL.
+
 ## Términos
 
 - Los términos y plazos procesales se cuentan en **días hábiles** (Ley 906), salvo norma especial verificada.

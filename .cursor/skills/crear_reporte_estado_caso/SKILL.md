@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 93311b2203e15680 -->
+<!-- config-version: 3; checksum: de9207935fd17b7f -->
 ---
 name: crear-reporte-estado-caso
 description: Contrato penal-víctimas: Generar reporte interno del estado del caso para el despacho (no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_reporte_estado_caso`. No sustituye a `preparar_resumen_operativo_cliente`.
@@ -20,6 +20,11 @@ Generar reporte interno del estado del caso para el despacho (no para cliente).
 
 ## Rol en analista_seguimiento_procesal
 Panorama operativo interno para el despacho; no sustituye memorial ni comunicación con cliente.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Radicado, actuaciones recientes, tareas pendientes.
 - Alertas de términos y seguimiento documental.
@@ -29,6 +34,7 @@ Panorama operativo interno para el despacho; no sustituye memorial ni comunicaci
 - Etiqueta: `REPORTE INTERNO DESPACHO`.
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Consolidar estado procesal y actuaciones recientes.
 2. Listar pendientes, responsables y plazos.
 3. Incluir alertas de términos relevantes.

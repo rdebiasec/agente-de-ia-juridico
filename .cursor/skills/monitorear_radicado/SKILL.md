@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 6478e8939e885d1a -->
+<!-- config-version: 3; checksum: 57cb14498688fa75 -->
 ---
 name: monitorear-radicado
 description: Contrato penal-víctimas: Consultar o registrar estado del radicado con fuente y timestamp. Activar cuando el plan/HITL o el especialista requiera `monitorear_radicado`. No sustituye a `seguimiento_documentos_radicados`.
@@ -20,6 +20,11 @@ Consultar o registrar estado del radicado con fuente y timestamp.
 
 ## Rol en analista_seguimiento_procesal
 Consulta puntual de estado; alimenta alertas y reportes de seguimiento.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapas Ley 906, términos (días hábiles), checklist seguimiento operativo.
+- `agente/conocimiento/normas-clave.md` — criterio operativo; no inventar radicados ni actuaciones.
+- Herramientas: `leer_playbook_proceso(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` / `buscar_en_expediente` antes de afirmar estado, plazos o movimientos.
+
 ## Inputs
 - Número de radicado (si consta).
 - Última consulta registrada (si existe).
@@ -29,6 +34,7 @@ Consulta puntual de estado; alimenta alertas y reportes de seguimiento.
 - Cambios respecto a consulta anterior (si aplica).
 
 ## Steps
+0. Anclar estado/términos a Fuentes KB/expediente; sin radicado/actuación verificada → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni movimientos judiciales.
 1. Registrar o consultar estado del radicado con fuente y timestamp.
 2. Listar última actuación conocida sin inventar movimientos.
 3. Marcar inconsistencias de número/estado como pendientes.

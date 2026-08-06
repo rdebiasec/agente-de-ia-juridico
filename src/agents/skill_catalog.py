@@ -200,6 +200,7 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     "analista_seguimiento_procesal": (
         "generar_alertas_terminos_vencimientos",
         "detectar_inactividad_procesal",
+        "crear_reporte_estado_caso",
     ),
 }
 

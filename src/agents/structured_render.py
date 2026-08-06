@@ -219,6 +219,7 @@ def render_structured_output(output: Any) -> str:
             ("Actuaciones relevantes", "actuaciones_relevantes"),
             ("Términos / alertas", "terminos_alertas"),
             ("Próximas acciones", "proximas_acciones"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []

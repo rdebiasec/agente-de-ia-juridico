@@ -5,9 +5,9 @@
 **Fecha:** 2026-08-05  
 **E0:** Auto (humano)  
 **Modo:** panel IA personificado + síntesis E0  
-**Piloto:** `config/evals/agent_eval_cases.json` (v3.6)  
+**Piloto:** `config/evals/agent_eval_cases.json` (v3.7)  
 **Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; notepads F5 diferido por prioridad #6)  
-**Rama de trabajo A0–A6:** `cursor/analisis-a0-a1-prompts-skills`
+**Rama de trabajo A0–A7:** `cursor/analisis-a0-a1-prompts-skills`
 
 ---
 
@@ -29,6 +29,7 @@
 | **A4** Deep audiencias | **Hecho** (scorecard + A-aud + patches P0/P1 + eval) |
 | **A5** Deep redactor | **Hecho** (scorecard + A-reda + patches P0/P1 + eval) |
 | **A6** Deep calidad | **Hecho** (scorecard + A-cali + patches P0/P1 + eval) |
+| **A7** Deep seguimiento | **Hecho** (scorecard + A-segu + patches P0/P1 + eval) |
 
 ---
 
@@ -40,17 +41,17 @@
 | Prompts agentes | **10/10** | Roster canónico completo |
 | Guardrails I/O/T por agente | **10/10** (input+output+tools) | PASS cobertura archivos |
 | Guardrails globales g1–g10 | **10** | Presentes |
-| Eval cases | **41** (v3.6) | Routing/scope/HITL/PII + tool-surface/budget A0–A6 |
+| Eval cases | **44** (v3.7) | Routing/scope/HITL/PII + tool-surface/budget A0–A7 |
 | Evals → `analista_ruta_procesal` | **1** (`route-ruta-906`) | **PASS** (A0) |
 | Evals → `analista_representacion_victimas` | **3** (`route-victimas`, `tool-surface-victimas`, `instruction-budget-victimas`) | **PASS** (A3) |
 | Evals → `analista_audiencias` | **3** (`route-audiencia`, `tool-surface-audiencias`, `instruction-budget-audiencias`) | **PASS** (A4) |
 | Evals → `redactor_documentos_juridicos` | **4** (`route-memorial`, `completeness-*`, `instruction-budget-redactor`, `tool-surface-redactor`) | **PASS** (A5) |
 | Evals → `analista_calidad_juridica` | **4+** (`route-calidad-via-plan`, `tool-surface-calidad`, `instruction-budget-calidad`, `quality-gate-*`) | **PASS** (A6) |
-| Evals → `analista_seguimiento_procesal` | **0** | **FAIL** cobertura eval |
-| Referencias KB path en skills O1–O7 | **71+** con Fuentes KB | **PASS** (A0–A6) |
+| Evals → `analista_seguimiento_procesal` | **3** (`route-seguimiento`, `tool-surface-seguimiento`, `instruction-budget-seguimiento`) | **PASS** (A7) |
+| Referencias KB path en skills O1–O8 parcial | **77+** con Fuentes KB | **PASS** (A0–A7) |
 | KB `penal.md` | marco tipico operativo | **PASS** (A0) |
-| KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención/prep. audiencia/redacción/calidad | **PASS** (A0–A6) |
-| KB `normas-clave.md` | marco + derechos + checklist O5/O6/O7 redacción+calidad | **PASS** (A3–A6) |
+| KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención/prep. audiencia/redacción/calidad/seguimiento | **PASS** (A0–A7) |
+| KB `normas-clave.md` | marco + derechos + checklist O5/O6/O7/O8 seguimiento | **PASS** (A3–A7) |
 | Legacy prose residual O1/O2 | varios (“calidad”, “gestor”, “coordinador”) | PARTIAL |
 
 ### Matriz agente × primario × secundarios (runtime)
@@ -67,6 +68,7 @@ Fuente: `src/agents/skill_catalog.py`.
 | `analista_audiencias` | `preparar_preguntas_audiencia` | objetivo, guion, detectar_riesgos | **OK (A4)** — solicitudes/checklist/simulación/intervención owned sin ancla runtime |
 | `redactor_documentos_juridicos` | `redactar_memorial_penal` | estructurar, marcar_pendientes, controlar_tono | **OK (A5)** — otras `redactar_*` owned sin ancla runtime |
 | `analista_calidad_juridica` | `revisar_coherencia_estrategica` | alucinaciones, verificar_citas, clasificar_aprobacion | **OK (A6)** — jurisprudencia/confidencialidad/tono owned sin ancla runtime |
+| `analista_seguimiento_procesal` | `monitorear_radicado` | alertas, inactividad, crear_reporte | **OK (A7)** — registrar/documentos/resumen/impulso owned sin ancla runtime |
 | Resto | ver informe prompts previo | — | OK para esta ola |
 
 ---
@@ -309,7 +311,7 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 | 12 | — | F4: checklist panel 12 (1 día) | P1 | Pendiente |
 | 13 | — | F5: notepads `{agent_id}.md` en Drive `0ABOGkPnKHSC5Uk9PVA` | P2 | Diferido |
 | 14 | — | Evals tipicidad groundedness (matriz elementos) | P2 | Pendiente |
-| 15 | — | Oleadas A3–A8 (ex O5–O8) | P1 | **A3–A6 Hecho; siguiente A7** |
+| 15 | — | Oleadas A3–A8 (ex O5–O8) | P1 | **A3–A7 Hecho; siguiente A8** |
 
 ---
 
@@ -318,21 +320,22 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 **Hallazgo de proceso (A0):** el bloque “Cierre parcial de ejecución” abajo marcó H-101…H-304 como **Hecho**, pero al iniciar A0 en el árbol de trabajo **no** estaban aplicados (skills sin `## Fuentes KB`, `penal.md` sin marco tipico, schemas sin `etapa_ley906`/`fuentes_kb`, sin `route-ruta-906`).  
 Los IDs `H-*` se conservan; la ejecución real de esos residuales se documenta como `A-tipi-*` / `A-ruta-*` / patches A0.
 
-**Patches A0–A6 aplicados (2026-08-05)**
-- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklists evidencia O4 + representación O5 + prep. audiencia O6 + redacción O7 + **calidad/citas O7**)
-- Skills O1–O6 + O7 redacción + **O7 calidad (7 skills)** → `## Fuentes KB` + steps verificables + bump checksum
-- `src/agents/skill_catalog.py` secundarios tipicidad/ruta/cronología/evidencia/víctimas/audiencias/redactor/**calidad** (citas en ancla A6)
-- Schemas/renderer: `fuentes_kb` en tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor/**DictamenCalidad**
-- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 / víctimas v6 / audiencias v5 / redactor v5 / **calidad v7** + guardrails I/O grounding
-- Evals `3.6` + `tool-surface-calidad` (+ route/budget/quality-gate previos)
-- Sync: `python scripts/sync_skills_agente_a_cursor.py` (81 skills)
+**Patches A0–A7 aplicados (2026-08-05)**
+- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklists evidencia O4 + representación O5 + prep. audiencia O6 + redacción O7 + calidad/citas O7 + **seguimiento O8**)
+- Skills O1–O6 + O7 redacción/calidad + **O8 parcial (6 skills + inactividad clarify)** → `## Fuentes KB` + steps verificables + bump checksum
+- `src/agents/skill_catalog.py` secundarios tipicidad/ruta/cronología/evidencia/víctimas/audiencias/redactor/calidad/**seguimiento** (reporte en ancla A7)
+- Schemas/renderer: `fuentes_kb` en tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor/DictamenCalidad/**SeguimientoProcesal**
+- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 / víctimas v6 / audiencias v5 / redactor v5 / calidad v7 / **seguimiento v5** + guardrails I/O grounding
+- Evals `3.7` + `route-seguimiento` + `tool-surface-seguimiento` + `instruction-budget-seguimiento`
+- Sync: espejo `.cursor/skills` en skills O8 tocados
 - **A-vict-006 cerrado en A4:** `analizar_intervencion_victima` permanece Used By ruta+audiencias (sin MOVE a víctimas)
 - **A-reda-005:** `marcar_pendientes_verificacion` Used By + Rol redactor (secundario)
 - **A-cali-***: ver scorecard A6
+- **A-segu-***: ver scorecard A7
 
-**Tests (A0–A6 focused):** **39 passed** en suite A6 (`test_l03_structured_output`, `test_quality_gate_plan`, `test_guardrails_iot_coverage`, `test_prompt_skill_quality`, `test_skill_tools_registry`, `test_agent_evals`, `test_skill_config`).
+**Tests (A0–A7 focused):** **39 passed** en suite A7 (`test_l03_structured_output`, `test_quality_gate_plan`, `test_guardrails_iot_coverage`, `test_prompt_skill_quality`, `test_skill_tools_registry`, `test_agent_evals`, `test_skill_config`).
 
-**Siguiente oleada:** **A7** — deep-dive `analista_seguimiento_procesal` (+ O8 parcial).
+**Siguiente oleada:** **A8** — deep-dive `coordinador_caso` (+ O8 gerencia).
 
 ---
 
@@ -1344,7 +1347,7 @@ evals_a_ampliar: []
 
 ---
 
-## Cola E0 (post A0–A6)
+## Cola E0 (post A0–A7)
 
 | # | ID | Acción | Sev | Estado |
 |---|---|---|---|---|
@@ -1356,41 +1359,190 @@ evals_a_ampliar: []
 | 6 | A-aud-* | Patches audiencias O6 + eval | P1 | **Hecho** |
 | 7 | A-reda-* | Patches redactor O7 + eval | P1 | **Hecho** |
 | 8 | A-cali-* | Patches calidad O7 + eval | P1 | **Hecho** |
-| 9 | — | **A7** deep `analista_seguimiento_procesal` (+ O8 parcial) | P1 | **Siguiente** |
+| 9 | A-segu-* | Patches seguimiento O8 + eval | P1 | **Hecho** |
+| 10 | — | **A8** deep `coordinador_caso` (+ O8 gerencia) | P1 | **Siguiente** |
 
-### Evals gap (post A6)
+### Evals gap (post A7)
 
-- **Hecho A6:** `tool-surface-calidad` (evals v3.6; route/budget/quality-gate ya existían)
-- **Pendiente:** evals seguimiento (A7)
+- **Hecho A7:** `route-seguimiento`, `tool-surface-seguimiento`, `instruction-budget-seguimiento` (evals v3.7)
+- **Pendiente:** re-score coordinador (A8)
 
-## Notas panel (personas) — post A0–A6
+## Notas panel (personas) — post A0–A7
 
-- **L1:** Checklists O1–O7 (redacción+calidad) en KB; citas sin arts/sentencias inventadas.
-- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor/calidad alineados.
-- **T5:** Superficies tipicidad/víctimas/audiencias/redactor/calidad + budgets + quality-gate.
-- **L3:** Gate duro calidad; redactor HIGH RISK; siguiente A7 términos/seguimiento.
+- **L1:** Checklists O1–O8 (seguimiento) en KB; sin arts/radicados inventados.
+- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor/calidad/seguimiento alineados.
+- **T5:** Superficies tipicidad/víctimas/audiencias/redactor/calidad/seguimiento + budgets + quality-gate.
+- **L3:** HITL seguimiento ya cableado; siguiente A8 coordinador/POC.
 
-> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A6 arriba.
+> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A7 arriba.
 
-- KB / skills O1–O7 / secundarios / evals / F3 prompts — ejecutados en A0–A6.
+- KB / skills O1–O8 / secundarios / evals / F3 prompts — ejecutados en A0–A7.
 
-**Siguiente ejecución sugerida:** **A7 seguimiento**.
+**Siguiente ejecución sugerida:** **A8 coordinador**.
 
 ---
 
 ## Piloto evals (decisión #7) — actualizado
 
-- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `route-calidad-via-plan`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias/redactor/calidad), budgets, `quality-gate-*`
-- **Hecho A6:** `tool-surface-calidad` (evals v3.6)
-- Backlog: groundedness eval campos tipicidad/evidencia/víctimas/audiencias/redactor/calidad (P2); notepads F-08 (P2); evals seguimiento (A7)
+- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `route-calidad-via-plan`, `route-seguimiento`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias/redactor/calidad/seguimiento), budgets, `quality-gate-*`
+- **Hecho A7:** route + tool-surface + budget seguimiento (evals v3.7)
+- Backlog: groundedness eval campos tipicidad/evidencia/víctimas/audiencias/redactor/calidad/seguimiento (P2); notepads F-08 (P2)
+
+---
+
+## A7 — Scorecard `analista_seguimiento_procesal`
+
+| Campo | Valor |
+|---|---|
+| Fecha | 2026-08-05 |
+| Oleada | A7 |
+| Expertos | L1, L2, L3, T1–T7, E0 |
+| Primario | `monitorear_radicado` |
+| Secundarios anclados | generar_alertas_terminos_vencimientos, detectar_inactividad_procesal, crear_reporte_estado_caso |
+| Skills owned / O8 parcial | monitorear + registrar + documentos + alertas + inactividad + reporte + resumen cliente (+ impulso shared redactor; términos shared ruta) |
+| Veredicto global | **PARTIAL → PASS tras patches** |
+
+### Técnica (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Prompt | 5 | v5: skills nombrados, tools reales, `fuentes_kb`, HITL |
+| Few-shots / anti-drift | 5 | Inactividad 4m + fallo inventar radicado 999999 |
+| Ancla skills | 5 | Primario + 3 secundarios (reporte en ancla A7) |
+| Tools honesty | 5 | REAL tools; planned lookup/calendar no invocables |
+| Guardrails I/O/T | 5 | groundedness + no_invention + schema fuentes_kb |
+| Schema | 5 | SeguimientoProcesal + `fuentes_kb` |
+| HITL | 5 | Ya en HITL_OUTPUT_AGENTS + planes impulso |
+| Evals | 5 | route + tool-surface + budget |
+| Config parity | 4 | Prompt/guardrails/skills versionados |
+
+### Jurídico-procedural (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Grounding KB | 5 | Checklist seguimiento O8 en 906 + normas-clave |
+| Etapa 906 | 4 | Remite ruta; no redefine etapas |
+| Tipicidad/dogmática | 5 | Fuera de alcance (límite correcto) |
+| Derechos víctima | 4 | Resumen cliente HITL; no revictimizar vía políticas |
+| Hecho vs inferencia | 5 | Actuaciones con fuente; inactividad inferida = pendiente |
+| Términos/oportunidad | 5 | Días hábiles; sin fecha_base no certificar |
+| Citas | 4 | No inventa normas; remite KB/pendiente |
+| HITL accionable | 5 | HITL_OUTPUT + no cliente sin abogado |
+| Alcance | 5 | Operativo; no tipicidad ni redacción |
+| Litigabilidad | 5 | Reporte accionable para gerente/abogado |
+
+### Análisis panel (síntesis)
+
+- **L1:** Cadena monitorear→actuaciones/documentos→inactividad/alertas→reporte litigable; KB tenía hueco O8 — cerrado.
+- **L2:** Resumen cliente con HITL; confidencialidad en policies.
+- **L3:** HITL ya cableado; refuerzo contractual prompt/guardrail.
+- **T1:** Prompt v4 genérico; v5 alinea skills + schema.
+- **T2:** Secundarios: +`crear_reporte_estado_caso` (misión paso 3).
+- **T3:** groundedness + tools honesty anti-planned.
+- **T4:** tool-surface vecinos ruta+calidad; excluye redactor/audiencias.
+- **T5:** añadidos route/surface/budget seguimiento (evals v3.7).
+- **T6:** `notas_trabajo` OK; Drive diferido.
+- **T7:** PII en tools/args; no inventar radicados.
+
+### Hallazgos A7
+
+```yaml
+id: A-segu-001
+severidad: P1
+bloque: skills
+archivo: agente/skills/{O8 parcial}/*/SKILL.md
+experto: L1+T2
+veredicto: PASS (patched)
+evidencia_repo: "6/6 core O8 sin Fuentes KB al inicio A7 (monitorear/registrar/documentos/alertas/reporte/resumen)"
+evidencia_kb: "proceso-penal-906.md checklist seguimiento; normas-clave.md checklist O8"
+impacto: "reportes sin contrato explícito de grounding / anti-invención de radicados"
+fix_aplicado: "Fuentes KB + step 0 ancla en 6 skills + clarify planned process_lookup en inactividad; bump + sync .cursor"
+porque: "F-05 convención Fuentes KB; O8 parcial plan A7"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-segu-002
+severidad: P1
+bloque: prompt+schema+guardrails
+archivo: analista_seguimiento_procesal.md; schemas.SeguimientoProcesal; guardrails I/O/T
+experto: T1+T3
+veredicto: PASS (patched)
+evidencia_repo: "prompt v4 sin skills nombrados/fuentes_kb; schema sin fuentes_kb; groundedness ausente"
+evidencia_kb: "proceso-penal-906.md checklist seguimiento"
+impacto: "drift prompt↔schema; invención de radicados/actuaciones menos enforceable"
+fix_aplicado: "prompt v5 + fuentes_kb schema/render + groundedness_policy + tools allowlist honestas"
+porque: "alineación tipicidad/…/calidad post-F3 como estándar"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-segu-003
+severidad: P1
+bloque: ownership
+archivo: src/agents/skill_catalog.py _SECONDARY_SKILLS
+experto: T2
+veredicto: PASS (patched)
+evidencia_repo: "secundarios solo alertas+inactividad (sin reporte de estado)"
+evidencia_kb: "N/A"
+impacto: "ancla runtime no priorizaba reporte accionable (paso 3 misión)"
+fix_aplicado: "secundarios: alertas + inactividad + crear_reporte_estado_caso"
+porque: "A7 foco operativo reporte; registrar/documentos siguen owned"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-segu-004
+severidad: P1
+bloque: kb
+archivo: agente/conocimiento/proceso-penal-906.md; normas-clave.md
+experto: L1+L2
+veredicto: PASS (patched)
+evidencia_repo: "KB sin checklist seguimiento operativo O8"
+evidencia_kb: "checklist seguimiento (radicado→alertas→reporte→HITL; no inventar radicados)"
+impacto: "skills O8 sin ancla procedural concreta"
+fix_aplicado: "checklist seguimiento en 906 + normas-clave"
+porque: "F-15 KB enrichment; no inventar arts/radicados"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-segu-005
+severidad: P1
+bloque: evals
+archivo: config/evals/agent_eval_cases.json
+experto: T5
+veredicto: PASS (patched)
+evidencia_repo: "0 evals seguimiento al inicio A7 (hueco plan)"
+evidencia_kb: "N/A"
+impacto: "regresión route/superficie/budget seguimiento invisible en CI"
+fix_aplicado: "route-seguimiento + tool-surface-seguimiento + instruction-budget-seguimiento (evals v3.7)"
+porque: "plan A7; F-07/F-12"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-segu-006
+severidad: P2
+bloque: hitl
+archivo: skill_catalog.HITL_OUTPUT_AGENTS + plan_templates
+experto: L3+T4
+veredicto: PASS (ya cableado; refuerzo documental)
+evidencia_repo: "seguimiento ya en HITL_OUTPUT_AGENTS; planes indagacion_impulso incluyen paso seguimiento"
+evidencia_kb: "checklist seguimiento paso 7 HITL"
+impacto: "riesgo de comunicar estado a cliente sin abogado — mitigado por skill resumen + prompt"
+fix_aplicado: "refuerzo prompt/guardrail; sin cambio runtime HITL"
+porque: "HITL ya correcto; A7 refuerza contrato"
+evals_a_ampliar: []
+```
 
 ---
 
 ## Anexo — texto previo “Cierre parcial F1–F3” (histórico)
 
-> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A6 arriba.
+> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A7 arriba.
 
 **Patches pretendidos (histórico)**
-- KB / 17 skills O1+O2 / secundarios / evals 3.2 / F3 prompts — **reclamados como Hecho antes de existir en árbol**; ejecutados en A0–A4.
+- KB / 17 skills O1+O2 / secundarios / evals 3.2 / F3 prompts — **reclamados como Hecho antes de existir en árbol**; ejecutados en A0–A7.
 
-**Siguiente ejecución sugerida (histórico):** O3 / F4 → **reemplazado por A5 redactor**.
+**Siguiente ejecución sugerida (histórico):** O3 / F4 → **reemplazado por A8 coordinador**.

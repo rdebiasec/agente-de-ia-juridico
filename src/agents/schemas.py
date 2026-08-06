@@ -507,6 +507,10 @@ class SeguimientoProcesal(BaseModel):
     terminos_alertas: list[str] = Field(default_factory=list)
     inactividad_detectada: str = Field(default="", description="Señal de inactividad o vacío.")
     proximas_acciones: list[str] = Field(default_factory=list)
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Paths KB/expediente consultados al monitorear radicado, términos o inactividad.",
+    )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
         default_factory=list,

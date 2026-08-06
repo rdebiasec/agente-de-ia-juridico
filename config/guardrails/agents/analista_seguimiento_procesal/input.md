@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 4660b1b77fc5d230 -->
+<!-- config-version: 4; checksum: 3d52e441a77dc0db -->
 # Guardrails de entrada — analista_seguimiento_procesal
 
 ## desk_policies
@@ -9,7 +9,8 @@ Políticas del despacho aplicables (ver `_shared/desk_policies.md`):
 Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
-Solo pedidos internos del Gerente sobre **seguimiento procesal operativo** en penal-víctimas Colombia.
+Solo pedidos internos del Gerente sobre **seguimiento procesal operativo** (radicado, actuaciones, términos, inactividad, reporte) en penal-víctimas Colombia.
+No tipicidad ni redacción de memoriales.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

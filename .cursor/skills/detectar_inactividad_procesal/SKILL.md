@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: ecd746f17375e2a5 -->
+<!-- config-version: 4; checksum: fb3307efec24c6e2 -->
 ---
 name: detectar-inactividad-procesal
 description: Contrato penal-víctimas: Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde. Activar cuando el plan/HITL o el especialista requiera `detectar_inactividad_procesal`. No sustituye a `redactar_solicitud_impulso_procesal`.
@@ -32,7 +32,7 @@ Alerta operativa periódica sobre radicado.
 ## Inputs
 - Última actuación registrada (fecha, tipo, fuente).
 - Etapa procesal y plazos razonables de la etapa.
-- Consulta estado radicado (`process_lookup_query`).
+- Consulta estado radicado (si hay dato en expediente; `process_lookup_query` es planned — no invocar).
 
 ## Outputs
 - `periodo_inactividad` (días/meses).

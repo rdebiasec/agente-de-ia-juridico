@@ -111,13 +111,26 @@ def test_render_new_schemas_is_prose_not_raw_json():
             actuaciones_relevantes=["Denuncia 2024-01"],
             proximas_acciones=["Derecho de petición a Fiscalía"],
             terminos_alertas=["Revisar términos de impulso"],
+            fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+            pendientes_verificacion=["Confirmar última actuación en SPOA"],
         )
     )
     assert "Seguimiento procesal" in seg_txt
     assert "Derecho de petición" in seg_txt
+    assert "proceso-penal-906.md" in seg_txt
+    assert "Confirmar última actuación" in seg_txt
 
 
-def test_redactor_schema_still_valid():
+def test_seguimiento_schema_fuentes_kb():
+    from src.agents.schemas import SeguimientoProcesal
+
+    seg = SeguimientoProcesal(
+        resumen="Sin movimiento reciente",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+        pendientes_verificacion=["Verificar radicado SPOA"],
+    )
+    assert seg.fuentes_kb[0].endswith("proceso-penal-906.md")
+    assert "[PENDIENTE" in seg.radicado_o_referencia
     from src.agents.schemas import BorradorDocumentoPenal
     from src.agents.structured_render import render_structured_output
 
