@@ -124,6 +124,26 @@ def test_both_sides_changed_is_a_conflict_and_import_refuses(repo_root):
         import_to_db(diff, author_email=AUTHOR)
 
 
+def test_inflated_header_without_prod_baseline_is_file_ahead(repo_root):
+    """Headers de otra DB/rama (vN > activa) no bloquean GitOps archivo → DB."""
+    _write(repo_root, "# No inventar\nRegla original.")
+    import_to_db(diff_item(KIND, KEY), author_email=AUTHOR)
+
+    _write(
+        repo_root,
+        "<!-- config-version: 9; checksum: deadbeefdeadbeef -->\n"
+        "# No inventar\nRegla desde rama de análisis.",
+    )
+
+    diff = diff_item(KIND, KEY)
+    assert diff.status == STATUS_FILE_AHEAD
+    assert "adelantado" in diff.detail
+
+    result = import_to_db(diff, author_email=AUTHOR, note="A0–A8 gitops")
+    assert result["version"] == 2
+    assert diff_item(KIND, KEY).status == STATUS_IN_SYNC
+
+
 def test_missing_file_reports_no_file(repo_root):
     _write(repo_root, "# No inventar\nRegla original.")
     import_to_db(diff_item(KIND, KEY), author_email=AUTHOR)

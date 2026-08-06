@@ -10,6 +10,13 @@
 **Rama de trabajo A0–A8/X:** `cursor/analisis-a0-a1-prompts-skills`  
 **PR:** https://github.com/rdebiasec/agente-de-ia-juridico/pull/9
 
+### Nota ops — Sync config post PR #9 (2026-08-06)
+
+- **Fallo:** run [`31068465432`](https://github.com/rdebiasec/agente-de-ia-juridico/actions/runs/31068465432) — headers A0–A8 > versiones activas en prod → `unknown` / «falta baseline de header».
+- **No usar `--allow-conflicts`:** omite bloqueados; no publica el repo.
+- **Remediación:** header adelantado → `file_ahead` (GitOps archivo→DB). Detalle: [`docs/operaciones/NOTA_SYNC_CONFIG_POST_PR9.md`](../operaciones/NOTA_SYNC_CONFIG_POST_PR9.md).
+- **Fuera de alcance:** F4 auth, F5 notepads.
+
 ---
 
 ## Estado de fases

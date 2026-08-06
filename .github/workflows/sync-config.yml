@@ -18,6 +18,8 @@ on:
         description: "Solo reportar diferencias, sin escribir a la DB"
         type: boolean
         default: true
+      # Headers adelantados (v archivo > v DB) se tratan como file_ahead en
+      # sync.py — no hace falta --allow-conflicts (ese flag omite, no publica).
 
 concurrency:
   group: sync-config

@@ -73,7 +73,10 @@ def main() -> int:
     parser.add_argument(
         "--allow-conflicts",
         action="store_true",
-        help="no fallar por conflictos; los omite y sincroniza el resto",
+        help=(
+            "no fallar por conflict/unknown; los omite y sincroniza el resto "
+            "(no fuerza archivo→DB: headers adelantados ya son file_ahead)"
+        ),
     )
     args = parser.parse_args()
 
