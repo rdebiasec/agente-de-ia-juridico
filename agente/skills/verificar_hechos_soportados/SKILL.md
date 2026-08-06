@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: e71f8e4b9d22f63e -->
+<!-- config-version: 3; checksum: ced84dc2459cc0b0 -->
 ---
 name: verificar-hechos-soportados
 description: Contrato penal-víctimas: Cruzar cada afirmación factual del análisis con fuente en expediente y clasificar soporte. Activar cuando el plan/HITL o el especialista requiera `verificar_hechos_soportados`. No sustituye a `marcar_pendientes_verificacion`.
@@ -23,6 +23,11 @@ Cruzar cada afirmación factual del análisis con fuente en expediente y clasifi
 ## Rol en analista_cronologia_hechos
 Último control antes de entregar cronología/matriz al despacho o derivar a tipicidad. Complementa `marcar_pendientes_verificacion` con cruce activo contra expediente.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Texto o estructura a verificar (cronología, matriz, lista de hechos).
 - Expediente y fuentes disponibles en RAG.
@@ -35,6 +40,7 @@ Cruzar cada afirmación factual del análisis con fuente en expediente y clasifi
 - Recomendación: apto para uso interno | requiere completar fuentes | no apto para memorial.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Listar afirmaciones factuales en el texto o análisis.
 2. Cruzar cada afirmación con fuente documental o expediente.
 3. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.

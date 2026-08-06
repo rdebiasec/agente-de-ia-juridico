@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 1235b1bd44352ea9 -->
+<!-- config-version: 3; checksum: 6b7ae5beca09a03e -->
 ---
 name: extraer-hechos-relevantes
 description: Contrato penal-víctimas: Extraer hechos materiales de documentos, relatos, audios o mensajes, con referencia de fuente, filtrando opiniones e inferencias. Activar cuando el plan/HITL o el especialista requiera `extraer_hechos_relevantes`. No sustituye a `crear_matriz_hecho_fue...
@@ -23,6 +23,11 @@ Extraer hechos materiales de documentos, relatos, audios o mensajes, con referen
 ## Rol en analista_cronologia_hechos
 Punto de entrada del agente tras triage del coordinador. Alimenta matriz hecho-fuente, actores y cronología.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Documentos PDF/imagen, textos, transcripciones de audio o mensajes del turno/expediente.
 - Objetivo del análisis (comprensión del caso, memorial, audiencia).
@@ -34,6 +39,7 @@ Punto de entrada del agente tras triage del coordinador. Alimenta matriz hecho-f
 - Elementos no legibles o no procesables marcados `[PENDIENTE DE VERIFICAR]`.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Procesar documentos, relatos, audios o mensajes del expediente/turno.
 2. Extraer hechos materiales con referencia de fuente (no opiniones).
 3. Separar opiniones e inferencias en lista aparte.

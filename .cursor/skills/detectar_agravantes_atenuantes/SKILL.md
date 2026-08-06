@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 3742c1f32d922b22 -->
+<!-- config-version: 3; checksum: 33b4e68965d2538e -->
 ---
 name: detectar-agravantes-atenuantes
 description: Contrato penal-víctimas: Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar. Activar cuando el plan/HITL o el especialista requiera `detectar_agravantes_atenuantes`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -21,6 +21,10 @@ Identificar circunstancias de agravación o atenuación aplicables con soporte f
 ## Rol en analista_responsabilidad_tipicidad
 Ejecutar tras descomposición del tipo y autoría. Relevante para gravedad de solicitudes de la víctima y expectativas de pena (sin prometer resultado).
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Tipo penal hipotético y hechos soportados.
 - Circunstancias del hecho (vínculo con víctima, premeditación, grupo, etc.).
@@ -31,10 +35,12 @@ Ejecutar tras descomposición del tipo y autoría. Relevante para gravedad de so
 - Circunstancias no acreditadas marcadas `[PENDIENTE DE VERIFICAR]`.
 
 ## Steps
-1. Revisar hechos que configuren agravantes o atenuantes aplicables.
-2. Vincular con norma penal y prueba disponible.
-3. Marcar elementos no acreditados como pendientes.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
+1. Listar circunstancias narradas que *podrían* agravar/atenuar con ancla fáctica.
+2. No sembrar artículos del CP sin Fuentes KB verificadas.
+3. Separar hecho vs inferencia; marcar pendientes.
+4. Entregar lista preliminar para revisión humana.
+
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_agravantes_atenuantes`.

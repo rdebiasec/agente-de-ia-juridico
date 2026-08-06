@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: af27481a08853900 -->
+<!-- config-version: 3; checksum: 040b46e25b701cc4 -->
 ---
 name: detectar-vacios-factuales
 description: Contrato penal-víctimas: Identificar información factual ausente que impide comprender el caso o sostener una actuación, y priorizar qué aclarar primero. Activar cuando el plan/HITL o el especialista requiera `detectar_vacios_factuales`. No sustituye a `gestionar_faltantes_exp...
@@ -24,6 +24,11 @@ Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `
 ## Rol en coordinador_caso
 **MOVE:** este skill ya no es ownership del POC. El coordinador solo lo dispara vía tool del especialista dueño.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Relato disponible (víctima, abogado, documentos).
 - Matriz hecho-fuente preliminar (si existe).
@@ -36,6 +41,7 @@ Análisis profundo de lagunas tras extracción y matriz hecho-fuente. Alimenta `
 - Agente sugerido para profundizar (cronología, tipicidad, evidencia).
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Partir de hechos/cronología ya extraídos.
 2. Listar huecos críticos (fecha, lugar, actor, medio, daño) para la pretensión.
 3. Priorizar vacíos que bloquean tipicidad, prueba o actuación procesal.

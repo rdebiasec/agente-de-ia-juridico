@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8151ad6478ea5e5d -->
+<!-- config-version: 3; checksum: 73e805c135d78d70 -->
 ---
 name: detectar-riesgos-atipicidad
 description: Contrato penal-víctimas: Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_atipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -22,6 +22,10 @@ Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que pre
 ## Rol en analista_responsabilidad_tipicidad
 Gate temprano: ejecutar en paralelo con o justo después de `identificar_conductas_punibles_preliminares`. Si riesgo alto, alertar antes de ruta procesal penal.
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Hipótesis de tipos penales.
 - Descomposición de elementos (si existe).
@@ -34,6 +38,7 @@ Gate temprano: ejecutar en paralelo con o justo después de `identificar_conduct
 - `recomendacion_interna`: continuar análisis penal | explorar vía no penal | pedir hechos adicionales.
 
 ## Steps
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Revisar elementos del tipo vs hechos/prueba disponibles.
 2. Señalar riesgos de atipicidad o insuficiencia probatoria por elemento.
 3. No afirmar inocencia ni tipicidad definitiva.

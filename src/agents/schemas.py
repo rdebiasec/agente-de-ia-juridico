@@ -219,6 +219,10 @@ class CronologiaPenal(BaseModel):
         default_factory=list,
         description="Vacíos o lagunas fácticas relevantes.",
     )
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Orígenes KB/expediente consultados (si aplica).",
+    )
     pendientes_verificacion: list[str] = Field(
         default_factory=list,
         description="Datos a verificar con el abogado o el expediente.",
@@ -240,6 +244,10 @@ class ElementoTipoPenal(BaseModel):
     elemento: str = Field(..., description="Elemento objetivo/subjetivo del tipo.")
     hechos_que_soportan: list[str] = Field(default_factory=list)
     prueba_disponible: list[str] = Field(default_factory=list)
+    estado: Literal["cubierto", "parcial", "vacio"] = Field(
+        default="parcial",
+        description="Cobertura fáctica/probatoria del elemento (preliminar).",
+    )
     riesgo_o_brecha: str = Field(default="", description="Riesgo de atipicidad o brecha.")
 
 
@@ -259,6 +267,14 @@ class MatrizTipicidad(BaseModel):
     dolo_culpa: str = Field(default="", description="Elemento subjetivo preliminar.")
     agravantes_atenuantes: list[str] = Field(default_factory=list)
     riesgos_atipicidad: list[str] = Field(default_factory=list)
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Paths KB u orígenes usados (p. ej. agente/conocimiento/penal.md).",
+    )
+    etiqueta_preliminar: str = Field(
+        default="ANÁLISIS DOGMÁTICO PRELIMINAR — NO IMPUTACIÓN",
+        description="Etiqueta obligatoria de no calificación definitiva.",
+    )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
         default_factory=list,
@@ -347,13 +363,36 @@ class DictamenCalidad(BaseModel):
 # --- Especialistas que estaban en prosa (L03): schemas mínimos para HITL ---
 
 
+EtapaLey906 = Literal[
+    "indagacion_investigacion",
+    "audiencias_preliminares",
+    "formulacion_imputacion",
+    "medida_aseguramiento",
+    "acusacion",
+    "audiencia_preparatoria",
+    "juicio_oral",
+    "recursos",
+    "ejecucion_penal",
+    "archivo",
+    "pendiente_verificar",
+]
+
+
 class RutaProcesalLey906(BaseModel):
     """Salida estructurada del analista de ruta procesal Ley 906."""
 
     resumen: str = Field(..., description="Resumen operativo de la ruta para el Gerente.")
+    etapa_ley906: EtapaLey906 = Field(
+        default="pendiente_verificar",
+        description="Etapa canónica alineada a proceso-penal-906.md.",
+    )
     etapa_aparente: str = Field(
         default="pendiente_verificar",
-        description="Etapa aparente (indagación, imputación, etc.) o pendiente.",
+        description="Alias libre/legacy; preferir etapa_ley906.",
+    )
+    evidencia_etapa: str = Field(
+        default="",
+        description="Actuación + fecha + fuente que soporta la etapa.",
     )
     oportunidades_intervencion: list[str] = Field(default_factory=list)
     terminos_o_vencimientos: list[str] = Field(default_factory=list)
@@ -361,6 +400,14 @@ class RutaProcesalLey906(BaseModel):
     ruta_recomendada: list[str] = Field(
         default_factory=list,
         description="Pasos o actuaciones sugeridas (preliminares).",
+    )
+    ruta_detallada: list[str] = Field(
+        default_factory=list,
+        description="Pasos con responsable/dependencia/plazo estimado si aplica.",
+    )
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Paths KB usados (p. ej. proceso-penal-906.md).",
     )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(

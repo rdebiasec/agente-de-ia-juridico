@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c4e4f63ae47432b2 -->
+<!-- config-version: 3; checksum: 3d77b3291423d5ce -->
 ---
 name: mapear-tipo-penal-hecho-prueba
 description: Contrato penal-víctimas: Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario. Activar cuando el plan/HITL o el especialista requiera `mapear_tipo_penal_hecho_prueba`. No sustituye a `construir_matriz_hecho_prue...
@@ -21,8 +21,12 @@ disable-model-invocation: true
 Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario.
 
 ## Rol en analista_responsabilidad_tipicidad
-Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/culpa. Alimenta plan probatorio (`crear_plan_recaudo_probatorio` → gestor evidencia).
+Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/culpa. Alimenta plan probatorio (`crear_plan_recaudo_probatorio` → analista_evidencia).
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Elementos del tipo descompuestos.
 - Matriz hecho-fuente y hecho-prueba (si existen).
@@ -34,6 +38,7 @@ Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/c
 - Etiqueta: `INSUMO ESTRATÉGICO — REVISIÓN ABOGADO`.
 
 ## Steps
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Tomar hipótesis tipica y elementos ya identificados.
 2. Mapear cada elemento a hecho(s) y medio(s) de prueba.
 3. Marcar celdas vacías como brecha; no inventar prueba.

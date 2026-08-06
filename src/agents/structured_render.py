@@ -62,6 +62,7 @@ def render_structured_output(output: Any) -> str:
         for label, key in (
             ("Contradicciones", "contradicciones"),
             ("Vacíos fácticos", "vacios_factuales"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []
@@ -78,6 +79,8 @@ def render_structured_output(output: Any) -> str:
         ]
         if data.get("tipo_penal_sugerido"):
             lines.append(f"Tipo sugerido: {data['tipo_penal_sugerido']}")
+        if data.get("etiqueta_preliminar"):
+            lines.append(f"Etiqueta: {data['etiqueta_preliminar']}")
         if data.get("autoria_participacion"):
             lines.append(f"Autoría/participación: {data['autoria_participacion']}")
         if data.get("dolo_culpa"):
@@ -87,10 +90,15 @@ def render_structured_output(output: Any) -> str:
             lines.append("\nElementos:")
             for el in elementos:
                 if isinstance(el, dict):
-                    lines.append(f"- {el.get('elemento')}: {el.get('riesgo_o_brecha') or '—'}")
+                    estado = el.get("estado") or ""
+                    estado_txt = f" [{estado}]" if estado else ""
+                    lines.append(
+                        f"- {el.get('elemento')}{estado_txt}: {el.get('riesgo_o_brecha') or '—'}"
+                    )
         for label, key in (
             ("Riesgos de atipicidad", "riesgos_atipicidad"),
             ("Agravantes/atenuantes", "agravantes_atenuantes"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []
@@ -122,17 +130,24 @@ def render_structured_output(output: Any) -> str:
 
 
     # RutaProcesalLey906
-    if "ruta_recomendada" in data and "etapa_aparente" in data:
+    if "ruta_recomendada" in data and (
+        "etapa_aparente" in data or "etapa_ley906" in data
+    ):
+        etapa = data.get("etapa_ley906") or data.get("etapa_aparente") or "pendiente_verificar"
         lines = [
             "Ruta procesal Ley 906 (preliminar)",
             str(data.get("resumen") or "").strip(),
-            f"Etapa aparente: {data.get('etapa_aparente')}",
+            f"Etapa Ley 906: {etapa}",
         ]
+        if data.get("evidencia_etapa"):
+            lines.append(f"Evidencia de etapa: {data['evidencia_etapa']}")
         for label, key in (
             ("Oportunidades de intervención", "oportunidades_intervencion"),
             ("Términos / vencimientos", "terminos_o_vencimientos"),
             ("Riesgos procesales", "riesgos_procesales"),
             ("Ruta recomendada", "ruta_recomendada"),
+            ("Ruta detallada", "ruta_detallada"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []

@@ -89,3 +89,27 @@ def test_other_team_scope_routes_to_poc_fuera_de_alcance():
     triage = build_triage(msg)
     assert triage.agente_destino == "coordinador_caso"
     assert triage.tipo_tarea == "fuera_de_alcance"
+
+
+def test_tipicidad_ruta_cronologia_output_grounding_policies():
+    """A0/A1 residual: guardrails deben exigir grounding / domain_limits no vacíos."""
+    for agent_id, needles in (
+        (
+            "analista_responsabilidad_tipicidad",
+            ("groundedness_policy", "penal.md", "tipicidad definitiva"),
+        ),
+        (
+            "analista_ruta_procesal",
+            ("groundedness_policy", "proceso-penal-906", "fecha_base"),
+        ),
+        (
+            "analista_cronologia_hechos",
+            ("groundedness_policy", "pendiente_verificar", "tipicidad"),
+        ),
+    ):
+        text = (AGENTS_GR / agent_id / "output.md").read_text(encoding="utf-8").lower()
+        for needle in needles:
+            assert needle.lower() in text, f"{agent_id} falta {needle}"
+        # domain_limits no vacío
+        after = text.split("## domain_limits", 1)[-1]
+        assert len(after.strip()) > 20

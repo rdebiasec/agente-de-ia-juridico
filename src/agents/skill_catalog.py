@@ -160,12 +160,12 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     "analista_cronologia_hechos": (
         "extraer_hechos_relevantes",
         "detectar_contradicciones_factuales",
-        "detectar_vacios_factuales",
+        "clasificar_fuente_factual",
     ),
     "analista_responsabilidad_tipicidad": (
         "identificar_conductas_punibles_preliminares",
-        "detectar_riesgos_atipicidad",
-        "mapear_tipo_penal_hecho_prueba",
+        "analizar_dolo_culpa_elemento_subjetivo",
+        "analizar_autoria_y_participacion",
     ),
     "analista_evidencia": (
         "detectar_brechas_probatorias",
@@ -185,6 +185,7 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     "analista_ruta_procesal": (
         "evaluar_oportunidad_procesal",
         "crear_ruta_procesal_recomendada",
+        "controlar_terminos_procesales_preliminares",
     ),
     "analista_representacion_victimas": (
         "analizar_derechos_victima",

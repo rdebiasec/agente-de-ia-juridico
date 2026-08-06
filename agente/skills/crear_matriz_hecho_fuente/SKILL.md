@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 182d9c17c8812a24 -->
+<!-- config-version: 3; checksum: 31543c02be41dd33 -->
 ---
 name: crear-matriz-hecho-fuente
 description: Contrato penal-víctimas: Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte. Activar cuando el plan/HITL o el especialista requiera `crear_matriz_hecho_fuente`. No sustituye a `clasificar_fuente_factual`.
@@ -22,6 +22,11 @@ Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestam
 ## Rol en analista_cronologia_hechos
 Puente entre extracción y cronología. Profundiza la matriz preliminar del coordinador (`clasificar_fuente_factual`) con referencias verificables.
 
+## Fuentes KB
+- Relato/expediente del caso (hechos); no inventar fechas ni actuaciones.
+- `agente/conocimiento/proceso-penal-906.md` — solo si un evento es actuación procesal (etiquetar etapa con evidencia).
+- `agente/conocimiento/normas-clave.md` — no revictimización al ordenar relatos.
+- Herramientas: `buscar_en_expediente`, `buscar_en_conocimiento` para anclar; no calificar tipicidad aquí.
 ## Inputs
 - Lista de hechos extraídos (`extraer_hechos_relevantes`).
 - Expediente y documentos disponibles.
@@ -33,6 +38,7 @@ Puente entre extracción y cronología. Profundiza la matriz preliminar del coor
 - Lista de fuentes a solicitar al abogado.
 
 ## Steps
+0. Separar confirmado|narrado|inferido|pendiente_verificar; no inventar fechas; no tipificar (otro especialista).
 1. Listar hechos relevantes uno a uno.
 2. Vincular cada hecho con fuente exacta (documento, folio, timestamp).
 3. Señalar hechos sin fuente como pendientes.

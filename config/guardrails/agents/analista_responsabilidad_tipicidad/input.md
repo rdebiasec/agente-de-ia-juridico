@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d66d7b38f41c91c2 -->
+<!-- config-version: 5; checksum: b60b88beac314f9f -->
 # Guardrails de entrada — analista_responsabilidad_tipicidad
 
 ## desk_policies
@@ -10,6 +10,9 @@ Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
 Solo pedidos internos del Gerente sobre **tipicidad y responsabilidad preliminar** en penal-víctimas Colombia.
+
+## required_context_policy
+Pedido interno debe permitir hipótesis tipica preliminar o pedir faltantes; exigir grounding KB antes de citar normas.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

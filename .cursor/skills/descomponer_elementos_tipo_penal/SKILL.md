@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: a6c4a27c353681e9 -->
+<!-- config-version: 4; checksum: 1e6dcaaac4dd708f -->
 ---
 name: descomponer-elementos-tipo-penal
 description: Contrato penal-víctimas: Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente. Activar cuando el plan/HITL o el especialista requiera `descomponer_elementos_tipo_penal`. No sustituye a `mapear_tipo_penal_hecho_...
@@ -21,6 +21,10 @@ Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y norm
 ## Rol en analista_responsabilidad_tipicidad
 Núcleo dogmático del agente. Ejecutar tras hipótesis de conductas (`identificar_conductas_punibles_preliminares`).
 
+## Fuentes KB
+- `agente/conocimiento/penal.md` — marco tipico preliminar (no imputación).
+- `agente/conocimiento/normas-clave.md` — criterio operativo y regla de citación.
+- Herramientas: `leer_area_derecho(penal)`, `leer_normas_clave`, `buscar_en_conocimiento` antes de citar CP.
 ## Inputs
 - Hipótesis de tipos penales preliminares.
 - Hechos soportados y cronología verificada.
@@ -32,6 +36,7 @@ Núcleo dogmático del agente. Ejecutar tras hipótesis de conductas (`identific
 - Etiqueta: `ANÁLISIS DOGMÁTICO PRELIMINAR`.
 
 ## Steps
+0. Antes de citar normas o cerrar hipótesis: leer Fuentes KB (`penal.md` / `normas-clave.md`) vía tools de grounding; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Tomar hipótesis tipica tentativa (no definitiva) del contexto.
 2. Listar elementos objetivos/subjetivos del tipo y mapear a hechos/prueba disponibles.
 3. Marcar elementos sin soporte como brecha / pendiente.

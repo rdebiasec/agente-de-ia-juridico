@@ -27,8 +27,15 @@ def test_new_schemas_require_core_fields():
         SeguimientoProcesal,
     )
 
-    ruta = RutaProcesalLey906(resumen="Impulso en indagación", etapa_aparente="indagacion")
+    ruta = RutaProcesalLey906(
+        resumen="Impulso en indagación",
+        etapa_ley906="indagacion_investigacion",
+        etapa_aparente="indagacion",
+        evidencia_etapa="Denuncia SPOA — fecha narrada",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
+    )
     assert ruta.pendientes_verificacion == []
+    assert ruta.etapa_ley906 == "indagacion_investigacion"
     with pytest.raises(ValidationError):
         RutaProcesalLey906(resumen=" ")
 
@@ -60,14 +67,20 @@ def test_render_new_schemas_is_prose_not_raw_json():
     ruta_txt = render_structured_output(
         RutaProcesalLey906(
             resumen="Evaluar impulso",
+            etapa_ley906="indagacion_investigacion",
             etapa_aparente="indagacion",
+            evidencia_etapa="Última actuación: denuncia",
             ruta_recomendada=["Solicitar impulso", "Verificar radicado"],
+            ruta_detallada=["1. Impulso — abogado — ESTIMACIÓN IA"],
+            fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
             pendientes_verificacion=["Confirmar número SPOA"],
         )
     )
     assert "Ruta procesal" in ruta_txt
+    assert "indagacion_investigacion" in ruta_txt
     assert "Solicitar impulso" in ruta_txt
     assert "Confirmar número SPOA" in ruta_txt
+    assert "proceso-penal-906.md" in ruta_txt
     assert "'ruta_recomendada'" not in ruta_txt  # no dump dict crudo tipico
 
     vict_txt = render_structured_output(
@@ -124,3 +137,45 @@ def test_orchestrator_poc_chat_has_no_output_type():
     poc = build_orchestrator(use_cache=False)
     assert poc.name == POC_AGENT_ID
     assert getattr(poc, "output_type", None) is None
+
+
+def test_matriz_tipicidad_and_cronologia_fuentes_kb():
+    from src.agents.schemas import (
+        CronologiaPenal,
+        ElementoTipoPenal,
+        EventoCronologia,
+        MatrizTipicidad,
+    )
+    from src.agents.structured_render import render_structured_output
+
+    matriz = MatrizTipicidad(
+        hipotesis_tipica="Lesiones personales preliminares",
+        elementos=[
+            ElementoTipoPenal(
+                elemento="resultado lesión",
+                estado="vacio",
+                riesgo_o_brecha="Falta pericia",
+            )
+        ],
+        fuentes_kb=["agente/conocimiento/penal.md"],
+    )
+    txt = render_structured_output(matriz)
+    assert "NO IMPUTACIÓN" in matriz.etiqueta_preliminar
+    assert "penal.md" in txt
+    assert "[vacio]" in txt
+
+    crono = CronologiaPenal(
+        eventos=[
+            EventoCronologia(
+                fecha_o_momento="2024-01",
+                descripcion="Golpe narrado",
+                clasificacion="narrado",
+                fuente="relato víctima",
+            )
+        ],
+        fuentes_kb=["expediente"],
+        vacios_factuales=["Hora exacta"],
+    )
+    crono_txt = render_structured_output(crono)
+    assert "Hora exacta" in crono_txt
+    assert crono.fuentes_kb == ["expediente"]
