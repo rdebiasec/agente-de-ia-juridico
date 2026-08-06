@@ -239,6 +239,45 @@ async def test_audit_session_dev_auto_login_blocked_in_production_like_env(monke
 
 
 @pytest.mark.asyncio
+async def test_audit_open_access_blocked_in_production_like_env(monkeypatch):
+    """F4 P0: AUDIT_REQUIRE_LOGIN=false no abre el portal en Render / cookie secure."""
+    _audit_env(monkeypatch)
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "false")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "true")
+    monkeypatch.setenv("RENDER", "true")
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/api/audit/session")
+        body = r.json()
+        assert body["authenticated"] is False
+        assert body["login_required"] is True
+        assert body["open_access"] is False
+        assert r.cookies.get("audit_session") is None
+
+
+@pytest.mark.asyncio
+async def test_audit_open_access_allowed_only_in_local_opt_out(monkeypatch):
+    _audit_env(monkeypatch)
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "false")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
+    monkeypatch.delenv("RENDER", raising=False)
+    from src.config import get_settings
+
+    get_settings.cache_clear()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        r = await client.get("/api/audit/session")
+        body = r.json()
+        assert body["authenticated"] is True
+        assert body["login_required"] is False
+        assert body["open_access"] is True
+        assert body["email"]
+
+
+@pytest.mark.asyncio
 async def test_audit_unavailable_without_site_password(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "")
     from src.config import get_settings

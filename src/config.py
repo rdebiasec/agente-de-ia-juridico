@@ -57,11 +57,13 @@ class Settings(BaseSettings):
     site_username: str = "despacho"
     # Sin valores por defecto débiles: configurar en .env local o secretos de Render.
     site_password: str = ""
-    # False = sin gate de login en /abogado y APIs web (local y prod).
-    # SITE_PASSWORD puede seguir existiendo para /auditoria si AUDIT_REQUIRE_LOGIN=true.
+    # Default seguro: gate de login en /abogado y APIs web.
+    # Local puede apagarlo con WEB_AUTH_ENABLED=false en .env.
+    # SITE_PASSWORD también protege /auditoria cuando AUDIT_REQUIRE_LOGIN=true.
     web_auth_enabled: bool = True
     # Allowlist de IP cuando el login web está apagado (CSV de IPs o CIDR).
     # En Render: CF-Connecting-IP. Health/Slack/Twilio no pasan por esta lista (path bypass).
+    # Defensa en profundidad: puede coexistir con WEB_AUTH_ENABLED=true.
     ip_allowlist_enabled: bool = False
     ip_allowlist: str = ""
     session_secret: str = ""
@@ -89,11 +91,12 @@ class Settings(BaseSettings):
     # Solo desarrollo local (.env); bloqueado en Render y con SESSION_COOKIE_SECURE=true.
     dev_auto_login: bool = False
     # Correo con el que /auditoria abre sesión sola cuando DEV_AUTO_LOGIN=true
-    # o cuando AUDIT_REQUIRE_LOGIN=false (acceso abierto local/prod).
+    # o cuando AUDIT_REQUIRE_LOGIN=false (solo local; bloqueado en prod-like).
     # Úselo con su correo habitual para conservar el progreso guardado.
     dev_audit_email: str = ""
-    # Si false, /auditoria no pide correo/contraseña/PIN (sesión abierta automática).
-    audit_require_login: bool = False
+    # Default seguro: /auditoria exige correo/contraseña/PIN/consent.
+    # Local puede usar AUDIT_REQUIRE_LOGIN=false; prod-like lo fuerza ON.
+    audit_require_login: bool = True
     # Telemetría de depuración (middleware /debug/*). Nunca activar en producción.
     app_debug: bool = False
     # Cifrado en reposo (Fernet). Si vacío, se deriva de SESSION_SECRET cuando exista.

@@ -18,8 +18,15 @@ OPEN_AUDIT_FALLBACK_EMAIL = "editor@lexiatek.local"
 
 
 def audit_login_required(settings: Settings) -> bool:
-    """False = portal de auditoría sin gate (local y/o prod según env)."""
-    return bool(settings.audit_require_login)
+    """True salvo opt-out local explícito; nunca open-access en prod-like."""
+    if bool(settings.audit_require_login):
+        return True
+    # Misma barrera que DEV_AUTO_LOGIN: Render / cookie secure no permiten portal abierto.
+    if os.environ.get("RENDER"):
+        return True
+    if settings.session_cookie_secure:
+        return True
+    return False
 
 
 def open_audit_email(settings: Settings) -> str:

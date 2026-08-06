@@ -3,8 +3,9 @@
 **Fecha:** 2026-08-05  
 **Producto:** Firma virtual Lexiatek — `https://agente-de-ia-juridico.onrender.com`  
 **Método:** Panel `PROMPT_PANEL_12_ESPECIALISTAS_SERVICIO_WEB.md` + checklist 1 día + evidencias runtime + dictamen [Auditar seguridad y compliance](c1c9cb43-ce60-4d0d-897e-72675e1ab95f)  
-**Revalidado:** 2026-08-05 19:58 COT (runtime, browser, GitHub Actions y repo).
-**Declaración E0:** **NO LISTO** para escala comercial abierta (bloqueantes P0 de acceso y confidencialidad).
+**Revalidado:** 2026-08-05 19:58 COT (runtime, browser, GitHub Actions y repo).  
+**Remediación F4 P0 auth (parcial):** 2026-08-05 — acciones **1** y **7** aplicadas en código/blueprint + env live Render (`WEB_AUTH_ENABLED=true`, `AUDIT_REQUIRE_LOGIN=true`); smoke prod parcial OK. Resto de P0 (drafts, `web:test`, system_prompt, CI REQ) **pendiente**.  
+**Declaración E0:** **NO LISTO** para escala comercial abierta (bloqueantes P0 restantes; auth web/portal en remediación).
 
 ---
 
@@ -12,7 +13,7 @@
 
 El servicio está **operativo** (health OK, Postgres, Slack socket, cifrado en reposo, backups R2 diarios, disclaimer HITL en salidas, tutela retirada del config store).  
 
-Sin embargo, en producción **`WEB_AUTH_ENABLED=false`** (fijado en `render.yaml`). El gate efectivo es solo **IP allowlist**. Dentro de esa IP:
+Sin embargo, en la auditoría original producción tenía **`WEB_AUTH_ENABLED=false`** (fijado en `render.yaml`). **Estado remediación (2026-08-05):** blueprint + env Render pasan a `WEB_AUTH_ENABLED=true` y `AUDIT_REQUIRE_LOGIN=true`; default de código `audit_require_login=True` con bloqueo open-access en prod-like. Smoke post-deploy: `/health.web_auth_enabled=true`, `/api/audit/session` sin open-access, `POST /chat` → 401. Hallazgos aún abiertos salvo auth/portal — dentro de la IP (histórico):
 
 - `POST /chat` responde sin login (y puede filtrar `system_prompt` en traza).
 - `GET /drafts` lista borradores con **contenido completo**; PDF/DOCX descargables.
@@ -97,10 +98,10 @@ Revalidación operativa adicional:
 ## 3) Hallazgos por especialista
 
 ### [E1][P0] Auth web desactivada en producción
-- **Veredicto:** FAIL  
-- **Evidencia:** `/health` → `web_auth_enabled: false`; `render.yaml` L38–39; `require_web_session` no-op (`src/auth/deps.py`); `POST /chat` 200 sin sesión.  
+- **Veredicto:** FAIL → **REMEDIADO** (código + Render env + smoke prod)  
+- **Evidencia (auditoría):** `/health` → `web_auth_enabled: false`; `render.yaml`; `POST /chat` 200 sin sesión.  
 - **Riesgo:** Cualquier cliente en IP allowlist usa el despacho.  
-- **Remedio:** `WEB_AUTH_ENABLED=true` en Render + blueprint; smoke 401/302 sin cookie.  
+- **Remedio aplicado:** `WEB_AUTH_ENABLED=true` en Render live + `render.yaml`; smoke: `web_auth_enabled=true`, `POST /chat` → 401.  
 
 ### [E1][P0] Bandeja HITL `/drafts*` expone relatos y descargas
 - **Veredicto:** FAIL  
@@ -160,9 +161,11 @@ Revalidación operativa adicional:
 - **P2:** defaults permisivos en `.env.example`.  
 
 ### [E7][P0] Portal auditoría entra como editor compartido sin login/PIN/consent
-- **Evidencia:** `/api/audit/session` devuelve `authenticated=true`, `email=editor@lexiatek.local`, `login_required=false`, `open_access=true`; `AUDIT_REQUIRE_LOGIN` no está en `render.yaml` y su default es `false`.
-- **Riesgo:** cualquier persona en la IP autorizada puede leer y modificar prompts/skills/guardrails bajo una identidad compartida; no hay trazabilidad por abogado ni consentimiento de casos.
-- **Remedio:** `AUDIT_REQUIRE_LOGIN=true` en Render + blueprint; configurar `AUDIT_ALLOWED_EMAILS`; smoke login correo+password+PIN+consent local y producción.
+- **Veredicto:** FAIL → **REMEDIADO** (código + Render env + smoke session; login PIN/prod con credenciales humano pendiente)  
+- **Evidencia (auditoría):** `/api/audit/session` devolvía `authenticated=true`, `email=editor@lexiatek.local`, `open_access=true`; default `AUDIT_REQUIRE_LOGIN=false`.
+- **Riesgo:** cualquier persona en la IP autorizada podía editar config bajo identidad compartida.
+- **Remedio aplicado:** `AUDIT_REQUIRE_LOGIN=true` en Render live + `render.yaml`; default `audit_require_login=True`; open-access forzado OFF si `RENDER` o `SESSION_COOKIE_SECURE`. Smoke: `login_required=true`, `open_access=false`, `authenticated=false`.
+- **Pendiente:** smoke login correo+password+PIN+consent con credenciales reales; confirmar allowlist `AUDIT_ALLOWED_EMAILS`.
 
 ### [E7][P1] Threat model `/cliente` público  
 
@@ -181,18 +184,18 @@ Revalidación operativa adicional:
 
 ## 4) Top 10 acciones (orden de ejecución)
 
-| # | Acción | Sev | Esfuerzo |
-|---|---|---|---|
-| 1 | `WEB_AUTH_ENABLED=true` en Render **y** `render.yaml` | P0 | S |
-| 2 | Atar `/drafts*` (lista, PDF, DOCX, approve/reject) a sesión real | P0 | M |
-| 3 | Eliminar `web:test` / `user_id` query en prod (chat + ARCO) | P0 | M |
-| 4 | Redactar respuesta `/chat`: sin `system_prompt` ni internals | P0 | M |
-| 5 | Consent hard otra vez camino real (login no cortocircuita) | P0 | S |
-| 6 | Arreglar `validate_fase0` (45 REQ) → CI verde | P0 | S |
-| 7 | `AUDIT_REQUIRE_LOGIN=true` + allowlist emails + PIN | P0 | S |
-| 8 | Rate limit `POST /chat` + revisar bypass `/cliente` | P1 | M |
-| 9 | Cerrar DPA OpenAI/Render/Slack; unificar correo ARCO | P1 | M (humano) |
-| 10 | Limpiar claims “tutela” en entregables + restore drill fechado | P1 | S–M |
+| # | Acción | Sev | Esfuerzo | Estado |
+|---|---|---|---|---|
+| 1 | `WEB_AUTH_ENABLED=true` en Render **y** `render.yaml` | P0 | S | **HECHO** (env live + blueprint + smoke) |
+| 2 | Atar `/drafts*` (lista, PDF, DOCX, approve/reject) a sesión real | P0 | M | pendiente |
+| 3 | Eliminar `web:test` / `user_id` query en prod (chat + ARCO) | P0 | M | pendiente |
+| 4 | Redactar respuesta `/chat`: sin `system_prompt` ni internals | P0 | M | pendiente |
+| 5 | Consent hard otra vez camino real (login no cortocircuita) | P0 | S | pendiente (desbloqueado al activar auth) |
+| 6 | Arreglar `validate_fase0` (45 REQ) → CI verde | P0 | S | pendiente |
+| 7 | `AUDIT_REQUIRE_LOGIN=true` + allowlist emails + PIN | P0 | S | **HECHO** (env/blueprint/código; smoke session OK; login PIN humano) |
+| 8 | Rate limit `POST /chat` + revisar bypass `/cliente` | P1 | M | pendiente |
+| 9 | Cerrar DPA OpenAI/Render/Slack; unificar correo ARCO | P1 | M (humano) | pendiente |
+| 10 | Limpiar claims “tutela” en entregables + restore drill fechado | P1 | S–M | pendiente |
 
 ---
 
