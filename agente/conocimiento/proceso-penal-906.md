@@ -106,6 +106,18 @@ Uso operativo para `analista_calidad_juridica` (sin inventar normas, sentencias 
 6. No reescribir el memorial completo: hallazgos y cambios concretos; registrar `fuentes_kb` si se consultó KB/expediente.
 7. Dictamen = preliminar de la IA; el abogado decide uso externo.
 
+## Checklist gerencia / POC (ancla skills O8 gerencia)
+
+Uso operativo para `coordinador_caso` / `POC_OWNED_SKILLS` (sin inventar hechos de caso ni etapa definitiva):
+
+1. Leer triage de sistema (`clasificar_tarea_y_etapa` → `build_triage` / `[TRIAGE_SISTEMA]`); no re-clasificar tipo, etapa, urgencia ni faltantes en contra del código.
+2. Gate documental (`gestionar_faltantes_expediente` → `assess_completeness`): pedir bloqueantes antes de redactor; no inventar documentos.
+3. Urgencia (`detectar_urgencia_penal` → `assess_urgency`): critica/alta → escalar humano antes del fondo; no inventar vencimientos ni amenazas.
+4. Ledger de tareas (`actualizar_tareas_responsable` → `tareas_gerencia`): estados `pendiente`|`cerrada`; sin dueño/plazo crítico → pedir al abogado.
+5. Etiquetar datos no soportados (`marcar_pendientes_verificacion`); una sola voz al abogado; no handoffs terminales.
+6. Análisis de fondo → especialistas as_tool; redacción accionable → plan HITL (no redactor en chat).
+7. Fuera de alcance (otro equipo / no penal-víctimas) → contención breve; no inventar hechos ni normas.
+
 ## Checklist seguimiento procesal operativo (ancla skills O8 parcial)
 
 Uso operativo para `analista_seguimiento_procesal` (sin inventar radicados ni actuaciones):

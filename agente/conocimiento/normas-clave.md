@@ -64,6 +64,16 @@ Uso operativo para `analista_representacion_victimas` (sin inventar artículos):
 7. Objetivos priorizados sin prometer resultados judiciales; trade-offs explícitos para el abogado.
 8. Comunicación al cliente o pieza accionable → HITL abogado.
 
+## Checklist gerencia / POC (ancla skills O8 gerencia)
+
+Uso operativo para `coordinador_caso` (triage, faltantes, urgencia, tareas):
+
+1. Leer `agente/conocimiento/proceso-penal-906.md` (checklist gerencia/POC).
+2. Respetar `[TRIAGE_SISTEMA]`; no inventar etapa, radicado, faltantes ni nivel de urgencia.
+3. Gate documental ≠ vacíos factuales (cronología); bloqueantes antes de memorial/impulso.
+4. Critica/alta → confirmación humana; sin fecha de término → `[PENDIENTE DE VERIFICAR]`.
+5. Una voz de despacho; piezas accionables → HITL; no comunicar al cliente sin abogado.
+
 ## Checklist seguimiento procesal / términos (ancla skills O8 parcial)
 
 Uso operativo para `analista_seguimiento_procesal` (sin inventar radicados):

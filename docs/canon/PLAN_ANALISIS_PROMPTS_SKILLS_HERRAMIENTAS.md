@@ -1,12 +1,13 @@
 # Plan — Análisis profundo por agente (prompts, skills, herramientas)
 
-**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3+A4+A5+A6+A7; 2026-08-05).  
+**Estado:** `A0–A8 COMPLETO` (deep-dives cerrados 2026-08-05; pendiente oleada **X** cruzada / PR).  
 **Fecha:** 2026-08-05  
 **Editor humano (E0):** Auto / Cursor  
 **Modo panel:** agentes IA personificados (`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`) + E0 consolida  
 **Informe vivo (absorbe progreso):** [`INFORME_INSPECCION_CONFIG_NOTEPADS.md`](INFORME_INSPECCION_CONFIG_NOTEPADS.md)  
 **Complementa (no reemplaza):** [`PLAN_INSPECCION_CONFIG_NOTEPADS.md`](PLAN_INSPECCION_CONFIG_NOTEPADS.md)  
-**Prompt ejecutable:** [`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`](PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md)
+**Prompt ejecutable:** [`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`](PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md)  
+**Rama:** `cursor/analisis-a0-a1-prompts-skills`
 
 ---
 
@@ -114,7 +115,7 @@ Fuente: `scripts/lib/catalogo_aprobacion.py` + `src/agents/skill_catalog.py` + `
 | **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | **Hecho** |
 | **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | **Hecho** |
 | **A7** | Deep | `analista_seguimiento_procesal` | Hueco eval + términos operativos | O8 (parcial) | **Hecho** |
-| **A8** | Deep | `coordinador_caso` | POC, triage, voz única, `POC_OWNED_SKILLS` | O8 gerencia | G01–G09 hecho; re-score ligero + gaps |
+| **A8** | Deep | `coordinador_caso` | POC, triage, voz única, `POC_OWNED_SKILLS` | O8 gerencia | **Hecho** |
 
 **Gate de lanzamiento:** el operador aprueba una fila (`aprobado, ejecuta A1`) o un bloque (`aprobado, ejecuta A0`).
 
@@ -310,7 +311,7 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A5** | `aprobado, ejecuta A5` | Deep redactor + O7 redacción + eval surface | **Hecho** |
 | **A6** | `aprobado, ejecuta A6` | Deep calidad + O7 calidad/citas | **Hecho** |
 | **A7** | `aprobado, ejecuta A7` | Deep seguimiento + O8 parcial + eval | **Hecho** |
-| **A8** | `aprobado, ejecuta A8` | Deep coordinador + O8 gerencia | 0.5–1 turno |
+| **A8** | `aprobado, ejecuta A8` | Deep coordinador + O8 gerencia | **Hecho** |
 | **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |
 | **E** | `aprobado, ejecuta A-…` (lista) | Patches + evals + tests | Por lote P0 |
 | **N** | `aprobado, ejecuta F-08` | Notepads Drive dual (piloto eval) | Tras o paralelo P2 |

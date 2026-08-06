@@ -1,5 +1,5 @@
 {
-  "version": "3.7",
+  "version": "3.8",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -388,6 +388,31 @@
       "agent_id": "analista_seguimiento_procesal",
       "max_chars": 12000,
       "notes": "Regresión A7: prompt seguimiento completo sin explotar tokens."
+    },
+    {
+      "id": "tool-surface-coordinador",
+      "category": "tool_surface",
+      "message": "¿Qué falta en el expediente para continuar el análisis?",
+      "focus_agent_id": "coordinador_caso",
+      "expected_enabled_contains": [
+        "analista_cronologia_hechos",
+        "analista_responsabilidad_tipicidad",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=POC: superficie completa de especialistas chat; redactor HIGH RISK excluido del chat_pool."
+    },
+    {
+      "id": "route-coordinador-gerencia",
+      "category": "routing",
+      "message": "¿Qué falta en el expediente para continuar el análisis?",
+      "expected_destination": "coordinador_caso",
+      "expected_plan_required": false,
+      "notes": "Cobertura A8: gate faltantes / gerencia permanece en POC."
     }
   ]
 }

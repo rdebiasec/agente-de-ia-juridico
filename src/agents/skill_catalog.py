@@ -157,6 +157,11 @@ def skill_contract_brief(skill_id: str | None, *, max_chars: int = 900) -> str:
 
 # Anclas secundarias cortas (primario + 2–3) sin explotar tokens.
 _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
+    "coordinador_caso": (
+        "gestionar_faltantes_expediente",
+        "detectar_urgencia_penal",
+        "actualizar_tareas_responsable",
+    ),
     "analista_cronologia_hechos": (
         "extraer_hechos_relevantes",
         "detectar_contradicciones_factuales",
