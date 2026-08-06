@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c96f33abc2dd35b1 -->
+<!-- config-version: 4; checksum: 775194b9b22e2a1b -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Contrato penal-víctimas: Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento. Activar cuando el plan/HITL o el especialista requiera `evaluar_solicitud_fiscalia_juez`. No sustituye a `redactar_memorial...

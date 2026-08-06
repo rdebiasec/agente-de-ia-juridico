@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: e1022839c6f0358c -->
+<!-- config-version: 4; checksum: 9e3e8d0f81cdde2c -->
 ---
 name: controlar-terminos-procesales-preliminares
 description: Contrato penal-víctimas: Identificar términos procesales relevantes y estimar fechas límite, con advertencia explícita de verificación humana. Activar cuando el plan/HITL o el especialista requiera `controlar_terminos_procesales_preliminares`. No sustituye a `generar_alertas_t...

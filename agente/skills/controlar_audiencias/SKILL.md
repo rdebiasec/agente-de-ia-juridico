@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: c9321c51d296acc5 -->
+<!-- config-version: 4; checksum: d8c9b0b1672368a1 -->
 ---
 name: controlar-audiencias
 description: Contrato penal-víctimas: Controlar que la preparación de audiencia cumpla requisitos formales y sustantivos Ley 906 antes de la intervención. Activar cuando el plan/HITL o el especialista requiera `controlar_audiencias`. No sustituye a `preparar_preguntas_audiencia`.

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 6a7a659236d9e289 -->
+<!-- config-version: 4; checksum: 9b9608c0f75ea0f8 -->
 ---
 name: preparar-resumen-operativo-cliente
 description: Contrato penal-víctimas: Redactar resumen simple del estado del proceso para la víctima o cliente, sin estrategia sensible. Activar cuando el plan/HITL o el especialista requiera `preparar_resumen_operativo_cliente`. No sustituye a `crear_resumen_ejecutivo_litigante`.

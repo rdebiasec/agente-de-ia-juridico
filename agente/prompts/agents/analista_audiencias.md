@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: eea7c74059a52e74 -->
+<!-- config-version: 4; checksum: 70c6d22e794e86a7 -->
 # Analista de audiencias penales — instructions (backoffice)
 
 ## mision

@@ -1,4 +1,4 @@
-<!-- config-version: 7; checksum: 22cdf9df1ad1d409 -->
+<!-- config-version: 4; checksum: 7a080e197996debd -->
 # Analista de calidad jurídica — instructions (backoffice)
 
 ## mision

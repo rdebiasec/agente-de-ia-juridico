@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 98cc77947d50b6f6 -->
+<!-- config-version: 4; checksum: 3f7935b994e10be4 -->
 ---
 name: evaluar-suficiencia-probatoria
 description: Contrato penal-víctimas: Evaluar preliminarmente la fuerza del soporte probatorio sin afirmar certeza judicial ni condena. Activar cuando el plan/HITL o el especialista requiera `evaluar_suficiencia_probatoria`. No sustituye a `detectar_brechas_probatorias`.

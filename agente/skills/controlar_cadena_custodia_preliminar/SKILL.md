@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 7f69ddff3cdcddfa -->
+<!-- config-version: 5; checksum: 8b40ee1430d87eeb -->
 ---
 name: controlar-cadena-custodia-preliminar
 description: Contrato penal-víctimas: Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad. Activar cuando el plan/HITL o el especialista requiera `controlar_cadena_custodia_preliminar`. No sustituye a `preservar_evidencia_digital`.

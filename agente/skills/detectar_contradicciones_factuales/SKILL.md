@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 8bb94931ddfa16a6 -->
+<!-- config-version: 4; checksum: de9f7b8d93eebb22 -->
 ---
 name: detectar-contradicciones-factuales
 description: Contrato penal-víctimas: Detectar y documentar inconsistencias entre versiones (víctima, testigos, documentos, autoridades) sin resolverlas ni concluir culpabilidad. Activar cuando el plan/HITL o el especialista requiera `detectar_contradicciones_factuales`. No sustituye a `co...

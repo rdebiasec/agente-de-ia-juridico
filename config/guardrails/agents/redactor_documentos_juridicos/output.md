@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 24a9fa9900301a79 -->
+<!-- config-version: 4; checksum: 2ed8a1921eb78f23 -->
 # Output guardrails — redactor_documentos_juridicos
 
 ## desk_policies

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 590db0ea86443a21 -->
+<!-- config-version: 4; checksum: 9898c2a043f7c9e2 -->
 ---
 name: detectar-riesgos-audiencia
 description: Contrato penal-víctimas: Identificar riesgos tácticos y procesales específicos de una audiencia programada. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_audiencia`. No sustituye a `simular_escenarios_audiencia`.

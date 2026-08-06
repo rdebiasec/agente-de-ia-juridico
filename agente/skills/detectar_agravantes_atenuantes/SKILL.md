@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 33b4e68965d2538e -->
+<!-- config-version: 4; checksum: cf47d03b5342ec2c -->
 ---
 name: detectar-agravantes-atenuantes
 description: Contrato penal-víctimas: Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar. Activar cuando el plan/HITL o el especialista requiera `detectar_agravantes_atenuantes`. No sustituye a `descomponer_elementos_tipo_penal`.

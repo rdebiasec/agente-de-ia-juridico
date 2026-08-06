@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 7adf624e896eee72 -->
+<!-- config-version: 3; checksum: d815c17fe755779a -->
 # Guardrails de entrada — analista_cronologia_hechos
 
 ## desk_policies

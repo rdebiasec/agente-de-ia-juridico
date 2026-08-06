@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 0755b048a9fb894f -->
+<!-- config-version: 4; checksum: 2683e67dad5f6578 -->
 <!-- config-version: 5; checksum: PLACEHOLDER -->
 # Analista de seguimiento procesal — instructions (backoffice)
 

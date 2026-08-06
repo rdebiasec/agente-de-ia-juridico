@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: a63f514e7d0a83dd -->
+<!-- config-version: 4; checksum: 361f7d13f58260f2 -->
 ---
 name: construir-matriz-hecho-prueba
 description: Contrato penal-víctimas: Vincular hechos relevantes con prueba existente, faltante o en trámite, priorizando brechas críticas. Activar cuando el plan/HITL o el especialista requiera `construir_matriz_hecho_prueba`. No sustituye a `mapear_tipo_penal_hecho_prueba`.

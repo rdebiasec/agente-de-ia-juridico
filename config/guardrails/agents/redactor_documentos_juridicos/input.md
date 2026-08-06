@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 28c3c65fe6e319f7 -->
+<!-- config-version: 2; checksum: 28c3c65fe6e319f7 -->
 # Guardrails de entrada — redactor_documentos_juridicos
 
 ## desk_policies

@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 98a76af21a6e4ce8 -->
+<!-- config-version: 3; checksum: a4efe4492b5d8010 -->
 # Guardrails de entrada — analista_evidencia
 
 ## desk_policies

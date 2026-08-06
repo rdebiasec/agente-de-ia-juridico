@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 31543c02be41dd33 -->
+<!-- config-version: 4; checksum: edb02a65e8eefb10 -->
 ---
 name: crear-matriz-hecho-fuente
 description: Contrato penal-víctimas: Relacionar cada hecho relevante con su fuente exacta (documento, folio, timestamp) y nivel de soporte. Activar cuando el plan/HITL o el especialista requiera `crear_matriz_hecho_fuente`. No sustituye a `clasificar_fuente_factual`.

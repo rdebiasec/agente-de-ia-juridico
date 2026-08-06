@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 5f95be848dd26d40 -->
+<!-- config-version: 3; checksum: 00e31ee8404ddbc4 -->
 # Guardrails de salida — analista_seguimiento_procesal
 
 ## desk_policies

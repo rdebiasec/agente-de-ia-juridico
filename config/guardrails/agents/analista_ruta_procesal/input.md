@@ -1,4 +1,4 @@
-<!-- config-version: 5; checksum: 52bedda262603b86 -->
+<!-- config-version: 3; checksum: 52bedda262603b86 -->
 # Guardrails de entrada — analista_ruta_procesal
 
 ## desk_policies

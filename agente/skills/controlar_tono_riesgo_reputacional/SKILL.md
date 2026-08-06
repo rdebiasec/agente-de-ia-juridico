@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: dc3009df5ae85a96 -->
+<!-- config-version: 4; checksum: 1409ad7b0d05fe96 -->
 ---
 name: controlar-tono-riesgo-reputacional
 description: Contrato penal-víctimas: Detectar contenido que exponga al despacho o a la víctima a riesgo reputacional o mediático innecesario. Activar cuando el plan/HITL o el especialista requiera `controlar_tono_riesgo_reputacional`. No sustituye a `controlar_tono_juridico_documento`.

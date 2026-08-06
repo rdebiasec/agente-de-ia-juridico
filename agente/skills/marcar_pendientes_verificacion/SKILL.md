@@ -1,4 +1,4 @@
-<!-- config-version: 7; checksum: 4a53379acde42a34 -->
+<!-- config-version: 4; checksum: 62c74b733c9437a8 -->
 ---
 name: marcar-pendientes-verificacion
 description: Contrato penal-víctimas: Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable. Activar cuando el plan/HITL o el especialista requiera `marcar_pendientes_verificacion`. No sustituye a `verificar...
