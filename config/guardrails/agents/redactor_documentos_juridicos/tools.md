@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 043d13c41f51c13b -->
+<!-- config-version: 3; checksum: 043d13c41f51c13b -->
 # Guardrails de tools — redactor_documentos_juridicos
 
 ## desk_policies
