@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editor de configuración del asistente penal-víctimas — por agente: prompts, skills y guardrails">
+    <title>LexiaTek - Editor de configuración</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="audit-portal.css?v=4.1">
+    <style>
+        :root {
+            --ui-font-family: 'Lato', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --ui-button-font-weight: 700;
+            --ui-surface: #1e293b;
+            --ui-surface-inset: #0f172a;
+            --ui-border: #334155;
+            --ui-border-strong: #475569;
+            --ui-text: #e2e8f0;
+            --ui-text-muted: #94a3b8;
+            --ui-tag-bg: #ffffff;
+            --ui-tag-text: #1e3a5f;
+            --ui-tag-border: #cbd5e1;
+            --g-coord: #2563eb;
+            --g-coord-soft: #1e3a8a;
+            --g-coord-tint: rgba(37, 99, 235, 0.18);
+            --g-coord-child: #60a5fa;
+            --g-esp: #059669;
+            --g-esp-soft: #065f46;
+            --g-esp-tint: rgba(5, 150, 105, 0.18);
+            --g-esp-child: #34d399;
+            --g-qa: #d97706;
+            --g-qa-soft: #92400e;
+            --g-qa-tint: rgba(217, 119, 6, 0.18);
+            --g-qa-child: #fbbf24;
+        }
+        body {
+            font-family: var(--ui-font-family);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        body button,
+        body input[type="button"],
+        body input[type="submit"],
+        body input[type="reset"] {
+            font-family: var(--ui-font-family);
+            font-weight: var(--ui-button-font-weight);
+            font-style: normal;
+        }
+        #audit-auth-gate {
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem; background: #0f172a;
+        }
+        #audit-auth-gate.gate-hidden { display: none !important; }
+        #audit-auth-gate.gate-checking #audit-auth-form,
+        #audit-auth-gate.gate-checking #audit-auth-gate-footer { display: none !important; }
+        #audit-auth-gate:not(.gate-checking) #audit-auth-checking { display: none !important; }
+        #audit-app-root.app-gated { display: none !important; }
+        /* Page canvas only — trays keep their own gradients */
+        html, body, #audit-app-root { background: var(--ui-surface); }
+        #audit-app-root { color: var(--ui-text); }
+        #audit-app-root main {
+            background: var(--ui-surface);
+        }
+        /* Editor card: centered over #1e293b gutters — no divider lines */
+        #audit-app-root > .flex.flex-1,
+        #audit-app-root main {
+            background: #1e293b !important;
+        }
+        #audit-app-root main {
+            align-items: center;
+            padding-inline: 0;
+        }
+        #agent-tabs-bar {
+            background: #1e293b !important;
+            border-bottom: none !important;
+        }
+        #cfg-workspace {
+            box-sizing: border-box;
+            width: min(calc(100% - 5rem), 56rem);
+            max-width: min(calc(100% - 5rem), 56rem);
+            flex: 1 1 auto;
+            align-self: center;
+            /* Uniform top + sides; a bit less below */
+            margin: 1.25rem auto 0.7rem;
+            border: none;
+            border-radius: 1.1rem;
+            overflow: hidden;
+            background: #0f172a;
+            box-shadow: none;
+        }
+        #cfg-toolbar {
+            border-bottom: none !important;
+            background: #0f172a !important;
+        }
+        #cfg-note-bar {
+            border-bottom: none !important;
+            background: #0f172a !important;
+        }
+        #cfg-workspace .cfg-compose {
+            background: #0f172a;
+            border-top: none !important;
+        }
+        #cfg-editor-empty {
+            border: none;
+        }
+        #cfg-form-anatomy.is-workspace,
+        #cfg-form-skill.is-workspace,
+        #cfg-form-guard.is-workspace,
+        #cfg-form-prose.is-workspace {
+            width: 100%;
+            max-width: none;
+            margin-inline: 0;
+        }
+        @media (max-width: 640px) {
+            #cfg-workspace {
+                width: calc(100% - 1.25rem);
+                max-width: calc(100% - 1.25rem);
+                margin: 0.75rem auto 0.5rem;
+                border-radius: 0.85rem;
+            }
+        }
+        #cfg-sidebar { border-right-color: var(--ui-border); }
+        #cfg-sidebar .border-slate-800 { border-color: var(--ui-border); }
+        #cfg-sidebar #cfg-search { background: var(--ui-surface-inset); border-color: var(--ui-border-strong); }
+        #cfg-sidebar #cfg-list-count,
+        #cfg-item-list > p { color: var(--ui-text-muted); }
+        #cfg-item-list .cfg-item { border-color: #3b4a61; }
+        #cfg-item-list .cfg-item:not(.active) { background: rgba(15, 23, 42, 0.55); }
+        #cfg-item-list .cfg-item:not(.active):hover { background: #334155; }
+        .cfg-item.active { background: #1e3a5f; color: #fff; border-color: #3b82f6; }
+        .cfg-dirty { box-shadow: inset 3px 0 0 #f59e0b; }
+        .diff-add { background: #064e3b; color: #a7f3d0; }
+        .diff-del { background: #7f1d1d; color: #fecaca; }
+
+        .cfg-compose {
+            background: #0f172a;
+            border-top: none;
+            padding: 1.25rem 1.25rem 1.75rem;
+            color: var(--ui-text);
+        }
+        @media (min-width: 768px) {
+            .cfg-compose { padding-left: 1.5rem; padding-right: 1.5rem; }
+        }
+        .cfg-field {
+            display: grid;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .cfg-field:last-child { margin-bottom: 0; }
+        .cfg-field-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ui-text-muted);
+        }
+        .cfg-field-hint {
+            font-size: 0.75rem;
+            color: var(--ui-text-muted);
+            margin-top: -0.15rem;
+        }
+        .cfg-field-control {
+            width: 100%;
+            border: 1px solid var(--ui-border-strong);
+            border-radius: 0.85rem;
+            background: var(--ui-surface-inset);
+            color: var(--ui-text);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            padding: 0.75rem 0.9rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            font-family: var(--ui-font-family);
+        }
+        .cfg-field-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        }
+        .cfg-field-control:disabled {
+            background: rgba(15, 23, 42, 0.65);
+            color: var(--ui-text-muted);
+        }
+        .cfg-field-control::placeholder { color: #64748b; }
+        .cfg-field-control.cfg-dirty {
+            box-shadow: inset 3px 0 0 #f59e0b;
+        }
+        textarea.cfg-field-control {
+            resize: none;
+            overflow: hidden;
+            min-height: 2.75rem;
+            field-sizing: content;
+            padding-bottom: calc(1.5em * 2);
+        }
+        #cfg-editor.raw-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .cfg-note-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.72rem;
+            font-weight: var(--ui-button-font-weight);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ui-text-muted);
+            background: transparent;
+            border: 0;
+            padding: 0.2rem 0;
+            cursor: pointer;
+        }
+        .cfg-note-toggle:hover { color: var(--ui-text); }
+        .cfg-note-chevron {
+            font-size: 0.65rem;
+            transition: transform 0.15s ease;
+        }
+        #cfg-note-bar.is-collapsed .cfg-note-chevron { transform: rotate(-90deg); }
+        #cfg-note-bar.is-collapsed #cfg-note-body { display: none; }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .cfg-anatomy-body { max-width: 52rem; }
+        .cfg-anatomy-field { margin: 0 0 1rem; }
+        .cfg-anatomy-field:last-child { margin-bottom: 0; }
+        .cfg-anatomy-field-label {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--ui-text);
+        }
+        .cfg-anatomy-field-hint {
+            margin: 0.2rem 0 0.45rem;
+            font-size: 0.78rem;
+            line-height: 1.35;
+            color: var(--ui-text-muted);
+        }
+        .cfg-anatomy-list-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.55rem;
+        }
+        .cfg-anatomy-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .cfg-anatomy-item {
+            display: grid;
+            grid-template-columns: 1.75rem 1fr auto;
+            gap: 0.45rem;
+            align-items: start;
+        }
+        .cfg-anatomy-item-resp {
+            grid-template-columns: 9.5rem 1fr auto;
+        }
+        .cfg-anatomy-item-num {
+            width: 1.75rem;
+            height: 1.75rem;
+            margin-top: 0.35rem;
+            border-radius: 0.45rem;
+            background: #1e3a5f;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cfg-anatomy-select {
+            margin-top: 0.15rem;
+            border: 1px solid var(--ui-border-strong);
+            border-radius: 0.65rem;
+            background: var(--ui-surface-inset);
+            color: var(--ui-text);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.45rem 0.55rem;
+        }
+        .cfg-anatomy-add {
+            flex-shrink: 0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #93c5fd;
+            background: rgba(37, 99, 235, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.45);
+            border-radius: 0.55rem;
+            padding: 0.4rem 0.7rem;
+        }
+        .cfg-anatomy-add:hover { background: rgba(37, 99, 235, 0.35); }
+        .cfg-anatomy-add:disabled,
+        .cfg-anatomy-remove:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .cfg-anatomy-remove {
+            width: 1.85rem;
+            height: 1.85rem;
+            margin-top: 0.3rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--ui-border);
+            background: var(--ui-surface);
+            color: var(--ui-text-muted);
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .cfg-anatomy-remove:hover:not(:disabled) {
+            border-color: #fecdd3;
+            color: #fda4af;
+            background: rgba(127, 29, 29, 0.35);
+        }
+        .cfg-anatomy-input { min-height: 2.5rem; }
+        .cfg-rich-wrap { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+        .cfg-fmt-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 0 0 1rem;
+            padding: 0.4rem 0.45rem;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            background: rgba(15, 23, 42, 0.92);
+            position: sticky;
+            top: 0;
+            z-index: 8;
+        }
+        .cfg-fmt-bar[data-disabled="true"] {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        .cfg-fmt-btn {
+            min-width: 2rem;
+            height: 2rem;
+            padding: 0 0.55rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #cbd5e1;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+        .cfg-fmt-btn:hover {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+        .cfg-fmt-btn.is-active {
+            background: #1e3a5f;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        .cfg-fmt-sep {
+            width: 1px;
+            height: 1.35rem;
+            background: #334155;
+            margin: 0 0.15rem;
+        }
+        .cfg-fmt-hint {
+            margin-left: auto;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #64748b;
+            padding-right: 0.25rem;
+        }
+        .cfg-anatomy-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            max-width: 52rem;
+            margin: 0 0 0.9rem;
+            position: sticky;
+            top: 4.5rem;
+            z-index: 5;
+            padding: 0.45rem;
+            border: 1px solid var(--ui-border);
+            border-radius: 0.75rem;
+            background: var(--ui-surface);
+            box-shadow: 0 1px 2px rgba(2, 6, 23, 0.35);
+        }
+        .cfg-anatomy-tab {
+            flex: 1 1 10rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            padding: 0.55rem 0.75rem;
+            border-radius: 0.55rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--ui-text-muted);
+            transition: all 0.15s ease;
+        }
+        .cfg-anatomy-tab:hover:not(.active) {
+            color: var(--ui-text);
+            background: rgba(15, 23, 42, 0.55);
+        }
+        .cfg-anatomy-tab.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.22);
+        }
+        .cfg-anatomy-tab:focus-visible {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
+        }
+        .cfg-anatomy-chapter {
+            max-width: 52rem;
+            margin: 0 0 1rem;
+        }
+        .cfg-anatomy-chapter-head {
+            margin: 0 0 0.5rem;
+        }
+        .cfg-anatomy-chapter-head h4 {
+            margin: 0;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ui-text-muted);
+        }
+        .cfg-anatomy-card {
+            max-width: 52rem;
+            background: var(--ui-surface);
+            border: 1px solid var(--ui-border);
+            border-radius: 0.9rem;
+            padding: 0.85rem 1rem 1rem;
+            margin-bottom: 0.65rem;
+        }
+        .cfg-anatomy-card:last-child { margin-bottom: 0; }
+        .cfg-anatomy-card[data-tone="risk"] { border-color: rgba(251, 113, 133, 0.55); }
+        .cfg-anatomy-card[data-tone="control"] { border-color: rgba(251, 191, 36, 0.55); }
+        .cfg-anatomy-card[data-tone="voice"] { border-color: rgba(96, 165, 250, 0.55); }
+        .cfg-anatomy-card-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            margin-bottom: 0.55rem;
+        }
+        .cfg-anatomy-card-copy {
+            min-width: 0;
+            flex: 1;
+        }
+        .cfg-anatomy-hint {
+            margin: 0.2rem 0 0;
+            font-size: 0.8rem;
+            line-height: 1.35;
+            font-weight: 500;
+            color: var(--ui-text-muted);
+        }
+        .cfg-anatomy-num {
+            flex-shrink: 0;
+            width: 1.55rem;
+            height: 1.55rem;
+            margin-top: 0.1rem;
+            border-radius: 0.45rem;
+            background: #1e3a5f;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cfg-anatomy-card[data-tone="risk"] .cfg-anatomy-num { background: #be123c; }
+        .cfg-anatomy-card[data-tone="control"] .cfg-anatomy-num { background: #b45309; }
+        .cfg-anatomy-card[data-tone="voice"] .cfg-anatomy-num { background: #1d4ed8; }
+        .cfg-anatomy-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--ui-text);
+        }
+        .cfg-part {
+            margin: 0 0 0.85rem;
+            padding: 0 0 0.75rem;
+            border-bottom: 1px solid var(--ui-border);
+        }
+        .cfg-part:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+        .cfg-part-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ui-text-muted);
+            margin: 0 0 0.4rem;
+            user-select: none;
+        }
+        .cfg-part-body {
+            min-height: 1.5rem;
+        }
+        .cfg-rich {
+            min-height: 4.5rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            cursor: text;
+            line-height: 1.55;
+        }
+        .cfg-rich.is-disabled {
+            background: rgba(15, 23, 42, 0.65);
+            color: var(--ui-text-muted);
+            cursor: not-allowed;
+        }
+        .cfg-rich:empty:before,
+        .cfg-rich.is-empty:before {
+            content: attr(data-placeholder);
+            color: #64748b;
+            pointer-events: none;
+        }
+        .cfg-rich ul, .cfg-rich ol {
+            margin: 0.25rem 0 0.35rem 1.2rem;
+            padding: 0;
+        }
+        .cfg-rich li { margin: 0.15rem 0; }
+        .cfg-rich .md-h { margin: 0.35rem 0 0.15rem; }
+        .cfg-rich code,
+        .cfg-rich .md-term {
+            font-family: inherit;
+            font-size: inherit;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            color: inherit;
+        }
+        .cfg-rich strong { font-weight: 700; color: #f8fafc; }
+        .cfg-anatomy-legacy .cfg-anatomy-intro {
+            max-width: 52rem;
+            margin: 0 0 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.85rem;
+            background: #334155;
+            color: #e2e8f0;
+        }
+        .cfg-anatomy-legacy .cfg-anatomy-intro h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .cfg-anatomy-legacy .cfg-anatomy-intro p {
+            margin: 0.35rem 0 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #cbd5e1;
+        }
+        #cfg-history-drawer.open { transform: translateX(0); }
+        #cfg-history-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        .ui-title { text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; }
+        .ui-btn {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            padding: 0.55rem 0.9rem;
+            border-radius: 0.7rem;
+        }
+
+        /* Parent team tabs — same look as agent tabs */
+        .group-tab {
+            position: relative;
+            z-index: 2;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.45rem 0.7rem 0.4rem;
+            border-radius: 0.55rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #94a3b8;
+            transition: all 0.15s ease;
+        }
+        .group-tab:hover:not(.active) { color: #e2e8f0; background: #1e293b; }
+        .group-tab[data-group="coordinacion"].active {
+            background: #3b82f6; color: #fff; border-color: #93c5fd;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset;
+        }
+        .group-tab[data-group="especialista"].active {
+            background: #10b981; color: #fff; border-color: #6ee7b7;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset;
+        }
+        .group-tab[data-group="calidad"].active {
+            background: #f59e0b; color: #111827; border-color: #fcd34d;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset;
+        }
+
+        #btn-sistema {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.45rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+            background: #0f172a;
+        }
+        #btn-sistema.active, #btn-sistema:hover {
+            background: #475569; color: #f8fafc; border-color: #94a3b8;
+        }
+
+        #agent-tabs-bar {
+            position: relative;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Room for tray-label chips sitting fully above each layer */
+            padding-top: 1.35rem;
+        }
+        /* Compact UX (mock): breadcrumb + pills; hide tall tray tree */
+        body.ux-compact #agent-tabs-bar {
+            padding: 0.65rem 0.75rem 0.35rem;
+            align-items: stretch;
+        }
+        body.ux-compact #agent-tabs-bar > .group-tray,
+        body.ux-compact #agent-tabs-bar > .agent-tray,
+        body.ux-compact #agent-tabs-bar > .section-tray,
+        body.ux-compact #agent-tabs-bar > .prompt-tray,
+        body.ux-compact #agent-tabs-bar > .skills-tray,
+        body.ux-compact #agent-tabs-bar > .guard-tray,
+        body.ux-compact #group-connector {
+            display: none !important;
+        }
+        #ux-nav {
+            display: none;
+            width: min(100%, 56rem);
+            margin: 0 auto;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+        body.ux-compact #ux-nav { display: flex; }
+        .ux-crumb-bar {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.35rem 0.25rem;
+            padding: 0.55rem 0.75rem;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid #334155;
+            border-radius: 0.85rem;
+        }
+        .ux-crumb {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.35rem 0.55rem;
+            border-radius: 0.45rem;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+        .ux-crumb:hover:not(:disabled) {
+            background: #1e293b;
+            color: #fff;
+        }
+        .ux-crumb.current {
+            background: #1e3a5f;
+            color: #fff;
+            border: 1px solid #3b82f6;
+        }
+        .ux-crumb:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
+        .ux-crumb-wrap {
+            position: relative;
+            display: inline-flex;
+        }
+        .ux-crumb-sep {
+            color: #64748b;
+            font-size: 0.7rem;
+            user-select: none;
+        }
+        .ux-crumb-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 0.3rem);
+            left: 0;
+            z-index: 40;
+            min-width: 12rem;
+            max-width: 18rem;
+            max-height: 16rem;
+            overflow: auto;
+            padding: 0.35rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 28px rgba(2, 6, 23, 0.45);
+        }
+        .ux-crumb-menu.open { display: block; }
+        .ux-crumb-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            color: #e2e8f0;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.45rem 0.65rem;
+            border-radius: 0.45rem;
+            cursor: pointer;
+        }
+        .ux-crumb-menu button:hover { background: #1e293b; }
+        .ux-crumb-menu button.active {
+            background: #1e3a5f;
+            color: #fff;
+        }
+        .ux-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .ux-pill-row.hidden { display: none !important; }
+        .ux-pill {
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #94a3b8;
+            border-radius: 999px;
+            padding: 0.38rem 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .ux-pill:hover { border-color: #64748b; color: #fff; }
+        .ux-pill.active {
+            background: #3b82f6;
+            border-color: #60a5fa;
+            color: #fff;
+        }
+        #cfg-editor-empty .empty-ctas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        #cfg-editor-empty .empty-ctas button {
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 0.75rem;
+            padding: 0.7rem 1.05rem;
+            font-weight: 800;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            min-width: 8rem;
+        }
+        #cfg-editor-empty .empty-ctas button:hover {
+            border-color: #60a5fa;
+            background: #1e3a5f;
+        }
+
+        /* —— Vista Mapa / documentación —— */
+        .ux-view-tabs {
+            display: flex;
+            gap: 0.35rem;
+            margin-right: 0.35rem;
+        }
+        .ux-view-tab {
+            border: 1px solid #475569;
+            background: transparent;
+            color: #cbd5e1;
+            border-radius: 0.55rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .ux-view-tab:hover { border-color: #94a3b8; color: #fff; }
+        .ux-view-tab.active {
+            background: #1e3a5f;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        body.ux-map-view #ux-nav,
+        body.ux-map-view #cfg-editor-panel,
+        body.ux-map-view #cfg-editor-empty,
+        body.ux-map-view #cfg-toolbar {
+            display: none !important;
+        }
+        body.ux-map-view #cfg-map-panel { display: block; }
+        #cfg-map-panel {
+            display: none;
+            width: min(100%, 56rem);
+            margin: 0 auto;
+            padding: 1rem 1.1rem 2rem;
+            color: #e2e8f0;
+        }
+        .map-hero {
+            margin-bottom: 1.1rem;
+        }
+        .map-hero h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+        .map-hero p {
+            margin: 0.45rem 0 0;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            line-height: 1.45;
+            max-width: 42rem;
+        }
+        .map-section {
+            margin-top: 1.35rem;
+        }
+        .map-section h3 {
+            margin: 0 0 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #60a5fa;
+        }
+        .map-diagram {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 1rem 0.9rem 1.1rem;
+            overflow-x: auto;
+        }
+        .map-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0.55rem 0.35rem;
+        }
+        .map-node {
+            min-width: 7.5rem;
+            max-width: 11rem;
+            flex: 1 1 7.5rem;
+            border: 1px solid #475569;
+            background: #0f172a;
+            border-radius: 0.75rem;
+            padding: 0.65rem 0.7rem;
+            text-align: center;
+        }
+        .map-node strong {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+        .map-node span {
+            display: block;
+            font-size: 0.68rem;
+            line-height: 1.35;
+            color: #94a3b8;
+        }
+        .map-node.accent {
+            border-color: #3b82f6;
+            background: linear-gradient(180deg, #1e3a5f, #0f172a);
+        }
+        .map-node.soft {
+            border-color: #334155;
+            background: #172033;
+        }
+        .map-arrow {
+            align-self: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            padding: 0 0.1rem;
+            user-select: none;
+        }
+        .map-stack {
+            display: grid;
+            gap: 0.55rem;
+        }
+        .map-layer {
+            border: 1px dashed #475569;
+            border-radius: 0.85rem;
+            padding: 0.7rem 0.75rem;
+            background: rgba(2, 6, 23, 0.35);
+        }
+        .map-layer-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.45rem;
+        }
+        .map-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .map-chip {
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 0.28rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .map-chip.active {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+            color: #fff;
+        }
+        .map-docs {
+            display: grid;
+            gap: 0.75rem;
+        }
+        @media (min-width: 780px) {
+            .map-docs { grid-template-columns: 1fr 1fr; }
+        }
+        .map-doc {
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.65);
+            border-radius: 0.85rem;
+            padding: 0.85rem 0.95rem;
+        }
+        .map-doc h4 {
+            margin: 0 0 0.35rem;
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .map-doc p, .map-doc li {
+            margin: 0;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: #94a3b8;
+        }
+        .map-doc ul {
+            margin: 0.35rem 0 0;
+            padding-left: 1.1rem;
+        }
+        .map-doc li + li { margin-top: 0.25rem; }
+        .map-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.1rem;
+        }
+        .map-cta-row button {
+            border: 1px solid #3b82f6;
+            background: #1e3a5f;
+            color: #fff;
+            border-radius: 0.65rem;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .map-cta-row button:hover { background: #2563eb; }
+        .map-footnote {
+            margin-top: 1rem;
+            font-size: 0.72rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .group-tray,
+        .agent-tray,
+        .section-tray,
+        .guard-tray,
+        .prompt-tray,
+        .skills-tray {
+            position: relative;
+            z-index: 3;
+            overflow: visible;
+            margin-left: auto;
+            margin-right: auto;
+            /* Equal inset on all 4 sides for tabs / content inside the layer */
+            padding: 0.9rem;
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(2, 6, 23, 0.78));
+            transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+        }
+        .group-tray {
+            width: min(100%, 52rem);
+            max-width: 100%;
+        }
+        .agent-tray {
+            z-index: 1;
+            margin-top: 2.75rem;
+            width: fit-content;
+            max-width: 100%;
+            align-self: center;
+        }
+        .agent-tray #agent-tabs {
+            justify-content: center;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+        .section-tray {
+            z-index: 1;
+            margin-top: 2.75rem;
+            width: fit-content;
+            max-width: 100%;
+            align-self: center;
+        }
+        .section-tray.hidden { display: none; }
+        .guard-tray {
+            z-index: 1;
+            margin-top: 2.75rem;
+            width: min(100%, 42rem);
+            max-width: 100%;
+            align-self: center;
+        }
+        .guard-tray.is-focused {
+            width: min(100%, 34rem);
+            padding-bottom: 3rem;
+        }
+        .guard-tray.hidden { display: none; }
+        .prompt-tray {
+            z-index: 1;
+            margin-top: 2.75rem;
+            width: fit-content;
+            max-width: 100%;
+            align-self: center;
+        }
+        .skills-tray {
+            z-index: 1;
+            margin-top: 2.75rem;
+            width: min(100%, 42rem);
+            max-width: 100%;
+            align-self: center;
+        }
+        .skills-tray.is-focused {
+            width: min(100%, 34rem);
+            padding-bottom: 3rem;
+        }
+        .prompt-tray.hidden,
+        .skills-tray.hidden { display: none; }
+        #agent-section-tabs,
+        #prompt-part-tabs {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: space-evenly;
+            gap: 2rem;
+            padding: 0;
+            min-width: 22rem;
+        }
+        #prompt-part-tabs {
+            gap: 0.85rem;
+            min-width: 34rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        /* Skills / Guardrails: flujo secuencial con flechas (sin lista numerada) */
+        #skill-tabs,
+        #guard-class-tabs {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0;
+            width: 100%;
+            min-width: 0;
+            max-height: min(58vh, 36rem);
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 0;
+            scrollbar-gutter: stable;
+        }
+        #skill-tabs::-webkit-scrollbar,
+        #guard-class-tabs::-webkit-scrollbar {
+            width: 6px;
+        }
+        #skill-tabs::-webkit-scrollbar-thumb,
+        #guard-class-tabs::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 999px;
+        }
+        /* Esquina inferior-izquierda del layer — fuera del conector SVG (cruz) */
+        .skills-back-btn,
+        .guardrails-back-btn {
+            position: absolute;
+            left: 0.65rem;
+            bottom: 0.55rem;
+            z-index: 6;
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid #475569;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+        .skills-tray.is-focused .skills-back-btn,
+        .guard-tray.is-focused .guardrails-back-btn {
+            display: flex;
+        }
+        .skills-back-btn:hover,
+        .guardrails-back-btn:hover {
+            color: #e2e8f0;
+            background: #1e293b;
+            border-color: #64748b;
+        }
+        .skill-flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 1.85rem;
+            color: #64748b;
+            pointer-events: none;
+        }
+        .skill-flow-arrow svg {
+            width: 16px;
+            height: 26px;
+            display: block;
+        }
+        .skills-tray[data-group="coordinacion"] .skill-flow-arrow,
+        .guard-tray[data-group="coordinacion"] .skill-flow-arrow { color: #60a5fa; }
+        .skills-tray[data-group="especialista"] .skill-flow-arrow,
+        .guard-tray[data-group="especialista"] .skill-flow-arrow { color: #34d399; }
+        .skills-tray[data-group="calidad"] .skill-flow-arrow,
+        .guard-tray[data-group="calidad"] .skill-flow-arrow { color: #fbbf24; }
+        .group-tray[data-group="coordinacion"],
+        .agent-tray[data-group="coordinacion"],
+        .section-tray[data-group="coordinacion"],
+        .guard-tray[data-group="coordinacion"],
+        .prompt-tray[data-group="coordinacion"],
+        .skills-tray[data-group="coordinacion"] {
+            background: linear-gradient(180deg, var(--g-coord-tint), rgba(2, 6, 23, 0.9));
+            border-color: rgba(96, 165, 250, 0.35);
+            color: var(--g-coord-child);
+        }
+        .group-tray[data-group="especialista"],
+        .agent-tray[data-group="especialista"],
+        .section-tray[data-group="especialista"],
+        .guard-tray[data-group="especialista"],
+        .prompt-tray[data-group="especialista"],
+        .skills-tray[data-group="especialista"] {
+            background: linear-gradient(180deg, var(--g-esp-tint), rgba(2, 6, 23, 0.9));
+            border-color: rgba(52, 211, 153, 0.35);
+            color: var(--g-esp-child);
+        }
+        .group-tray[data-group="calidad"],
+        .agent-tray[data-group="calidad"],
+        .section-tray[data-group="calidad"],
+        .guard-tray[data-group="calidad"],
+        .prompt-tray[data-group="calidad"],
+        .skills-tray[data-group="calidad"] {
+            background: linear-gradient(180deg, var(--g-qa-tint), rgba(2, 6, 23, 0.9));
+            border-color: rgba(251, 191, 36, 0.35);
+            color: var(--g-qa-child);
+        }
+        /* Layer title chips — fully above the tray (no border overlay) */
+        .tray-label,
+        .agent-tray-label,
+        .section-tray-label,
+        .guard-tray-label,
+        .prompt-tray-label,
+        .skills-tray-label {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, calc(-100% - 0.35rem));
+            margin: 0;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            line-height: 1.15;
+            text-transform: uppercase;
+            white-space: nowrap;
+            color: #94a3b8;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 999px;
+            z-index: 6;
+            pointer-events: none;
+            box-shadow: none;
+        }
+        /* White chips for the three top-level tile tags */
+        .tray-label,
+        .agent-tray-label,
+        .section-tray-label {
+            padding: 0.1rem 0.4rem;
+            font-size: 0.5rem;
+            letter-spacing: 0.1em;
+            color: var(--ui-tag-text);
+            background: var(--ui-tag-bg);
+            border-color: var(--ui-tag-border);
+            box-shadow: none;
+        }
+        .guard-tray[data-group="coordinacion"] .guard-tray-label,
+        .prompt-tray[data-group="coordinacion"] .prompt-tray-label,
+        .skills-tray[data-group="coordinacion"] .skills-tray-label {
+            color: #93c5fd;
+            border-color: rgba(96, 165, 250, 0.45);
+        }
+        .guard-tray[data-group="especialista"] .guard-tray-label,
+        .prompt-tray[data-group="especialista"] .prompt-tray-label,
+        .skills-tray[data-group="especialista"] .skills-tray-label {
+            color: #6ee7b7;
+            border-color: rgba(52, 211, 153, 0.45);
+        }
+        .guard-tray[data-group="calidad"] .guard-tray-label,
+        .prompt-tray[data-group="calidad"] .prompt-tray-label,
+        .skills-tray[data-group="calidad"] .skills-tray-label {
+            color: #fcd34d;
+            border-color: rgba(251, 191, 36, 0.45);
+        }
+        #group-tabs,
+        #agent-tabs {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-height: 2.25rem;
+            padding: 0;
+        }
+        #group-tabs {
+            justify-content: space-evenly;
+            gap: 2.5rem;
+        }
+
+        /* Connector tree: selected group → each agent of that group */
+        #group-connector {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0;
+            overflow: visible;
+            transition: opacity 0.18s ease;
+        }
+        #group-connector.visible { opacity: 1; }
+        #group-connector .tree-line {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: square;
+            stroke-linejoin: miter;
+            opacity: 0.7;
+        }
+        #group-connector .tree-line.is-active {
+            stroke-width: 3;
+            opacity: 1;
+        }
+        #group-connector .tree-head {
+            fill: currentColor;
+            opacity: 0.7;
+        }
+        #group-connector .tree-head.is-active { opacity: 1; }
+        #group-connector .tree-origin {
+            fill: currentColor;
+            stroke: #020617;
+            stroke-width: 2;
+        }
+        #group-connector[data-group="coordinacion"] { color: #60a5fa; }
+        #group-connector[data-group="especialista"] { color: #34d399; }
+        #group-connector[data-group="calidad"] { color: #fbbf24; }
+        .group-connector[data-group="coordinacion"] { color: #60a5fa; }
+        .group-connector[data-group="especialista"] { color: #34d399; }
+        .group-connector[data-group="calidad"] { color: #fbbf24; }
+
+        /* Child agent tray — nested under selected team */
+        /* (shared tray chrome with .group-tray above) */
+
+        /* Child agent tabs — muted until selected */
+        .agent-tab {
+            position: relative;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.45rem 0.7rem 0.4rem;
+            border-radius: 0.55rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #94a3b8;
+            transition: all 0.15s ease;
+        }
+        /* Fallback caret only for tabs the SVG tree cannot reach (wrapped rows). */
+        .agent-tab::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -0.55rem;
+            width: 0;
+            height: 0;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 6px solid #64748b;
+            opacity: 0.85;
+            display: none;
+        }
+        .agent-tab[data-caret="css"]::before { display: block; }
+        .agent-tab:hover:not(.active) { color: #e2e8f0; background: #1e293b; }
+        .agent-tab[data-group="coordinacion"].active {
+            background: #3b82f6; color: #fff; border-color: #93c5fd;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset;
+        }
+        .agent-tab[data-group="especialista"].active {
+            background: #10b981; color: #fff; border-color: #6ee7b7;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset;
+        }
+        .agent-tab[data-group="calidad"].active {
+            background: #f59e0b; color: #111827; border-color: #fcd34d;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset;
+        }
+        .agent-tab[data-group="coordinacion"].active::before { border-bottom-color: #93c5fd; }
+        .agent-tab[data-group="especialista"].active::before { border-bottom-color: #6ee7b7; }
+        .agent-tab[data-group="calidad"].active::before { border-bottom-color: #fcd34d; }
+
+        .section-tab, .guard-class-tab, .prompt-part-tab, .skill-tab {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.6rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #94a3b8;
+            transition: all 0.15s ease;
+        }
+        .section-tab.active, .guard-class-tab.active, .prompt-part-tab.active, .skill-tab.active {
+            background: #2563eb; color: #fff; border-color: #3b82f6;
+        }
+
+        /* Section / prompt tabs inside tree trays behave like agent tabs */
+        .section-tray .section-tab,
+        .prompt-tray .prompt-part-tab {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.45rem 0.7rem 0.4rem;
+            border-radius: 0.55rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #94a3b8;
+            max-width: 16rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .skills-tray .skill-tab,
+        .guard-tray .guard-class-tab {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+            font-size: 0.98rem;
+            font-weight: var(--ui-button-font-weight);
+            letter-spacing: 0.01em;
+            text-transform: none;
+            line-height: 1.4;
+            min-height: 3.15rem;
+            padding: 0.9rem 1.15rem;
+            border-radius: 0.85rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #94a3b8;
+            overflow: visible;
+            white-space: normal;
+        }
+        .skills-tray .skill-tab-label,
+        .guard-tray .guard-class-tab-label {
+            display: block;
+            min-width: 0;
+        }
+        .skills-tray.is-focused .skill-tab,
+        .guard-tray.is-focused .guard-class-tab {
+            font-size: 1.08rem;
+            min-height: 3.6rem;
+            padding: 1.05rem 1.3rem;
+        }
+        .section-tray .section-tab:hover:not(.active),
+        .prompt-tray .prompt-part-tab:hover:not(.active),
+        .skills-tray .skill-tab:hover:not(.active),
+        .guard-tray .guard-class-tab:hover:not(.active) {
+            color: #e2e8f0;
+            background: #1e293b;
+        }
+        .section-tray[data-group="coordinacion"] .section-tab.active,
+        .prompt-tray[data-group="coordinacion"] .prompt-part-tab.active,
+        .skills-tray[data-group="coordinacion"] .skill-tab.active,
+        .guard-tray[data-group="coordinacion"] .guard-class-tab.active {
+            background: #3b82f6; color: #fff; border-color: #93c5fd;
+        }
+        .section-tray[data-group="especialista"] .section-tab.active,
+        .prompt-tray[data-group="especialista"] .prompt-part-tab.active,
+        .skills-tray[data-group="especialista"] .skill-tab.active,
+        .guard-tray[data-group="especialista"] .guard-class-tab.active {
+            background: #10b981; color: #fff; border-color: #6ee7b7;
+        }
+        .section-tray[data-group="calidad"] .section-tab.active,
+        .prompt-tray[data-group="calidad"] .prompt-part-tab.active,
+        .skills-tray[data-group="calidad"] .skill-tab.active,
+        .guard-tray[data-group="calidad"] .guard-class-tab.active {
+            background: #f59e0b; color: #111827; border-color: #fcd34d;
+        }
+
+        /* Editor amplio del apartado de prompt */
+        #cfg-form-anatomy.is-workspace #cfg-anatomy-nav { display: none; }
+        #cfg-form-anatomy.is-workspace .cfg-anatomy-card {
+            max-width: none;
+            min-height: calc(100vh - 22rem);
+            padding: 1.25rem 1.35rem 1.5rem;
+            margin: 0;
+        }
+        #cfg-form-anatomy.is-workspace .cfg-anatomy-body {
+            max-width: none;
+        }
+        #cfg-form-anatomy.is-workspace .cfg-rich {
+            min-height: 12rem;
+        }
+        #cfg-form-anatomy.is-workspace .cfg-paso-text,
+        #cfg-form-anatomy.is-workspace .cfg-resp-text {
+            min-height: 5rem;
+        }
+        #cfg-prompt-pick,
+        #cfg-prose-pick {
+            max-width: 40rem;
+            margin: 3rem auto;
+            text-align: center;
+            color: var(--ui-text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Editor amplio para Skills y Guardrails (mismo feel que Prompt) */
+        #cfg-form-prose.is-workspace {
+            max-width: none;
+        }
+        #cfg-form-prose.is-workspace .cfg-field-control#cfg-editor {
+            min-height: calc(100vh - 22rem);
+            font-size: 0.98rem;
+            line-height: 1.55;
+            padding: 1.1rem 1.2rem 1.4rem;
+        }
+        #cfg-form-skill.is-workspace,
+        #cfg-form-guard.is-workspace {
+            max-width: none;
+        }
+        #cfg-form-skill .cfg-anatomy-card,
+        #cfg-form-guard .cfg-anatomy-card {
+            max-width: none;
+            min-height: calc(100vh - 24rem);
+            padding: 1.25rem 1.35rem 1.5rem;
+            margin: 0;
+        }
+        #cfg-form-skill .cfg-anatomy-body,
+        #cfg-form-guard .cfg-anatomy-body {
+            max-width: none;
+            display: grid;
+            gap: 1rem;
+        }
+        #cfg-form-skill .cfg-rich,
+        #cfg-form-guard .cfg-rich {
+            min-height: 5.5rem;
+        }
+        #cfg-form-skill .cfg-skill-paso-text {
+            min-height: 3.5rem;
+        }
+        #cfg-form-skill .cfg-skill-grid-2,
+        #cfg-form-guard .cfg-guard-grid-2 {
+            display: grid;
+            gap: 1rem;
+        }
+        @media (min-width: 900px) {
+            #cfg-form-skill .cfg-skill-grid-2,
+            #cfg-form-guard .cfg-guard-grid-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        #cfg-skill-raw-wrap.hidden,
+        #cfg-guard-raw-wrap.hidden { display: none; }
+
+        body[data-mode="sistema"] #agent-tabs-bar { display: none !important; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen ux-compact">
+
+    <div id="audit-auth-gate" class="fixed inset-0 z-[100] gate-checking">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 px-6 py-6 text-white text-center">
+                <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-black tracking-wide text-xl mb-3">LexiaTek</div>
+                <h2 class="text-xl font-bold ui-title">Entrar al editor del despacho</h2>
+                <p class="text-sm text-slate-400 mt-2">Revise e instruya cómo trabaja el asistente en sus casos</p>
+            </div>
+            <div id="audit-auth-checking" class="p-10 text-center text-slate-600" aria-live="polite">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-600 mb-4" aria-hidden="true"></i>
+                <p class="text-base font-medium">Verificando sesión…</p>
+            </div>
+            <form id="audit-auth-form" class="p-6 space-y-4" autocomplete="on">
+                <p id="audit-auth-error" class="hidden text-base text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert"></p>
+                <div>
+                    <label for="audit-auth-email" class="block text-sm font-bold uppercase text-slate-500 mb-1">Correo electrónico</label>
+                    <input id="audit-auth-email" name="email" type="email" autocomplete="email" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 outline-none" placeholder="abogada@despacho.com" required>
+                </div>
+                <div>
+                    <label for="audit-auth-password" class="block text-sm font-bold uppercase text-slate-500 mb-1">Contraseña del despacho</label>
+                    <input id="audit-auth-password" name="password" type="password" autocomplete="current-password" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div id="audit-auth-pin-block" class="hidden">
+                    <label for="audit-auth-pin" class="block text-sm font-bold uppercase text-slate-500 mb-1">PIN personal</label>
+                    <input id="audit-auth-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" autocomplete="off" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 outline-none" placeholder="6–8 dígitos">
+                </div>
+                <div id="audit-auth-new-pin-block" class="hidden">
+                    <label for="audit-auth-new-pin" class="block text-sm font-bold uppercase text-slate-500 mb-1">Crear PIN personal (primera vez)</label>
+                    <input id="audit-auth-new-pin" name="new_pin" type="password" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" autocomplete="new-password" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 outline-none" placeholder="6–8 dígitos">
+                    <p class="text-sm text-slate-500 mt-1">El PIN es solo suyo. Nadie más del despacho puede ver su progreso.</p>
+                </div>
+                <div id="audit-auth-consent-block" class="space-y-2 text-base text-slate-600">
+                    <label class="flex items-start gap-2">
+                        <input id="audit-accept-privacy" type="checkbox" class="mt-1 scale-125" required>
+                        <span>Acepto el aviso de privacidad (Ley 1581).</span>
+                    </label>
+                    <label class="flex items-start gap-2">
+                        <input id="audit-accept-cases" type="checkbox" class="mt-1 scale-125" required>
+                        <span>Autorizo el tratamiento de datos de casos en este portal.</span>
+                    </label>
+                </div>
+                <button type="submit" id="audit-auth-submit" class="ui-btn w-full bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all">Entrar</button>
+            </form>
+            <p id="audit-auth-gate-footer" class="text-sm text-slate-400 text-center px-6 pb-4">Datos de casos permitidos con autorización · ARCO: privacidad@dbxsolutions.com</p>
+        </div>
+    </div>
+
+    <div id="audit-app-root" class="flex flex-col min-h-screen flex-1 app-gated">
+        <header class="bg-slate-900 text-white px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black tracking-wide text-lg">LexiaTek</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Instrucciones del asistente</h1>
+                    <p class="text-xs text-slate-400 mt-0.5 hidden md:block">La IA propone · usted revisa y aprueba</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="ux-view-tabs" role="tablist" aria-label="Vista del portal">
+                    <button type="button" class="ux-view-tab active" id="ux-view-editor" role="tab" aria-selected="true" data-view="editor">Editor</button>
+                    <button type="button" class="ux-view-tab" id="ux-view-map" role="tab" aria-selected="false" data-view="map">Cómo funciona</button>
+                </div>
+                <button type="button" id="btn-sistema" title="Prompt compartido del sistema (fuera de los grupos)">Prompt sistema</button>
+                <button type="button" id="audit-auth-logout" class="hidden ui-btn bg-slate-700 hover:bg-slate-600 text-white border border-slate-600">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar sesión
+                </button>
+            </div>
+        </header>
+
+        <div id="agent-tabs-bar" class="bg-slate-900 px-3 md:px-5 py-3">
+            <div id="ux-nav" aria-label="Navegación compacta de configuración">
+                <div class="ux-crumb-bar" role="navigation" aria-label="Ruta de configuración">
+                    <div class="ux-crumb-wrap">
+                        <button type="button" class="ux-crumb" id="ux-crumb-group" aria-haspopup="menu" aria-expanded="false" title="Elegir equipo">Equipo</button>
+                        <div class="ux-crumb-menu" id="ux-menu-group" role="menu" aria-label="Equipos de agentes"></div>
+                    </div>
+                    <span class="ux-crumb-sep" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <div class="ux-crumb-wrap">
+                        <button type="button" class="ux-crumb" id="ux-crumb-agent" aria-haspopup="menu" aria-expanded="false" title="Elegir agente">Agente</button>
+                        <div class="ux-crumb-menu" id="ux-menu-agent" role="menu" aria-label="Agentes"></div>
+                    </div>
+                    <span class="ux-crumb-sep" id="ux-crumb-sep-section" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <button type="button" class="ux-crumb current" id="ux-crumb-section" disabled>Prompt</button>
+                    <span class="ux-crumb-sep hidden" id="ux-crumb-sep-part" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                    <button type="button" class="ux-crumb current hidden" id="ux-crumb-part" disabled>—</button>
+                </div>
+                <div class="ux-pill-row" id="ux-section-pills" role="tablist" aria-label="Configuración">
+                    <button type="button" class="ux-pill" data-section="prompt">Prompt</button>
+                    <button type="button" class="ux-pill" data-section="skills">Skills</button>
+                    <button type="button" class="ux-pill" data-section="guardrails">Guardrails</button>
+                </div>
+                <div class="ux-pill-row hidden" id="ux-part-pills" role="tablist" aria-label="Detalle"></div>
+            </div>
+            <div class="group-tray" id="group-tray" data-group="coordinacion">
+                <p class="tray-label">Equipos de Agentes</p>
+                <div id="group-tabs" role="tablist" aria-label="Equipos de agentes"></div>
+            </div>
+            <svg id="group-connector" aria-hidden="true" focusable="false"></svg>
+            <div id="agent-tray" class="agent-tray" data-group="coordinacion">
+                <p class="agent-tray-label">Agentes</p>
+                <div id="agent-tabs" role="tablist" aria-label="Agentes"></div>
+            </div>
+            <div id="section-tray" class="section-tray hidden" data-group="coordinacion">
+                <p class="section-tray-label">Configuración</p>
+                <div id="agent-section-tabs" role="tablist" aria-label="Configuración del agente">
+                    <button type="button" data-section="prompt" class="section-tab">Prompt</button>
+                    <button type="button" data-section="skills" class="section-tab section-skills">Skills</button>
+                    <button type="button" data-section="guardrails" class="section-tab section-guardrails">Guardrails</button>
+                </div>
+            </div>
+            <div id="guard-tray" class="guard-tray hidden" data-group="coordinacion">
+                <p class="guard-tray-label">Guardrails</p>
+                <div id="guard-class-tabs" role="listbox" aria-label="Clases de guardrail en secuencia"></div>
+                <button type="button" id="guardrails-back-btn" class="guardrails-back-btn" aria-label="Ver todos los guardrails">
+                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Ver todos los guardrails</span>
+                </button>
+            </div>
+            <div id="prompt-tray" class="prompt-tray hidden" data-group="coordinacion">
+                <p class="prompt-tray-label">Prompt</p>
+                <div id="prompt-part-tabs" role="tablist" aria-label="Apartados del prompt"></div>
+            </div>
+            <div id="skills-tray" class="skills-tray hidden" data-group="coordinacion">
+                <p class="skills-tray-label">Skills</p>
+                <div id="skill-tabs" role="listbox" aria-label="Skills del agente en secuencia"></div>
+                <button type="button" id="skills-back-btn" class="skills-back-btn" aria-label="Ver todos los skills">
+                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>Ver todos los skills</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-1 min-h-0">
+            <main class="flex-1 flex flex-col min-w-0" style="background: #1e293b;">
+                <div id="cfg-workspace">
+                    <div id="cfg-toolbar" class="px-4 md:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900">
+                        <div>
+                            <p id="cfg-current-label" class="text-base font-bold text-slate-100">Seleccione un ítem</p>
+                            <p id="cfg-meta" class="hidden text-xs text-slate-400 mt-0.5">—</p>
+                            <p id="cfg-shared-badge" class="hidden text-xs text-amber-200 bg-amber-950/50 border border-amber-700/60 rounded-lg px-2.5 py-1 mt-1.5 inline-block"></p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" id="cfg-btn-history" class="ui-btn border border-slate-600 bg-slate-800/80 text-slate-100 hover:bg-slate-700 disabled:opacity-40" disabled>
+                                <i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial
+                            </button>
+                            <button type="button" id="cfg-btn-reload" class="ui-btn border border-slate-600 bg-slate-800/80 text-slate-100 hover:bg-slate-700 disabled:opacity-40" disabled>
+                                <i class="fa-solid fa-rotate mr-1"></i> Recargar
+                            </button>
+                            <button type="button" id="cfg-btn-save" class="ui-btn bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40" disabled>
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar versión
+                            </button>
+                        </div>
+                    </div>
+                    <div id="cfg-editor-panel">
+                        <div id="cfg-note-bar" class="bg-slate-900">
+                            <div class="px-4 md:px-6 py-2 flex items-center gap-2">
+                                <button type="button" id="cfg-note-toggle" class="cfg-note-toggle" aria-expanded="true" aria-controls="cfg-note-body" title="Mostrar u ocultar la nota de versión">
+                                    <i class="fa-solid fa-chevron-down cfg-note-chevron" aria-hidden="true"></i>
+                                    <span>Nota de versión</span>
+                                </button>
+                                <span id="cfg-dirty-badge" class="hidden text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded bg-amber-900/60 text-amber-200 border border-amber-700/50 ml-auto">Borrador local</span>
+                            </div>
+                            <div id="cfg-note-body" class="px-4 md:px-6 pb-2.5 flex items-center gap-3">
+                                <label class="sr-only" for="cfg-note">Nota de versión</label>
+                                <input id="cfg-note" type="text" maxlength="240" placeholder="Resuma el cambio para el historial del despacho…" class="flex-1 border border-slate-600 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-slate-950 text-slate-100 placeholder:text-slate-500">
+                            </div>
+                        </div>
+                        <div class="cfg-compose">
+                        <div id="cfg-fmt-bar" class="cfg-fmt-bar" role="toolbar" aria-label="Herramientas de texto" data-disabled="true">
+                            <button type="button" class="cfg-fmt-btn" data-fmt="bold" title="Negrita" aria-label="Negrita"><i class="fa-solid fa-bold" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="italic" title="Cursiva" aria-label="Cursiva"><i class="fa-solid fa-italic" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="code" title="Código / término" aria-label="Código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-sep" aria-hidden="true"></span>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="h3" title="Título" aria-label="Título"><i class="fa-solid fa-heading" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="ul" title="Lista con viñetas" aria-label="Lista con viñetas"><i class="fa-solid fa-list-ul" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="ol" title="Lista numerada" aria-label="Lista numerada"><i class="fa-solid fa-list-ol" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-sep" aria-hidden="true"></span>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="undo" title="Deshacer" aria-label="Deshacer"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="redo" title="Rehacer" aria-label="Rehacer"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>
+                            <button type="button" class="cfg-fmt-btn" data-fmt="clear" title="Quitar formato" aria-label="Quitar formato"><i class="fa-solid fa-text-slash" aria-hidden="true"></i></button>
+                            <span class="cfg-fmt-hint">Texto</span>
+                        </div>
+                        <div id="cfg-form-anatomy" class="hidden is-workspace">
+                            <p id="cfg-prompt-pick" class="hidden">Elija un apartado del Prompt arriba para editarlo con espacio amplio.</p>
+                            <nav id="cfg-anatomy-nav" class="cfg-anatomy-nav hidden" role="tablist" aria-label="Apartados de la instrucción"></nav>
+                            <div id="cfg-anatomy-fields"></div>
+                        </div>
+                        <div id="cfg-form-structured" class="hidden max-w-3xl cfg-anatomy-legacy">
+                            <div class="cfg-anatomy-intro">
+                                <h3>Formato breve</h3>
+                                <p>Quién es, qué debe lograr y reglas mínimas.</p>
+                            </div>
+                            <div class="cfg-field">
+                                <label class="cfg-field-label" for="cfg-field-rol">Quién es</label>
+                                <input id="cfg-field-rol" type="text" class="cfg-field-control" placeholder="Ej. analista de cronología y hechos penales" disabled>
+                            </div>
+                            <div class="cfg-field">
+                                <label class="cfg-field-label" for="cfg-field-mision">Qué debe lograr</label>
+                                <textarea id="cfg-field-mision" rows="3" class="cfg-field-control" placeholder="Describa la misión…" disabled></textarea>
+                            </div>
+                            <div class="cfg-field">
+                                <label class="cfg-field-label" for="cfg-field-instrucciones">Reglas</label>
+                                <textarea id="cfg-field-instrucciones" rows="5" class="cfg-field-control" placeholder="Reglas mínimas…" disabled></textarea>
+                            </div>
+                        </div>
+                        <div id="cfg-form-skill" class="hidden is-workspace">
+                            <div id="cfg-skill-fields"></div>
+                        </div>
+                        <div id="cfg-form-guard" class="hidden is-workspace">
+                            <div id="cfg-guard-fields"></div>
+                        </div>
+                        <div id="cfg-form-prose" class="max-w-3xl">
+                            <p id="cfg-prose-pick" class="hidden">Elija un skill o guardrail arriba para editarlo con espacio amplio.</p>
+                            <div id="cfg-prose-fields" class="cfg-field">
+                                <label id="cfg-editor-label" class="cfg-field-label" for="cfg-editor">Contenido</label>
+                                <p id="cfg-editor-hint" class="cfg-field-hint">Texto editable de la configuración</p>
+                                <textarea id="cfg-editor" rows="4" class="cfg-field-control" placeholder="Seleccione un ítem para editar…" disabled></textarea>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="cfg-editor-empty" class="hidden px-4 md:px-6 py-10 text-sm text-slate-400 text-center">
+                        <p class="mb-1">¿Qué quiere configurar de este agente?</p>
+                        <div class="empty-ctas">
+                            <button type="button" data-empty-section="prompt">Prompt</button>
+                            <button type="button" data-empty-section="skills">Skills</button>
+                            <button type="button" data-empty-section="guardrails">Guardrails</button>
+                        </div>
+                    </div>
+                    <div id="cfg-map-panel" aria-label="Mapa y documentación del asistente">
+                        <div class="map-hero">
+                            <h2>Cómo funciona LexiaTek</h2>
+                            <p>
+                                La IA propone; el abogado revisa y aprueba. Este portal versiona las instrucciones
+                                del despacho (prompts, skills y guardrails) sin inventar radicados, sentencias ni normas.
+                            </p>
+                        </div>
+
+                        <section class="map-section">
+                            <h3>1 · Firma en runtime</h3>
+                            <div class="map-diagram">
+                                <div class="map-flow" aria-hidden="false">
+                                    <div class="map-node soft">
+                                        <strong>Abogado</strong>
+                                        <span>Chat web · aprueba borradores (HITL)</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node accent">
+                                        <strong>Gerente del Caso</strong>
+                                        <span>Único interlocutor (POC) en web/Slack</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node">
+                                        <strong>Especialistas</strong>
+                                        <span>Backoffice interno · no hablan al cliente</span>
+                                    </div>
+                                    <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="map-node soft">
+                                        <strong>Calidad</strong>
+                                        <span>Revisión jurídica antes de entregar</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="map-section">
+                            <h3>2 · Qué edita este portal</h3>
+                            <div class="map-diagram">
+                                <div class="map-stack">
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Equipos</div>
+                                        <div class="map-chips" id="map-group-chips">
+                                            <span class="map-chip">Coordinación</span>
+                                            <span class="map-chip">Especialistas</span>
+                                            <span class="map-chip">Calidad</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Agentes del equipo</div>
+                                        <div class="map-chips" id="map-agent-chips">
+                                            <span class="map-chip">Cargando agentes…</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Por cada agente</div>
+                                        <div class="map-chips">
+                                            <span class="map-chip active">Prompt</span>
+                                            <span class="map-chip">Función · Tareas · Responsabilidades · Estilo</span>
+                                            <span class="map-chip active">Skills</span>
+                                            <span class="map-chip active">Guardrails</span>
+                                            <span class="map-chip">Input · Output · Tools</span>
+                                        </div>
+                                    </div>
+                                    <div class="map-layer">
+                                        <div class="map-layer-title">Persistencia</div>
+                                        <div class="map-flow" style="justify-content:flex-start">
+                                            <div class="map-node soft" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Borrador local</strong>
+                                                <span>Autosave en el navegador</span>
+                                            </div>
+                                            <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                            <div class="map-node accent" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Guardar versión</strong>
+                                                <span>Historial en Postgres · nota obligatoria</span>
+                                            </div>
+                                            <div class="map-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                            <div class="map-node" style="flex:0 1 auto;min-width:8rem;max-width:14rem;text-align:left">
+                                                <strong>Asistente en vivo</strong>
+                                                <span>Nueva versión entra al runtime</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="map-section">
+                            <h3>3 · Documentación rápida</h3>
+                            <div class="map-docs">
+                                <article class="map-doc">
+                                    <h4>Ruta del editor</h4>
+                                    <p>Use el breadcrumb: Equipo → Agente → Prompt/Skills/Guardrails. Cada clic baja un nivel; el notepad muestra solo el ítem activo.</p>
+                                    <ul>
+                                        <li><strong>Prompt:</strong> quién es, qué hace, límites y tono.</li>
+                                        <li><strong>Skills:</strong> procedimientos reutilizables (pueden compartirse).</li>
+                                        <li><strong>Guardrails:</strong> filtros de entrada, salida y tools.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Reglas del despacho</h4>
+                                    <ul>
+                                        <li>No inventar sentencias, radicados ni normas.</li>
+                                        <li>Todo lo accionable requiere aprobación humana.</li>
+                                        <li>Prompt sistema = reglas compartidas de toda la firma.</li>
+                                        <li>Cambios quedan auditados con nota e historial.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Flujo recomendado</h4>
+                                    <ul>
+                                        <li>1. Elija equipo y agente en la ruta.</li>
+                                        <li>2. Ajuste Prompt (Función primero).</li>
+                                        <li>3. Revise Skills y Guardrails críticos.</li>
+                                        <li>4. Guarde versión y pruebe en el chat del abogado.</li>
+                                    </ul>
+                                </article>
+                                <article class="map-doc">
+                                    <h4>Dónde está cada cosa</h4>
+                                    <ul>
+                                        <li><strong>COORDINACIÓN:</strong> Gerente del Caso (POC).</li>
+                                        <li><strong>ESPECIALISTAS:</strong> cronología, tipicidad, ruta, víctimas, evidencia, audiencias…</li>
+                                        <li><strong>CALIDAD:</strong> control jurídico antes de entregar.</li>
+                                    </ul>
+                                </article>
+                            </div>
+                            <div class="map-cta-row">
+                                <button type="button" id="map-go-editor">Ir al editor</button>
+                                <button type="button" id="map-go-gerente">Abrir Gerente del Caso</button>
+                            </div>
+                            <p class="map-footnote">
+                                Fuente operativa: firma virtual con HITL · canales web (activo) y Slack · WhatsApp no implementado.
+                            </p>
+                        </section>
+                    </div>
+                </div>
+                <p id="cfg-toast" class="hidden fixed bottom-4 right-4 max-w-sm bg-slate-950 text-white text-sm px-4 py-3 rounded-xl shadow-xl z-50 border border-slate-700" role="status"></p>
+            </main>
+        </div>
+    </div>
+
+    <div id="cfg-history-backdrop" class="fixed inset-0 bg-slate-950/60 opacity-0 pointer-events-none transition-opacity z-40"></div>
+    <aside id="cfg-history-drawer" class="fixed top-0 right-0 h-full w-full max-w-xl shadow-2xl border-l border-slate-700 z-50 transform translate-x-full transition-transform flex flex-col text-slate-100 bg-slate-900">
+        <div class="px-5 py-5 border-b border-slate-700 flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-slate-100 ui-title">Historial de versiones</h2>
+                <p id="cfg-history-subtitle" class="text-sm text-slate-400 mt-1">—</p>
+            </div>
+            <button type="button" id="cfg-history-close" class="text-slate-400 hover:text-slate-100 px-3 py-2 text-xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="cfg-history-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+        <div id="cfg-diff-panel" class="hidden border-t border-slate-700 max-h-[40%] overflow-y-auto p-4 bg-slate-950">
+            <p class="text-sm font-bold uppercase text-slate-400 mb-2">Diff vs activo</p>
+            <pre id="cfg-diff-body" class="text-sm whitespace-pre-wrap font-mono text-slate-200"></pre>
+        </div>
+    </aside>
+
+    <script src="./audit-api-config.js?v=4.0"></script>
+    <script src="./auth-config.js?v=3.0.1"></script>
+    <script src="./auth-gate.js?v=3.9"></script>
+    <script src="./app.js?v=7.28"></script>
+</body>
+</html>
