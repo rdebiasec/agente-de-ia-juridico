@@ -183,7 +183,7 @@ Funciona como soporte técnico-estratégico para que la abogada:
 |---|---|---|---|
 | Fase A (firma sin estado) | Activar firma virtual y flujo multiagente | Cerrada | Valor visible en redacción y estrategia |
 | Fase B (persistencia y operación) | Consolidar Postgres, RAG, HITL y plazos | Mayoría completada | Escalabilidad y trazabilidad para producción |
-| Sprint siguiente | Cierre de brechas prioritarias (Slack productivo, checklist REQ, tutela completa) | En curso | Condiciones de salida comercial más robustas |
+| Sprint siguiente | Cierre de brechas prioritarias (Slack productivo, checklist REQ, alcance penal víctimas) | En curso | Condiciones de salida comercial más robustas |
 
 ### 6.3 Traducción comercial del roadmap
 

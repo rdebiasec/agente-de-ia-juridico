@@ -144,6 +144,7 @@ Límites actuales (por defecto):
 | Ruta | Política |
 |---|---|
 | `POST /auth/login` | 12 intentos / 15 min por IP |
+| `POST /chat` | 60 mensajes / 15 min por sesión (`subject_id`); 180 / 15 min por IP |
 | `POST /chat/plan` | 20 solicitudes / 15 min por sesión (`subject_id`) |
 | `POST /chat/plan/{id}/execute` | 20 ejecuciones / 15 min por sesión |
 
