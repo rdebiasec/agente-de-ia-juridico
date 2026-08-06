@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 7e646dc9b0fcf304 -->
+<!-- config-version: 2; checksum: 7e646dc9b0fcf304 -->
 # Guardrails de tools — analista_responsabilidad_tipicidad
 
 ## desk_policies

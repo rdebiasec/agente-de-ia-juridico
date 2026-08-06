@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 9c93b4a66fca74ae -->
+<!-- config-version: 2; checksum: 9c93b4a66fca74ae -->
 # Guardrails de entrada — analista_representacion_victimas
 
 ## desk_policies

@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: b91e00fb53689667 -->
+<!-- config-version: 2; checksum: b91e00fb53689667 -->
 # Guardrails de entrada — coordinador_caso
 
 ## desk_policies
