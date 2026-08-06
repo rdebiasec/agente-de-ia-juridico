@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 9a2e9ee2c43e8709 -->
+<!-- config-version: 4; checksum: 4b33a7047565413c -->
 # Guardrails de entrada — analista_ruta_procesal
 
 ## desk_policies
@@ -10,6 +10,12 @@ Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
 Solo pedidos internos del Gerente sobre **ruta procesal Ley 906** en penal-víctimas Colombia.
+
+## required_context_policy
+- Para acreditar etapa: actuación procesal + fecha + fuente.
+- Para calcular término: etapa + tipo de actuación + fecha base verificable.
+- Si falta alguno, permitir análisis preliminar pero obligar `[PENDIENTE DE VERIFICAR]`; no cerrar vencimiento.
+- Pedido de memorial/impulso accionable se deriva a plan HITL y `redactor_documentos_juridicos`.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

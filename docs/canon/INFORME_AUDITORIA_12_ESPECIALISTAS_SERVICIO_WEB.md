@@ -3,6 +3,7 @@
 **Fecha:** 2026-08-05  
 **Producto:** Firma virtual Lexiatek — `https://agente-de-ia-juridico.onrender.com`  
 **Método:** Panel `PROMPT_PANEL_12_ESPECIALISTAS_SERVICIO_WEB.md` + checklist 1 día + evidencias runtime + dictamen [Auditar seguridad y compliance](c1c9cb43-ce60-4d0d-897e-72675e1ab95f)  
+**Revalidado:** 2026-08-05 19:58 COT (runtime, browser, GitHub Actions y repo).
 **Declaración E0:** **NO LISTO** para escala comercial abierta (bloqueantes P0 de acceso y confidencialidad).
 
 ---
@@ -27,14 +28,14 @@ Sin embargo, en producción **`WEB_AUTH_ENABLED=false`** (fijado en `render.yaml
 | E4 Arquitectura | **PASS** | 0 | 0 | 1 |
 | E5 SRE / Reliability | **PASS** | 0 | 0 | 1 |
 | E6 Calidad SW | **FAIL** | 1 | 0 | 1 |
-| E7 UX producto | **PARTIAL** | 0 | 2 | 0 |
+| E7 UX producto | **FAIL** | 1 | 1 | 0 |
 | E8 Marketing / claims | **PARTIAL** | 0 | 1 | 1 |
 | E9 Ética litigante | **PARTIAL** | 1 | 0 | 0 |
 | E10 FinOps | **PARTIAL** | 0 | 1 | 1 |
 | E11 Observabilidad | **PARTIAL** | 0 | 0 | 1 |
 | E12 Supply chain | **PARTIAL** | 0 | 2 | 1 |
 
-**Conteo actualizado:** P0×9 · P1×11 · P2×9
+**Conteo actualizado:** P0×10 · P1×10 · P2×9
 
 ---
 
@@ -65,7 +66,31 @@ GET /health → {
 | Backup Postgres→R2 | success 2026-08-05 (y días previos) |
 | CI `main` | **failure** — `validate_fase0.py`: espera 50 REQ, hay 45 |
 | `config_active` tutela/constitucional | **0** rows (prod limpio) |
-| pytest local auth+guardrails+firma | **22 passed** |
+| pytest F3 config+guardrails+HITL | **52 passed** |
+| pytest F4 acceso+privacidad+HITL | **45 passed** (fixtures fijan explícitamente el modo autenticado) |
+
+### Revalidación directa F4
+
+Desde un navegador en la IP autorizada, sin ingresar correo, contraseña ni PIN:
+
+```json
+GET /api/audit/session → {
+  "auth_enabled": true,
+  "authenticated": true,
+  "email": "editor@lexiatek.local",
+  "login_required": false,
+  "open_access": true
+}
+```
+
+El editor cargó el catálogo activo y habilitó controles de edición/guardado. Esto confirma que la IP allowlist es el único perímetro real del portal: no hay identidad individual, consentimiento ni PIN antes de editar configuración.
+
+Revalidación operativa adicional:
+
+- `/health`: Postgres, cifrado y Slack OK; `web_auth_enabled=false`, `ip_allowlist_enabled=true`.
+- Backup Postgres→R2: 5/5 ejecuciones recientes exitosas (1–5 agosto).
+- CI `main`: 5/5 ejecuciones recientes fallidas; la última exige 50 REQ pero el canon tiene 45.
+- Catálogo prod: 0 coincidencias `tutela`/`constitucional`.
 
 ---
 
@@ -134,9 +159,10 @@ GET /health → {
 - Suite local auth/firma/guardrails: 22 passed (no sustituye CI).  
 - **P2:** defaults permisivos en `.env.example`.  
 
-### [E7][P1] Portal auditoría: login 503 / gate débil
-- **Evidencia:** `POST /api/audit/login` 503 si `auth_enabled` false; `AUDIT_REQUIRE_LOGIN` no forzado en blueprint.  
-- **Remedio:** `AUDIT_REQUIRE_LOGIN=true`; desacoplar gate portal de `WEB_AUTH`.  
+### [E7][P0] Portal auditoría entra como editor compartido sin login/PIN/consent
+- **Evidencia:** `/api/audit/session` devuelve `authenticated=true`, `email=editor@lexiatek.local`, `login_required=false`, `open_access=true`; `AUDIT_REQUIRE_LOGIN` no está en `render.yaml` y su default es `false`.
+- **Riesgo:** cualquier persona en la IP autorizada puede leer y modificar prompts/skills/guardrails bajo una identidad compartida; no hay trazabilidad por abogado ni consentimiento de casos.
+- **Remedio:** `AUDIT_REQUIRE_LOGIN=true` en Render + blueprint; configurar `AUDIT_ALLOWED_EMAILS`; smoke login correo+password+PIN+consent local y producción.
 
 ### [E7][P1] Threat model `/cliente` público  
 
@@ -163,7 +189,7 @@ GET /health → {
 | 4 | Redactar respuesta `/chat`: sin `system_prompt` ni internals | P0 | M |
 | 5 | Consent hard otra vez camino real (login no cortocircuita) | P0 | S |
 | 6 | Arreglar `validate_fase0` (45 REQ) → CI verde | P0 | S |
-| 7 | `AUDIT_REQUIRE_LOGIN=true` + allowlist emails + PIN | P1 | S |
+| 7 | `AUDIT_REQUIRE_LOGIN=true` + allowlist emails + PIN | P0 | S |
 | 8 | Rate limit `POST /chat` + revisar bypass `/cliente` | P1 | M |
 | 9 | Cerrar DPA OpenAI/Render/Slack; unificar correo ARCO | P1 | M (humano) |
 | 10 | Limpiar claims “tutela” en entregables + restore drill fechado | P1 | S–M |
@@ -186,7 +212,7 @@ GET /health → {
 
 ## 6) Declaración final (E0)
 
-**NO LISTO** para invitar más despachos / tráfico abierto hasta cerrar **acciones 1–5** (auth, drafts por sujeto, sin `web:test`/ARCO débil, sin filtrar prompts, consent real).  
+**NO LISTO** para invitar más despachos / tráfico abierto hasta cerrar **acciones 1–7** (auth web y portal, drafts por sujeto, sin `web:test`/ARCO débil, sin filtrar prompts, consentimiento real y editor con identidad/PIN).
 
 Con 1–6 hechas → **LISTO CONDICIONAL** (faltan portal audit duro, rate limit, DPA).  
 Con 1–9 hechas → **LISTO** para escala controlada.  
@@ -195,7 +221,20 @@ Con 1–9 hechas → **LISTO** para escala controlada.
 
 ---
 
-## 7) Artefactos generados en esta sesión
+## 7) Fuentes oficiales de la recomendación
+
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) — autenticación, sesiones y control de acceso consistentes; sustenta E1/E7.
+- [OWASP API1:2023 Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/) — cada acceso por ID debe verificar autorización sobre el objeto; sustenta aislamiento de drafts, expedientes y ARCO.
+- [SUIN-Juriscol — régimen de protección de datos / Ley 1581](https://www.suin-juriscol.gov.co/legislacion/habeasdata.html) — autorización previa e informada, circulación restringida y responsabilidad demostrada; sustenta E2.
+- [OpenAI Agents SDK — Human in the loop](https://openai.github.io/openai-agents-python/human_in_the_loop/) y [Guardrails](https://openai.github.io/openai-agents-python/guardrails/) — pausa/aprobación de acciones sensibles y límites de guardrails de agente/tool; sustenta E3.
+- [Render — compliance y DPA](https://render.com/docs/certifications-compliance) — DPA disponible en Document Center; sustenta la acción de cerrar evidencia del encargado.
+- Evidencia operativa: [CI fallida más reciente](https://github.com/rdebiasec/agente-de-ia-juridico/actions/runs/31053690978) · [backup R2 exitoso más reciente](https://github.com/rdebiasec/agente-de-ia-juridico/actions/runs/30993803826).
+
+Fuentes internas canónicas: `GUIA_PROYECTO_AGENTE_JURIDICO.md`, `requisitos_asistente.json`, `ESTADO_PROYECTO.md`, `RUNBOOK_CUMPLIMIENTO_1581.md`, `ESTADO_DPA_Y_ARCO.md`.
+
+---
+
+## 8) Artefactos generados en esta sesión
 
 | Archivo | Uso |
 |---|---|

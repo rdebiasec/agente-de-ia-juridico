@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: dfd1dfaf6a8e5476 -->
+<!-- config-version: 3; checksum: 5651b710ee76f188 -->
 ---
 name: crear-ruta-procesal-recomendada
 description: Contrato penal-víctimas: Proponer secuencia de próximos pasos procesales para la representación de la víctima, con responsables y plazos, para revisión del abogado. Activar cuando el plan/HITL o el especialista requiera `crear_ruta_procesal_recomendada`. No sustituye a `evalua...
@@ -38,9 +38,11 @@ Producto integrador del agente. Ejecutar tras etapa, actuaciones mapeadas, oport
 - Etiqueta: `BORRADOR PARA REVISIÓN — NO EJECUTAR SIN APROBACIÓN`.
 
 ## Steps
-1. Partir de etapa e intereses de la víctima.
-2. Proponer secuencia de actuaciones posibles con justificación breve.
-3. Separar recomendación de decisión del abogado; HITL para piezas accionables.
+1. Partir de `etapa_ley906` canónica (`proceso-penal-906.md`) + intereses de la víctima.
+2. Proponer secuencia numerada: actuación posible en esa etapa, responsable, plazo estimado (días hábiles o pendiente), dependencia.
+3. Cruzar con `detectar_riesgos_procesales` / oportunidad; no citar arts. 906 sin RAG.
+4. Separar recomendación de decisión del abogado; etiqueta `BORRADOR PARA REVISIÓN — NO EJECUTAR SIN APROBACIÓN`.
+5. Piezas accionables (memorial/impulso) → plan HITL / `redactor_documentos_juridicos`.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `crear_ruta_procesal_recomendada`.
@@ -66,9 +68,16 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `crear_rut
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **Aviso de borrador:** Aviso de borrador y revisión profesional.
 
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
+
 ## No duplicar
 - No evaluar oportunidad de cada actuación (`evaluar_oportunidad_procesal`).
-- No redactar memoriales (`redactor_documentos_juridicos`).
+- No redactar memoriales (dueño: `redactor_documentos_juridicos`).
 
 ## Riesgo si se omite
 Actuaciones desordenadas o extemporáneas en representación de víctimas bajo Ley 906.

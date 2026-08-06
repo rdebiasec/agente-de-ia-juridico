@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: d368168e652e6ef0 -->
+<!-- config-version: 3; checksum: 0ed0e1c5498a2f8f -->
 ---
 name: evaluar-solicitud-fiscalia-juez
 description: Contrato penal-víctimas: Evaluar procedencia formal y conveniencia estratégica de una solicitud a Fiscalía o juez de control de garantías / conocimiento. Activar cuando el plan/HITL o el especialista requiera `evaluar_solicitud_fiscalia_juez`. No sustituye a `redactar_memorial...
@@ -67,6 +67,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_s
 - **No revictimizar:** Solicitudes que expongan innecesariamente a la víctima señalar riesgo.
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
 
 ## No duplicar
 - No redactar memorial (`redactar_memorial_penal`).

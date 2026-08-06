@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 23e96a1db43a28bf -->
+<!-- config-version: 3; checksum: b4e23963da398b82 -->
 ---
 name: generar-preguntas-tipicidad
 description: Contrato penal-víctimas: Formular preguntas para completar elementos del tipo penal, sin presuponer culpabilidad. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_tipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -36,10 +36,11 @@ Formular preguntas para completar elementos del tipo penal, sin presuponer culpa
 - Etiqueta: `NO SUSTITUYE ANÁLISIS DE TIPICIDAD`.
 
 ## Steps
-1. Identificar vacíos en elementos del tipo penal.
-2. Formular preguntas para víctima, testigos o abogado.
-3. Evitar preguntas que presupongan culpabilidad.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Tomar vacíos por elemento del tipo (objetivo/subjetivo) desde descomposición/matriz (`penal.md`).
+2. Formular preguntas ligadas a `elemento_factual_que_aclara`; no genéricas.
+3. Evitar inducción de culpabilidad y preguntas revictimizantes (p. ej. “¿por qué no denunció antes?”).
+4. Si el vacío es dogmático-jurídico, derivar a `analista_responsabilidad_tipicidad` (no resolverlo aquí).
+5. Etiqueta `NO SUSTITUYE ANÁLISIS DE TIPICIDAD`; revisión humana antes de enviar a víctima.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `generar_preguntas_tipicidad`.
@@ -59,8 +60,15 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_p
 - **Revision humana obligatoria:** Revisión del abogado antes de enviar a víctima.
 - **Aviso de borrador:** Aviso de revisión profesional.
 
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
+
 ## No duplicar
-- No descomponer tipos penales (`descomponer_elementos_tipo_penal` → tipicidad).
+- No descomponer tipos penales (`descomponer_elementos_tipo_penal` → `analista_responsabilidad_tipicidad`).
 - No preguntas solo factuales sin vínculo tipico (`generar_preguntas_aclaracion`).
 - No mapear hecho-prueba (`mapear_tipo_penal_hecho_prueba`).
 

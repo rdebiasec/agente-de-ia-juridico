@@ -1,5 +1,5 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -8,6 +8,9 @@
     "config/guardrails/agents/",
     "docs/canon/PROMPT_REVISION_PROMPTS_Y_SKILLS.md",
     "docs/canon/INFORME_AUDITORIA_PROMPTS_SKILLS.md",
+    "docs/canon/INFORME_INSPECCION_CONFIG_NOTEPADS.md",
+    "agente/conocimiento/proceso-penal-906.md",
+    "agente/conocimiento/penal.md",
     "agentic-architectures KB: Ch6, Ch7, Ch8, Ch10, Ch11, Ch12"
   ],
   "cases": [
@@ -47,6 +50,14 @@
       "message": "Analice preliminarmente tipicidad, dolo y autoría en el caso penal.",
       "expected_destination": "analista_responsabilidad_tipicidad",
       "expected_plan_required": false
+    },
+    {
+      "id": "route-ruta-906",
+      "category": "routing",
+      "message": "Identifique la etapa procesal bajo Ley 906 y proponga la ruta procesal recomendada para la víctima.",
+      "expected_destination": "analista_ruta_procesal",
+      "expected_plan_required": false,
+      "notes": "H-203 inspección config: cobertura eval de ruta procesal."
     },
     {
       "id": "route-audiencia",

@@ -29,6 +29,7 @@ def test_new_schemas_require_core_fields():
 
     ruta = RutaProcesalLey906(resumen="Impulso en indagación", etapa_aparente="indagacion")
     assert ruta.pendientes_verificacion == []
+    assert ruta.etapa_ley906 == "pendiente_verificar"
     with pytest.raises(ValidationError):
         RutaProcesalLey906(resumen=" ")
 
@@ -61,11 +62,28 @@ def test_render_new_schemas_is_prose_not_raw_json():
         RutaProcesalLey906(
             resumen="Evaluar impulso",
             etapa_aparente="indagacion",
+            etapa_ley906="indagacion_investigacion",
+            evidencia_etapa=[
+                {
+                    "actuacion": "Denuncia",
+                    "fecha": "[PENDIENTE DE VERIFICAR]",
+                    "fuente": "expediente",
+                }
+            ],
             ruta_recomendada=["Solicitar impulso", "Verificar radicado"],
+            ruta_detallada=[
+                {
+                    "actuacion": "Confirmar última actuación",
+                    "responsable": "abogado",
+                }
+            ],
             pendientes_verificacion=["Confirmar número SPOA"],
         )
     )
     assert "Ruta procesal" in ruta_txt
+    assert "indagacion_investigacion" in ruta_txt
+    assert "Evidencia de etapa" in ruta_txt
+    assert "Ruta detallada" in ruta_txt
     assert "Solicitar impulso" in ruta_txt
     assert "Confirmar número SPOA" in ruta_txt
     assert "'ruta_recomendada'" not in ruta_txt  # no dump dict crudo tipico

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 22b07fae999888bb -->
+<!-- config-version: 3; checksum: 99f02ad4967f721a -->
 ---
 name: analizar-autoria-y-participacion
 description: Contrato penal-víctimas: Evaluar preliminarmente autoría y participación (autor, coautor, cómplice) según hechos, sin imputación formal. Activar cuando el plan/HITL o el especialista requiera `analizar_autoria_y_participacion`. No sustituye a `identificar_actores_y_roles`.
@@ -31,10 +31,11 @@ Ejecutar tras descomposición de elementos y mapa de actores. En representación
 - Etiqueta: `PRELIMINAR — NO IMPUTACIÓN FORMAL`.
 
 ## Steps
-1. Identificar posibles autores, coautores y partícipes según hechos.
-2. Evaluar preliminarmente conductas de cada interviniente.
-3. Señalar vacíos probatorios en autoría/participación.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Partir del mapa de actores y hechos soportados por interviniente (`penal.md` §Autoría).
+2. Asignar `rol_preliminar` (autor | coautor | partícipe | testigo | sin_datos) con hechos_soporte; sin imputación formal.
+3. Señalar vacíos probatorios y riesgo de atribuir conducta no acreditada.
+4. Normas de autoría/participación del CP: solo si verificadas en RAG; si no → `[PENDIENTE DE VERIFICAR]`.
+5. Etiqueta `PRELIMINAR — NO IMPUTACIÓN FORMAL`; revisión humana antes de comunicar roles.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_autoria_y_participacion`.
@@ -57,6 +58,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `analizar_
 - **Revision humana obligatoria:** No comunicar roles a Fiscalía o víctima sin revisión del abogado.
 - **No revictimizar:** No sugerir participación de la víctima sin base factual.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
 
 ## No duplicar
 - No identificar actores (`identificar_actores_y_roles` — solo roles procesales básicos).

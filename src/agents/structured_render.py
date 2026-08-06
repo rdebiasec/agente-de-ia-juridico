@@ -74,8 +74,12 @@ def render_structured_output(output: Any) -> str:
     if "hipotesis_tipica" in data:
         lines = [
             "Matriz de tipicidad preliminar",
+            str(data.get("etiqueta_preliminar") or "HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN"),
             f"Hipótesis: {data.get('hipotesis_tipica')}",
         ]
+        fuentes = data.get("fuentes_kb") or []
+        if fuentes:
+            lines.append("Fuentes KB: " + "; ".join(str(x) for x in fuentes))
         if data.get("tipo_penal_sugerido"):
             lines.append(f"Tipo sugerido: {data['tipo_penal_sugerido']}")
         if data.get("autoria_participacion"):
@@ -87,7 +91,10 @@ def render_structured_output(output: Any) -> str:
             lines.append("\nElementos:")
             for el in elementos:
                 if isinstance(el, dict):
-                    lines.append(f"- {el.get('elemento')}: {el.get('riesgo_o_brecha') or '—'}")
+                    lines.append(
+                        f"- {el.get('elemento')} [{el.get('estado', 'pendiente_verificar')}]: "
+                        f"{el.get('riesgo_o_brecha') or '—'}"
+                    )
         for label, key in (
             ("Riesgos de atipicidad", "riesgos_atipicidad"),
             ("Agravantes/atenuantes", "agravantes_atenuantes"),
@@ -123,11 +130,21 @@ def render_structured_output(output: Any) -> str:
 
     # RutaProcesalLey906
     if "ruta_recomendada" in data and "etapa_aparente" in data:
+        etapa = data.get("etapa_ley906") or data.get("etapa_aparente")
         lines = [
             "Ruta procesal Ley 906 (preliminar)",
             str(data.get("resumen") or "").strip(),
-            f"Etapa aparente: {data.get('etapa_aparente')}",
+            f"Etapa aparente: {etapa}",
         ]
+        evidencia = data.get("evidencia_etapa") or []
+        if evidencia:
+            lines.append("\nEvidencia de etapa:")
+            for item in evidencia:
+                if isinstance(item, dict):
+                    lines.append(
+                        f"- {item.get('actuacion') or 'Actuación pendiente'} | "
+                        f"fecha={item.get('fecha')} | fuente={item.get('fuente')}"
+                    )
         for label, key in (
             ("Oportunidades de intervención", "oportunidades_intervencion"),
             ("Términos / vencimientos", "terminos_o_vencimientos"),
@@ -139,6 +156,16 @@ def render_structured_output(output: Any) -> str:
             if items:
                 lines.append(f"\n{label}:")
                 lines.extend(f"- {x}" for x in items)
+        detalle = data.get("ruta_detallada") or []
+        if detalle:
+            lines.append("\nRuta detallada:")
+            for i, item in enumerate(detalle, 1):
+                if isinstance(item, dict):
+                    lines.append(
+                        f"{i}. {item.get('actuacion')} — responsable={item.get('responsable')}; "
+                        f"plazo={item.get('plazo_estimado')}; "
+                        f"soporte={item.get('soporte_normativo')}"
+                    )
         return "\n".join(lines).strip()
 
     # RepresentacionVictimas

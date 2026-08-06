@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 67695d5921456b46 -->
+<!-- config-version: 3; checksum: 4e320ccefa605c45 -->
 ---
 name: evaluar-oportunidad-procesal
 description: Contrato penal-víctimas: Determinar si una actuación propuesta es oportuna, prematura o extemporánea para la víctima en la etapa actual. Activar cuando el plan/HITL o el especialista requiera `evaluar_oportunidad_procesal`. No sustituye a `controlar_terminos_procesales_prelimi...
@@ -62,6 +62,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `evaluar_o
 - **Revision humana obligatoria:** HITL obligatorio antes de interponer recurso o solicitud.
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **Aviso de borrador:** Aviso: términos deben verificarse por abogado.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
 
 ## No duplicar
 - No calcular todos los términos (`controlar_terminos_procesales_preliminares`).

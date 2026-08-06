@@ -137,10 +137,12 @@
         const label =
           role === "gerente" ? "Coordinador del Caso" : isAttach ? "Archivo enviado" : "Usted";
         const extra = isAttach ? " cliente-msg--attachment" : "";
-        return `<article class="cliente-msg cliente-msg--${role}${extra}">
-          <span class="cliente-msg-meta">${escapeHtml(label)}</span>
-          ${escapeHtml(m.content || "")}
-        </article>`;
+        return (
+          `<article class="cliente-msg cliente-msg--${role}${extra}">` +
+          `<span class="cliente-msg-meta">${escapeHtml(label)}</span>` +
+          `<div class="cliente-msg-body">${escapeHtml(m.content || "")}</div>` +
+          `</article>`
+        );
       })
       .join("");
     messagesEl.scrollTop = messagesEl.scrollHeight;

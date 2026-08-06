@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: c4e4f63ae47432b2 -->
+<!-- config-version: 3; checksum: cbe5f8425977cef0 -->
 ---
 name: mapear-tipo-penal-hecho-prueba
 description: Contrato penal-víctimas: Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario. Activar cuando el plan/HITL o el especialista requiera `mapear_tipo_penal_hecho_prueba`. No sustituye a `construir_matriz_hecho_prue...
@@ -21,7 +21,7 @@ disable-model-invocation: true
 Relacionar cada elemento del tipo penal con hechos y pruebas, visualizando fortalezas, debilidades y recaudo necesario.
 
 ## Rol en analista_responsabilidad_tipicidad
-Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/culpa. Alimenta plan probatorio (`crear_plan_recaudo_probatorio` → gestor evidencia).
+Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/culpa. Alimenta plan probatorio (`crear_plan_recaudo_probatorio` → `analista_evidencia`).
 
 ## Inputs
 - Elementos del tipo descompuestos.
@@ -34,10 +34,11 @@ Producto integrador del agente. Ejecutar tras descomposición, autoría y dolo/c
 - Etiqueta: `INSUMO ESTRATÉGICO — REVISIÓN ABOGADO`.
 
 ## Steps
-1. Tomar hipótesis tipica y elementos ya identificados.
-2. Mapear cada elemento a hecho(s) y medio(s) de prueba.
-3. Marcar celdas vacías como brecha; no inventar prueba.
-4. No sustituir inventario (`inventariar_evidencia`) ni matriz completa de evidencia.
+1. Tomar hipótesis tipica y elementos descompuestos (`penal.md` paso 6).
+2. Por cada `elemento_tipo`: hecho, prueba_existente, prueba_faltante, fortaleza, riesgo.
+3. Celdas vacías = brecha de recaudo; priorizar elementos débiles; no inventar prueba.
+4. No sustituir `inventariar_evidencia` ni `construir_matriz_hecho_prueba` (matriz genérica hecho→prueba).
+5. Etiqueta `INSUMO ESTRATÉGICO — REVISIÓN ABOGADO`; HITL antes de audiencia/memorial.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_tipo_penal_hecho_prueba`.
@@ -59,6 +60,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `mapear_ti
 - **Separar hecho de inferencia:** Elemento “cubierto” requiere prueba identificada o hecho confirmado.
 - **Revision humana obligatoria:** HITL obligatorio antes de audiencia o memorial.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
 
 ## No duplicar
 - **vs `construir_matriz_hecho_prueba`:** esta matriz es por **elemento del tipo penal**; la otra es hecho→prueba genérica.

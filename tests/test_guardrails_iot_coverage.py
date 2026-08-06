@@ -34,6 +34,24 @@ def test_all_agents_have_input_output_tools_md():
     assert missing == [], f"Faltan políticas I/O/T: {missing}"
 
 
+def test_tipicidad_and_route_guardrails_anchor_legal_grounding():
+    tipicidad = (
+        AGENTS_GR / "analista_responsabilidad_tipicidad" / "output.md"
+    ).read_text(encoding="utf-8")
+    ruta = (AGENTS_GR / "analista_ruta_procesal" / "output.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "penal.md" in tipicidad
+    assert "HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN" in tipicidad
+    assert "[PENDIENTE DE VERIFICAR]" in tipicidad
+
+    assert "proceso-penal-906.md" in ruta
+    assert "días hábiles" in ruta
+    assert "fecha base" in ruta
+    assert "plan HITL" in ruta
+
+
 def test_specialists_have_input_and_output_guardrails_wired():
     from src.agents.orchestrator import get_agent_by_id
 

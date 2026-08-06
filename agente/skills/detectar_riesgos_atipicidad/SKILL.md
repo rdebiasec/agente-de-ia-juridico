@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 8151ad6478ea5e5d -->
+<!-- config-version: 3; checksum: 0fac7d931e44cd27 -->
 ---
 name: detectar-riesgos-atipicidad
 description: Contrato penal-víctimas: Detectar riesgo de atipicidad o naturaleza no penal antes de actuaciones que presupongan delito. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_atipicidad`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -34,10 +34,11 @@ Gate temprano: ejecutar en paralelo con o justo después de `identificar_conduct
 - `recomendacion_interna`: continuar análisis penal | explorar vía no penal | pedir hechos adicionales.
 
 ## Steps
-1. Revisar elementos del tipo vs hechos/prueba disponibles.
-2. Señalar riesgos de atipicidad o insuficiencia probatoria por elemento.
-3. No afirmar inocencia ni tipicidad definitiva.
-4. Proponer preguntas de aclaración, no conclusiones cerradas.
+1. Contrastar elementos del tipo (descompuestos o hipótesis) vs hechos/prueba (`penal.md` pasos 5–6).
+2. Calificar `riesgo_atipicidad` alto|medio|bajo por elementos faltantes objetivos/subjetivos.
+3. Si indicios de vía no penal, anotar `conducta_alternativa` como preliminar (civil/disciplinaria/administrativa).
+4. No afirmar inocencia ni tipicidad definitiva; no inventar jurisprudencia.
+5. Recomendación interna + preguntas de aclaración; riesgo alto → alertar Gerente/abogado antes de radicar.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_riesgos_atipicidad`.
@@ -61,9 +62,16 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - **Fuera de alcance:** Si el caso es claramente no penal, declararlo y no forzar tipicidad.
 - **Aviso de borrador:** Aviso de revisión profesional.
 
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
+
 ## No duplicar
 - No descomponer elementos (`descomponer_elementos_tipo_penal`).
-- No calidad final (`clasificar_aprobacion_juridica` en calidad).
+- No calidad final (`clasificar_aprobacion_juridica` → `analista_calidad_juridica`).
 
 ## Riesgo si se omite
 Denuncia o memorial por delito inexistente → archivo, costos y daño a la víctima.

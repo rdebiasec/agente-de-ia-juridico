@@ -162,10 +162,12 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
         "detectar_contradicciones_factuales",
         "detectar_vacios_factuales",
     ),
+    # Anclas chat slim: primario + hasta 3 secundarios (ver agent_capability_anchor).
+    # dolo/autoría priorizados frente a mapear/atipicidad (H-103 inspección 2026-08-05).
     "analista_responsabilidad_tipicidad": (
         "identificar_conductas_punibles_preliminares",
-        "detectar_riesgos_atipicidad",
-        "mapear_tipo_penal_hecho_prueba",
+        "analizar_dolo_culpa_elemento_subjetivo",
+        "analizar_autoria_y_participacion",
     ),
     "analista_evidencia": (
         "detectar_brechas_probatorias",
@@ -185,6 +187,7 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     "analista_ruta_procesal": (
         "evaluar_oportunidad_procesal",
         "crear_ruta_procesal_recomendada",
+        "controlar_terminos_procesales_preliminares",
     ),
     "analista_representacion_victimas": (
         "analizar_derechos_victima",

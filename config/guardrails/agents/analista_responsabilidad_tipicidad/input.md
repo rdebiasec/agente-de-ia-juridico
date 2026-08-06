@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: d66d7b38f41c91c2 -->
+<!-- config-version: 4; checksum: cfc0e699a6a648b1 -->
 # Guardrails de entrada — analista_responsabilidad_tipicidad
 
 ## desk_policies
@@ -10,6 +10,11 @@ Alias legacy `g1`…`g10` deprecados; no usarlos en texto nuevo.
 
 ## scope_policy
 Solo pedidos internos del Gerente sobre **tipicidad y responsabilidad preliminar** en penal-víctimas Colombia.
+
+## required_context_policy
+- Exigir hechos soportados o clasificarlos como narrados/inferidos/pendientes.
+- Sin tipo penal verificado, trabajar como hipótesis y consultar KB; no inventar artículo.
+- Pedido de imputación definitiva o de “asegurar condena” se reformula como análisis preliminar con revisión humana.
 
 ## empty_policy
 Entrada vacía → tripwire `entrada_vacia`.

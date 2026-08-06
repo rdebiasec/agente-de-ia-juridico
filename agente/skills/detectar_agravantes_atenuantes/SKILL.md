@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 3742c1f32d922b22 -->
+<!-- config-version: 3; checksum: 91087b7d60f42ee2 -->
 ---
 name: detectar-agravantes-atenuantes
 description: Contrato penal-víctimas: Identificar circunstancias de agravación o atenuación aplicables con soporte factual y normativo preliminar. Activar cuando el plan/HITL o el especialista requiera `detectar_agravantes_atenuantes`. No sustituye a `descomponer_elementos_tipo_penal`.
@@ -31,10 +31,11 @@ Ejecutar tras descomposición del tipo y autoría. Relevante para gravedad de so
 - Circunstancias no acreditadas marcadas `[PENDIENTE DE VERIFICAR]`.
 
 ## Steps
-1. Revisar hechos que configuren agravantes o atenuantes aplicables.
-2. Vincular con norma penal y prueba disponible.
-3. Marcar elementos no acreditados como pendientes.
-4. Entregar salida estructurada, marcar `[PENDIENTE DE VERIFICAR]` lo no soportado y someter a revisión humana.
+1. Tras tipo base y autoría, listar circunstancias fácticas candidatas (`penal.md` §Agravantes).
+2. Por cada una: `circunstancia`, `tipo` (agravante|atenuante|cualificadora), `norma_cp` (verificada o pendiente), `hecho_soporte`, `prueba`, `estado`.
+3. Sin hecho o sin norma verificada → `pendiente` / `[PENDIENTE DE VERIFICAR]`; no inventar artículos.
+4. Rechazar fórmulas que culpen a la víctima sin base; no prometer pena.
+5. Entregar registro estructurado para revisión del abogado.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_agravantes_atenuantes`.
@@ -57,6 +58,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - **Revision humana obligatoria:** No prometer pena o resultado al cliente.
 - **No revictimizar:** No usar circunstancias que culpen a la víctima (ej. “provocación” sin soporte).
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
 
 ## No duplicar
 - No descomponer tipo base (`descomponer_elementos_tipo_penal`).

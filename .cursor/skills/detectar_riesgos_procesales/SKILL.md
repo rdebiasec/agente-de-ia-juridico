@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4597bfc899bb4525 -->
+<!-- config-version: 3; checksum: e4ce934e8e292510 -->
 ---
 name: detectar-riesgos-procesales
 description: Contrato penal-víctimas: Identificar y priorizar riesgos procesales que puedan causar improcedencia, pérdida de derechos o extemporaneidad. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_procesales`. No sustituye a `evaluar_oportunidad_procesal`.
@@ -59,6 +59,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - **Revision humana obligatoria:** Riesgos críticos requieren escalamiento al abogado titular.
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
 
 ## No duplicar
 - No evaluar una sola actuación (`evaluar_oportunidad_procesal`).

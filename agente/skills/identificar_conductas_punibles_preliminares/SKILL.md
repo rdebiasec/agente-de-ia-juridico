@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 4f9597371c9c3c27 -->
+<!-- config-version: 3; checksum: cedc41d96e6d6d33 -->
 ---
 name: identificar-conductas-punibles-preliminares
 description: Contrato penal-víctimas: Mapear conductas descritas en hechos verificados contra tipos penales hipotéticos, sin conclusión definitiva ni imputación. Activar cuando el plan/HITL o el especialista requiera `identificar_conductas_punibles_preliminares`. No sustituye a `descompone...
@@ -33,10 +33,11 @@ Punto de entrada del agente tras cronología verificada. Alimenta `descomponer_e
 - Etiqueta obligatoria: `HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN`.
 
 ## Steps
-1. Listar conductas narradas con soporte fáctico mínimo.
-2. Asociar hipótesis tipicas tentativas (no definitivas) sin forzar tipo.
-3. Marcar conductas atípicas o insuficientes como riesgo/pendiente.
-4. Derivar descomposición elemental a `descomponer_elementos_tipo_penal`.
+1. Anclar hechos a cronología soportada; si faltan, derivar a `analista_cronologia_hechos` (ver `penal.md` §Marco tipico paso 1).
+2. Listar conductas narradas con soporte fáctico mínimo (hecho ≠ inferencia).
+3. Asociar hipótesis tipicas tentativas vía `leer_normas_clave`/`buscar_en_conocimiento`; sin forzar tipo ni inventar artículos.
+4. Marcar conductas atípicas/insuficientes; etiqueta `HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN`.
+5. Derivar descomposición a `descomponer_elementos_tipo_penal`.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `identificar_conductas_punibles_preliminares`.
@@ -64,7 +65,14 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `identific
 ## Handoff
 - Requiere entrada de `analista_cronologia_hechos`: cronología + `verificar_hechos_soportados` con recomendación apta.
 - Salida alimenta `identificar_conductas_punibles_preliminares` → `descomponer_elementos_tipo_penal` → `mapear_tipo_penal_hecho_prueba`.
-- Si `detectar_riesgos_atipicidad` = alto → alertar coordinador y abogado antes de ruta penal.
+- Si `detectar_riesgos_atipicidad` = alto → alertar al Gerente (`coordinador_caso`) y abogado antes de ruta penal.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
 
 ## No duplicar
 - No descomponer elementos (`descomponer_elementos_tipo_penal`).

@@ -72,6 +72,11 @@ body.cliente-body {
   padding: 1.5rem 1rem 2rem;
 }
 
+.cliente-start[hidden],
+.cliente-shell[hidden] {
+  display: none !important;
+}
+
 .cliente-start-stage {
   width: min(1040px, 100%);
   display: grid;
@@ -386,11 +391,10 @@ body.cliente-body {
 
 .cliente-msg {
   max-width: min(78%, 520px);
-  padding: 0.72rem 0.9rem;
-  border-radius: 16px;
+  padding: 0.7rem 0.95rem 0.75rem;
+  border-radius: 14px;
   line-height: 1.45;
   font-size: 0.95rem;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -398,14 +402,14 @@ body.cliente-body {
   align-self: flex-end;
   background: linear-gradient(145deg, rgba(37, 99, 235, 0.14), rgba(6, 182, 212, 0.1));
   border: 1px solid rgba(37, 99, 235, 0.22);
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 5px;
 }
 
 .cliente-msg--gerente {
   align-self: flex-start;
   background: #fff;
   border: 1px solid var(--c-line);
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 5px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
@@ -420,7 +424,14 @@ body.cliente-body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--c-muted);
-  margin-bottom: 0.28rem;
+  margin: 0 0 0.35rem;
+  line-height: 1.2;
+}
+
+.cliente-msg-body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .cliente-composer {

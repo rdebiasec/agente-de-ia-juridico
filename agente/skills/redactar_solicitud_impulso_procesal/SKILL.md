@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 54475032dbc43c73 -->
+<!-- config-version: 3; checksum: a069dee4fd8e3352 -->
 ---
 name: redactar-solicitud-impulso-procesal
 description: Contrato penal-víctimas: Redactar solicitud de impulso procesal ante inactividad de Fiscalía o juez. Activar cuando el plan/HITL o el especialista requiera `redactar_solicitud_impulso_procesal`. No sustituye a `detectar_inactividad_procesal`.
@@ -60,6 +60,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `redactar_
 - **No inventar:** No inventar actuaciones ni fechas.
 - **Revision humana obligatoria:** HITL antes de radicar.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
 
 ## No duplicar
 - No detectar inactividad (`detectar_inactividad_procesal` — seguimiento).

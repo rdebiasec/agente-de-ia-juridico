@@ -16,6 +16,8 @@ def _audit_env(monkeypatch) -> None:
     monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
     monkeypatch.setenv("DATABASE_URL", "")
     monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
+    monkeypatch.setenv("IP_ALLOWLIST_ENABLED", "false")
     monkeypatch.delenv("RENDER", raising=False)
     from src.config import get_settings
 
@@ -210,6 +212,8 @@ async def test_audit_session_dev_auto_login(monkeypatch):
             "auth_enabled": True,
             "policy_version": r.json()["policy_version"],
             "dev_auto_login": True,
+            "login_required": True,
+            "open_access": False,
         }
 
         # La cookie emitida sirve para las rutas protegidas: sin PIN ni consentimiento.

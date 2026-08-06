@@ -21,14 +21,30 @@ KB_EXPECTED = [
     "proceso-penal-906.md",
 ]
 
+# REQ-038…042 (acciones de tutela) fueron retirados del producto el 2026-08-03.
+REQ_ACTIVOS_ESPERADOS = 45
+REQ_RETIRADOS = {f"REQ-{n:03d}" for n in range(38, 43)}
+
 errors: list[str] = []
 
 if not REQ_FILE.exists():
     errors.append(f"Falta {REQ_FILE}")
 else:
     data = json.loads(REQ_FILE.read_text())
-    if len(data["requisitos"]) != 50:
-        errors.append(f"Deben existir 50 REQ, hay {len(data['requisitos'])}")
+    requisitos = data["requisitos"]
+    ids = {r["id"] for r in requisitos}
+    if len(requisitos) != REQ_ACTIVOS_ESPERADOS:
+        errors.append(
+            f"Deben existir {REQ_ACTIVOS_ESPERADOS} REQ activos, hay {len(requisitos)}"
+        )
+    if data.get("total") != len(requisitos):
+        errors.append(
+            f"requisitos_asistente.json: 'total' ({data.get('total')}) "
+            f"no coincide con los REQ listados ({len(requisitos)})"
+        )
+    reaparecidos = sorted(ids & REQ_RETIRADOS)
+    if reaparecidos:
+        errors.append(f"REQ retirados presentes de nuevo: {', '.join(reaparecidos)}")
 
 if not PROMPT.exists():
     errors.append("Falta agente/prompts/sistema.md (persona del experto)")
@@ -70,4 +86,7 @@ if errors:
         print(f"  - {e}")
     sys.exit(1)
 
-print("OK: firma virtual (A+B) — 50 REQ, persona, KB, agentes, esquemas, persistencia, HITL y servicios presentes.")
+print(
+    f"OK: firma virtual (A+B) — {REQ_ACTIVOS_ESPERADOS} REQ activos, persona, KB, agentes, "
+    "esquemas, persistencia, HITL y servicios presentes."
+)

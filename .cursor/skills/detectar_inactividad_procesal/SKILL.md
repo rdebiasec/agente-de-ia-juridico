@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 521472bc509898e5 -->
+<!-- config-version: 3; checksum: 1ca0d44a0460e9c7 -->
 ---
 name: detectar-inactividad-procesal
 description: Contrato penal-víctimas: Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde. Activar cuando el plan/HITL o el especialista requiera `detectar_inactividad_procesal`. No sustituye a `redactar_solicitud_impulso_procesal`.
@@ -64,9 +64,16 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `detectar_
 - **Revision humana obligatoria:** HITL obligatorio antes de usar la salida en memorial, estrategia o comunicación con cliente.
 - **Aviso de borrador:** Aviso de revisión profesional.
 
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
+
 ## No duplicar
 - No redactar impulso (`redactar_solicitud_impulso_procesal` → redactor).
-- No monitoreo continuo (`monitorear_radicado` → gestor).
+- No monitoreo continuo (`monitorear_radicado` → `analista_seguimiento_procesal`).
 
 ## Riesgo si se omite
 Archivo o abandono del caso por inactividad institucional no impugnada.

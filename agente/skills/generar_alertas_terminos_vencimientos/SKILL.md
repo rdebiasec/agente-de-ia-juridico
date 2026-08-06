@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: d30420f51c9c5c65 -->
+<!-- config-version: 3; checksum: 7d34557a5970dfc3 -->
 ---
 name: generar-alertas-terminos-vencimientos
 description: Contrato penal-víctimas: Generar alertas de vencimientos próximos clasificadas por criticidad. Activar cuando el plan/HITL o el especialista requiera `generar_alertas_terminos_vencimientos`. No sustituye a `controlar_terminos_procesales_preliminares`.
@@ -59,6 +59,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `generar_a
 - **Revision humana obligatoria:** Alerta crítica dispara revisión humana, no actuación automática.
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.
 - **Aviso de borrador:** Verificación humana de términos.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/proceso-penal-906.md` — etapas canónicas y términos (días hábiles).
+- `agente/conocimiento/normas-clave.md` — criterio operativo + citación.
+- Tools: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`.
+- Actuación/fecha/artículo no verificado → `[PENDIENTE DE VERIFICAR]`.
 
 ## No duplicar
 - No identificar términos desde cero (`controlar_terminos_procesales_preliminares`).

@@ -262,8 +262,8 @@ def build_templated_steps(
                 (
                     "analista_responsabilidad_tipicidad",
                     "Tipicidad VIF / familia",
-                    "Consultaré tipicidad preliminar (p. ej. art. 229 C.P. u otras "
-                    "conductas familiares) sin conclusiones definitivas.",
+                    "Consultaré tipicidad preliminar de VIF u otras conductas familiares "
+                    "con norma verificada en KB, sin conclusiones definitivas.",
                 ),
                 (
                     "analista_evidencia",
@@ -273,9 +273,9 @@ def build_templated_steps(
                 ),
                 (
                     "analista_audiencias",
-                    "Solicitudes de protección (art. 134)",
+                    "Solicitudes de atención y protección",
                     "Voy a pedir preparación de solicitudes de atención/protección y "
-                    "guion para control de garantías o juicio, según etapa.",
+                    "guion para control de garantías o juicio, según etapa y norma verificada.",
                 ),
                 (
                     "analista_calidad_juridica",
@@ -294,7 +294,7 @@ def build_templated_steps(
                     "analista_ruta_procesal",
                     "Procedencia querella / abreviado",
                     "Voy a pedir al equipo de ruta 906 confirmar si el caso encaja en "
-                    "querella o procedimiento abreviado (Ley 1826) y próximos pasos.",
+                    "querella o procedimiento abreviado, con norma verificada y próximos pasos.",
                 ),
                 (
                     "analista_responsabilidad_tipicidad",

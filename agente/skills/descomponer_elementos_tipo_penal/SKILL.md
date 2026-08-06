@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: a6c4a27c353681e9 -->
+<!-- config-version: 3; checksum: 3659be9774e3a46a -->
 ---
 name: descomponer-elementos-tipo-penal
 description: Contrato penal-víctimas: Descomponer tipos penales hipotéticos en elementos objetivos, subjetivos y normativos verificables contra el expediente. Activar cuando el plan/HITL o el especialista requiera `descomponer_elementos_tipo_penal`. No sustituye a `mapear_tipo_penal_hecho_...
@@ -32,10 +32,11 @@ Núcleo dogmático del agente. Ejecutar tras hipótesis de conductas (`identific
 - Etiqueta: `ANÁLISIS DOGMÁTICO PRELIMINAR`.
 
 ## Steps
-1. Tomar hipótesis tipica tentativa (no definitiva) del contexto.
-2. Listar elementos objetivos/subjetivos del tipo y mapear a hechos/prueba disponibles.
-3. Marcar elementos sin soporte como brecha / pendiente.
-4. No afirmar tipicidad definitiva ni inventar artículos.
+1. Tomar hipótesis tipica tentativa (no definitiva); contrastar norma con `leer_normas_clave` / RAG (`penal.md` §Marco tipico paso 3).
+2. Listar elementos **objetivos** (conducta, resultado, nexo, tipicidad especial, sujeto) y **subjetivos** (dolo/culpa) del tipo.
+3. Mapear cada elemento a hecho_soporte / prueba; estado = cubierto | parcial | vacío.
+4. Elementos sin soporte → brecha + `[PENDIENTE DE VERIFICAR]`; no inventar artículos ni tipicidad definitiva.
+5. Etiqueta `ANÁLISIS DOGMÁTICO PRELIMINAR`; dolo detallado → `analizar_dolo_culpa_elemento_subjetivo`.
 
 ## Tools
 Skills = contratos (no function_tools invocables). No existe tool LLM `descomponer_elementos_tipo_penal`.
@@ -58,6 +59,13 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `descompon
 - **Revision humana obligatoria:** No usar en escrito de acusación o memorial sin revisión del abogado.
 - **No revictimizar:** En delitos sexuales/violencia, no presuponer consentimiento en elementos subjetivos.
 - **Aviso de borrador:** Aviso de revisión profesional.
+
+
+## Fuentes KB (obligatorio consultar antes de citar norma)
+- `agente/conocimiento/penal.md` — marco tipico, dolo/culpa, autoría, agravantes.
+- `agente/conocimiento/normas-clave.md` — marco Ley 599/906 + checklist de citación.
+- Tools: `leer_area_derecho` (penal), `leer_normas_clave`, `buscar_en_conocimiento`.
+- Artículo concreto no verificado → `[PENDIENTE DE VERIFICAR]`. No inventar normas.
 
 ## No duplicar
 - No mapear prueba por elemento (`mapear_tipo_penal_hecho_prueba`).

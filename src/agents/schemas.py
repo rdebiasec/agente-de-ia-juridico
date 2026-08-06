@@ -240,6 +240,10 @@ class ElementoTipoPenal(BaseModel):
     elemento: str = Field(..., description="Elemento objetivo/subjetivo del tipo.")
     hechos_que_soportan: list[str] = Field(default_factory=list)
     prueba_disponible: list[str] = Field(default_factory=list)
+    estado: Literal["cubierto", "parcial", "vacio", "pendiente_verificar"] = Field(
+        default="pendiente_verificar",
+        description="Nivel de soporte del elemento, sin convertir inferencias en hechos.",
+    )
     riesgo_o_brecha: str = Field(default="", description="Riesgo de atipicidad o brecha.")
 
 
@@ -253,6 +257,14 @@ class MatrizTipicidad(BaseModel):
     tipo_penal_sugerido: str = Field(
         default="",
         description="Tipo penal tentativo o [PENDIENTE DE VERIFICAR].",
+    )
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Fuentes KB/RAG realmente consultadas; no incluir citas inventadas.",
+    )
+    etiqueta_preliminar: str = Field(
+        default="HIPÓTESIS PRELIMINAR — NO IMPUTACIÓN",
+        description="Advertencia obligatoria sobre el carácter no definitivo.",
     )
     elementos: list[ElementoTipoPenal] = Field(default_factory=list)
     autoria_participacion: str = Field(default="", description="Autoría/participación preliminar.")
@@ -347,20 +359,59 @@ class DictamenCalidad(BaseModel):
 # --- Especialistas que estaban en prosa (L03): schemas mínimos para HITL ---
 
 
+class EvidenciaEtapaProcesal(BaseModel):
+    """Actuación que soporta (o no) la etapa procesal inferida."""
+
+    actuacion: str = Field(default="")
+    fecha: str = Field(default="[PENDIENTE DE VERIFICAR]")
+    fuente: str = Field(default="[PENDIENTE DE VERIFICAR]")
+
+
+class PasoRutaProcesal(BaseModel):
+    """Paso de ruta preliminar; no autoriza ejecución."""
+
+    actuacion: str
+    responsable: str = Field(default="abogado")
+    dependencia: str = Field(default="")
+    plazo_estimado: str = Field(default="[PENDIENTE DE VERIFICAR]")
+    soporte_normativo: str = Field(default="[PENDIENTE DE VERIFICAR]")
+
+
 class RutaProcesalLey906(BaseModel):
     """Salida estructurada del analista de ruta procesal Ley 906."""
 
     resumen: str = Field(..., description="Resumen operativo de la ruta para el Gerente.")
     etapa_aparente: str = Field(
         default="pendiente_verificar",
-        description="Etapa aparente (indagación, imputación, etc.) o pendiente.",
+        description="Alias de compatibilidad; preferir etapa_ley906.",
     )
+    etapa_ley906: Literal[
+        "indagacion_investigacion",
+        "audiencias_preliminares_garantias",
+        "formulacion_imputacion",
+        "medida_aseguramiento",
+        "acusacion",
+        "audiencia_preparatoria",
+        "juicio_oral",
+        "recursos",
+        "ejecucion_penal",
+        "archivo",
+        "pendiente_verificar",
+    ] = Field(
+        default="pendiente_verificar",
+        description="Enum canónico de agente/conocimiento/proceso-penal-906.md.",
+    )
+    evidencia_etapa: list[EvidenciaEtapaProcesal] = Field(default_factory=list)
     oportunidades_intervencion: list[str] = Field(default_factory=list)
     terminos_o_vencimientos: list[str] = Field(default_factory=list)
     riesgos_procesales: list[str] = Field(default_factory=list)
     ruta_recomendada: list[str] = Field(
         default_factory=list,
         description="Pasos o actuaciones sugeridas (preliminares).",
+    )
+    ruta_detallada: list[PasoRutaProcesal] = Field(
+        default_factory=list,
+        description="Ruta con responsable, dependencia, plazo y soporte verificables.",
     )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
