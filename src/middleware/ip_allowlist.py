@@ -66,7 +66,9 @@ def path_is_bypassed(path: str) -> bool:
         return True
     if path == "/twilio" or path.startswith("/twilio/"):
         return True
-    # Front-office víctima / webchat: no usa allowlist del desk (auth propia / rate limit).
+    # Front-office víctima / webchat: bypass intencional del allowlist del desk.
+    # Quitar sin feature-flag rompería la superficie víctima cuando IP_ALLOWLIST_ENABLED=true.
+    # Leftover auditoría: documentado; no endurecer aquí sin flag + auth propia.
     if path == "/cliente" or path.startswith("/cliente/"):
         return True
     if path == "/webchat" or path.startswith("/webchat/"):
