@@ -1,4 +1,4 @@
-<!-- config-version: 6; checksum: d2ee1341f240e3a1 -->
+<!-- config-version: 7; checksum: 4a53379acde42a34 -->
 ---
 name: marcar-pendientes-verificacion
 description: Contrato penal-víctimas: Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable. Activar cuando el plan/HITL o el especialista requiera `marcar_pendientes_verificacion`. No sustituye a `verificar...
@@ -17,12 +17,21 @@ Etiqueta todo dato no verificado antes de entregar la voz del despacho.
 
 ## Used By Agents
 - `coordinador_caso`
+- `redactor_documentos_juridicos` (secundario — pendientes en borradores)
 
 ## Purpose
 Recorrer la salida del turno e insertar `[PENDIENTE DE VERIFICAR]` en todo dato, cita normativa, hecho o radicado sin fuente verificable.
 
 ## Rol en coordinador_caso
 Control de calidad transversal antes de entregar cualquier salida del coordinador o de ensamblar respuestas de subagentes. Persistencia estructurada vía `record_specialist_result`.
+
+## Rol en redactor_documentos_juridicos
+Secundario: etiquetar citas/radicados/hechos sin soporte en el borrador antes de HITL/calidad.
+
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — regla de citación; `[PENDIENTE DE VERIFICAR]` sin soporte.
+- `agente/conocimiento/proceso-penal-906.md` — no inventar radicados, fechas ni arts CPP.
+- Convención: preferir sobre-marcar a afirmar sin ancla.
 
 ## Inputs
 - Texto o estructura de salida a revisar (del turno actual o borrador consolidado).
@@ -36,6 +45,7 @@ Control de calidad transversal antes de entregar cualquier salida del coordinado
 - Conteo de pendientes y recomendación de no uso externo si hay impacto alto.
 
 ## Steps
+0. Contrastar afirmaciones con Fuentes KB/expediente disponibles; sobre-marcar si duda.
 1. Recorrer salida/borrador y listar afirmaciones sin soporte.
 2. Etiquetar con `[PENDIENTE DE VERIFICAR]` y dueño sugerido.
 3. No corregir el fondo jurídico ni aprobar calidad.

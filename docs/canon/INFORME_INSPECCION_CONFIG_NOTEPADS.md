@@ -5,9 +5,9 @@
 **Fecha:** 2026-08-05  
 **E0:** Auto (humano)  
 **Modo:** panel IA personificado + síntesis E0  
-**Piloto:** `config/evals/agent_eval_cases.json` (v3.4)  
+**Piloto:** `config/evals/agent_eval_cases.json` (v3.5)  
 **Drive:** `https://drive.google.com/drive/folders/0ABOGkPnKHSC5Uk9PVA` (dual DB+Drive; notepads F5 diferido por prioridad #6)  
-**Rama de trabajo A0–A4:** `cursor/analisis-a0-a1-prompts-skills`
+**Rama de trabajo A0–A5:** `cursor/analisis-a0-a1-prompts-skills`
 
 ---
 
@@ -27,6 +27,7 @@
 | **A2** Deep evidencia | **Hecho** (scorecard + A-evid + patches P0/P1) |
 | **A3** Deep víctimas | **Hecho** (scorecard + A-vict + patches P0/P1 + eval) |
 | **A4** Deep audiencias | **Hecho** (scorecard + A-aud + patches P0/P1 + eval) |
+| **A5** Deep redactor | **Hecho** (scorecard + A-reda + patches P0/P1 + eval) |
 
 ---
 
@@ -38,15 +39,16 @@
 | Prompts agentes | **10/10** | Roster canónico completo |
 | Guardrails I/O/T por agente | **10/10** (input+output+tools) | PASS cobertura archivos |
 | Guardrails globales g1–g10 | **10** | Presentes |
-| Eval cases | **39** (v3.4) | Routing/scope/HITL/PII + tool-surface/budget A0–A4 |
+| Eval cases | **40** (v3.5) | Routing/scope/HITL/PII + tool-surface/budget A0–A5 |
 | Evals → `analista_ruta_procesal` | **1** (`route-ruta-906`) | **PASS** (A0) |
 | Evals → `analista_representacion_victimas` | **3** (`route-victimas`, `tool-surface-victimas`, `instruction-budget-victimas`) | **PASS** (A3) |
 | Evals → `analista_audiencias` | **3** (`route-audiencia`, `tool-surface-audiencias`, `instruction-budget-audiencias`) | **PASS** (A4) |
+| Evals → `redactor_documentos_juridicos` | **4** (`route-memorial`, `completeness-*`, `instruction-budget-redactor`, `tool-surface-redactor`) | **PASS** (A5) |
 | Evals → `analista_seguimiento_procesal` | **0** | **FAIL** cobertura eval |
-| Referencias KB path en skills O1/O2/O3/O4/O5/O6 | **56+** con Fuentes KB | **PASS** (A0–A4) |
+| Referencias KB path en skills O1/O2/O3/O4/O5/O6/O7-redacción | **64+** con Fuentes KB | **PASS** (A0–A5) |
 | KB `penal.md` | marco tipico operativo | **PASS** (A0) |
-| KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención/prep. audiencia | **PASS** (A0–A4) |
-| KB `normas-clave.md` | marco + derechos + checklist O5/O6 | **PASS** (A3–A4) |
+| KB `proceso-penal-906.md` | etapas + checklists evidencia/intervención/prep. audiencia/redacción | **PASS** (A0–A5) |
+| KB `normas-clave.md` | marco + derechos + checklist O5/O6/O7 | **PASS** (A3–A5) |
 | Legacy prose residual O1/O2 | varios (“calidad”, “gestor”, “coordinador”) | PARTIAL |
 
 ### Matriz agente × primario × secundarios (runtime)
@@ -61,6 +63,7 @@ Fuente: `src/agents/skill_catalog.py`.
 | `analista_evidencia` | `inventariar_evidencia` | clasificar_tipo, matriz, brechas | **OK (A2)** — recaudo/custodia/preservar owned sin ancla runtime |
 | `analista_representacion_victimas` | `construir_teoria_caso_victima` | derechos, riesgo_revictimizacion, priorizar_objetivos | **OK (A3)** — intereses/daño/diferencial/mapear owned sin ancla runtime |
 | `analista_audiencias` | `preparar_preguntas_audiencia` | objetivo, guion, detectar_riesgos | **OK (A4)** — solicitudes/checklist/simulación/intervención owned sin ancla runtime |
+| `redactor_documentos_juridicos` | `redactar_memorial_penal` | estructurar, marcar_pendientes, controlar_tono | **OK (A5)** — otras `redactar_*` owned sin ancla runtime |
 | Resto | ver informe prompts previo | — | OK para esta ola |
 
 ---
@@ -303,7 +306,7 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 | 12 | — | F4: checklist panel 12 (1 día) | P1 | Pendiente |
 | 13 | — | F5: notepads `{agent_id}.md` en Drive `0ABOGkPnKHSC5Uk9PVA` | P2 | Diferido |
 | 14 | — | Evals tipicidad groundedness (matriz elementos) | P2 | Pendiente |
-| 15 | — | Oleadas A3–A8 (ex O5–O8) | P1 | **A3–A4 Hecho; siguiente A5** |
+| 15 | — | Oleadas A3–A8 (ex O5–O8) | P1 | **A3–A5 Hecho; siguiente A6** |
 
 ---
 
@@ -312,19 +315,20 @@ fix_aplicado: "retirar números concretos del texto de plantilla; exigir norma v
 **Hallazgo de proceso (A0):** el bloque “Cierre parcial de ejecución” abajo marcó H-101…H-304 como **Hecho**, pero al iniciar A0 en el árbol de trabajo **no** estaban aplicados (skills sin `## Fuentes KB`, `penal.md` sin marco tipico, schemas sin `etapa_ley906`/`fuentes_kb`, sin `route-ruta-906`).  
 Los IDs `H-*` se conservan; la ejecución real de esos residuales se documenta como `A-tipi-*` / `A-ruta-*` / patches A0.
 
-**Patches A0–A4 aplicados (2026-08-05)**
-- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklists evidencia O4 + representación O5 + prep. audiencia O6)
-- Skills O1–O6 → `## Fuentes KB` + steps verificables + bump checksum (O6: 11 skills)
-- `src/agents/skill_catalog.py` secundarios tipicidad/ruta/cronología/evidencia/víctimas/audiencias (`detectar_riesgos_audiencia`)
-- Schemas/renderer: `fuentes_kb` en tipicidad/ruta/crono/evidencia/víctimas/**audiencias**
-- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 / víctimas v6 / **audiencias v5** + guardrails I/O grounding
-- Evals `3.4` + `tool-surface-audiencias` / `instruction-budget-audiencias` (+ `route-audiencia` previo)
+**Patches A0–A5 aplicados (2026-08-05)**
+- KB: `agente/conocimiento/{penal,normas-clave,proceso-penal-906}.md` (marco tipico + enum etapas + días hábiles + checklists evidencia O4 + representación O5 + prep. audiencia O6 + **redacción O7**)
+- Skills O1–O6 + O7 redacción → `## Fuentes KB` + steps verificables + bump checksum (O7-redacción: 8 skills)
+- `src/agents/skill_catalog.py` secundarios tipicidad/ruta/cronología/evidencia/víctimas/audiencias/redactor (sin cambio secundarios A5 — ya alineados)
+- Schemas/renderer: `fuentes_kb` en tipicidad/ruta/crono/evidencia/víctimas/audiencias/**redactor**
+- Prompts tipicidad v5 / ruta v7 / cronología v5 / evidencia v7 / víctimas v6 / audiencias v5 / **redactor v5** + guardrails I/O grounding
+- Evals `3.5` + `tool-surface-redactor` (+ route/completeness/budget redactor previos)
 - Sync: `python scripts/sync_skills_agente_a_cursor.py` (81 skills)
 - **A-vict-006 cerrado en A4:** `analizar_intervencion_victima` permanece Used By ruta+audiencias (sin MOVE a víctimas)
+- **A-reda-005:** `marcar_pendientes_verificacion` Used By + Rol redactor (secundario)
 
-**Tests (A0–A4 focused):** **51 passed** (`test_l03_structured_output`, `test_guardrails_iot_coverage`, `test_agent_evals`, `test_skill_config`, `test_prompt_skill_quality`, `test_fase3_plan_product`, `test_bitacora_notas`).
+**Tests (A0–A5 focused):** **51 passed** (`test_l03_structured_output`, `test_guardrails_iot_coverage`, `test_agent_evals`, `test_skill_config`, `test_prompt_skill_quality`, `test_fase3_plan_product`, `test_bitacora_notas`).
 
-**Siguiente oleada:** **A5** — deep-dive `redactor_documentos_juridicos` (+ O7 redacción).
+**Siguiente oleada:** **A6** — deep-dive `analista_calidad_juridica` (+ O7 calidad/citas).
 
 ---
 
@@ -1040,7 +1044,155 @@ evals_a_ampliar: []
 
 ---
 
-## Cola E0 (post A0–A4)
+## A5 — Scorecard `redactor_documentos_juridicos`
+
+| Campo | Valor |
+|---|---|
+| Fecha | 2026-08-05 |
+| Oleada | A5 |
+| Expertos | L1, L2, L3, T1–T7, E0 |
+| Primario | `redactar_memorial_penal` |
+| Secundarios anclados | estructurar_hechos_fundamentos_solicitudes, marcar_pendientes_verificacion, controlar_tono_juridico_documento |
+| Skills owned / O7 redacción | 5 `redactar_*` + estructurar + marcar_pendientes + tono_juridico (+ evaluar_derecho_peticion shared) |
+| Veredicto global | **PARTIAL → PASS tras patches** |
+
+### Técnica (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Prompt | 5 | v5: pasos con skills, tools reales, `fuentes_kb`, HITL HIGH RISK |
+| Few-shots / anti-drift | 5 | Impulso + fallo divorcio fuera de alcance |
+| Ancla skills | 5 | Primario + 3 secundarios ya correctos; Used By marcar alineado |
+| Tools honesty | 5 | REAL tools; Planned checkers no invocables |
+| Guardrails I/O/T | 5 | groundedness + HITL + domain_limits anti-radicado inventado |
+| Schema | 5 | BorradorDocumentoPenal + `fuentes_kb` |
+| HITL | 5 | `HIGH_RISK_AGENTS` + plan_required memorial — reforzado en prompt/guardrail |
+| Evals | 5 | route + completeness + budget + tool-surface |
+| Config parity | 4 | Prompt/guardrails/skills versionados |
+
+### Jurídico-procedural (0–5)
+
+| Eje | Score | Nota 1 línea |
+|---|---|---|
+| Grounding KB | 5 | Checklist O7 en 906 + normas-clave |
+| Etapa 906 | 5 | Ancla etapa; sin actuación → pendiente |
+| Tipicidad/dogmática | 5 | Fuera de alcance (límite correcto) |
+| Derechos víctima | 5 | Tono/no revictimizar; petición vía evaluar |
+| Hecho vs inferencia | 5 | Estructura hechos→fundamentos→peticiones |
+| Términos/oportunidad | 4 | Sin fecha_base → pendiente; no certifica plazos |
+| Citas | 4 | Remite KB/pendiente; calidad profunda en A6 |
+| HITL accionable | 5 | Borrador; no firmar/radicar sin abogado |
+| Alcance | 5 | Solo penal-víctimas; no otras materias Lexiatek |
+| Litigabilidad | 5 | Memorial/impulso/petición/ampliación usable |
+
+### Análisis panel (síntesis)
+
+- **L1:** Cadena estructurar→redactar_*→tono→pendientes litigable; KB tenía hueco O7 — cerrado.
+- **L2:** Few-shots y skills protegen no-inventar radicados/normas; groundedness refuerza ancla.
+- **L3:** Ya en HIGH_RISK/HITL_OUTPUT; refuerzo explícito en prompt/guardrail (no bypass chat).
+- **T1:** Prompt v4 genérico; v5 alinea skills nombrados + schema como audiencias.
+- **T2:** Secundarios OK; `marcar_pendientes` Used By ahora incluye redactor.
+- **T3:** I/O groundedness + domain_limits anti-radicado / anti-firma.
+- **T4:** tool-surface vecinos calidad+ruta; excluye audiencias.
+- **T5:** route/completeness/budget existían; añadido tool-surface (evals v3.5).
+- **T6:** `notas_trabajo` OK; Drive diferido.
+- **T7:** PII/minimización gráfica en cuerpo.
+
+### Hallazgos A5
+
+```yaml
+id: A-reda-001
+severidad: P1
+bloque: skills
+archivo: agente/skills/{O7 redacción}/*/SKILL.md
+experto: L1+T2
+veredicto: PASS (patched)
+evidencia_repo: "8/8 O7-redacción sin Fuentes KB al inicio A5 (recurso ya tenía; evaluar header corrupto parcial)"
+evidencia_kb: "proceso-penal-906.md checklist O7; normas-clave.md checklist redacción"
+impacto: "borradores sin contrato explícito de grounding / anti-invención de radicados"
+fix_aplicado: "Fuentes KB en 8 skills + bump version/checksum + sync .cursor; header evaluar limpio"
+porque: "F-05 convención Fuentes KB; prioridad procedural"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-reda-002
+severidad: P1
+bloque: prompt+schema+guardrails
+archivo: redactor_documentos_juridicos.md; schemas.BorradorDocumentoPenal; guardrails output
+experto: T1+T3
+veredicto: PASS (patched)
+evidencia_repo: "prompt v4 sin fuentes_kb/tools nombrados; schema sin fuentes_kb; groundedness_policy ausente"
+evidencia_kb: "proceso-penal-906.md checklist O7"
+impacto: "drift prompt↔schema; invención de radicados/normas menos enforceable"
+fix_aplicado: "prompt v5 + fuentes_kb + groundedness_policy + domain_limits HITL"
+porque: "alineación tipicidad/ruta/…/audiencias post-F3 como estándar"
+evals_a_ampliar: ["enum tipo ampliación/petición explícito (P2)"]
+```
+
+```yaml
+id: A-reda-003
+severidad: P1
+bloque: evals
+archivo: config/evals/agent_eval_cases.json
+experto: T5
+veredicto: PASS (patched)
+evidencia_repo: "route+completeness+budget; sin tool-surface-redactor"
+evidencia_kb: "N/A"
+impacto: "regresión de superficie/vecinos redactor invisible en CI"
+fix_aplicado: "tool-surface-redactor (evals v3.5): vecinos calidad+ruta; chat excluye HIGH RISK redactor"
+porque: "plan A5 high-risk HITL; F-07/F-12; chat-without-high-risk-tools"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-reda-004
+severidad: P1
+bloque: kb
+archivo: agente/conocimiento/proceso-penal-906.md; normas-clave.md
+experto: L1+L2
+veredicto: PASS (patched)
+evidencia_repo: "KB sin checklist redacción O7"
+evidencia_kb: "checklist O7 (hechos→fundamentos→peticiones; HITL; no inventar radicados)"
+impacto: "skills O7 sin ancla procedural concreta"
+fix_aplicado: "checklist redacción en 906 + normas-clave"
+porque: "F-15 KB enrichment; no inventar arts CPP"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-reda-005
+severidad: P2
+bloque: ownership
+archivo: marcar_pendientes_verificacion
+experto: T2
+veredicto: PASS (patched)
+evidencia_repo: "Used By solo coordinador_caso; secundario runtime del redactor"
+evidencia_kb: "N/A"
+impacto: "drift catalog Used By vs skill_catalog secundarios"
+fix_aplicado: "Used By + Rol redactor; Fuentes KB"
+porque: "honestidad de ownership; techo secundarios ya correcto"
+evals_a_ampliar: []
+```
+
+```yaml
+id: A-reda-006
+severidad: P1
+bloque: hitl
+archivo: prompt + guardrails output + HIGH_RISK_AGENTS
+experto: L3+T3
+veredicto: PASS (patched — refuerzo)
+evidencia_repo: "HITL wiring ya correcto; prompt/guardrail genéricos sobre borrador"
+evidencia_kb: "checklist O7 paso 7 HITL"
+impacto: "riesgo de tono 'listo para radicar' sin refuerzo contractual"
+fix_aplicado: "prompt v5 + hitl_policy/domain_limits: no firmar/radicar; HIGH RISK explícito"
+porque: "plan A5 high-risk drafts must go through HITL"
+evals_a_ampliar: []
+```
+
+---
+
+## Cola E0 (post A0–A5)
 
 | # | ID | Acción | Sev | Estado |
 |---|---|---|---|---|
@@ -1050,28 +1202,35 @@ evals_a_ampliar: []
 | 4 | A-evid-* | Patches evidencia O4 | P1 | **Hecho** |
 | 5 | A-vict-* | Patches víctimas O5 + eval | P1 | **Hecho** |
 | 6 | A-aud-* | Patches audiencias O6 + eval | P1 | **Hecho** |
-| 7 | — | **A5** deep `redactor_documentos_juridicos` (+ O7) | P1 | **Siguiente** |
-| 8 | — | Evals seguimiento | P1 | Cola A7 |
-| 9 | F-08 | Notepads Drive dual | P2 | Diferido |
-| 10 | — | Groundedness eval tipicidad/evidencia/víctimas/audiencias campos | P2 | Backlog |
+| 7 | A-reda-* | Patches redactor O7 + eval | P1 | **Hecho** |
+| 8 | — | **A6** deep `analista_calidad_juridica` (+ O7 calidad) | P1 | **Siguiente** |
+| 9 | — | Evals seguimiento | P1 | Cola A7 |
+
+### Evals gap (post A5)
+
+- **Hecho A5:** `tool-surface-redactor` (evals v3.5; route/completeness/budget ya existían)
+- **Pendiente:** evals seguimiento (A7); cobertura calidad profunda (A6)
+
+## Notas panel (personas) — post A0–A5
+
+- **L1:** Checklists O1–O7 (redacción) en KB; citas sin arts inventados.
+- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas/audiencias/redactor alineados; A-vict-006 cerrado.
+- **T5:** Superficies tipicidad/víctimas/audiencias/redactor + budgets.
+- **L3:** Redactor HIGH RISK reforzado; calidad (A6) cierra citas/alucinación.
+
+> Los bullets siguientes reflejan la intención documentada pre-A0; la reconciliación y ejecución real están en §A0–A5 arriba.
+
+- KB / skills O1–O7 redacción / secundarios / evals / F3 prompts — ejecutados en A0–A5.
+
+**Siguiente ejecución sugerida:** **A6 calidad**.
 
 ---
 
 ## Piloto evals (decisión #7) — actualizado
 
-- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias), budgets
-- **Hecho A4:** `tool-surface-audiencias` + `instruction-budget-audiencias` (evals v3.4; route ya existía)
-
----
-
-## Notas panel (personas) — post A0–A4
-
-- **L1:** KB tipicidad/ruta/cronología/evidencia/víctimas/audiencias con suelo mínimo litigable; no inventar arts — RAG sigue siendo gate.
-- **L2:** O6 ancla prep. oral + no revictimización; O5 intereses≠derechos.
-- **L3:** Audiencias en HITL_OUTPUT; ensayo abogado antes de estrados.
-- **T2:** Secundarios tipicidad/ruta/crono/evidencia/víctimas/audiencias alineados; A-vict-006 cerrado.
-- **T5:** Huecos eval ruta+víctimas+audiencias (surface/budget) cerrados; queda seguimiento.
-- **T6:** Notepads diferidos; contrato `notas_especialista` OK en los 6 agentes deep.
+- Existentes: `route-tipicidad`, `route-memorial`, `route-cronologia`, `route-evidencia`, `route-ruta-906`, `route-victimas`, `route-audiencia`, `tool-surface-*` (tipicidad/cronología/evidencia/víctimas/audiencias/redactor), budgets
+- **Hecho A5:** `tool-surface-redactor` (evals v3.5; route/completeness/budget redactor ya existían)
+- Backlog: groundedness eval campos tipicidad/evidencia/víctimas/audiencias/redactor (P2); notepads F-08 (P2)
 
 ---
 

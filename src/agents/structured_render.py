@@ -20,10 +20,13 @@ def render_structured_output(output: Any) -> str:
     if isinstance(cuerpo, str) and cuerpo.strip():
         titulo = str(data.get("titulo") or "").strip()
         pendientes = data.get("pendientes_verificacion") or []
+        fuentes = data.get("fuentes_kb") or []
         header = f"{titulo}\n\n" if titulo else ""
         extras = ""
+        if fuentes:
+            extras += "\n\nFuentes KB:\n- " + "\n- ".join(str(f) for f in fuentes)
         if pendientes:
-            extras = "\n\nPendientes de verificación:\n- " + "\n- ".join(
+            extras += "\n\nPendientes de verificación:\n- " + "\n- ".join(
                 str(p) for p in pendientes
             )
         return f"{header}{cuerpo}{extras}".strip()

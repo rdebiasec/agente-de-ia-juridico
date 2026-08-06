@@ -31,6 +31,16 @@ Uso operativo para `analista_audiencias` (sin inventar artículos ni fechas de a
 4. Marco de intervención (`analizar_intervencion_victima`) vía ruta/audiencias — no inventar facultades.
 5. Salida revisable (**HITL** en `HITL_OUTPUT_AGENTS`); ensayo con abogado antes de estrados.
 
+## Checklist redacción de piezas (ancla skills O7)
+
+Uso operativo para `redactor_documentos_juridicos` (sin inventar artículos ni radicados):
+
+1. Leer `agente/conocimiento/proceso-penal-906.md` (checklist redacción O7 + etapas).
+2. Hechos → fundamentos → peticiones; anclar a expediente/KB o marcar `[PENDIENTE DE VERIFICAR]`.
+3. No inventar radicados, sentencias, anexos ni numerales; tono formal y no revictimizante.
+4. Pieza accionable → **HITL** (`HIGH_RISK_AGENTS`); no firmar ni radicar sin abogado.
+5. Control de citas/calidad → `analista_calidad_juridica` cuando el plan lo indique.
+
 ## Checklist representación de víctimas (ancla skills O5)
 
 Uso operativo para `analista_representacion_victimas` (sin inventar artículos):

@@ -81,6 +81,19 @@ Uso operativo para `analista_audiencias` (sin inventar artículos ni fechas):
 7. Producto = preparación interna; **HITL obligatorio** antes de estrados — no sustituye oralidad del abogado.
 8. Sin notificación/actuación fundante → no certificar oportunidad ni términos; marcar `[PENDIENTE DE VERIFICAR]`.
 
+## Checklist redacción de piezas penales (ancla skills O7)
+
+Uso operativo para `redactor_documentos_juridicos` (sin inventar artículos ni radicados):
+
+1. Identificar tipo de pieza (memorial, impulso, petición, ampliación) y destinatario procesal.
+2. Confirmar `etapa_ley906` (o `pendiente_verificar`); sin actuación fundante no afirmar oportunidad.
+3. Estructurar **hechos → fundamentos → peticiones**; separar hecho confirmado/narrado/inferido.
+4. Anclar hechos al expediente y normas a KB; sin soporte → `[PENDIENTE DE VERIFICAR]` (no inventar radicados, arts CPP ni anexos).
+5. Derecho de petición: evaluar procedencia antes de redactar; no inventar plazos de respuesta.
+6. Tono formal, respetuoso con la víctima; no revictimizar ni sobreprometer resultados.
+7. Producto = **borrador interno**; etiqueta `BORRADOR — NO RADICAR SIN FIRMA`; **HITL obligatorio** (HIGH RISK) antes de uso externo.
+8. Pasar a calidad jurídica cuando el plan lo indique; el abogado firma y radica.
+
 ## Términos
 
 - Los términos y plazos procesales se cuentan en **días hábiles** (Ley 906), salvo norma especial verificada.

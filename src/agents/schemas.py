@@ -90,6 +90,10 @@ class BorradorDocumentoPenal(BaseModel):
     )
     titulo: str = Field(..., description="Título corto del borrador.")
     cuerpo: str = Field(..., description="Texto completo del borrador revisable.")
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Paths KB/expediente consultados al anclar hechos o normas.",
+    )
     pendientes_verificacion: list[str] = Field(
         default_factory=list,
         description="Hechos, citas o radicados que el abogado debe verificar.",

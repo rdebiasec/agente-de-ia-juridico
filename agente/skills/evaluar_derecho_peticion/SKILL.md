@@ -1,5 +1,4 @@
-<!-- config-version: 3; checksum: 664ccab649f3d2a3 -->
-<!-- config-version: 3; checksum: pending -->
+<!-- config-version: 4; checksum: ba2fddc61d931323 -->
 ---
 name: evaluar-derecho-peticion
 description: Contrato penal-víctimas: Verificar si hay petición previa incumplida y si procede un nuevo derecho de petición, impulso o seguimiento en vía penal. Activar cuando el plan/HITL o el especialista requiera `evaluar_derecho_peticion`. No sustituye a `redactar_derecho_peticion_penal`.
@@ -26,6 +25,11 @@ Solo redactar petición o impulso si este skill dictamina procedencia preliminar
 ## Rol en analista_seguimiento_procesal
 Insumo para alertas de silencio administrativo y términos de respuesta.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — derechos de información/petición; sin inventar plazos.
+- `agente/conocimiento/proceso-penal-906.md` — términos en días hábiles; sin fecha_base no certificar.
+- Tools reales: `leer_normas_clave`, `leer_playbook_proceso`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Copia o datos de petición previa (fecha, destinatario, objeto, radicado si consta).
 - Plazo legal de respuesta y fecha de vencimiento.
@@ -39,6 +43,7 @@ Insumo para alertas de silencio administrativo y términos de respuesta.
 - Etiqueta: `EVALUACIÓN PETICIÓN — VÍA PENAL (NO TUTELA)`.
 
 ## Steps
+0. Anclar petición previa/plazos a Fuentes KB o expediente; sin fecha_base no certificar vencimiento.
 1. Verificar existencia de petición previa, destinatario y objeto solicitado.
 2. Constatar plazo de respuesta y silencio administrativo si aplica.
 3. Determinar si procede nuevo derecho de petición, memorial de impulso u otra vía penal.

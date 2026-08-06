@@ -125,12 +125,15 @@ def test_redactor_schema_still_valid():
         tipo="memorial",
         titulo="Impulso",
         cuerpo="Solicito impulso del radicado…",
+        fuentes_kb=["agente/conocimiento/proceso-penal-906.md"],
         pendientes_verificacion=["Confirmar radicado"],
     )
     text = render_structured_output(draft)
     assert "Impulso" in text
     assert "Confirmar radicado" in text
+    assert "proceso-penal-906.md" in text
     assert draft.tipo == "memorial"
+    assert draft.fuentes_kb[0].endswith("proceso-penal-906.md")
 
 
 def test_orchestrator_poc_chat_has_no_output_type():

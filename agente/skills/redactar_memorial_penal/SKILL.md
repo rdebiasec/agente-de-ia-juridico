@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 177588d90399a636 -->
+<!-- config-version: 3; checksum: a92eba6f59fc3eb3 -->
 ---
 name: redactar-memorial-penal
 description: Contrato penal-víctimas: Redactar borrador de memorial penal con hechos soportados, fundamentos y peticiones. Activar cuando el plan/HITL o el especialista requiera `redactar_memorial_penal`. No sustituye a `estructurar_hechos_fundamentos_solicitudes`.
@@ -21,6 +21,11 @@ Redactar borrador de memorial penal con hechos soportados, fundamentos y peticio
 ## Rol en redactor_documentos_juridicos
 Skill primario del agente; ejecutar antes de pasar a calidad jurídica.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist redacción O7; etapas; no inventar arts CPP.
+- `agente/conocimiento/normas-clave.md` — checklist redacción; derechos víctima; HITL antes de radicar.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Hechos verificados y cronología (`verificar_hechos_soportados`).
 - Evaluación de solicitud si aplica (`evaluar_solicitud_fiscalia_juez`).
@@ -33,6 +38,7 @@ Skill primario del agente; ejecutar antes de pasar a calidad jurídica.
 - Etiqueta: `BORRADOR — NO RADICAR SIN FIRMA`.
 
 ## Steps
+0. Anclar hechos/etapa/norma a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`. No inventar radicados ni arts.
 1. Identificar destinatario, pretensión y hechos soportados del expediente.
 2. Estructurar hechos → fundamentos → peticiones sin inventar citas ni radicados.
 3. Insertar `[PENDIENTE DE VERIFICAR]` en cada dato no anclado.

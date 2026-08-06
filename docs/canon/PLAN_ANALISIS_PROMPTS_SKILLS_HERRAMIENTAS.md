@@ -111,7 +111,7 @@ Fuente: `scripts/lib/catalogo_aprobacion.py` + `src/agents/skill_catalog.py` + `
 | **A2** | Deep | `analista_evidencia` | Cadena hecho-prueba | O4 | **Hecho** |
 | **A3** | Deep | `analista_representacion_victimas` | Hueco eval + derechos víctima | O5 | **Hecho** |
 | **A4** | Deep | `analista_audiencias` | Oralidad / HITL | O6 | **Hecho** |
-| **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | Pendiente profundo |
+| **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | **Hecho** |
 | **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | Pendiente profundo |
 | **A7** | Deep | `analista_seguimiento_procesal` | Hueco eval + términos operativos | O8 (parcial) | Pendiente profundo |
 | **A8** | Deep | `coordinador_caso` | POC, triage, voz única, `POC_OWNED_SKILLS` | O8 gerencia | G01–G09 hecho; re-score ligero + gaps |
@@ -306,8 +306,9 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A1** | `aprobado, ejecuta A1` | Deep `analista_cronologia_hechos` + skills O3 | **Hecho** |
 | **A2** | `aprobado, ejecuta A2` | Deep evidencia + O4 | **Hecho** |
 | **A3** | `aprobado, ejecuta A3` | Deep víctimas + O5 + eval nuevo | **Hecho** |
-| **A4** | `aprobado, ejecuta A4` | Deep audiencias + O6 + eval surface/budget | **Hecho** |
-| **A5–A6** | `aprobado, ejecuta A5` … | Redactor → calidad | 1 turno c/u |
+| **A4** | `aprobado, ejecuta A4` | Deep `analista_audiencias` + O6 + eval surface/budget | **Hecho** |
+| **A5** | `aprobado, ejecuta A5` | Deep redactor + O7 redacción + eval surface | **Hecho** |
+| **A6** | `aprobado, ejecuta A6` | Deep calidad + O7 calidad/citas | 1 turno |
 | **A7–A8** | `aprobado, ejecuta A7` … | Seguimiento → coordinador | 0.5–1 c/u |
 | **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |
 | **E** | `aprobado, ejecuta A-…` (lista) | Patches + evals + tests | Por lote P0 |
