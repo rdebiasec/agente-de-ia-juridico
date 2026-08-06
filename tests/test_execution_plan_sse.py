@@ -125,7 +125,11 @@ async def test_sse_replays_events_after_execution():
                     events.append(json.loads(line[6:]))
                 if events and events[-1].get("event") in ("plan_done", "plan_failed"):
                     break
+                # Heartbeats no cuentan hacia el tope de eventos útiles, pero
+                # limitamos la espera para no colgar la suite si el plan no termina.
                 if len(events) > 40:
+                    break
+                if sum(1 for e in events if e.get("event") == "heartbeat") >= 5:
                     break
 
     names = {e.get("event") for e in events}

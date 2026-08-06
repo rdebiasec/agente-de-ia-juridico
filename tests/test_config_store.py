@@ -134,9 +134,11 @@ def test_edited_prompt_reaches_orchestrator(monkeypatch):
     get_settings.cache_clear()
     reset_repository()
 
+    from src.agents.agent_cache import clear_agent_cache
     from src.agents.orchestrator import get_agent_by_id
     from src.config_store import save_version
 
+    clear_agent_cache()
     marker = "PROMPT_MARKER_RUNTIME_XYZ_99"
     save_version(
         "prompt",
@@ -149,3 +151,4 @@ def test_edited_prompt_reaches_orchestrator(monkeypatch):
     agent = get_agent_by_id("analista_calidad_juridica")
     assert agent is not None
     assert marker in (agent.instructions or "")
+    clear_agent_cache()

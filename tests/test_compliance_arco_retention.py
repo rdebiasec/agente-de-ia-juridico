@@ -19,7 +19,8 @@ async def test_arco_erase_clears_session_data(monkeypatch):
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "arco-session-secret-key-32chars!!")
     monkeypatch.setenv("DATABASE_URL", "")
-
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    get_settings.cache_clear()
     from src.storage import reset_repository
 
     reset_repository()

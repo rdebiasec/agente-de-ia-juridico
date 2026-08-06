@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 2b1fafa45960467d -->
+<!-- config-version: 3; checksum: 037ca6a8d5cd25e3 -->
 ---
 name: preservar-evidencia-digital
 description: Contrato penal-víctimas: Proteger mensajes, archivos, audios o videos digitales sin alterarlos, con hash y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `preservar_evidencia_digital`. No sustituye a `controlar_cadena_custodia_preliminar`.
@@ -60,6 +60,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `preservar
 - `chain_of_custody_logger` — no implementada
 
 ## Guardrails
+- **Integridad probatoria:** Preservar original, hash y metadatos sin alterar el contenido.
 - **No inventar:** No inventar hashes ni metadatos.
 - **Confidencialidad:** Minimizar copias innecesarias de material sensible.
 - **Revision humana obligatoria:** HITL antes de compartir evidencia digital fuera del despacho.

@@ -54,21 +54,24 @@ def test_expediente_sync_from_tutela_message_no_marca_tipo_tutela():
     from src.gateway import expediente as exp_mod
 
     repo = InMemoryRepository()
+    previous_repo = exp_mod.expediente_store.repo
     exp_mod.expediente_store.repo = repo
-    msg = (
-        "Accionante: Carlos Andrés Gómez Vega CC 71234567. "
-        "Accionado: Cementerio Jardines de la Esperanza S.A.S. NIT 900.123.456-7. "
-        "Quiero una tutela por vulneración del debido proceso. Radicado interno CE-PET-2026-0315."
-    )
-    trace = {"timestamp": 1, "spans": []}
-    result = sync_expediente_from_chat("web:tut", msg, [], trace=trace)
-    # Ya no se marca tipo_proceso=tutela (fuera del producto).
-    from src.gateway.expediente import expediente_store
-    exp = expediente_store.get("web:tut")
-    assert exp is not None
-    assert getattr(exp, "tipo_proceso", None) != "tutela"
-    assert getattr(exp, "etapa_actual", None) != "tutela_en_preparacion"
-    assert any(s["name"] == "Expediente: sincronización" for s in trace["spans"])
+    try:
+        msg = (
+            "Accionante: Carlos Andrés Gómez Vega CC 71234567. "
+            "Accionado: Cementerio Jardines de la Esperanza S.A.S. NIT 900.123.456-7. "
+            "Quiero una tutela por vulneración del debido proceso. Radicado interno CE-PET-2026-0315."
+        )
+        trace = {"timestamp": 1, "spans": []}
+        sync_expediente_from_chat("web:tut", msg, [], trace=trace)
+        # Ya no se marca tipo_proceso=tutela (fuera del producto).
+        exp = exp_mod.expediente_store.get("web:tut")
+        assert exp is not None
+        assert getattr(exp, "tipo_proceso", None) != "tutela"
+        assert getattr(exp, "etapa_actual", None) != "tutela_en_preparacion"
+        assert any(s["name"] == "Expediente: sincronización" for s in trace["spans"])
+    finally:
+        exp_mod.expediente_store.repo = previous_repo
 
 
 def test_post_validations_no_abre_flujo_tutela():
@@ -78,11 +81,14 @@ def test_post_validations_no_abre_flujo_tutela():
     assert "tutela" not in "".join(s.get("name", "") for s in trace.get("spans", [])).lower()
 
 
-def test_session_and_trace_persist_in_memory():
-    repo = InMemoryRepository()
+def test_session_and_trace_persist_in_memory(monkeypatch):
+    from src.config import get_settings
     from src.storage import reset_repository
 
+    monkeypatch.setenv("DATABASE_URL", "")
+    get_settings.cache_clear()
     reset_repository()
+    repo = get_repository()
     # monkeypatch would be cleaner; test repo directly
     repo.append_chat_message("web:u1", channel="web", user_id="u1", role="user", content="Hola", max_messages=50)
     repo.append_chat_message("web:u1", channel="web", user_id="u1", role="assistant", content="Bienvenida", max_messages=50)
@@ -100,12 +106,15 @@ def test_session_and_trace_persist_in_memory():
     assert traces[0].payload["spans"][0]["name"] == "test"
 
 
-def test_repository_agent_session_roundtrip():
+def test_repository_agent_session_roundtrip(monkeypatch):
     import asyncio
     import uuid
 
+    from src.config import get_settings
     from src.storage import reset_repository
 
+    monkeypatch.setenv("DATABASE_URL", "")
+    get_settings.cache_clear()
     reset_repository()
     sid = f"web:test-{uuid.uuid4().hex[:8]}"
     session = RepositoryAgentSession(sid, channel="web", user_id="u2")

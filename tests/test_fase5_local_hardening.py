@@ -48,6 +48,16 @@ def test_cliente_chat_sets_cliente_cookie_not_lawyer(repo, monkeypatch):
     from src.main import app
 
     client = TestClient(app)
+    start = client.post(
+        "/cliente/start",
+        json={
+            "nombre": "Fase5",
+            "consent_1581": True,
+            "cliente_session_id": "fase5-v",
+            "lawyer_session_id": "web:abogada",
+        },
+    )
+    assert start.status_code == 200, start.text
     res = client.post(
         "/cliente/chat",
         json={
