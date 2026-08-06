@@ -53,6 +53,9 @@ def validate_production_settings(settings: Settings) -> None:
     if settings.app_debug:
         errors.append("APP_DEBUG debe ser false en producción.")
 
+    if not settings.web_auth_enabled:
+        errors.append("WEB_AUTH_ENABLED debe ser true en producción (sin sujeto compartido web:test).")
+
     if not settings.site_password:
         errors.append(
             "SITE_PASSWORD debe ser un secreto fuerte (≥12 caracteres) o un hash "

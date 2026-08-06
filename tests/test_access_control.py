@@ -62,17 +62,30 @@ async def test_plan_bola_blocks_cross_subject(auth_env):
 
 
 @pytest.mark.asyncio
-async def test_trace_bola_blocks_other_session(auth_env):
+async def test_drafts_bola_blocks_cross_subject(auth_env):
+    from src.hitl import drafts as hitl
+
+    draft = hitl.crear_borrador(
+        session_id="web:owner-subject",
+        contenido="Relato sensible de víctima — solo el dueño.",
+        tipo="memorial",
+    )
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        allowed = await client.get(
-            "/debug/trace/web:owner-subject",
-            cookies=_cookie("owner-subject"),
-        )
-        assert allowed.status_code == 200
+        own_list = await client.get("/drafts/pendientes", cookies=_cookie("owner-subject"))
+        assert own_list.status_code == 200
+        assert draft.id in [d["id"] for d in own_list.json()["drafts"]]
 
-        denied = await client.get(
-            "/debug/trace/web:owner-subject",
-            cookies=_cookie("other-subject"),
-        )
-        assert denied.status_code == 403
+        other_list = await client.get("/drafts/pendientes", cookies=_cookie("attacker-subject"))
+        assert other_list.status_code == 200
+        assert draft.id not in [d["id"] for d in other_list.json()["drafts"]]
+
+        spoof = await client.get(f"/drafts/{draft.id}", cookies=_cookie("attacker-subject"))
+        assert spoof.status_code == 403
+
+        spoof_docx = await client.get(f"/drafts/{draft.id}/docx", cookies=_cookie("attacker-subject"))
+        assert spoof_docx.status_code == 403
+
+        own = await client.get(f"/drafts/{draft.id}", cookies=_cookie("owner-subject"))
+        assert own.status_code == 200
+        assert "Relato sensible" in own.json()["contenido"]

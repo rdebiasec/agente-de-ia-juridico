@@ -424,7 +424,9 @@ class _TraceRunHooks(RunHooksBase[Any, Any]):
             "model": str(model_name),
             "started_at_ms": started_at_ms,
             "started_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started_at_ms / 1000)),
-            "system_prompt": _truncate(mask_pii(system_prompt or ""), limit=1400),
+            # Nunca persistir el system prompt completo (fuga vía /chat y debug).
+            "system_prompt": "[redacted]",
+            "system_prompt_chars": len(system_prompt or ""),
             "input_preview": _extract_input_preview(input_items, limit=1200),
             "status": "in_progress",
             "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0, "cached_input_tokens": 0, "reasoning_tokens": 0},

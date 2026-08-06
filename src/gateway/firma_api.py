@@ -9,7 +9,9 @@ from pydantic import BaseModel
 from datetime import date
 import time
 
-from src.auth.deps import require_web_session
+from src.auth.deps import get_web_subject_id, require_web_session
+from src.config import Settings, get_settings
+from src.gateway.draft_access import require_draft_for_subject, resolve_list_session_id
 from src.hitl import drafts as hitl
 from src.hitl.drafts import TransicionInvalida
 from src.services import rag
@@ -66,29 +68,45 @@ async def actualizar_flags_expediente(req: ExpedienteFlagsRequest):
 
 
 @router.get("/drafts")
-async def listar_borradores(estado: str | None = None, session_id: str | None = None):
+async def listar_borradores(
+    estado: str | None = None,
+    session_id: str | None = None,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
     repo = get_repository()
-    items = repo.list_drafts(estado=estado, session_id=session_id)
+    scoped = resolve_list_session_id(
+        subject_id=uid, settings=settings, requested_session_id=session_id
+    )
+    items = repo.list_drafts(estado=estado, session_id=scoped)
     return {"drafts": [d.to_dict() for d in items]}
 
 
 @router.get("/drafts/pendientes")
-async def listar_pendientes():
-    """Bandeja del abogado: borradores aún sin decisión final."""
+async def listar_pendientes(
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    """Bandeja del abogado: borradores de su sesión aún sin decisión final."""
     repo = get_repository()
+    scoped = resolve_list_session_id(subject_id=uid, settings=settings)
     pendientes = [
         d.to_dict()
-        for d in repo.list_drafts()
+        for d in repo.list_drafts(session_id=scoped)
         if d.estado in {ESTADO_PROPUESTO, "en_revision"}
     ]
     return {"drafts": pendientes}
 
 
 @router.get("/drafts/{draft_id}")
-async def obtener_borrador(draft_id: str):
-    draft = get_repository().get_draft(draft_id)
-    if draft is None:
-        raise HTTPException(status_code=404, detail="Borrador no encontrado.")
+async def obtener_borrador(
+    draft_id: str,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    draft = require_draft_for_subject(
+        get_repository().get_draft(draft_id), uid, settings=settings
+    )
     return draft.to_dict()
 
 
@@ -102,21 +120,37 @@ def _aplicar(accion, draft_id: str, **kwargs):
 
 
 @router.post("/drafts/{draft_id}/approve")
-async def aprobar_borrador(draft_id: str, req: AprobarRequest):
+async def aprobar_borrador(
+    draft_id: str,
+    req: AprobarRequest,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    require_draft_for_subject(get_repository().get_draft(draft_id), uid, settings=settings)
     draft = _aplicar(hitl.aprobar, draft_id, revisor=req.revisor, comentario=req.comentario)
     return draft.to_dict()
 
 
-
-
 @router.post("/drafts/{draft_id}/reject")
-async def rechazar_borrador(draft_id: str, req: RechazarRequest):
+async def rechazar_borrador(
+    draft_id: str,
+    req: RechazarRequest,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    require_draft_for_subject(get_repository().get_draft(draft_id), uid, settings=settings)
     draft = _aplicar(hitl.rechazar, draft_id, revisor=req.revisor, comentario=req.comentario)
     return draft.to_dict()
 
 
 @router.post("/drafts/{draft_id}/edit")
-async def editar_borrador(draft_id: str, req: EditarRequest):
+async def editar_borrador(
+    draft_id: str,
+    req: EditarRequest,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    require_draft_for_subject(get_repository().get_draft(draft_id), uid, settings=settings)
     draft = _aplicar(
         hitl.editar, draft_id, revisor=req.revisor, nuevo_contenido=req.contenido, comentario=req.comentario
     )
@@ -124,10 +158,14 @@ async def editar_borrador(draft_id: str, req: EditarRequest):
 
 
 @router.get("/drafts/{draft_id}/docx")
-async def descargar_docx(draft_id: str):
-    draft = get_repository().get_draft(draft_id)
-    if draft is None:
-        raise HTTPException(status_code=404, detail="Borrador no encontrado.")
+async def descargar_docx(
+    draft_id: str,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    draft = require_draft_for_subject(
+        get_repository().get_draft(draft_id), uid, settings=settings
+    )
     data = docx_desde_borrador(draft)
     filename = f"{draft.tipo}-{draft.id}.docx"
     return Response(
@@ -138,10 +176,14 @@ async def descargar_docx(draft_id: str):
 
 
 @router.get("/drafts/{draft_id}/pdf")
-async def descargar_pdf(draft_id: str):
-    draft = get_repository().get_draft(draft_id)
-    if draft is None:
-        raise HTTPException(status_code=404, detail="Borrador no encontrado.")
+async def descargar_pdf(
+    draft_id: str,
+    uid: str = Depends(get_web_subject_id),
+    settings: Settings = Depends(get_settings),
+):
+    draft = require_draft_for_subject(
+        get_repository().get_draft(draft_id), uid, settings=settings
+    )
     try:
         data = generar_pdf_desde_borrador(draft)
     except Exception as exc:  # WeasyPrint o libs de sistema ausentes
