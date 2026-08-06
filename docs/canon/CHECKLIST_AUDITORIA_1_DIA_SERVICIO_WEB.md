@@ -24,13 +24,13 @@ Marcar: `[ ]` pendiente · `[x]` OK · `[~]` parcial · `[!]` falló
 
 | # | Check | Cómo / dónde | Resultado |
 |---|---|---|---|
-| B1 | Auth web obligatoria en prod | `WEB_AUTH_ENABLED`, `SITE_PASSWORD`; `DEV_AUTO_LOGIN` off en prod | [!] |
+| B1 | Auth web obligatoria en prod | `WEB_AUTH_ENABLED`, `SITE_PASSWORD`; `DEV_AUTO_LOGIN` off en prod | [x] remediado código/env/smoke |
 | B2 | Sesión idle + cookie secure | `SESSION_IDLE_MINUTES`, `SESSION_COOKIE_SECURE`, `SESSION_SECRET` | [~] |
-| B3 | Portal auditoría: login + PIN + consent | `/api/audit/login`, `prelogin`, `policy` | [!] |
+| B3 | Portal auditoría: login + PIN + consent | `/api/audit/login`, `prelogin`, `policy` | [~] session gate ON; smoke PIN/consent con creds |
 | B4 | Allowlist emails auditoría | `AUDIT_ALLOWED_EMAILS` configurado en prod | [~] |
 | B5 | IP allowlist (si aplica) | `IP_ALLOWLIST_ENABLED` / middleware | [x] |
 | B6 | Sin secretos en git | `.gitignore` + no `.env` tracked; solo `.env.example` | [x] |
-| B7 | APIs sensibles requieren sesión | chat, expediente, firma, audit progress | [!] |
+| B7 | APIs sensibles requieren sesión | chat, expediente, firma, audit progress | [~] chat 401 sin cookie; drafts aún P0 |
 
 ### C. Privacidad Ley 1581 (60–90 min)
 
