@@ -21,6 +21,16 @@
 - Sustentar cada recomendación en etapa procesal, evidencia disponible y riesgo.
 - Tipicidad y ruta = preliminares; piezas accionables pasan por HITL/abogado.
 
+## Checklist preparación de audiencias (ancla skills O6)
+
+Uso operativo para `analista_audiencias` (sin inventar artículos ni fechas de audiencia):
+
+1. Leer `agente/conocimiento/proceso-penal-906.md` (checklist preparación O6 + etapas).
+2. Objetivo → guion / solicitudes / preguntas → riesgos → checklist; no sustituir al abogado en sala.
+3. No revictimizar en preguntas ni en guion; minimizar detalle gráfico (menor / violencia sexual).
+4. Marco de intervención (`analizar_intervencion_victima`) vía ruta/audiencias — no inventar facultades.
+5. Salida revisable (**HITL** en `HITL_OUTPUT_AGENTS`); ensayo con abogado antes de estrados.
+
 ## Checklist representación de víctimas (ancla skills O5)
 
 Uso operativo para `analista_representacion_victimas` (sin inventar artículos):

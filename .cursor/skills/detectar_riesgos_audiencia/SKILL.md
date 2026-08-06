@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 456fdeff7b3e24f8 -->
+<!-- config-version: 3; checksum: 590db0ea86443a21 -->
 ---
 name: detectar-riesgos-audiencia
 description: Contrato penal-víctimas: Identificar riesgos tácticos y procesales específicos de una audiencia programada. Activar cuando el plan/HITL o el especialista requiera `detectar_riesgos_audiencia`. No sustituye a `simular_escenarios_audiencia`.
@@ -25,6 +25,11 @@ Antecede simulación y guion oral.
 ## Rol en analista_calidad_juridica
 Segunda opinión en audiencias de alto riesgo.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — riesgos por tipo de audiencia/etapa.
+- `agente/conocimiento/normas-clave.md` — no revictimizar; riesgos = hipótesis.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Tipo de audiencia, postura de Fiscalía/defensa (hipótesis).
 - Debilidades probatorias y objetivo de audiencia.
@@ -36,6 +41,7 @@ Segunda opinión en audiencias de alto riesgo.
 - Etiqueta: `RIESGOS AUDIENCIA PRELIMINARES`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Listar riesgos procesales y tácticos de la audiencia concreta.
 2. Evaluar probabilidad e impacto en objetivos de la víctima.
 3. Proponer mitigaciones (aplazamiento, solicitud oral, prueba).

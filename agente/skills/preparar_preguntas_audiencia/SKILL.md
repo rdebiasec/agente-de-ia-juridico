@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 055f6d52e5539112 -->
+<!-- config-version: 3; checksum: 253196d5d4811d27 -->
 ---
 name: preparar-preguntas-audiencia
 description: Contrato penal-víctimas: Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, alineadas a matriz hecho-prueba y objetivo de audiencia. Activar cuando el plan/HITL o el especialista requiera `preparar_preguntas_audiencia`. No sustituye a `preparar_guio...
@@ -20,6 +20,11 @@ Redactar preguntas neutrales y no inductivas para víctima, testigos o peritos, 
 
 ## Rol en analista_audiencias
 Guion probatorio oral alineado con hechos y teoría del caso.
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — checklist preparación O6; no revictimizar.
+- `agente/conocimiento/normas-clave.md` — dignidad/protección; minimizar exposición íntima no pertinente.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Objetivo de audiencia (`identificar_objetivo_audiencia`).
 - Matriz hecho-prueba y cronología verificada.
@@ -31,6 +36,7 @@ Guion probatorio oral alineado con hechos y teoría del caso.
 - Etiqueta: `REVISAR CON ABOGADO — ESPECIALMENTE PREGUNTAS A VÍCTIMA`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Definir objetivo de la audiencia y hechos a acreditar.
 2. Redactar preguntas abiertas/cerradas sin revictimizar.
 3. Separar preguntas a testigos/peritos vs solicitudes orales.

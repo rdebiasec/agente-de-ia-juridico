@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 34ba0d85a1962a35 -->
+<!-- config-version: 3; checksum: 7e39bc476404cb01 -->
 ---
 name: generar-preguntas-testigos-peritos
 description: Contrato penal-víctimas: Formular preguntas para testigos o peritos (no para la víctima) alineadas a hechos pendientes de aclarar. Activar cuando el plan/HITL o el especialista requiera `generar_preguntas_testigos_peritos`. No sustituye a `preparar_preguntas_audiencia`.
@@ -25,6 +25,11 @@ Uso principal en preparación de audiencia.
 ## Rol en analista_cronologia_hechos
 Solo para aclarar huecos factuales vía terceros; no preguntas a víctima.
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — práctica testimonial/pericial por etapa.
+- `agente/conocimiento/normas-clave.md` — preguntas a terceros, no a víctima.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Matriz hecho-prueba y vacíos factuales.
 - Tipo de testigo/perito y objeto de su declaración.
@@ -35,6 +40,7 @@ Solo para aclarar huecos factuales vía terceros; no preguntas a víctima.
 - Etiqueta: `PREGUNTAS TERCEROS — NO VÍCTIMA`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Identificar hechos que requieren aclaración por testigo o perito.
 2. Formular preguntas neutrales y no inductivas.
 3. Ordenar por relevancia probatoria.

@@ -195,6 +195,7 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     "analista_audiencias": (
         "identificar_objetivo_audiencia",
         "preparar_guion_intervencion_oral",
+        "detectar_riesgos_audiencia",
     ),
     "analista_seguimiento_procesal": (
         "generar_alertas_terminos_vencimientos",

@@ -1,6 +1,6 @@
 # Plan — Análisis profundo por agente (prompts, skills, herramientas)
 
-**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3; 2026-08-05).  
+**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3+A4; 2026-08-05).  
 **Fecha:** 2026-08-05  
 **Editor humano (E0):** Auto / Cursor  
 **Modo panel:** agentes IA personificados (`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`) + E0 consolida  
@@ -110,7 +110,7 @@ Fuente: `scripts/lib/catalogo_aprobacion.py` + `src/agents/skill_catalog.py` + `
 | **A1** | Deep | `analista_cronologia_hechos` | Siguiente gap procedural (hechos → tipicidad) | O3 | **Hecho** |
 | **A2** | Deep | `analista_evidencia` | Cadena hecho-prueba | O4 | **Hecho** |
 | **A3** | Deep | `analista_representacion_victimas` | Hueco eval + derechos víctima | O5 | **Hecho** |
-| **A4** | Deep | `analista_audiencias` | Oralidad / HITL | O6 | Pendiente profundo |
+| **A4** | Deep | `analista_audiencias` | Oralidad / HITL | O6 | **Hecho** |
 | **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | Pendiente profundo |
 | **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | Pendiente profundo |
 | **A7** | Deep | `analista_seguimiento_procesal` | Hueco eval + términos operativos | O8 (parcial) | Pendiente profundo |
@@ -306,7 +306,8 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A1** | `aprobado, ejecuta A1` | Deep `analista_cronologia_hechos` + skills O3 | **Hecho** |
 | **A2** | `aprobado, ejecuta A2` | Deep evidencia + O4 | **Hecho** |
 | **A3** | `aprobado, ejecuta A3` | Deep víctimas + O5 + eval nuevo | **Hecho** |
-| **A4–A6** | `aprobado, ejecuta A4` … | Audiencias → redactor → calidad | 1 turno c/u |
+| **A4** | `aprobado, ejecuta A4` | Deep audiencias + O6 + eval surface/budget | **Hecho** |
+| **A5–A6** | `aprobado, ejecuta A5` … | Redactor → calidad | 1 turno c/u |
 | **A7–A8** | `aprobado, ejecuta A7` … | Seguimiento → coordinador | 0.5–1 c/u |
 | **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |
 | **E** | `aprobado, ejecuta A-…` (lista) | Patches + evals + tests | Por lote P0 |

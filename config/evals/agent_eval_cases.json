@@ -1,5 +1,5 @@
 {
-  "version": "3.3",
+  "version": "3.4",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -286,6 +286,28 @@
       "agent_id": "analista_representacion_victimas",
       "max_chars": 12000,
       "notes": "Regresión A3: prompt víctimas completo sin explotar tokens."
+    },
+    {
+      "id": "tool-surface-audiencias",
+      "category": "tool_surface",
+      "message": "Prepare preguntas y guion para la audiencia penal de la víctima.",
+      "expected_enabled_contains": [
+        "analista_audiencias",
+        "analista_ruta_procesal",
+        "analista_calidad_juridica"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Vecinos audiencias: ruta + víctimas + calidad (orchestrator)."
+    },
+    {
+      "id": "instruction-budget-audiencias",
+      "category": "instruction_budget",
+      "agent_id": "analista_audiencias",
+      "max_chars": 12000,
+      "notes": "Regresión A4: prompt audiencias completo sin explotar tokens."
     },
     {
       "id": "route-calidad-via-plan",

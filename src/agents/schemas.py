@@ -471,6 +471,10 @@ class PreparacionAudiencia(BaseModel):
     preguntas_clave: list[str] = Field(default_factory=list)
     riesgos_audiencia: list[str] = Field(default_factory=list)
     checklist: list[str] = Field(default_factory=list)
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Orígenes KB/expediente consultados (si aplica).",
+    )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
         default_factory=list,

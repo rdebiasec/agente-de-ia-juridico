@@ -68,6 +68,19 @@ Sin inventar facultades ni artículos del CPP:
 6. Teoría del caso y objetivos = borrador interno; no radicar ni comunicar al cliente sin abogado.
 7. Intervención oral/táctica detallada → `analista_audiencias`; memorial → redactor + HITL.
 
+## Checklist preparación de audiencias (ancla skills O6)
+
+Uso operativo para `analista_audiencias` (sin inventar artículos ni fechas):
+
+1. Confirmar tipo de audiencia, juez (garantías vs conocimiento) y `etapa_ley906` (o `pendiente_verificar`).
+2. Definir objetivo jurídico y táctico de la víctima; alinear con teoría/intereses (insumo víctimas/ruta).
+3. Marco de intervención procedente (`analizar_intervencion_victima`) antes de guion/preguntas/solicitudes.
+4. Preparar guion breve, solicitudes orales y preguntas; separar hecho soportado de hipótesis táctica.
+5. Anticipar riesgos (revictimización, revelación de estrategia, improvisación) y contraargumentos.
+6. Checklist previo: documentos, poder, prueba a llevar, tiempos; no inventar fecha/hora/enlace.
+7. Producto = preparación interna; **HITL obligatorio** antes de estrados — no sustituye oralidad del abogado.
+8. Sin notificación/actuación fundante → no certificar oportunidad ni términos; marcar `[PENDIENTE DE VERIFICAR]`.
+
 ## Términos
 
 - Los términos y plazos procesales se cuentan en **días hábiles** (Ley 906), salvo norma especial verificada.

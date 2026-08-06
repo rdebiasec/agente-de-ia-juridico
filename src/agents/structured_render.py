@@ -192,6 +192,7 @@ def render_structured_output(output: Any) -> str:
             ("Preguntas clave", "preguntas_clave"),
             ("Riesgos", "riesgos_audiencia"),
             ("Checklist", "checklist"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []

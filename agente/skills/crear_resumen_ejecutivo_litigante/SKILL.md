@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 6618c656d396a545 -->
+<!-- config-version: 3; checksum: aca949a5621819ed -->
 ---
 name: crear-resumen-ejecutivo-litigante
 description: Contrato penal-víctimas: Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no para cliente). Activar cuando el plan/HITL o el especialista requiera `crear_resumen_ejecutivo_litigante`. No sustituye a `preparar_resumen_operativo_cliente`.
@@ -19,6 +19,11 @@ disable-model-invocation: true
 ## Purpose
 Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no para cliente).
 
+## Fuentes KB
+- `agente/conocimiento/proceso-penal-906.md` — etapa y próximas actuaciones.
+- `agente/conocimiento/normas-clave.md` — confidencial abogado; no para cliente sin HITL.
+- Tools reales: `leer_playbook_proceso`, `leer_normas_clave`, `buscar_en_conocimiento`, `buscar_en_expediente`.
+
 ## Inputs
 - Teoría del caso, etapa procesal, prueba clave.
 - Objetivos de representación y próximas audiencias.
@@ -28,6 +33,7 @@ Síntesis ejecutiva del caso para el abogado litigante (estrategia y estado, no 
 - Etiqueta: `RESUMEN ABOGADO — CONFIDENCIAL`.
 
 ## Steps
+0. Anclar tipo de audiencia/etapa/objetivo a Fuentes KB; sin soporte → `[PENDIENTE DE VERIFICAR]`.
 1. Sintetizar estado factual y procesal del caso.
 2. Destacar fortalezas, debilidades y decisiones pendientes.
 3. Proponer próximos pasos prioritarios para el litigante.
