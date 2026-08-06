@@ -20,6 +20,12 @@ En `src/config_store/sync.py`: si el header del archivo es mayor que la versión
 
 **Fuera de alcance de esta nota:** F4 auth portal, F5 notepads.
 
+## Resultado
+
+- **Sync OK:** https://github.com/rdebiasec/agente-de-ia-juridico/actions/runs/31068829945 (`workflow_dispatch`, `dry_run=false`)
+- **Importados a DB:** 109 ítems (prompts/guardrails/skills A0–A8 + resto con drift)
+- **Headers:** commit `1ffae57` `chore(config): sincronizar headers de versión [skip-config-sync]`
+
 ## Verificación
 
 1. Merge / push de `cursor/fix-sync-config` a `main`.
