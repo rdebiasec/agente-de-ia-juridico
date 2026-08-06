@@ -41,6 +41,16 @@ Uso operativo para `redactor_documentos_juridicos` (sin inventar artículos ni r
 4. Pieza accionable → **HITL** (`HIGH_RISK_AGENTS`); no firmar ni radicar sin abogado.
 5. Control de citas/calidad → `analista_calidad_juridica` cuando el plan lo indique.
 
+## Checklist calidad jurídica / citas (ancla skills O7 calidad)
+
+Uso operativo para `analista_calidad_juridica` (sin inventar normas ni jurisprudencia):
+
+1. Leer `agente/conocimiento/proceso-penal-906.md` (checklist control de calidad).
+2. Verificar citas normativas y jurisprudencia contra KB/expediente; no inventar vigencia ni sentencias.
+3. Detectar alucinaciones (norma/sentencia/radicado/hecho no localizable) → pendiente o rechazo/escalamiento.
+4. Confidencialidad (Ley 1581) y no revictimización antes de dictamen final.
+5. Veredicto ∈ {aprobable, con_cambios, rechazado, escalar}; gate duro si rechazado/escalar.
+
 ## Checklist representación de víctimas (ancla skills O5)
 
 Uso operativo para `analista_representacion_victimas` (sin inventar artículos):

@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 29b736928af116f7 -->
+<!-- config-version: 3; checksum: 6546b8ebdf603a02 -->
 ---
 name: detectar-alucinaciones-legales
 description: Contrato penal-víctimas: Detectar citas normativas, sentencias, radicados o hechos inventados o no localizables en fuentes verificables. Activar cuando el plan/HITL o el especialista requiera `detectar_alucinaciones_legales`. No sustituye a `clasificar_aprobacion_juridica`.
@@ -21,6 +21,12 @@ Detectar citas normativas, sentencias, radicados o hechos inventados o no locali
 ## Rol en analista_calidad_juridica
 Primer filtro de detección; **no** clasifica aprobación final — derivar a `clasificar_aprobacion_juridica`.
 
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — checklist calidad/citas; regla de no invención.
+- `agente/conocimiento/proceso-penal-906.md` — checklist control de calidad (gate duro).
+- Tools reales: `buscar_en_conocimiento`, `buscar_en_expediente`, `leer_normas_clave`, `leer_playbook_proceso`.
+- Sin soporte → estado `no_localizada` o `pendiente`; no inventar que una cita “existe”.
+
 ## Inputs
 - Documento, análisis o recomendación a revisar.
 - Referencias citadas (artículos, sentencias, radicados, folios).
@@ -33,6 +39,7 @@ Primer filtro de detección; **no** clasifica aprobación final — derivar a `c
 - Etiqueta: `DETECCIÓN ALUCINACIONES — NO ES DICTAMEN DE APROBACIÓN`.
 
 ## Steps
+0. Extraer citas/hechos y cruzar con Fuentes KB/expediente; sin soporte → no_localizada/pendiente. No inventar verificaciones.
 1. Extraer citas de normas, sentencias, radicados y hechos afirmados.
 2. Cruzar con expediente/KB; clasificar verificada | no_localizada | inventada | pendiente.
 3. Entregar conteo y recomendación de escalamiento; no dictaminar aprobación final.

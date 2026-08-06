@@ -179,7 +179,7 @@ _SECONDARY_SKILLS: dict[str, tuple[str, ...]] = {
     ),
     "analista_calidad_juridica": (
         "detectar_alucinaciones_legales",
-        "controlar_confidencialidad_datos_sensibles",
+        "verificar_citas_normativas",
         "clasificar_aprobacion_juridica",
     ),
     "analista_ruta_procesal": (

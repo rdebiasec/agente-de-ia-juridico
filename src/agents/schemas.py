@@ -364,6 +364,10 @@ class DictamenCalidad(BaseModel):
         default="",
         description="Resumen ejecutivo del dictamen para el gerente/abogado.",
     )
+    fuentes_kb: list[str] = Field(
+        default_factory=list,
+        description="Paths KB/expediente consultados al verificar citas o hechos.",
+    )
     pendientes_verificacion: list[str] = Field(default_factory=list)
     notas_trabajo: list[NotaTrabajo] = Field(
         default_factory=list,

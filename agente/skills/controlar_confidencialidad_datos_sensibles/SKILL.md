@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 0d2a5d3173438c42 -->
+<!-- config-version: 3; checksum: a0285c0121f773ef -->
 ---
 name: controlar-confidencialidad-datos-sensibles
 description: Contrato penal-víctimas: Detectar y mitigar exposición innecesaria de datos personales sensibles en salidas del sistema. Activar cuando el plan/HITL o el especialista requiera `controlar_confidencialidad_datos_sensibles`. No sustituye a `controlar_no_revictimizacion`.
@@ -20,6 +20,12 @@ Detectar y mitigar exposición innecesaria de datos personales sensibles en sali
 
 ## Rol en analista_calidad_juridica
 Control de minimización y datos sensibles antes de salidas externas.
+## Fuentes KB
+- `agente/conocimiento/normas-clave.md` — minimización / no revictimización; checklist calidad.
+- Cumplimiento Ley 1581 (runbook despacho); no inventar bases legales de tratamiento.
+- Tools reales: solo las del agente; no hay `pii_detector` invocable — revisión contractual.
+- Destinatario externo + PII innecesaria → `redactar` o `solo_abogado` / escalar.
+
 ## Inputs
 - Texto o documento a revisar.
 - Destinatario previsto (interno, cliente, juzgado, tercero).
@@ -30,6 +36,7 @@ Control de minimización y datos sensibles antes de salidas externas.
 - Etiqueta: `CONTROL LEY 1581 / DATOS SENSIBLES`.
 
 ## Steps
+0. Minimizar PII segun Fuentes KB / Ley 1581; no inventar necesidad de dato.
 1. Detectar PII/datos sensibles/menor en la salida.
 2. Proponer redacción mínima necesaria o redacción.
 3. No sustituir control de no revictimización ni dictamen de aprobación.

@@ -136,6 +136,25 @@ def test_redactor_schema_still_valid():
     assert draft.fuentes_kb[0].endswith("proceso-penal-906.md")
 
 
+def test_dictamen_calidad_fuentes_kb():
+    from src.agents.schemas import DictamenCalidad
+    from src.agents.structured_render import render_structured_output
+
+    dictamen = DictamenCalidad(
+        veredicto="con_cambios",
+        hallazgos=["Cita C-999/99 sin soporte"],
+        cambios_requeridos=["Retirar o marcar pendiente la sentencia"],
+        resumen="Dictamen preliminar con cita no localizada",
+        fuentes_kb=["agente/conocimiento/normas-clave.md"],
+        pendientes_verificacion=["Verificar sentencia citada"],
+    )
+    text = render_structured_output(dictamen)
+    assert "con_cambios" in text
+    assert "normas-clave.md" in text
+    assert dictamen.fuentes_kb[0].endswith("normas-clave.md")
+    assert dictamen.bloquea_entrega is False
+
+
 def test_orchestrator_poc_chat_has_no_output_type():
     from src.agents.orchestrator import POC_AGENT_ID, build_orchestrator
 

@@ -94,6 +94,18 @@ Uso operativo para `redactor_documentos_juridicos` (sin inventar artículos ni r
 7. Producto = **borrador interno**; etiqueta `BORRADOR — NO RADICAR SIN FIRMA`; **HITL obligatorio** (HIGH RISK) antes de uso externo.
 8. Pasar a calidad jurídica cuando el plan lo indique; el abogado firma y radica.
 
+## Checklist control de calidad jurídica (ancla skills O7 calidad/citas)
+
+Uso operativo para `analista_calidad_juridica` (sin inventar normas, sentencias ni radicados):
+
+1. Leer el borrador/análisis y listar citas (normas, jurisprudencia, radicados) y afirmaciones factuales.
+2. Cruzar con expediente/KB (`buscar_en_expediente` / `buscar_en_conocimiento` / lecturas KB); sin soporte → `[PENDIENTE DE VERIFICAR]` o estado `no_localizada`/`pendiente`.
+3. Cadena: coherencia estratégica → alucinaciones/citas/jurisprudencia → hechos soportados → confidencialidad / no revictimización → dictamen (`clasificar_aprobacion_juridica`).
+4. Veredicto `DictamenCalidad`: `aprobable` | `con_cambios` | `rechazado` | `escalar`. Nunca aprobar en silencio.
+5. `rechazado` / `escalar` = **gate duro**: no entrega accionable del plan hasta abogado.
+6. No reescribir el memorial completo: hallazgos y cambios concretos; registrar `fuentes_kb` si se consultó KB/expediente.
+7. Dictamen = preliminar de la IA; el abogado decide uso externo.
+
 ## Términos
 
 - Los términos y plazos procesales se cuentan en **días hábiles** (Ley 906), salvo norma especial verificada.

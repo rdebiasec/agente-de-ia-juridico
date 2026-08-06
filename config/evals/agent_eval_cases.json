@@ -1,5 +1,5 @@
 {
-  "version": "3.5",
+  "version": "3.6",
   "sources": [
     "agente/fuente/GUIA_PROYECTO_AGENTE_JURIDICO.md",
     "agente/requisitos/requisitos_asistente.json",
@@ -323,6 +323,22 @@
       ],
       "include_kb_search_tool": false,
       "notes": "Focus=redactor HIGH RISK: chat_pool excluye redactor; vecinos calidad+ruta. Memorial vía plan HITL (route-memorial)."
+    },
+    {
+      "id": "tool-surface-calidad",
+      "category": "tool_surface",
+      "message": "Necesito control de calidad jurídica y verificar coherencia estratégica antes de entregarlo.",
+      "expected_enabled_contains": [
+        "analista_calidad_juridica",
+        "analista_cronologia_hechos",
+        "analista_ruta_procesal"
+      ],
+      "expected_enabled_excludes": [
+        "redactor_documentos_juridicos",
+        "analista_audiencias"
+      ],
+      "include_kb_search_tool": false,
+      "notes": "Focus=calidad: vecinos cronología+ruta (orchestrator); chat excluye HIGH RISK redactor."
     },
     {
       "id": "route-calidad-via-plan",

@@ -41,6 +41,7 @@ def render_structured_output(output: Any) -> str:
             ("Hallazgos", "hallazgos"),
             ("Cambios requeridos", "cambios_requeridos"),
             ("Riesgos", "riesgos"),
+            ("Fuentes KB", "fuentes_kb"),
             ("Pendientes de verificación", "pendientes_verificacion"),
         ):
             items = data.get(key) or []

@@ -1,6 +1,6 @@
 # Plan — Análisis profundo por agente (prompts, skills, herramientas)
 
-**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3+A4; 2026-08-05).  
+**Estado:** `EN_EJECUCION` (operador: `aprobado todo` → A0+A1+A2+A3+A4+A5+A6; 2026-08-05).  
 **Fecha:** 2026-08-05  
 **Editor humano (E0):** Auto / Cursor  
 **Modo panel:** agentes IA personificados (`PROMPT_PANEL_ANALISIS_PROMPTS_SKILLS.md`) + E0 consolida  
@@ -112,7 +112,7 @@ Fuente: `scripts/lib/catalogo_aprobacion.py` + `src/agents/skill_catalog.py` + `
 | **A3** | Deep | `analista_representacion_victimas` | Hueco eval + derechos víctima | O5 | **Hecho** |
 | **A4** | Deep | `analista_audiencias` | Oralidad / HITL | O6 | **Hecho** |
 | **A5** | Deep | `redactor_documentos_juridicos` | High-risk + HITL obligatorio | O7 (redacción) | **Hecho** |
-| **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | Pendiente profundo |
+| **A6** | Deep | `analista_calidad_juridica` | Control alucinación / citas | O7 (calidad) | **Hecho** |
 | **A7** | Deep | `analista_seguimiento_procesal` | Hueco eval + términos operativos | O8 (parcial) | Pendiente profundo |
 | **A8** | Deep | `coordinador_caso` | POC, triage, voz única, `POC_OWNED_SKILLS` | O8 gerencia | G01–G09 hecho; re-score ligero + gaps |
 
@@ -308,7 +308,8 @@ Cada ítem: propósito, dónde vive, prioridad, dependencias.
 | **A3** | `aprobado, ejecuta A3` | Deep víctimas + O5 + eval nuevo | **Hecho** |
 | **A4** | `aprobado, ejecuta A4` | Deep `analista_audiencias` + O6 + eval surface/budget | **Hecho** |
 | **A5** | `aprobado, ejecuta A5` | Deep redactor + O7 redacción + eval surface | **Hecho** |
-| **A6** | `aprobado, ejecuta A6` | Deep calidad + O7 calidad/citas | 1 turno |
+| **A6** | `aprobado, ejecuta A6` | Deep calidad + O7 calidad/citas | **Hecho** |
+| **A7** | `aprobado, ejecuta A7` | Deep seguimiento + O8 parcial + eval | 1 turno |
 | **A7–A8** | `aprobado, ejecuta A7` … | Seguimiento → coordinador | 0.5–1 c/u |
 | **X** | `aprobado, ejecuta X` | Hallazgos cruzados + Top 15 | 0.5 turno |
 | **E** | `aprobado, ejecuta A-…` (lista) | Patches + evals + tests | Por lote P0 |
