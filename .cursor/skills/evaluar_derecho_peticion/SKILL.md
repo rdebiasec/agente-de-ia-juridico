@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: ba2fddc61d931323 -->
+<!-- config-version: 4; checksum: 967bc154c5f9e70d -->
 ---
 name: evaluar-derecho-peticion
 description: Contrato penal-víctimas: Verificar si hay petición previa incumplida y si procede un nuevo derecho de petición, impulso o seguimiento en vía penal. Activar cuando el plan/HITL o el especialista requiera `evaluar_derecho_peticion`. No sustituye a `redactar_derecho_peticion_penal`.

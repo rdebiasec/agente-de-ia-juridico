@@ -38,6 +38,7 @@ from src.gateway.router import InboundMessage, handle_message
 from src.gateway.trace import trace_store
 from src.middleware.ip_allowlist import IpAllowlistMiddleware, client_ip as _client_ip_from_request
 from src.middleware.rate_limit import check_rate_limit, reset_rate_limit
+from src.observability.trace_public import public_trace, public_traces
 from src.security import is_production, security_headers_for_path, validate_production_settings
 from src.validation.probes import generate_probes
 from src.validation.report import build_export_html, build_rules_only, build_session_report
@@ -666,21 +667,22 @@ async def chat(
     result = await handle_message(
         InboundMessage(channel=req.channel, user_id=uid, text=req.message)
     )
-    return ChatResponse(
-        **{
-            k: result[k]
-            for k in (
-                "text",
-                "agent",
-                "pending_review",
-                "draft_id",
-                "trace",
-                "plan_id",
-                "offer_plan",
-            )
-            if k in result
-        }
-    )
+    payload = {
+        k: result[k]
+        for k in (
+            "text",
+            "agent",
+            "pending_review",
+            "draft_id",
+            "trace",
+            "plan_id",
+            "offer_plan",
+        )
+        if k in result
+    }
+    if "trace" in payload:
+        payload["trace"] = public_trace(payload.get("trace"))
+    return ChatResponse(**payload)
 
 
 def _plan_session_id(channel: str, user_id: str) -> str:
@@ -805,7 +807,7 @@ async def chat_approve_and_execute(
         agent=result["agent"],
         pending_review=result.get("pending_review", False),
         draft_id=result.get("draft_id"),
-        trace=result.get("trace"),
+        trace=public_trace(result.get("trace")),
         session_id=result["session_id"],
         plan_id=result["plan_id"],
         plan=result.get("plan"),
@@ -984,7 +986,7 @@ async def chat_history(channel: str = "web", uid: str = Depends(get_web_subject_
     return ChatHistoryResponse(
         session_id=session_id,
         messages=messages,
-        traces=trace_store.get(session_id, limit=40),
+        traces=public_traces(trace_store.get(session_id, limit=40)),
         expediente=exp.to_dict() if exp else None,
     )
 
@@ -1005,7 +1007,7 @@ async def debug_trace(session_id: str, limit: int = 20, uid: str = Depends(get_w
     if sid != f"web:{uid}":
         raise HTTPException(status_code=403, detail="No autorizado para esta sesión.")
     max_limit = max(1, min(limit, 100))
-    traces = trace_store.get(sid, limit=max_limit)
+    traces = public_traces(trace_store.get(sid, limit=max_limit))
     return TraceDebugResponse(session_id=sid, traces=traces)
 
 

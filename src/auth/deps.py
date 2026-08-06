@@ -52,6 +52,14 @@ def resolve_web_user_id(
 ) -> str:
     """ID de usuario web: cookie firmada en prod; fallback solo si auth desactivada (tests)."""
     if not auth_enabled(settings.site_password):
+        from src.security import is_production
+
+        # En prod nunca hay sujeto compartido: auth debe estar ON (validate_production_settings).
+        if is_production(settings):
+            raise HTTPException(
+                status_code=503,
+                detail="Auth web obligatoria en producción; no hay sujeto compartido.",
+            )
         fb = (client_fallback or "test").strip()
         return fb or "test"
 

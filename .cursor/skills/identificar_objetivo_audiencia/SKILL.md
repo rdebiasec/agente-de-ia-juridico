@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: ab3284e98d6b86b5 -->
+<!-- config-version: 4; checksum: 44d5afb1d6d7a6a1 -->
 ---
 name: identificar-objetivo-audiencia
 description: Contrato penal-víctimas: Definir qué debe lograr la víctima en la audiencia: objetivo jurídico (Ley 906) y táctico (postura procesal). Activar cuando el plan/HITL o el especialista requiera `identificar_objetivo_audiencia`. No sustituye a `preparar_guion_intervencion_oral`.

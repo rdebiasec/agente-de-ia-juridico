@@ -30,14 +30,14 @@ Marcar: `[ ]` pendiente · `[x]` OK · `[~]` parcial · `[!]` falló
 | B4 | Allowlist emails auditoría | `AUDIT_ALLOWED_EMAILS` configurado en prod | [~] |
 | B5 | IP allowlist (si aplica) | `IP_ALLOWLIST_ENABLED` / middleware | [x] |
 | B6 | Sin secretos en git | `.gitignore` + no `.env` tracked; solo `.env.example` | [x] |
-| B7 | APIs sensibles requieren sesión | chat, expediente, firma, audit progress | [~] chat 401 sin cookie; drafts aún P0 |
+| B7 | APIs sensibles requieren sesión | chat, expediente, firma, audit progress | [x] chat+drafts BOLA por subject |
 
 ### C. Privacidad Ley 1581 (60–90 min)
 
 | # | Check | Cómo / dónde | Resultado |
 |---|---|---|---|
-| C1 | Consent hard en login chat | `src/main.py` + `src/compliance/consent.py` | [!] |
-| C2 | Consent portal + casos | `audit_portal_api.py` | [!] |
+| C1 | Consent hard en login chat | `src/main.py` + `src/compliance/consent.py` | [x] |
+| C2 | Consent portal + casos | `audit_portal_api.py` | [x] |
 | C3 | Consent `/cliente` | `triple_chat_api.py` `consent_1581` | [x] |
 | C4 | ARCO erase | `POST /api/compliance/arco-erase` + runbook | [~] |
 | C5 | Páginas legales | `/legal/terminos`, privacidad, tratamiento casos | [x] |
@@ -78,7 +78,7 @@ Marcar: `[ ]` pendiente · `[x]` OK · `[~]` parcial · `[!]` falló
 
 | # | Check | Cómo / dónde | Resultado |
 |---|---|---|---|
-| F1 | CI verde en main | GitHub Actions | [!] |
+| F1 | CI verde en main | GitHub Actions | [x] |
 | F2 | pytest guardrails/HITL/routing | `tests/test_guardrails_iot_*`, `test_firma`, evals | [x] |
 | F3 | Evals OOS / memorial | `config/evals/agent_eval_cases.json` | [x] |
 | F4 | Sync config en push | `sync-config.yml` | [x] |

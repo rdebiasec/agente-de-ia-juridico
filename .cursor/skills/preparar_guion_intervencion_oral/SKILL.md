@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: ec180e3314de75ea -->
+<!-- config-version: 4; checksum: 22bdb07950d02a22 -->
 ---
 name: preparar-guion-intervencion-oral
 description: Contrato penal-víctimas: Armar guion breve de intervención oral del abogado de la víctima: apertura, argumento, réplicas y cierre con peticiones. Activar cuando el plan/HITL o el especialista requiera `preparar_guion_intervencion_oral`. No sustituye a `preparar_preguntas_audie...

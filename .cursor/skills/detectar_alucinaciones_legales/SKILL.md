@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 6546b8ebdf603a02 -->
+<!-- config-version: 4; checksum: 6215004ad7c8323c -->
 ---
 name: detectar-alucinaciones-legales
 description: Contrato penal-víctimas: Detectar citas normativas, sentencias, radicados o hechos inventados o no localizables en fuentes verificables. Activar cuando el plan/HITL o el especialista requiera `detectar_alucinaciones_legales`. No sustituye a `clasificar_aprobacion_juridica`.

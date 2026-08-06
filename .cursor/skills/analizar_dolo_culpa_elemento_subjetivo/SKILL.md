@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: e1686261245ad6de -->
+<!-- config-version: 4; checksum: df27a53c3cbd11cb -->
 ---
 name: analizar-dolo-culpa-elemento-subjetivo
 description: Contrato penal-víctimas: Identificar indicios factuales que podrían soportar dolo, culpa u otro elemento subjetivo, sin afirmar certeza. Activar cuando el plan/HITL o el especialista requiera `analizar_dolo_culpa_elemento_subjetivo`. No sustituye a `descomponer_elementos_tipo_...

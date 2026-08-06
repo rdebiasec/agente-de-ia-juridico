@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 209324afb96061b5 -->
+<!-- config-version: 4; checksum: 0813678960764c6c -->
 ---
 name: preparar-contraargumentos
 description: Contrato penal-víctimas: Anticipar argumentos de defensa o Fiscalía y preparar réplicas para audiencia o memorial. Activar cuando el plan/HITL o el especialista requiera `preparar_contraargumentos`. No sustituye a `preparar_guion_intervencion_oral`.

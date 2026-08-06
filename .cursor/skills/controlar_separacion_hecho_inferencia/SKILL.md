@@ -1,4 +1,4 @@
-<!-- config-version: 3; checksum: 790b41c0c3af76b8 -->
+<!-- config-version: 4; checksum: 71c7500097575c13 -->
 ---
 name: controlar-separacion-hecho-inferencia
 description: Contrato penal-víctimas: Verificar que hechos confirmados, narrados, inferidos y pendientes estén claramente separados en la salida. Activar cuando el plan/HITL o el especialista requiera `controlar_separacion_hecho_inferencia`. No sustituye a `verificar_hechos_soportados`.

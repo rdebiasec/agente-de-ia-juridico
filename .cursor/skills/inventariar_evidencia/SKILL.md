@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: 4ffd5d70c26a88ed -->
+<!-- config-version: 5; checksum: 633c062c36ec78f1 -->
 ---
 name: inventariar-evidencia
 description: Contrato penal-víctimas: Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `inventariar_evidencia`. No sustituye a `clasificar_tipo_prueba`.

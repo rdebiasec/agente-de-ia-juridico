@@ -1,4 +1,4 @@
-<!-- config-version: 4; checksum: fb3307efec24c6e2 -->
+<!-- config-version: 4; checksum: 73733ccd93222219 -->
 ---
 name: detectar-inactividad-procesal
 description: Contrato penal-víctimas: Detectar periodos sin movimiento procesal relevante y sugerir impulso si corresponde. Activar cuando el plan/HITL o el especialista requiera `detectar_inactividad_procesal`. No sustituye a `redactar_solicitud_impulso_procesal`.

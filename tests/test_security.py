@@ -35,6 +35,7 @@ def test_validate_production_warns_known_weak_but_long_secrets(monkeypatch):
         openai_api_key="sk-test",
         database_url="postgresql+psycopg://x",
         session_cookie_secure=True,
+        web_auth_enabled=True,
         dev_auto_login=False,
         app_debug=False,
     )
@@ -61,6 +62,7 @@ def test_validate_production_accepts_strong_config(monkeypatch):
         openai_api_key="sk-test",
         database_url="postgresql+psycopg://x",
         session_cookie_secure=True,
+        web_auth_enabled=True,
         dev_auto_login=False,
         app_debug=False,
     )
@@ -75,6 +77,7 @@ def test_validate_production_warns_short_password_under_16_chars(monkeypatch):
         openai_api_key="sk-test",
         database_url="postgresql+psycopg://x",
         session_cookie_secure=True,
+        web_auth_enabled=True,
         dev_auto_login=False,
         app_debug=False,
     )

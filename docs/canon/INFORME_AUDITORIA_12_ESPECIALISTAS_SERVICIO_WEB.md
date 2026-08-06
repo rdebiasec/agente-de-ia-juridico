@@ -187,11 +187,11 @@ Revalidación operativa adicional:
 | # | Acción | Sev | Esfuerzo | Estado |
 |---|---|---|---|---|
 | 1 | `WEB_AUTH_ENABLED=true` en Render **y** `render.yaml` | P0 | S | **HECHO** (env live + blueprint + smoke) |
-| 2 | Atar `/drafts*` (lista, PDF, DOCX, approve/reject) a sesión real | P0 | M | pendiente |
-| 3 | Eliminar `web:test` / `user_id` query en prod (chat + ARCO) | P0 | M | pendiente |
-| 4 | Redactar respuesta `/chat`: sin `system_prompt` ni internals | P0 | M | pendiente |
-| 5 | Consent hard otra vez camino real (login no cortocircuita) | P0 | S | pendiente (desbloqueado al activar auth) |
-| 6 | Arreglar `validate_fase0` (45 REQ) → CI verde | P0 | S | pendiente |
+| 2 | Atar `/drafts*` (lista, PDF, DOCX, approve/reject) a sesión real | P0 | M | **HECHO** (BOLA `web:{subject_id}`; 403 cross-subject) |
+| 3 | Eliminar `web:test` / `user_id` query en prod (chat + ARCO) | P0 | M | **HECHO** (auth ON + validate_production + 503 si auth off en prod) |
+| 4 | Redactar respuesta `/chat`: sin `system_prompt` ni internals | P0 | M | **HECHO** (runner + `public_trace` en chat/history/debug) |
+| 5 | Consent hard otra vez camino real (login no cortocircuita) | P0 | S | **HECHO** (desbloqueado con auth; login exige privacy+casos) |
+| 6 | Arreglar `validate_fase0` (45 REQ) → CI verde | P0 | S | **HECHO** (`REQ_ACTIVOS_ESPERADOS = 45`) |
 | 7 | `AUDIT_REQUIRE_LOGIN=true` + allowlist emails + PIN | P0 | S | **HECHO** (env/blueprint/código; smoke session OK; login PIN humano) |
 | 8 | Rate limit `POST /chat` + revisar bypass `/cliente` | P1 | M | pendiente |
 | 9 | Cerrar DPA OpenAI/Render/Slack; unificar correo ARCO | P1 | M (humano) | pendiente |
@@ -215,10 +215,9 @@ Revalidación operativa adicional:
 
 ## 6) Declaración final (E0)
 
-**NO LISTO** para invitar más despachos / tráfico abierto hasta cerrar **acciones 1–7** (auth web y portal, drafts por sujeto, sin `web:test`/ARCO débil, sin filtrar prompts, consentimiento real y editor con identidad/PIN).
+**LISTO CONDICIONAL** para escala controlada cerrada: acciones P0 **1–7** cerradas en código/blueprint (auth web+portal, drafts BOLA, sin `web:test` en prod, sin filtrar prompts, consent en login, CI `validate_fase0` 45 REQ). Quedan P1 (rate limit `/cliente`, DPA, claims tutela).
 
-Con 1–6 hechas → **LISTO CONDICIONAL** (faltan portal audit duro, rate limit, DPA).  
-Con 1–9 hechas → **LISTO** para escala controlada.  
+~~**NO LISTO**~~ (histórico 2026-08-05) hasta cerrar acciones 1–7.  
 
 **Nota:** asumir que cualquier dispositivo en la IP allowlist pudo leer borradores en revisión; rotar exposición operativa si hubo datos reales en `/drafts`.
 
@@ -245,4 +244,4 @@ Fuentes internas canónicas: `GUIA_PROYECTO_AGENTE_JURIDICO.md`, `requisitos_asi
 | `docs/canon/CHECKLIST_AUDITORIA_1_DIA_SERVICIO_WEB.md` | Checklist operativo 1 día |
 | `docs/canon/INFORME_AUDITORIA_12_ESPECIALISTAS_SERVICIO_WEB.md` | Este informe |
 
-**Siguiente paso recomendado (Agent mode):** aplicar acciones 1, 3 y 4 en código/blueprint y redeploy; luego smoke auth local+prod.
+**Siguiente paso recomendado:** redeploy Render con este PR; smoke auth local+prod; P1 rate limit `/cliente` + DPA.
