@@ -125,7 +125,11 @@ async def test_sse_replays_events_after_execution():
                     events.append(json.loads(line[6:]))
                 if events and events[-1].get("event") in ("plan_done", "plan_failed"):
                     break
+                # Heartbeats no cuentan hacia el tope de eventos útiles, pero
+                # limitamos la espera para no colgar la suite si el plan no termina.
                 if len(events) > 40:
+                    break
+                if sum(1 for e in events if e.get("event") == "heartbeat") >= 5:
                     break
 
     names = {e.get("event") for e in events}
@@ -268,6 +272,8 @@ async def test_sse_requires_session(monkeypatch):
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
     monkeypatch.setenv("DEV_AUTO_LOGIN", "false")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    get_settings.cache_clear()
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:

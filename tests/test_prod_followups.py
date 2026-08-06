@@ -31,6 +31,8 @@ async def test_login_accepts_hashed_site_password(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", hashed)
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    get_settings.cache_clear()
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:

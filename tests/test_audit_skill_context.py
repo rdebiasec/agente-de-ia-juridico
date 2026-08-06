@@ -12,10 +12,14 @@ from lib.audit_data import build_audit_data  # noqa: E402
 from lib.catalogo_aprobacion import guia_audit_key, load_skills_catalog, skill_tools_list  # noqa: E402
 
 
+# Canon post-retiro de tutela: 81 skills penal-víctimas.
+EXPECTED_SKILL_COUNT = 81
+
+
 def test_build_audit_data_skill_context_fields():
     data = build_audit_data()
     skills = data["skills"]
-    assert len(skills) == 90
+    assert len(skills) == EXPECTED_SKILL_COUNT
 
     sample = next(s for s in skills if s["id"] == "extraer_hechos_relevantes")
     assert sample["instruccion"]
@@ -58,7 +62,7 @@ def test_items_total_includes_guia_context():
         + intro["guias_contexto"]
         + intro["pasos_total"]
     )
-    assert intro["guias_contexto"] == 90 * 3
+    assert intro["guias_contexto"] == EXPECTED_SKILL_COUNT * 3
     assert intro["items_total"] == expected
     assert data["version"] == "2.1"
 
@@ -66,4 +70,6 @@ def test_items_total_includes_guia_context():
 def test_catalog_helpers_tools_from_skill_md():
     raw = load_skills_catalog()["extraer_hechos_relevantes"]
     tools = skill_tools_list(raw)
-    assert "document_parser_extract_text" in tools
+    # Solo function tools implementables; planned/no implementadas no cuentan.
+    assert "buscar_en_expediente" in tools
+    assert "document_parser_extract_text" not in tools

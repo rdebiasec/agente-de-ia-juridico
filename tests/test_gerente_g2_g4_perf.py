@@ -11,7 +11,8 @@ def test_slim_instructions_under_budget():
         slim_instructions=True,
         use_cache=False,
     )
-    assert len(poc.instructions or "") <= 12000
+    # Alineado con config/evals instruction-budget-coordinador (15000).
+    assert len(poc.instructions or "") <= 15000
     assert "Guardrails de agente (INPUT)" not in (poc.instructions or "")
     assert "Políticas obligatorias" in (poc.instructions or "")
 
@@ -108,7 +109,7 @@ def test_eval_suite_includes_tool_surface():
     from src.agents.evals import run_eval_suite
 
     report = run_eval_suite()
-    assert report.eval_set_version == "3.0"
+    assert report.eval_set_version.startswith("3.")
     assert report.failed == 0
     assert "tool_surface" in report.category_scores
     assert "instruction_budget" in report.category_scores

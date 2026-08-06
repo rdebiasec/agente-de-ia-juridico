@@ -243,8 +243,12 @@ def validate_runtime_skill_config() -> list[str]:
         return [f"No se pudo construir catálogo: {exc}"]
 
     skills = catalog.get("skills") or []
-    if len(skills) != 90:
-        errors.append(f"Se esperaban 90 skills, hay {len(skills)}")
+    # Canon post-retiro de tutela (2026-08-05): 81 skills penal-víctimas.
+    expected_skill_count = 81
+    if len(skills) != expected_skill_count:
+        errors.append(
+            f"Se esperaban {expected_skill_count} skills, hay {len(skills)}"
+        )
 
     approved = load_approved_config()
     if approved:

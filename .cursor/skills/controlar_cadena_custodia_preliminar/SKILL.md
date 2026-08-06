@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 66650ef2b33ae757 -->
+<!-- config-version: 3; checksum: d5f994b7e3dc99b3 -->
 ---
 name: controlar-cadena-custodia-preliminar
 description: Contrato penal-víctimas: Verificar si la evidencia requiere cadena de custodia formal y detectar rupturas que afecten admisibilidad. Activar cuando el plan/HITL o el especialista requiera `controlar_cadena_custodia_preliminar`. No sustituye a `preservar_evidencia_digital`.
@@ -62,6 +62,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `controlar
 - `metadata_extractor` — no implementada
 
 ## Guardrails
+- **Integridad probatoria:** Documentar custodia, rupturas y riesgos de admisibilidad sin alterar evidencia.
 - **No inventar:** No inventar custodios, fechas ni protocolos.
 - **Separar hecho de inferencia:** Ruptura documentada ≠ conclusión de inadmisibilidad automática.
 - **Revision humana obligatoria:** HITL antes de descartar evidencia en estrategia.

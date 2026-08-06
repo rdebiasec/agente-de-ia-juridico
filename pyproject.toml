@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3.0", "pytest-asyncio>=0.25.0"]
+dev = ["pytest>=8.3.0", "pytest-asyncio>=0.25.0", "pytest-timeout>=2.3.0"]
 observability = ["sentry-sdk[fastapi]>=2.0.0"]
 drive = [
     "google-api-python-client>=2.150.0",
@@ -41,6 +41,7 @@ drive = [
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+timeout = 60
 markers = [
     "smoke: pruebas HTTP contra servidor local vivo (capa 5 del orquestador)",
 ]

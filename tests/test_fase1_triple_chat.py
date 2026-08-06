@@ -34,14 +34,14 @@ def test_enqueue_does_not_publish_gerente_to_client(repo):
         cliente_subject="victima-01",
         lawyer_session_id="web:abogada",
     )
-    assert out["status"] == "en_revision"
+    assert out["status"] == "en_dialogo"
     assert out["draft_id"]
 
     visible = tc.list_cliente_visible_messages("victima-01")
     roles = [m["role"] for m in visible["messages"]]
     assert "cliente" in roles
-    assert visible["status"] == "en_revision"
-    # Bienvenida + inbound; sin propuesta pending
+    assert visible["status"] == "en_dialogo"
+    # Bienvenida + inbound + intake auto; sin propuesta pending publicada
     assert all(m.get("visibility") != "pending_hitl" for m in visible["messages"])
 
     inbox = tc.list_cliente_inbox(status="proposed")
@@ -91,9 +91,10 @@ def test_reject_keeps_client_without_gerente_reply(repo):
     # Bienvenida del Coordinador puede existir; no hay respuesta al inbound
     cliente_msgs = [m for m in visible["messages"] if m["role"] == "cliente"]
     assert len(cliente_msgs) == 1
-    # Solo bienvenida de gerente (no draft aprobado)
+    # Bienvenida + intake conversacional (no draft aprobado)
     gerente = [m for m in visible["messages"] if m["role"] == "gerente"]
-    assert len(gerente) == 1
+    assert len(gerente) >= 1
+    assert all(m.get("visibility") != "pending_hitl" for m in gerente)
 
 
 def test_internal_transcript_roundtrip(repo):
@@ -162,7 +163,7 @@ def test_api_cliente_chat_and_inbox(repo, monkeypatch):
     )
     assert res.status_code == 200, res.text
     body = res.json()
-    assert body["status"] == "en_revision"
+    assert body["status"] == "en_dialogo"
     draft_id = body["draft_id"]
 
     msgs = client.get("/cliente/messages", params={"cliente_session_id": "api-user-1"})

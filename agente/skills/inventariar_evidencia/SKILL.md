@@ -1,4 +1,4 @@
-<!-- config-version: 2; checksum: 977c5c0f0110021b -->
+<!-- config-version: 3; checksum: 99b01d20d7a15f6f -->
 ---
 name: inventariar-evidencia
 description: Contrato penal-víctimas: Recopilar y numerar todos los elementos probatorios con metadatos y custodia preliminar. Activar cuando el plan/HITL o el especialista requiera `inventariar_evidencia`. No sustituye a `clasificar_tipo_prueba`.
@@ -51,6 +51,7 @@ Skills = contratos (no function_tools invocables). No existe tool LLM `inventari
 - `file_hash_generator` — no implementada
 
 ## Guardrails
+- **Integridad probatoria:** Inventariar sin alterar originales; registrar estado y ubicación.
 - **No inventar:** No inventar elementos ni hashes.
 - **Confidencialidad:** Minimizar exposición de datos sensibles en descripciones.
 - **Oportunidad y terminos Ley 906:** Sin plazo, notificación o etapa Ley 906 verificados, no certificar oportunidad; marcar `[PENDIENTE DE VERIFICAR]`.

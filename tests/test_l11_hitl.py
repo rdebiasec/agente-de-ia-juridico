@@ -8,23 +8,51 @@ from httpx import ASGITransport, AsyncClient
 from src.main import app
 from src.storage import get_repository
 
+DRAFTING_MESSAGE = (
+    "Redacte un memorial de impulso procesal. "
+    "Radicado 11001-60-00-2026-123456. La víctima denunció lesiones. "
+    "Tengo poder firmado. Última actuación: audiencia de imputación. "
+    "Partes: víctima y procesado."
+)
+
 
 @pytest.mark.asyncio
 async def test_l11_drafting_creates_persisted_hitl_draft():
-    """Redacción en web ⇒ pending_review + draft_id real en el repo."""
+    """Redacción de alto riesgo ⇒ plan HITL ⇒ borrador materializado en el repo."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        res = await client.post(
+        offered = await client.post(
             "/chat",
             json={
-                "message": "Redacte un correo formal al cliente sobre próximos pasos.",
+                "message": DRAFTING_MESSAGE,
                 "channel": "web",
                 "user_id": "l11-hitl-draft",
             },
         )
-    assert res.status_code == 200
-    data = res.json()
-    assert data["pending_review"] is True
+        assert offered.status_code == 200
+        offered_body = offered.json()
+        assert offered_body["pending_review"] is True
+        assert offered_body.get("offer_plan") is True
+
+        created = await client.post(
+            "/chat/plan",
+            json={
+                "message": DRAFTING_MESSAGE,
+                "channel": "web",
+                "user_id": "l11-hitl-draft",
+            },
+        )
+        assert created.status_code == 200
+        plan_id = created.json()["plan_id"]
+
+        executed = await client.post(
+            f"/chat/plan/{plan_id}/approve-and-execute",
+            json={"user_id": "l11-hitl-draft"},
+        )
+        assert executed.status_code == 200
+        data = executed.json()
+
+    assert data.get("pending_review") is True or data.get("draft_id")
     draft_id = data.get("draft_id")
     assert draft_id, "L11 exige borrador materializado cuando hay revisión humana"
 
@@ -36,8 +64,10 @@ async def test_l11_drafting_creates_persisted_hitl_draft():
     assert any(
         a.get("type") == "draft_created" and a.get("status") == "pending" for a in actions
     )
+    steps = (data.get("trace") or {}).get("steps") or []
     assert any(
-        a.get("type") == "human_review" and a.get("status") == "pending" for a in actions
+        step.get("step") == "Revisión humana" and step.get("status") == "pending"
+        for step in steps
     )
 
 

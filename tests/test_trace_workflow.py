@@ -5,28 +5,69 @@ from httpx import ASGITransport, AsyncClient
 
 from src.main import app
 
+DRAFTING_MESSAGE = (
+    "Redacte un memorial de impulso procesal. "
+    "Radicado 11001-60-00-2026-123456. La víctima denunció lesiones. "
+    "Tengo poder firmado. Última actuación: audiencia de imputación. "
+    "Partes: víctima y procesado."
+)
+
 
 @pytest.mark.asyncio
 async def test_trace_allowed_drafting_sets_pending_review():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        res = await client.post(
+        offered = await client.post(
             "/chat",
-            json={"message": "Redacte un correo formal al cliente sobre próximos pasos.", "channel": "web", "user_id": "trace-allow"},
+            json={
+                "message": DRAFTING_MESSAGE,
+                "channel": "web",
+                "user_id": "trace-allow",
+            },
         )
-    assert res.status_code == 200
-    data = res.json()
+        assert offered.status_code == 200
+        offered_body = offered.json()
+        assert offered_body["pending_review"] is True
+        assert offered_body.get("offer_plan") is True
+        offered_trace = offered_body.get("trace") or {}
+        assert offered_trace.get("human_review_required") is True
+        assert offered_trace.get("received_by_agent") == "coordinador_caso"
+
+        created = await client.post(
+            "/chat/plan",
+            json={
+                "message": DRAFTING_MESSAGE,
+                "channel": "web",
+                "user_id": "trace-allow",
+            },
+        )
+        assert created.status_code == 200
+        plan_id = created.json()["plan_id"]
+        executed = await client.post(
+            f"/chat/plan/{plan_id}/approve-and-execute",
+            json={"user_id": "trace-allow"},
+        )
+        assert executed.status_code == 200
+        data = executed.json()
+
     assert data["pending_review"] is True
     trace = data.get("trace") or {}
     assert trace.get("blocked") is False
     assert trace.get("human_review_required") is True
     assert trace.get("received_by_agent") == "coordinador_caso"
-    assert trace.get("sent_to_agent") in {"redactor_documentos_juridicos", "coordinador_caso"}
-    assert trace.get("skill_kan") in {"PEN-REDACCION", "PEN-COORD"}
+    assert trace.get("sent_to_agent") in {
+        "redactor_documentos_juridicos",
+        "coordinador_caso",
+        "analista_calidad_juridica",
+    }
+    assert trace.get("skill_kan") in {"PEN-REDACCION", "PEN-COORD", "PEN-CALIDAD"}
     assert isinstance(trace.get("actions"), list)
     assert isinstance(trace.get("completion"), dict)
     assert "summary" in trace.get("completion", {})
-    assert any(step.get("step") == "Revisión humana" and step.get("status") == "pending" for step in trace.get("steps", []))
+    assert any(
+        step.get("step") == "Revisión humana" and step.get("status") == "pending"
+        for step in trace.get("steps", [])
+    )
 
 
 @pytest.mark.asyncio

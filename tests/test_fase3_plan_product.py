@@ -20,6 +20,8 @@ async def _login_web(client: AsyncClient, monkeypatch: pytest.MonkeyPatch, passw
     monkeypatch.setenv("SITE_PASSWORD", password)
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars!!")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
     get_settings.cache_clear()
     login = await client.post(
         "/auth/login",
@@ -98,6 +100,29 @@ def test_templated_steps_indagacion_impulso_chain_order():
         assert steps[i - 1].step_id in (steps[i].depends_on or [])
 
 
+def test_vif_template_does_not_embed_unverified_article_numbers():
+    steps = build_templated_steps(
+        "vif_proteccion",
+        "Violencia intrafamiliar: evaluar protección de la víctima.",
+    )
+    assert steps is not None
+    rendered = " ".join(f"{step.title} {step.user_summary}" for step in steps)
+    assert "art. 229" not in rendered
+    assert "art. 134" not in rendered
+    assert "norma verificada" in rendered
+
+    abreviado = build_templated_steps(
+        "querella_abreviado",
+        "Preparar querella bajo procedimiento abreviado.",
+    )
+    assert abreviado is not None
+    abreviado_text = " ".join(
+        f"{step.title} {step.user_summary}" for step in abreviado
+    )
+    assert "Ley 1826" not in abreviado_text
+    assert "norma verificada" in abreviado_text
+
+
 def test_create_plan_indagacion_impulso_smoke():
     plan, err = create_execution_plan(
         message=(
@@ -112,7 +137,7 @@ def test_create_plan_indagacion_impulso_smoke():
     )
     assert err is None and plan
     assert plan.template_kind == "indagacion_impulso"
-    assert "[Impulso / anti-archivo en indagación]" in plan.objective
+    assert plan.objective.startswith("Impulso / anti-archivo en indagación")
     assert len(plan.steps) >= 7
     assert any(s.agent_id == "redactor_documentos_juridicos" for s in plan.steps)
 
@@ -198,6 +223,8 @@ async def test_audit_execution_dashboard_requires_auth(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "audit-dash-pass-long")
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars!!")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -258,6 +285,8 @@ async def test_audit_clear_execution_plans(monkeypatch):
     monkeypatch.setenv("SITE_PASSWORD", "audit-clear-plans-pass")
     monkeypatch.setenv("SITE_USERNAME", "despacho")
     monkeypatch.setenv("SESSION_SECRET", "test-session-secret-key-32chars!!")
+    monkeypatch.setenv("WEB_AUTH_ENABLED", "true")
+    monkeypatch.setenv("AUDIT_REQUIRE_LOGIN", "true")
     monkeypatch.setenv("DATABASE_URL", "")
 
     create_execution_plan(

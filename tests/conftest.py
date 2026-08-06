@@ -15,6 +15,19 @@ def reset_rate_limits_between_tests():
 
 
 @pytest.fixture(autouse=True)
+def reset_expediente_store_repo():
+    """Evita que un test deje `expediente_store.repo` apuntando a un repo local."""
+    from src.gateway.expediente import expediente_store
+
+    previous = expediente_store.repo
+    expediente_store.repo = None
+    yield
+    expediente_store.repo = None
+    # No restauramos `previous`: el default (None → get_repository()) es el contrato.
+    _ = previous
+
+
+@pytest.fixture(autouse=True)
 def disable_web_auth_by_default(monkeypatch, request):
     auth_modules = (
         "test_auth",

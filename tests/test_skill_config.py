@@ -42,7 +42,9 @@ def test_publish_rejects_incomplete_progress():
 def test_merge_keeps_guardrail_rich_text():
     catalog = build_audit_data()
     skill = next(s for s in catalog["skills"] if s["id"] == "extraer_hechos_relevantes")
-    assert any("**g" in g for g in skill.get("guardrails") or [])
+    # Las políticas desk reemplazaron los alias legacy g1…g10, pero el portal
+    # debe conservar el texto Markdown enriquecido de cada control.
+    assert any(g.startswith("**") for g in skill.get("guardrails") or [])
     merged = merge_progress_into_catalog(catalog, {"guardrails": {}, "agentes": {}, "guias": {}, "pasos": {}, "custom": {}})
     merged_skill = next(s for s in merged["skills"] if s["id"] == "extraer_hechos_relevantes")
     assert merged_skill["guardrails"]

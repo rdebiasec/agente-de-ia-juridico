@@ -31,7 +31,9 @@ def build_audit_data() -> dict:
     pasos_total = 0
     for sid in sorted(skills_raw):
         data = skills_raw[sid]
-        desc = (data.get("purpose") or data.get("instruccion") or "").strip()
+        purpose = (data.get("purpose") or "").strip()
+        instruccion = (data.get("instruccion") or purpose).strip()
+        desc = purpose or instruccion
         if not desc:
             desc = "Skill atomico del sistema penal-victimas."
         steps = build_skill_steps(data.get("steps") or [])
@@ -45,13 +47,13 @@ def build_audit_data() -> dict:
                 "id": sid,
                 "name": sid,
                 "titulo": skill_titulo_upper(
-                    (data.get("instruccion") or "").strip(),
+                    instruccion,
                     desc,
                 ),
                 "category": data.get("category") or "Sin categoria",
                 "desc": desc,
-                "instruccion": (data.get("instruccion") or "").strip(),
-                "purpose": (data.get("purpose") or "").strip(),
+                "instruccion": instruccion,
+                "purpose": purpose,
                 "inputs": (data.get("inputs") or "").strip(),
                 "outputs": (data.get("outputs") or "").strip(),
                 "tier": (data.get("tier") or "").strip(),
